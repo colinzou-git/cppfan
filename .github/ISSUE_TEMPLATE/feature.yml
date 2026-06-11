@@ -1,0 +1,66 @@
+name: Feature request
+description: Plan a focused cppFan feature for Claude Code or human implementation
+title: "[Feature]: "
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or developer problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User story
+      description: Describe the user outcome.
+      placeholder: As a learner, I want..., so that...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What should be implemented?
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: What should not be touched in this issue?
+    validations:
+      required: true
+  - type: textarea
+    id: allowed-edit-zones
+    attributes:
+      label: Allowed edit zones
+      description: List files/folders Claude Code may edit.
+      placeholder: |
+        - src/features/example/**
+        - tests/example/**
+        - docs/example.md
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List testable outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests
+      description: Unit/component/e2e/manual checks required for this feature.
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback plan
+      description: How can this change be safely undone?
+    validations:
+      required: true
