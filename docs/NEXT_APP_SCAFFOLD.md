@@ -1,6 +1,10 @@
 # Next App Scaffold Notes
 
-This scaffold implements roadmap item 002 and extends roadmap item 003: Scaffold Next.js + Supabase app, then configure Supabase Auth with Google and email login.
+This scaffold implements roadmap items 002 through 004:
+
+1. Scaffold Next.js + Supabase app.
+2. Configure Supabase Auth with Google and email login.
+3. Add profile and onboarding.
 
 ## Included
 
@@ -15,6 +19,8 @@ This scaffold implements roadmap item 002 and extends roadmap item 003: Scaffold
 - Login page with Google OAuth and email magic link
 - Auth callback route
 - Dashboard sign-out
+- Profile and onboarding flow
+- Profile migration with RLS
 - Vitest setup
 - Playwright setup
 - GitHub Actions CI
@@ -22,9 +28,7 @@ This scaffold implements roadmap item 002 and extends roadmap item 003: Scaffold
 
 ## Intentionally not included
 
-- Profile database table
-- Onboarding flow
-- Supabase database migrations
+- Skill map database
 - Learning content database
 - FSRS integration
 - Skill event database
@@ -33,16 +37,15 @@ This scaffold implements roadmap item 002 and extends roadmap item 003: Scaffold
 
 ## Next recommended PR
 
-Add profile and onboarding.
+Add skill map database and seed content.
 
 Allowed edit zones for next PR should include:
 
-- `app/onboarding/**`
-- `app/dashboard/**`
-- `src/features/profile/**`
-- `src/lib/supabase/**`
 - `supabase/migrations/**`
-- `.env.example`
-- `tests/e2e/onboarding*.spec.ts`
+- `src/features/skills/**`
+- `app/dashboard/**`
+- `docs/SKILL_ENGINE.md`
+- `tests/unit/**`
+- `tests/e2e/**`
 - `README.md`
 - relevant docs

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { getProfileForUser } from "@/features/profile/profile-queries";
 
 const nextItems = [
   {
@@ -37,6 +38,9 @@ export default async function DashboardPage() {
   const configured = isSupabaseConfigured();
   const supabase = await createClient();
   let userEmail: string | null = null;
+  let displayName: string | null = null;
+  let dailyNewSkillsGoal: number | null = null;
+  let dailyReviewMinutes: number | null = null;
 
   if (configured && supabase) {
     const {
@@ -48,7 +52,16 @@ export default async function DashboardPage() {
       redirect("/login?next=/dashboard");
     }
 
+    const profile = await getProfileForUser(user.id);
+
+    if (!profile?.onboarding_completed) {
+      redirect("/onboarding?next=/dashboard");
+    }
+
     userEmail = user.email ?? user.user_metadata?.email ?? "Signed-in learner";
+    displayName = profile.display_name;
+    dailyNewSkillsGoal = profile.daily_new_skills_goal;
+    dailyReviewMinutes = profile.daily_review_minutes;
   }
 
   return (
@@ -62,16 +75,24 @@ export default async function DashboardPage() {
             Dashboard scaffold
           </h1>
           <p className="mt-1 text-slate-600">
-            This protected dashboard placeholder is ready for auth, onboarding, reviews, and mastery.
+            This protected dashboard placeholder is ready for reviews, mastery, and recommendations.
           </p>
         </div>
 
-        <Button asChild variant="secondary">
-          <Link href="/login">
-            <Settings className="h-4 w-4" />
-            Auth setup
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary">
+            <Link href="/profile">
+              <UserCircle className="h-4 w-4" />
+              Profile
+            </Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/login">
+              <Settings className="h-4 w-4" />
+              Auth setup
+            </Link>
+          </Button>
+        </div>
       </header>
 
       {!configured ? (
@@ -83,8 +104,8 @@ export default async function DashboardPage() {
             <CardTitle>Supabase is not configured yet</CardTitle>
             <CardDescription>
               This route becomes fully protected after `NEXT_PUBLIC_SUPABASE_URL` and
-              `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are added to `.env.local`.
-              Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works.
+              `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are added to `.env.local`, auth is configured,
+              and the profile migration is applied.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -96,12 +117,20 @@ export default async function DashboardPage() {
             <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
               <UserCircle className="h-5 w-5" />
             </div>
-            <CardTitle>Signed in</CardTitle>
+            <CardTitle>Welcome{displayName ? `, ${displayName}` : ""}</CardTitle>
             <CardDescription>
-              Auth is connected. Current learner: <span className="font-bold">{userEmail}</span>
+              Signed in as <span className="font-bold">{userEmail}</span>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="grid gap-2 text-sm font-semibold text-emerald-950 sm:grid-cols-2">
+              <div className="rounded-2xl bg-white/70 p-3">
+                Daily new skills: <span className="font-black">{dailyNewSkillsGoal}</span>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-3">
+                Review minutes: <span className="font-black">{dailyReviewMinutes}</span>
+              </div>
+            </div>
             <form action={signOut}>
               <Button type="submit" variant="secondary">
                 Sign out
@@ -135,12 +164,12 @@ export default async function DashboardPage() {
         <CardContent>
           <ol className="grid gap-3 text-sm font-semibold text-slate-700 sm:grid-cols-2">
             {[
-              "Add profile and onboarding",
               "Add skill map database model",
               "Add learning item and quiz model",
               "Add FSRS review cards and logs",
               "Add skill event ledger and mastery scoring",
-              "Add first real structs/classes learning module"
+              "Add first real structs/classes learning module",
+              "Add personalized recommendation rules"
             ].map((item) => (
               <li key={item} className="rounded-2xl bg-slate-100 px-4 py-3">
                 {item}

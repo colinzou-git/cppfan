@@ -1,26 +1,32 @@
-# cppFan CI hardening patch
+# cppFan Playwright runner fix
 
-This patch updates only `.github/workflows/ci.yml`.
+This patch fixes the case where all E2E assertions pass, but the command exits with code 1 because a Playwright worker process does not exit cleanly on Windows.
 
-## Why
+## Files changed
 
-The current workflow runs `corepack enable` before `actions/setup-node`. This may work, but it is safer to:
+- `playwright.config.ts`
+- `docs/PLAYWRIGHT_E2E.md`
 
-1. Check out the repo.
-2. Set up Node 22.
-3. Enable Corepack.
-4. Activate the exact pnpm version from `packageManager`.
-5. Install and run checks.
+## Key changes
+
+- `workers: 1`
+- `fullyParallel: false`
+- `video: "off"`
+- local trace disabled
+- web server uses `pnpm build && pnpm start` instead of `pnpm dev`
+- `NEXT_TELEMETRY_DISABLED=1` for the E2E server
 
 ## Apply
 
 Unzip at the repo root and overwrite files.
 
-Then commit and push to `main`.
+Then run:
 
-## Local validation
+```powershell
+pnpm test:e2e
+```
 
-You already validated most local checks. Recommended final local command:
+A full check is:
 
 ```powershell
 pnpm lint

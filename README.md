@@ -4,7 +4,7 @@ cppFan is an adaptive web app for learning C++, data structures, and algorithms 
 
 ## Current status
 
-This scaffold now includes the first auth-ready web app foundation:
+This scaffold now includes the first auth/profile-ready web app foundation:
 
 - Next.js App Router
 - TypeScript
@@ -16,18 +16,20 @@ This scaffold now includes the first auth-ready web app foundation:
 - Passwordless email magic-link login UI
 - Auth callback route
 - Protected dashboard placeholder with sign-out
+- Profile and onboarding flow
+- `profiles` table migration with RLS
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-Learning features are intentionally not implemented yet. The next feature after auth should be profile/onboarding, then the skill map database.
+Learning features are intentionally not implemented yet. The next feature should be the skill map database and seed content.
 
 ## Requirements
 
 - Node.js 22 LTS or newer recommended
 - pnpm 10 or newer
-- A Supabase project when you are ready to configure auth
+- A Supabase project when you are ready to configure auth/profile persistence
 
 ## Setup
 
@@ -61,7 +63,7 @@ pnpm exec playwright install
 
 ## Supabase setup
 
-The scaffold is safe to run without Supabase environment variables. Auth pages will show setup guidance until these are configured:
+The scaffold is safe to run without Supabase environment variables. Auth and onboarding pages will show setup guidance until these are configured:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
@@ -75,6 +77,27 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 The code prefers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and falls back to `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+## Database setup
+
+Apply this migration before testing real onboarding persistence:
+
+```text
+supabase/migrations/20260611113000_create_profiles.sql
+```
+
+You can apply it through either:
+
+1. Supabase SQL Editor: paste and run the SQL.
+2. Supabase CLI migration flow.
+
+The table added is:
+
+```text
+public.profiles
+```
+
+It stores one row per authenticated user and uses RLS so each learner can only read, insert, and update their own profile.
 
 ## Google OAuth setup
 
@@ -92,8 +115,6 @@ In Google Cloud:
    - `http://localhost:3000`
    - your production domain later
 3. Add the authorized redirect URI shown by Supabase’s Google provider page.
-   - For a hosted Supabase project, this is usually your Supabase auth callback URL.
-   - For local Supabase CLI development, it may look like `http://127.0.0.1:54321/auth/v1/callback`.
 
 In Supabase Auth URL settings, add redirect URLs:
 
@@ -141,18 +162,19 @@ Keep these planning docs from the bootstrap phase:
 - `docs/SKILL_ENGINE.md`
 - `docs/ROADMAP_ISSUES.md`
 - `docs/AUTH_SETUP.md`
+- `docs/PROFILE_ONBOARDING.md`
 - `specs/000-ai-dev-foundation/spec.md`
 
 ## Next recommended GitHub issue
 
-Work on roadmap item 004:
+Work on roadmap item 005:
 
 ```text
-Add profile and onboarding
+Add skill map database and seed content
 ```
 
 Non-goals for the next step:
 
-- Do not implement learning features yet.
 - Do not implement FSRS yet.
-- Do not create the full learning database yet.
+- Do not implement quiz attempts yet.
+- Do not implement the full recommendation engine yet.
