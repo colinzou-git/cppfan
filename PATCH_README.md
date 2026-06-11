@@ -1,37 +1,58 @@
-# cppFan Playwright runner fix
+# cppFan Supabase env validation fix
 
-This patch fixes the case where all E2E assertions pass, but the command exits with code 1 because a Playwright worker process does not exit cleanly on Windows.
+This patch prevents the app from crashing when `.env.local` contains placeholder or malformed Supabase values.
 
-## Files changed
+## Problem
 
-- `playwright.config.ts`
-- `docs/PLAYWRIGHT_E2E.md`
+The app crashed with:
 
-## Key changes
+```text
+Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+```
 
-- `workers: 1`
-- `fullyParallel: false`
-- `video: "off"`
-- local trace disabled
-- web server uses `pnpm build && pnpm start` instead of `pnpm dev`
-- `NEXT_TELEMETRY_DISABLED=1` for the E2E server
+That happens when `NEXT_PUBLIC_SUPABASE_URL` is non-empty but not a real URL.
+
+Examples that crash without this fix:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=YOUR_PROJECT_URL
+NEXT_PUBLIC_SUPABASE_URL=YOUR_PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=
+```
+
+## Fix
+
+`src/lib/supabase/env.ts` now treats Supabase as configured only when:
+
+- `NEXT_PUBLIC_SUPABASE_URL` is a valid `http://` or `https://` URL
+- and either `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` is non-empty
 
 ## Apply
 
 Unzip at the repo root and overwrite files.
 
-Then run:
+Then restart dev server:
 
 ```powershell
-pnpm test:e2e
+Ctrl+C
+pnpm dev
 ```
 
-A full check is:
+## Also fix `.env.local`
 
-```powershell
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm test:e2e
+Until Supabase is ready, use blank values:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=cppFan
+```
+
+When Supabase is ready, use a real URL:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_REAL_KEY
 ```
