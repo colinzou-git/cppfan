@@ -1,0 +1,10 @@
+{
+  "name": "cppFan",
+  "short_name": "cppFan",
+  "description": "Adaptive C++ and data-structures learning app.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": []
+}
