@@ -1,6 +1,6 @@
 # Next App Scaffold Notes
 
-This scaffold implements roadmap item 002: Scaffold Next.js + Supabase app.
+This scaffold implements roadmap item 002 and extends roadmap item 003: Scaffold Next.js + Supabase app, then configure Supabase Auth with Google and email login.
 
 ## Included
 
@@ -8,11 +8,13 @@ This scaffold implements roadmap item 002: Scaffold Next.js + Supabase app.
 - TypeScript
 - Tailwind CSS
 - shadcn/ui-compatible setup
-- Supabase browser/server placeholders
+- Supabase browser/server clients
+- Supabase session refresh through root `proxy.ts`
 - Landing page
 - Dashboard placeholder
-- Login page scaffold
+- Login page with Google OAuth and email magic link
 - Auth callback route
+- Dashboard sign-out
 - Vitest setup
 - Playwright setup
 - GitHub Actions CI
@@ -20,8 +22,8 @@ This scaffold implements roadmap item 002: Scaffold Next.js + Supabase app.
 
 ## Intentionally not included
 
-- Real Google OAuth setup
-- Email login implementation
+- Profile database table
+- Onboarding flow
 - Supabase database migrations
 - Learning content database
 - FSRS integration
@@ -31,15 +33,16 @@ This scaffold implements roadmap item 002: Scaffold Next.js + Supabase app.
 
 ## Next recommended PR
 
-Configure Supabase Auth with Google and email login.
+Add profile and onboarding.
 
 Allowed edit zones for next PR should include:
 
-- `src/lib/supabase/**`
-- `app/login/**`
-- `app/auth/**`
+- `app/onboarding/**`
 - `app/dashboard/**`
+- `src/features/profile/**`
+- `src/lib/supabase/**`
+- `supabase/migrations/**`
 - `.env.example`
-- `tests/e2e/auth*.spec.ts`
+- `tests/e2e/onboarding*.spec.ts`
 - `README.md`
 - relevant docs

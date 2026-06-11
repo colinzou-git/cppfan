@@ -8,6 +8,6 @@ export function createClient() {
     return null;
   }
 
-  const { url, anonKey } = getSupabaseEnv();
-  return createBrowserClient(url, anonKey);
+  const { url, publishableKey } = getSupabaseEnv();
+  return createBrowserClient(url, publishableKey);
 }

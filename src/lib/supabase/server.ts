@@ -7,10 +7,10 @@ export async function createClient() {
     return null;
   }
 
-  const { url, anonKey } = getSupabaseEnv();
+  const { url, publishableKey } = getSupabaseEnv();
   const cookieStore = await cookies();
 
-  return createServerClient(url, anonKey, {
+  return createServerClient(url, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -22,7 +22,7 @@ export async function createClient() {
           });
         } catch {
           // Server Components cannot always set cookies directly.
-          // Middleware or route handlers can refresh sessions when needed.
+          // The root proxy refreshes sessions for normal requests.
         }
       }
     }

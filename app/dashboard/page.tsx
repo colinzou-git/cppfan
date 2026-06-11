@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpenCheck, Brain, CalendarClock, Settings, ShieldAlert } from "lucide-react";
+import { BookOpenCheck, Brain, CalendarClock, Settings, ShieldAlert, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -24,18 +24,31 @@ const nextItems = [
   }
 ];
 
+async function signOut() {
+  "use server";
+
+  const supabase = await createClient();
+  await supabase?.auth.signOut();
+
+  redirect("/login?message=signed-out");
+}
+
 export default async function DashboardPage() {
   const configured = isSupabaseConfigured();
   const supabase = await createClient();
+  let userEmail: string | null = null;
 
   if (configured && supabase) {
     const {
-      data: { user }
+      data: { user },
+      error
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (error || !user) {
       redirect("/login?next=/dashboard");
     }
+
+    userEmail = user.email ?? user.user_metadata?.email ?? "Signed-in learner";
   }
 
   return (
@@ -70,9 +83,31 @@ export default async function DashboardPage() {
             <CardTitle>Supabase is not configured yet</CardTitle>
             <CardDescription>
               This route becomes fully protected after `NEXT_PUBLIC_SUPABASE_URL` and
-              `NEXT_PUBLIC_SUPABASE_ANON_KEY` are added to `.env.local`.
+              `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are added to `.env.local`.
+              Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works.
             </CardDescription>
           </CardHeader>
+        </Card>
+      ) : null}
+
+      {configured && userEmail ? (
+        <Card className="border-emerald-200 bg-emerald-50/90 shadow-sm">
+          <CardHeader>
+            <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
+              <UserCircle className="h-5 w-5" />
+            </div>
+            <CardTitle>Signed in</CardTitle>
+            <CardDescription>
+              Auth is connected. Current learner: <span className="font-bold">{userEmail}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={signOut}>
+              <Button type="submit" variant="secondary">
+                Sign out
+              </Button>
+            </form>
+          </CardContent>
         </Card>
       ) : null}
 
@@ -100,12 +135,12 @@ export default async function DashboardPage() {
         <CardContent>
           <ol className="grid gap-3 text-sm font-semibold text-slate-700 sm:grid-cols-2">
             {[
-              "Configure Supabase Auth with Google and email login",
               "Add profile and onboarding",
               "Add skill map database model",
               "Add learning item and quiz model",
               "Add FSRS review cards and logs",
-              "Add skill event ledger and mastery scoring"
+              "Add skill event ledger and mastery scoring",
+              "Add first real structs/classes learning module"
             ].map((item) => (
               <li key={item} className="rounded-2xl bg-slate-100 px-4 py-3">
                 {item}

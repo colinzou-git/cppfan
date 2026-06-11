@@ -18,7 +18,7 @@ test("dashboard route reaches scaffold or auth gate", async ({ page }) => {
 
   if (dashboardVisible) {
     await expect(dashboardHeading).toBeVisible();
-    await expect(page.getByText(/Supabase is not configured yet/i)).toBeVisible();
+    await expect(page.getByText(/review queue/i)).toBeVisible();
     return;
   }
 
