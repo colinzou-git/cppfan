@@ -1,23 +1,31 @@
-# cppFan dashboard E2E robust fix
+# cppFan CI hardening patch
 
-This patch updates the dashboard E2E test so it passes in both valid local states:
+This patch updates only `.github/workflows/ci.yml`.
 
-1. Supabase is not configured:
-   - `/dashboard` shows the scaffold dashboard.
-   - Test checks the dashboard heading and setup warning.
+## Why
 
-2. Supabase is configured but no user is logged in:
-   - `/dashboard` redirects to `/login`.
-   - Test checks the login heading and login URL.
+The current workflow runs `corepack enable` before `actions/setup-node`. This may work, but it is safer to:
 
-This is better because the scaffold should work whether `.env.local` is empty or already contains Supabase keys.
+1. Check out the repo.
+2. Set up Node 22.
+3. Enable Corepack.
+4. Activate the exact pnpm version from `packageManager`.
+5. Install and run checks.
 
 ## Apply
 
 Unzip at the repo root and overwrite files.
 
-Then run:
+Then commit and push to `main`.
+
+## Local validation
+
+You already validated most local checks. Recommended final local command:
 
 ```powershell
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 pnpm test:e2e
 ```
