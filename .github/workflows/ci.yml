@@ -1,0 +1,9 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo cppFan bootstrap docs check
