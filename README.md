@@ -75,6 +75,7 @@ pnpm verify              # lint + typecheck + test + build (the CI gate, one com
 pnpm verify:codespace    # install/check/build, optional DB migration, optional e2e
 pnpm verify:e2e          # installs required browsers, then runs Playwright e2e
 pnpm db:migrate          # apply all database migrations (needs SUPABASE_DB_URL secret)
+pnpm db:verify           # verify the live answer-key hardening via the anon REST API
 ```
 
 `pnpm verify` mirrors the CI "App checks" gate, so a clean run locally means CI should
