@@ -59,9 +59,14 @@ Supabase CLI, with dependencies installed. Then:
 
 ```bash
 pnpm dev                 # port 3000 is auto-forwarded
-pnpm lint && pnpm typecheck && pnpm test
+pnpm verify              # lint + typecheck + test + build (the CI gate, one command)
+pnpm verify:e2e          # installs browsers, then runs Playwright e2e
 supabase --version       # ready for migration work
 ```
+
+`pnpm verify` mirrors the CI "App checks" gate, so a clean run locally means CI should
+pass too. Run `pnpm verify:e2e` when you also need the end-to-end suite (it downloads
+Chromium and WebKit first).
 
 Applying a migration from a Codespace still requires `supabase login` and
 `supabase link --project-ref <ref>` (DB password). For a one-off migration, the Supabase

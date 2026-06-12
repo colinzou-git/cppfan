@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify:e2e": "playwright install --with-deps chromium webkit && playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
