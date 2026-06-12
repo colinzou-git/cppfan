@@ -72,13 +72,23 @@ Supabase CLI, with dependencies installed. Then:
 ```bash
 pnpm dev                 # port 3000 is auto-forwarded
 pnpm verify              # lint + typecheck + test + build (the CI gate, one command)
+pnpm verify:codespace    # install/check/build, optional DB migration, optional e2e
 pnpm verify:e2e          # installs browsers, then runs Playwright e2e
 pnpm db:migrate          # apply all database migrations (needs SUPABASE_DB_URL secret)
 ```
 
 `pnpm verify` mirrors the CI "App checks" gate, so a clean run locally means CI should
-pass too. Run `pnpm verify:e2e` when you also need the end-to-end suite (it downloads
-Chromium and WebKit first).
+pass too. Run `pnpm verify:codespace` when you want the single Codespace health check: it
+installs dependencies, runs lint/typecheck/unit/build, applies migrations if
+`SUPABASE_DB_URL` is present, and prints the live Supabase smoke checks that still need a
+browser/session. Set `RUN_E2E=1` to include the Playwright suite:
+
+```bash
+RUN_E2E=1 pnpm verify:codespace
+```
+
+Run `pnpm verify:e2e` when you only need the end-to-end suite (it downloads Chromium and
+WebKit first).
 
 Apply database changes with `pnpm db:migrate` — a single command that runs every
 migration idempotently. It needs a `SUPABASE_DB_URL` Codespace secret; see
@@ -221,108 +231,35 @@ public.review_cards
 public.review_logs
 ```
 
-Both are **per-user data** with RLS scoped to `auth.uid() = user_id`. Review cards are
-created from eligible learning items the first time a signed-in learner opens `/review`,
-and FSRS scheduling runs through the `ts-fsrs` wrapper in `src/lib/fsrs/scheduler.ts`.
-Review logs are append-only (select/insert, no update/delete). Signed out or
-pre-migration, `/review` shows a read-only preview of eligible items instead of a live
-queue. FSRS card state is intentionally **not** the same as skill mastery (see
-`docs/SKILL_ENGINE.md`).
+These are per-user data with RLS scoped to `auth.uid() = user_id`. Review cards are
+upserted and rescheduled by the app; review logs are append-only evidence. Until this
+migration is applied, the `/review` page shows an empty/pre-migration state and grading
+still works from the learning-item seed.
 
-The skill event ledger migration adds:
+The skill event migration adds:
 
 ```text
 public.skill_events
 ```
 
-This is **per-user, append-only** evidence (select/insert only, RLS scoped to
-`auth.uid() = user_id`) using the stable event names from
-`docs/EVENT_SCHEMA_STABLE_NAMES.md`. Quiz attempts and review ratings emit events
-best-effort when signed in. Mastery is derived from this ledger by the rule-based scorer
-in `src/features/mastery/mastery-scoring.ts` — deterministic, explainable, and computed
-**separately from FSRS card state** (a learner can have a stable review card yet still be
-weak in the broader skill). The dashboard skill-mastery preview reflects this; signed out
-or pre-migration it shows an explanatory empty state.
+This append-only event ledger records learning and review evidence using stable event
+names from `docs/EVENT_SCHEMA_STABLE_NAMES.md`. It powers the rule-based mastery preview
+on the dashboard. Until applied, event recording no-ops and the dashboard shows an empty
+state.
 
-## Google OAuth setup
+## Environment variables
 
-In Supabase:
+Create `.env.local` from `.env.example` and fill in:
 
-1. Create a Supabase project.
-2. Go to Authentication → Providers.
-3. Enable Google.
-4. Add the Google Client ID and Client Secret from Google Cloud.
-
-In Google Cloud:
-
-1. Create an OAuth client ID with type Web application.
-2. Add authorized JavaScript origins:
-   - `http://localhost:3000`
-   - your production domain later
-3. Add the authorized redirect URI shown by Supabase’s Google provider page.
-
-In Supabase Auth URL settings, add redirect URLs:
-
-```text
-http://localhost:3000/auth/callback
-http://127.0.0.1:3000/auth/callback
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 ```
 
-After deployment, also add:
+For local DB migration from a Codespace, set `SUPABASE_DB_URL` as a Codespaces secret,
+not in `.env.local`.
 
-```text
-https://YOUR_DOMAIN/auth/callback
-```
+## Deployment
 
-## Email magic-link setup
-
-Supabase email magic links use `signInWithOtp`.
-
-For local development, make sure Supabase Auth allows:
-
-```text
-http://localhost:3000/auth/callback
-http://127.0.0.1:3000/auth/callback
-```
-
-The login page sends magic links with:
-
-```text
-/auth/callback?next=/dashboard
-```
-
-The callback route exchanges the code for a session and redirects to the safe `next` path.
-
-## Project docs
-
-Keep these planning docs from the bootstrap phase:
-
-- `CLAUDE.md`
-- `docs/PROJECT_BRIEF.md`
-- `docs/DEVELOPMENT_PLAN.md`
-- `docs/ARCHITECTURE.md`
-- `docs/AI_GUARDRAILS.md`
-- `docs/EVENT_SCHEMA.md`
-- `docs/EVENT_SCHEMA_STABLE_NAMES.md`
-- `docs/SKILL_ENGINE.md`
-- `docs/ROADMAP_ISSUES.md`
-- `docs/AUTH_SETUP.md`
-- `docs/PROFILE_ONBOARDING.md`
-- `specs/000-ai-dev-foundation/spec.md`
-
-## Next recommended GitHub issue
-
-The initial roadmap (issues #1–#6) is complete: skill map, learning items, quiz attempts,
-FSRS reviews, the skill event ledger with rule-based mastery, and the recommendation
-engine with a daily plan. The dashboard daily plan (`src/features/recommendations/`)
-orders due reviews, regressed/weak skills, the next lesson, and recommended prerequisites,
-explaining each suggestion.
-
-Tracked follow-ups:
-
-- Expand the curriculum beyond the structs/classes module (issue #16).
-
-Done since the initial roadmap: the answer-key hardening (server-side grading RPC +
-column lockdown) and the CI Node 24 action bump.
-
-Out of scope for now: an ML mastery model and in-browser code execution.
+The app is a standard Next.js app and can be deployed to Vercel. Configure the same
+public Supabase environment variables in the hosting provider.
