@@ -1,5 +1,15 @@
 import type { Skill, SkillMapPreviewData, SkillModule, SkillPrerequisite } from "./skill-types";
 
+/*
+ * This seed mirrors supabase/migrations/20260612011000_create_skill_map.sql.
+ * It is the source of truth for the read-only dashboard preview when the
+ * Supabase skill migration has not been applied yet, and it keeps stable
+ * skill ids aligned with docs/SKILL_ENGINE.md.
+ *
+ * Keep this file and the SQL migration in lockstep: the seed-integrity unit
+ * tests guard structure, but the two must agree on ids, modules, and order.
+ */
+
 export const skillModules: SkillModule[] = [
   { id: "cpp.structs_classes", title: "Structs and classes", description: "Members and access control.", order_index: 10 },
   { id: "cpp.constructors", title: "Constructors", description: "Object initialization and lifetime.", order_index: 20 },
@@ -7,13 +17,230 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 }
 ];
 
-export const skillSeed: Skill[] = [];
-export const skillPrerequisitesSeed: SkillPrerequisite[] = [];
+export const skillSeed: Skill[] = [
+  {
+    id: "cpp.structs_classes.syntax",
+    domain: "cpp",
+    module_id: "cpp.structs_classes",
+    title: "Struct/class syntax",
+    description: "Define simple structs and classes with member fields and methods.",
+    learner_goal: "Write a small type and explain how objects are created from it.",
+    level: "beginner",
+    item_types: ["lesson", "fill_blank", "code_reading"],
+    order_index: 10,
+    is_active: true
+  },
+  {
+    id: "cpp.structs_classes.public_private",
+    domain: "cpp",
+    module_id: "cpp.structs_classes",
+    title: "Public and private access",
+    description: "Use access control to protect object state and understand compiler access errors.",
+    learner_goal: "Decide which members should be public or private and fix simple access mistakes.",
+    level: "beginner",
+    item_types: ["quiz", "bug_spotting", "code_reading"],
+    order_index: 20,
+    is_active: true
+  },
+  {
+    id: "cpp.structs_classes.const_methods_intro",
+    domain: "cpp",
+    module_id: "cpp.structs_classes",
+    title: "Const methods intro",
+    description: "Read const method declarations and understand why const objects need const-safe methods.",
+    learner_goal: "Predict whether a method call on a const object should compile.",
+    level: "beginner",
+    item_types: ["quiz", "bug_spotting"],
+    order_index: 30,
+    is_active: true
+  },
+  {
+    id: "cpp.structs_classes.invariants_intro",
+    domain: "cpp",
+    module_id: "cpp.structs_classes",
+    title: "Class invariants intro",
+    description: "Explain how classes maintain valid state through constructors and member functions.",
+    learner_goal: "Describe the rule that must stay true for an object after every public method.",
+    level: "beginner",
+    item_types: ["lesson", "concept_check"],
+    order_index: 40,
+    is_active: true
+  },
+  {
+    id: "cpp.constructors.default_constructor",
+    domain: "cpp",
+    module_id: "cpp.constructors",
+    title: "Default constructor",
+    description: "Explain and write a constructor with no arguments.",
+    learner_goal: "Create an object with safe default state.",
+    level: "beginner",
+    item_types: ["lesson", "fill_blank"],
+    order_index: 110,
+    is_active: true
+  },
+  {
+    id: "cpp.constructors.parameterized_constructor",
+    domain: "cpp",
+    module_id: "cpp.constructors",
+    title: "Parameterized constructor",
+    description: "Initialize object state through constructor arguments.",
+    learner_goal: "Use constructor parameters to make invalid states harder to create.",
+    level: "beginner",
+    item_types: ["lesson", "code_reading"],
+    order_index: 120,
+    is_active: true
+  },
+  {
+    id: "cpp.constructors.member_initializer_list",
+    domain: "cpp",
+    module_id: "cpp.constructors",
+    title: "Member initializer list",
+    description: "Use initializer lists and explain why they are preferred for direct initialization.",
+    learner_goal: "Choose an initializer list over assignment inside the constructor body.",
+    level: "beginner",
+    item_types: ["quiz", "bug_spotting"],
+    order_index: 130,
+    is_active: true
+  },
+  {
+    id: "cpp.constructors.destructor_intro",
+    domain: "cpp",
+    module_id: "cpp.constructors",
+    title: "Destructor intro",
+    description: "Explain when destructors run and why they matter for resources.",
+    learner_goal: "Predict the lifetime order of simple stack objects.",
+    level: "beginner",
+    item_types: ["lesson", "predict_output"],
+    order_index: 140,
+    is_active: true
+  },
+  {
+    id: "cpp.raii.resource_lifetime",
+    domain: "cpp",
+    module_id: "cpp.raii",
+    title: "Resource lifetime",
+    description: "Connect resource acquisition to object lifetime.",
+    learner_goal: "Explain why the object that owns a resource should release it automatically.",
+    level: "intermediate",
+    item_types: ["lesson", "concept_check"],
+    order_index: 210,
+    is_active: true
+  },
+  {
+    id: "cpp.raii.destructor_cleanup",
+    domain: "cpp",
+    module_id: "cpp.raii",
+    title: "Destructor cleanup",
+    description: "Use destructors to release resources when ownership is manual.",
+    learner_goal: "Read a wrapper type and identify the cleanup point.",
+    level: "intermediate",
+    item_types: ["lesson", "code_reading"],
+    order_index: 220,
+    is_active: true
+  },
+  {
+    id: "cpp.raii.exception_safety_intro",
+    domain: "cpp",
+    module_id: "cpp.raii",
+    title: "Exception safety intro",
+    description: "Explain why RAII helps when code exits early because of return or exception.",
+    learner_goal: "Recognize why cleanup should not depend on reaching the last line of a function.",
+    level: "intermediate",
+    item_types: ["quiz", "code_reading"],
+    order_index: 230,
+    is_active: true
+  },
+  {
+    id: "cpp.raii.ownership_boundary",
+    domain: "cpp",
+    module_id: "cpp.raii",
+    title: "Ownership boundary",
+    description: "Identify which object owns a resource and which code only observes it.",
+    learner_goal: "Draw the boundary between owner and non-owner in small examples.",
+    level: "intermediate",
+    item_types: ["quiz", "bug_spotting"],
+    order_index: 240,
+    is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.unique_ptr",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "unique_ptr",
+    description: "Use unique ownership and explain why unique_ptr cannot be copied.",
+    learner_goal: "Transfer ownership with move and avoid accidental shared ownership.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 310,
+    is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.shared_ptr",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "shared_ptr",
+    description: "Explain shared ownership and reference counting at a beginner-friendly level.",
+    learner_goal: "Identify when multiple objects intentionally share ownership.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 320,
+    is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.weak_ptr",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "weak_ptr",
+    description: "Explain non-owning observation and cyclic-reference prevention.",
+    learner_goal: "Recognize when a pointer should observe without extending lifetime.",
+    level: "intermediate",
+    item_types: ["lesson", "code_reading"],
+    order_index: 330,
+    is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.cyclic_reference",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "Cyclic references",
+    description: "Spot a shared_ptr cycle and explain why it leaks.",
+    learner_goal: "Break a cycle by changing one side to weak_ptr.",
+    level: "intermediate",
+    item_types: ["bug_spotting", "code_reading"],
+    order_index: 340,
+    is_active: true
+  }
+];
+
+export const skillPrerequisitesSeed: SkillPrerequisite[] = [
+  { skill_id: "cpp.structs_classes.public_private", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
+  { skill_id: "cpp.structs_classes.const_methods_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
+  { skill_id: "cpp.structs_classes.invariants_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
+  { skill_id: "cpp.constructors.default_constructor", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
+  { skill_id: "cpp.constructors.parameterized_constructor", prerequisite_skill_id: "cpp.constructors.default_constructor", relationship_type: "recommended" },
+  { skill_id: "cpp.constructors.member_initializer_list", prerequisite_skill_id: "cpp.constructors.parameterized_constructor", relationship_type: "recommended" },
+  { skill_id: "cpp.constructors.destructor_intro", prerequisite_skill_id: "cpp.constructors.default_constructor", relationship_type: "recommended" },
+  { skill_id: "cpp.raii.resource_lifetime", prerequisite_skill_id: "cpp.constructors.destructor_intro", relationship_type: "recommended" },
+  { skill_id: "cpp.raii.destructor_cleanup", prerequisite_skill_id: "cpp.raii.resource_lifetime", relationship_type: "recommended" },
+  { skill_id: "cpp.raii.exception_safety_intro", prerequisite_skill_id: "cpp.raii.destructor_cleanup", relationship_type: "recommended" },
+  { skill_id: "cpp.raii.ownership_boundary", prerequisite_skill_id: "cpp.raii.resource_lifetime", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.unique_ptr", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.shared_ptr", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.weak_ptr", prerequisite_skill_id: "cpp.smart_pointers.shared_ptr", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.cyclic_reference", prerequisite_skill_id: "cpp.smart_pointers.weak_ptr", relationship_type: "recommended" }
+];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {
-  return { modules: skillModules, skills: skillSeed, prerequisites: skillPrerequisitesSeed, source: "seed" };
+  return {
+    modules: [...skillModules].sort((a, b) => a.order_index - b.order_index),
+    skills: skillSeed,
+    prerequisites: skillPrerequisitesSeed,
+    source: "seed"
+  };
 }
 
 export function getSkillsForModule(moduleId: string, skills = skillSeed) {
-  return skills.filter((skill) => skill.module_id === moduleId && skill.is_active).sort((a, b) => a.order_index - b.order_index);
+  return skills
+    .filter((skill) => skill.module_id === moduleId && skill.is_active)
+    .sort((a, b) => a.order_index - b.order_index);
 }

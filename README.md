@@ -18,12 +18,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - Protected dashboard placeholder with sign-out
 - Profile and onboarding flow
 - `profiles` table migration with RLS
+- Skill map data layer: `skills` and `skill_prerequisites` migration with RLS
+- C++ skill seed (structs/classes, constructors, RAII, smart pointers) mirrored in TypeScript
+- Read-only dashboard skill map preview with database-to-seed fallback
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-Learning features are intentionally not implemented yet. The next feature should be the skill map database and seed content.
+The skill map is read-only and intentionally does **not** implement FSRS, review cards,
+quiz attempts, code execution, or mastery scoring yet. The next feature after this is the
+learning item and quiz model — still not FSRS.
 
 ## Requirements
 
@@ -80,24 +85,37 @@ The code prefers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and falls back to `NEXT_
 
 ## Database setup
 
-Apply this migration before testing real onboarding persistence:
+Apply these migrations in order. Each can be applied through either the Supabase
+SQL Editor (paste and run the SQL) or the Supabase CLI migration flow.
 
 ```text
 supabase/migrations/20260611113000_create_profiles.sql
+supabase/migrations/20260612011000_create_skill_map.sql
 ```
 
-You can apply it through either:
-
-1. Supabase SQL Editor: paste and run the SQL.
-2. Supabase CLI migration flow.
-
-The table added is:
+The `profiles` migration adds:
 
 ```text
 public.profiles
 ```
 
 It stores one row per authenticated user and uses RLS so each learner can only read, insert, and update their own profile.
+
+The skill map migration adds:
+
+```text
+public.skills
+public.skill_prerequisites
+```
+
+These hold shared curriculum content (not per-user data). RLS is enabled and grants
+read-only access to anonymous and authenticated users; writes are reserved for
+service-role/admin tooling. The migration also seeds the first C++ modules and is
+idempotent (safe to re-run) thanks to `on conflict` upserts.
+
+The dashboard skill map preview falls back to the bundled TypeScript seed
+(`src/features/skills/skill-seed.ts`) until this migration is applied, so the preview
+renders even before the database has the tables.
 
 ## Google OAuth setup
 
@@ -167,14 +185,16 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-Work on roadmap item 005:
+The skill map database and seed content (roadmap item 005) is now implemented as a
+read-only data layer and dashboard preview. The next feature is the learning item and
+quiz model:
 
 ```text
-Add skill map database and seed content
+Add learning item and quiz model
 ```
 
 Non-goals for the next step:
 
 - Do not implement FSRS yet.
-- Do not implement quiz attempts yet.
-- Do not implement the full recommendation engine yet.
+- Do not implement review cards yet.
+- Do not implement the full recommendation engine or mastery scoring yet.
