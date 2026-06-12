@@ -72,7 +72,7 @@ Supabase CLI, with dependencies installed. Then:
 ```bash
 pnpm dev                 # port 3000 is auto-forwarded
 pnpm verify              # lint + typecheck + test + build (the CI gate, one command)
-pnpm verify:codespace    # install/check/build, optional DB migration, optional e2e
+pnpm verify:codespace    # install/check/build, optional DB migration, e2e by default
 pnpm verify:e2e          # installs required browsers, then runs Playwright e2e
 pnpm db:migrate          # apply all database migrations (needs SUPABASE_DB_URL secret)
 pnpm db:verify           # verify the live answer-key hardening via the anon REST API
@@ -81,11 +81,13 @@ pnpm db:verify           # verify the live answer-key hardening via the anon RES
 `pnpm verify` mirrors the CI "App checks" gate, so a clean run locally means CI should
 pass too. Run `pnpm verify:codespace` when you want the single Codespace health check: it
 installs dependencies, runs lint/typecheck/unit/build, applies migrations if
-`SUPABASE_DB_URL` is present, and prints the live Supabase smoke checks that still need a
-browser/session. Set `RUN_E2E=1` to include the Playwright suite:
+`SUPABASE_DB_URL` is present, runs Playwright e2e by default, and prints the live
+Supabase smoke checks that still need a browser/session.
+
+If you want to skip Playwright for a faster run:
 
 ```bash
-RUN_E2E=1 pnpm verify:codespace
+SKIP_E2E=1 pnpm verify:codespace
 ```
 
 Run `pnpm verify:e2e` when you only need the end-to-end suite; it installs the required
