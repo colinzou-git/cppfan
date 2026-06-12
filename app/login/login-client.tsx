@@ -48,11 +48,7 @@ export function LoginClient() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: getRedirectUrl(),
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent"
-        }
+        redirectTo: getRedirectUrl()
       }
     });
 
