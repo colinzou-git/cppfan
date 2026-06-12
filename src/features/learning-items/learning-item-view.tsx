@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AnswerForm } from "./answer-form";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
@@ -41,21 +42,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         </div>
 
         {hasChoices ? (
-          <div className="grid gap-2" data-testid="learning-item-choices">
-            <p className="text-sm font-semibold text-slate-700">Choices</p>
-            <ul className="grid gap-2">
-              {choices.map((choice) => (
-                <li
-                  key={choice.id}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800"
-                >
-                  {choice.content}
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs font-medium text-slate-500">
-              Answering and grading arrive in the next step. For now this item is read-only.
-            </p>
+          <div data-testid="learning-item-choices">
+            <AnswerForm itemId={item.id} choices={choices} />
           </div>
         ) : null}
 
