@@ -26,14 +26,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - Learning item viewer at `/learn/[itemId]`, linked from the skill map preview
 - Quiz attempt flow: answer a multiple-choice item, server-side grading, retry
 - `learning_item_attempts` migration with per-user RLS; attempts recorded when signed in
+- FSRS review scheduling: `review_cards` + `review_logs` migration with per-user RLS
+- `ts-fsrs` wrapper (`src/lib/fsrs/scheduler.ts`) and a `/review` queue with rating + reschedule
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-The learning loop now covers answering and basic grading. It intentionally does **not**
-implement FSRS, review cards, mastery scoring, recommendations, or code execution yet.
-The next feature is FSRS review cards and review logs.
+The learning loop now covers answering, basic grading, and FSRS-scheduled reviews.
+Review scheduling is deliberately kept separate from skill mastery. It intentionally
+does **not** implement mastery scoring, recommendations, or code execution yet. The next
+feature is the skill event ledger and rule-based mastery scoring.
 
 ## Requirements
 
@@ -120,6 +123,7 @@ supabase/migrations/20260611113000_create_profiles.sql
 supabase/migrations/20260612011000_create_skill_map.sql
 supabase/migrations/20260612120000_create_learning_items.sql
 supabase/migrations/20260613090000_create_learning_item_attempts.sql
+supabase/migrations/20260613100000_create_review_cards.sql
 ```
 
 The `profiles` migration adds:
@@ -177,6 +181,21 @@ in the `submitAnswer` server action — it works even when signed out or pre-mig
 > needs the client to read it, but fully hiding the column needs a `SECURITY DEFINER`
 > grading RPC or a public view + column grants — a separately testable change deferred
 > to a dedicated follow-up rather than shipped untested here.
+
+The review scheduling migration adds:
+
+```text
+public.review_cards
+public.review_logs
+```
+
+Both are **per-user data** with RLS scoped to `auth.uid() = user_id`. Review cards are
+created from eligible learning items the first time a signed-in learner opens `/review`,
+and FSRS scheduling runs through the `ts-fsrs` wrapper in `src/lib/fsrs/scheduler.ts`.
+Review logs are append-only (select/insert, no update/delete). Signed out or
+pre-migration, `/review` shows a read-only preview of eligible items instead of a live
+queue. FSRS card state is intentionally **not** the same as skill mastery (see
+`docs/SKILL_ENGINE.md`); mastery arrives in a later, separate feature.
 
 ## Google OAuth setup
 
@@ -246,15 +265,16 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-The skill map, the first learning-item content layer, and the quiz attempt flow with
-basic grading are implemented. The next feature is FSRS review cards and review logs:
+The skill map, learning-item content, quiz attempts with grading, and FSRS review
+scheduling are implemented. The next feature is the skill event ledger and rule-based
+mastery scoring:
 
 ```text
-Add FSRS review cards and review logs
+Add skill event ledger and mastery scoring
 ```
 
 Non-goals for the next step:
 
-- Do not implement mastery scoring yet.
+- Do not implement an ML mastery model yet.
 - Do not implement the full recommendation engine yet.
 - Do not implement code execution yet.

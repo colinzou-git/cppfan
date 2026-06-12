@@ -194,6 +194,25 @@ export function getFirstLearningItemIdForSkill(skillId: string): string | null {
   return getLearningItemsForSkill(skillId)[0]?.id ?? null;
 }
 
+export function getPrimarySkillId(itemId: string): string | null {
+  const primary = learningItemSkills.find(
+    (mapping) => mapping.learning_item_id === itemId && mapping.is_primary
+  );
+  return primary?.skill_id ?? null;
+}
+
+/**
+ * Active learning items that can seed a review card, each paired with its
+ * primary skill. Used to create review cards from eligible items.
+ */
+export function getEligibleReviewItems(): { item: LearningItem; skillId: string }[] {
+  return learningItems
+    .filter((item) => item.is_active)
+    .map((item) => ({ item, skillId: getPrimarySkillId(item.id) }))
+    .filter((entry): entry is { item: LearningItem; skillId: string } => entry.skillId !== null)
+    .sort((a, b) => a.item.order_index - b.item.order_index);
+}
+
 /** Map of skill id -> first learning item id, for preview links. */
 export function getItemLinksBySkill(): Record<string, string> {
   const links: Record<string, string> = {};

@@ -14,7 +14,7 @@ const nextItems = [
   {
     icon: CalendarClock,
     title: "Review queue",
-    body: "FSRS review cards will appear here after the review engine is implemented."
+    body: "Study cards scheduled with FSRS. Open it from the Review button above; sign in to start scheduling."
   },
   {
     icon: Brain,
@@ -85,6 +85,12 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/review">
+              <CalendarClock className="h-4 w-4" />
+              Review
+            </Link>
+          </Button>
           <Button asChild variant="secondary">
             <Link href="/profile">
               <UserCircle className="h-4 w-4" />
