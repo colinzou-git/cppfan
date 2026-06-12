@@ -28,15 +28,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - `learning_item_attempts` migration with per-user RLS; attempts recorded when signed in
 - FSRS review scheduling: `review_cards` + `review_logs` migration with per-user RLS
 - `ts-fsrs` wrapper (`src/lib/fsrs/scheduler.ts`) and a `/review` queue with rating + reschedule
+- Skill event ledger: `skill_events` migration with per-user RLS, stable event names
+- Rule-based mastery scoring v1 and a dashboard skill-mastery preview
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-The learning loop now covers answering, basic grading, and FSRS-scheduled reviews.
-Review scheduling is deliberately kept separate from skill mastery. It intentionally
-does **not** implement mastery scoring, recommendations, or code execution yet. The next
-feature is the skill event ledger and rule-based mastery scoring.
+The learning loop now covers answering, grading, FSRS-scheduled reviews, an event ledger,
+and rule-based mastery. Mastery is computed separately from FSRS card state. It
+intentionally does **not** implement an ML model, the recommendation engine, or code
+execution yet. The next feature is the recommendation engine and daily plan.
 
 ## Requirements
 
@@ -124,6 +126,7 @@ supabase/migrations/20260612011000_create_skill_map.sql
 supabase/migrations/20260612120000_create_learning_items.sql
 supabase/migrations/20260613090000_create_learning_item_attempts.sql
 supabase/migrations/20260613100000_create_review_cards.sql
+supabase/migrations/20260613110000_create_skill_events.sql
 ```
 
 The `profiles` migration adds:
@@ -195,7 +198,22 @@ and FSRS scheduling runs through the `ts-fsrs` wrapper in `src/lib/fsrs/schedule
 Review logs are append-only (select/insert, no update/delete). Signed out or
 pre-migration, `/review` shows a read-only preview of eligible items instead of a live
 queue. FSRS card state is intentionally **not** the same as skill mastery (see
-`docs/SKILL_ENGINE.md`); mastery arrives in a later, separate feature.
+`docs/SKILL_ENGINE.md`).
+
+The skill event ledger migration adds:
+
+```text
+public.skill_events
+```
+
+This is **per-user, append-only** evidence (select/insert only, RLS scoped to
+`auth.uid() = user_id`) using the stable event names from
+`docs/EVENT_SCHEMA_STABLE_NAMES.md`. Quiz attempts and review ratings emit events
+best-effort when signed in. Mastery is derived from this ledger by the rule-based scorer
+in `src/features/mastery/mastery-scoring.ts` — deterministic, explainable, and computed
+**separately from FSRS card state** (a learner can have a stable review card yet still be
+weak in the broader skill). The dashboard skill-mastery preview reflects this; signed out
+or pre-migration it shows an explanatory empty state.
 
 ## Google OAuth setup
 
@@ -265,16 +283,16 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-The skill map, learning-item content, quiz attempts with grading, and FSRS review
-scheduling are implemented. The next feature is the skill event ledger and rule-based
-mastery scoring:
+The skill map, learning-item content, quiz attempts with grading, FSRS review scheduling,
+and the skill event ledger with rule-based mastery are implemented. The next feature is
+the recommendation engine and daily plan:
 
 ```text
-Add skill event ledger and mastery scoring
+Add recommendation engine and daily plan
 ```
 
 Non-goals for the next step:
 
-- Do not implement an ML mastery model yet.
-- Do not implement the full recommendation engine yet.
-- Do not implement code execution yet.
+- Do not implement an ML model.
+- Do not implement code execution.
+- Do not redesign the whole UI.

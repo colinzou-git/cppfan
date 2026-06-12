@@ -2,6 +2,8 @@
 
 import { gradeChoiceAttempt } from "./grading";
 import { getGradingChoices, recordAttempt } from "./attempt-service";
+import { getPrimarySkillId } from "./learning-item-seed";
+import { recordSkillEvents } from "@/features/events/event-service";
 
 export type SubmitAnswerResult =
   | { status: "invalid" }
@@ -29,6 +31,13 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
   }
 
   const persisted = await recordAttempt({ itemId, choiceId, isCorrect: outcome.isCorrect });
+
+  // Append skill-mastery evidence (best effort; no-op when signed out).
+  const skillId = getPrimarySkillId(itemId);
+  await recordSkillEvents([
+    { eventType: "quiz_attempted", skillId, learningItemId: itemId },
+    { eventType: outcome.isCorrect ? "quiz_correct" : "quiz_wrong", skillId, learningItemId: itemId }
+  ]);
 
   return {
     status: "graded",
