@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getProfileForUser } from "@/features/profile/profile-queries";
 import { getSkillMapPreview } from "@/features/skills/skill-queries";
 import { SkillMapPreview } from "@/features/skills/skill-map-preview";
+import { getItemLinksBySkill } from "@/features/learning-items/learning-item-queries";
 
 const nextItems = [
   {
@@ -66,7 +67,7 @@ export default async function DashboardPage() {
     dailyReviewMinutes = profile.daily_review_minutes;
   }
 
-  const skillMap = await getSkillMapPreview();
+  const [skillMap, itemLinksBySkill] = await Promise.all([getSkillMapPreview(), getItemLinksBySkill()]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -158,7 +159,7 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <SkillMapPreview data={skillMap} />
+      <SkillMapPreview data={skillMap} itemLinksBySkill={itemLinksBySkill} />
 
       <Card className="border-white/70 bg-white/80 shadow-sm backdrop-blur">
         <CardHeader>

@@ -21,14 +21,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - Skill map data layer: `skills` and `skill_prerequisites` migration with RLS
 - C++ skill seed (structs/classes, constructors, RAII, smart pointers) mirrored in TypeScript
 - Read-only dashboard skill map preview with database-to-seed fallback
+- Learning item data layer: `learning_items`, `learning_item_skills`, `learning_item_choices` migration with RLS
+- First C++ learning content (structs/classes module) mirrored in a TypeScript seed
+- Read-only learning item viewer at `/learn/[itemId]`, linked from the skill map preview
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-The skill map is read-only and intentionally does **not** implement FSRS, review cards,
-quiz attempts, code execution, or mastery scoring yet. The next feature after this is the
-learning item and quiz model — still not FSRS.
+Learning content is read-only so far and intentionally does **not** implement quiz
+attempts, grading history, FSRS, review cards, mastery scoring, or code execution yet.
+The next feature is the quiz attempt flow and basic grading — still not FSRS.
 
 ## Requirements
 
@@ -113,6 +116,7 @@ SQL Editor (paste and run the SQL) or the Supabase CLI migration flow.
 ```text
 supabase/migrations/20260611113000_create_profiles.sql
 supabase/migrations/20260612011000_create_skill_map.sql
+supabase/migrations/20260612120000_create_learning_items.sql
 ```
 
 The `profiles` migration adds:
@@ -138,6 +142,21 @@ idempotent (safe to re-run) thanks to `on conflict` upserts.
 The dashboard skill map preview falls back to the bundled TypeScript seed
 (`src/features/skills/skill-seed.ts`) until this migration is applied, so the preview
 renders even before the database has the tables.
+
+The learning item migration adds:
+
+```text
+public.learning_items
+public.learning_item_skills
+public.learning_item_choices
+```
+
+These also hold shared curriculum content with read-only RLS for anon/authenticated
+users, and seed the first C++ module (structs/classes). The migration is idempotent.
+`learning_item_choices.is_correct` is the answer key: the client display query never
+selects it, and grading runs server-side (added with the quiz attempt feature). The
+`/learn/[itemId]` viewer falls back to the bundled seed
+(`src/features/learning-items/learning-item-seed.ts`) until this migration is applied.
 
 ## Google OAuth setup
 
@@ -207,12 +226,12 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-The skill map database and seed content (roadmap item 005) is now implemented as a
-read-only data layer and dashboard preview. The next feature is the learning item and
-quiz model:
+The skill map and the first learning-item content layer are now implemented as
+read-only data layers with a dashboard preview and a `/learn/[itemId]` viewer. The next
+feature is the quiz attempt flow and basic grading:
 
 ```text
-Add learning item and quiz model
+Add quiz attempt flow and basic grading
 ```
 
 Non-goals for the next step:
