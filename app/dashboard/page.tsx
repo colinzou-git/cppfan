@@ -11,6 +11,8 @@ import { SkillMapPreview } from "@/features/skills/skill-map-preview";
 import { getItemLinksBySkill } from "@/features/learning-items/learning-item-queries";
 import { getMasterySummary } from "@/features/mastery/mastery-queries";
 import { MasteryPreview } from "@/features/mastery/mastery-preview";
+import { getDailyPlan } from "@/features/recommendations/recommendation-queries";
+import { DailyPlan } from "@/features/recommendations/daily-plan";
 
 const nextItems = [
   {
@@ -69,10 +71,11 @@ export default async function DashboardPage() {
     dailyReviewMinutes = profile.daily_review_minutes;
   }
 
-  const [skillMap, itemLinksBySkill, masterySummary] = await Promise.all([
+  const [skillMap, itemLinksBySkill, masterySummary, dailyPlan] = await Promise.all([
     getSkillMapPreview(),
     getItemLinksBySkill(),
-    getMasterySummary()
+    getMasterySummary(),
+    getDailyPlan()
   ]);
 
   return (
@@ -170,6 +173,8 @@ export default async function DashboardPage() {
           </Card>
         ))}
       </section>
+
+      <DailyPlan plan={dailyPlan} />
 
       <MasteryPreview summary={masterySummary} />
 
