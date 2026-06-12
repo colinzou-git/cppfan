@@ -20,6 +20,7 @@ echo "Repo: ${repo_root}"
 if ! command -v pnpm >/dev/null 2>&1; then
   section "Enable pnpm via Corepack"
   corepack enable
+  corepack prepare pnpm@10.0.0 --activate
 fi
 
 section "Install dependencies"
