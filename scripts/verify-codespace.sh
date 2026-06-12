@@ -55,7 +55,7 @@ fi
 section "Optional Playwright e2e"
 if [ "${RUN_E2E:-0}" = "1" ]; then
   pnpm exec playwright install --with-deps chromium webkit
-  pnpm test:e2e
+  pnpm exec playwright test
 else
   echo "Skipping e2e by default. Run with RUN_E2E=1 pnpm verify:codespace to include Playwright."
 fi
