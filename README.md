@@ -22,7 +22,7 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - C++ skill seed (structs/classes, constructors, RAII, smart pointers) mirrored in TypeScript
 - Read-only dashboard skill map preview with database-to-seed fallback
 - Learning item data layer: `learning_items`, `learning_item_skills`, `learning_item_choices` migration with RLS
-- First C++ learning content (structs/classes, constructors, and RAII modules) mirrored in a TypeScript seed
+- First C++ learning content (structs/classes, constructors, RAII, and smart pointers modules) mirrored in a TypeScript seed
 - Learning item viewer at `/learn/[itemId]`, linked from the skill map preview
 - Quiz attempt flow: answer a multiple-choice item, server-side grading, retry
 - `learning_item_attempts` migration with per-user RLS; attempts recorded when signed in
@@ -169,6 +169,7 @@ supabase/migrations/20260613110000_create_skill_events.sql
 supabase/migrations/20260613120000_harden_learning_item_choices.sql
 supabase/migrations/20260613130000_seed_constructors_items.sql
 supabase/migrations/20260613140000_seed_raii_items.sql
+supabase/migrations/20260613160000_seed_smart_pointers_items.sql
 ```
 
 The `profiles` migration adds:
