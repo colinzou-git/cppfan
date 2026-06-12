@@ -34,6 +34,11 @@ pnpm build
 
 section "Optional Supabase migration"
 if [ -n "${SUPABASE_DB_URL:-}" ]; then
+  if ! command -v psql >/dev/null 2>&1; then
+    echo "Installing postgresql-client for migration support..."
+    sudo apt-get update -y >/dev/null
+    sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
+  fi
   pnpm db:migrate
 else
   cat <<'MSG'
