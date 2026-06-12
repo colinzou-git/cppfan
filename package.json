@@ -31,8 +31,9 @@
     "react": "latest",
     "react-dom": "latest",
     "tailwind-merge": "latest",
-    "zustand": "latest",
-    "xstate": "latest"
+    "ts-fsrs": "5.4.1",
+    "xstate": "latest",
+    "zustand": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
