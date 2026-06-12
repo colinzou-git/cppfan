@@ -11,6 +11,15 @@
 # a manual browser check while logged in.
 set -euo pipefail
 
+# Auto-load .env.local if the public vars are not already exported, so this
+# works from a Codespace without typing `set -a; . ./.env.local; set +a`.
+if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] && [ -f .env.local ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env.local
+  set +a
+fi
+
 url="${NEXT_PUBLIC_SUPABASE_URL:-}"
 key="${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}}"
 
