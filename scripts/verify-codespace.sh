@@ -2,9 +2,8 @@
 #
 # One-command cppFan verification script for GitHub Codespaces.
 #
-# Safe to re-run. It validates the app, optionally applies Supabase migrations
-# when SUPABASE_DB_URL is present, and optionally runs Playwright e2e when
-# RUN_E2E=1 is set.
+# Safe to re-run. It validates the app, optionally applies Supabase migrations,
+# and runs Playwright e2e by default. Set SKIP_E2E=1 to skip e2e.
 set -euo pipefail
 
 section() {
@@ -52,11 +51,11 @@ To enable DB verification in Codespaces:
 MSG
 fi
 
-section "Optional Playwright e2e"
-if [ "${RUN_E2E:-0}" = "1" ]; then
-  pnpm verify:e2e
+section "Playwright e2e"
+if [ "${SKIP_E2E:-0}" = "1" ]; then
+  echo "Skipping e2e because SKIP_E2E=1. Run pnpm verify:codespace without SKIP_E2E to include Playwright."
 else
-  echo "Skipping e2e by default. Run with RUN_E2E=1 pnpm verify:codespace to include Playwright."
+  pnpm verify:e2e
 fi
 
 section "Manual live checks after DB migration"
