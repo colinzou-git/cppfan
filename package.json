@@ -15,7 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "verify:e2e": "pnpm exec playwright install --with-deps chromium webkit && pnpm exec playwright test",
+    "verify:e2e": "pnpm exec playwright install --with-deps chromium webkit && pnpm test:e2e",
     "verify:codespace": "bash scripts/verify-codespace.sh",
     "db:migrate": "bash scripts/apply-migrations.sh",
     "format": "prettier --write .",
