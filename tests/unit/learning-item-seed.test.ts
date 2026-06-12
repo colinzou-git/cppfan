@@ -116,7 +116,12 @@ describe("curriculum coverage", () => {
     "cpp.constructors.default_constructor",
     "cpp.constructors.parameterized_constructor",
     "cpp.constructors.member_initializer_list",
-    "cpp.constructors.destructor_intro"
+    "cpp.constructors.destructor_intro",
+    // raii module (#36)
+    "cpp.raii.resource_lifetime",
+    "cpp.raii.destructor_cleanup",
+    "cpp.raii.exception_safety_intro",
+    "cpp.raii.ownership_boundary"
   ];
 
   it("has at least one learning item for every covered skill", () => {
@@ -126,9 +131,11 @@ describe("curriculum coverage", () => {
     }
   });
 
-  it("gives each constructors skill at least two items (per the agreed density)", () => {
-    const constructorSkills = expectedSkillsWithContent.filter((id) => id.startsWith("cpp.constructors."));
-    for (const skillId of constructorSkills) {
+  it("gives each constructors and raii skill at least two items (per the agreed density)", () => {
+    const denseSkills = expectedSkillsWithContent.filter(
+      (id) => id.startsWith("cpp.constructors.") || id.startsWith("cpp.raii.")
+    );
+    for (const skillId of denseSkills) {
       const itemIds = new Set(
         learningItemSkills.filter((mapping) => mapping.skill_id === skillId).map((mapping) => mapping.learning_item_id)
       );
