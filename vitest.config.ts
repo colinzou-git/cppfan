@@ -20,10 +20,14 @@ export default defineConfig({
     ]
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-      "@/components": path.resolve(__dirname, "components"),
-      "@/app": path.resolve(__dirname, "app")
-    }
+    // Most-specific aliases first: vite matches the first entry, so "@/components"
+    // and "@/app" must precede the catch-all "@" -> src. String finds keep vite's
+    // path-boundary semantics (so scoped packages like "@testing-library/*" are
+    // not matched).
+    alias: [
+      { find: "@/components", replacement: path.resolve(__dirname, "components") },
+      { find: "@/app", replacement: path.resolve(__dirname, "app") },
+      { find: "@", replacement: path.resolve(__dirname, "src") }
+    ]
   }
 });

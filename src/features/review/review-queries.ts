@@ -69,7 +69,10 @@ function toDueEntry(card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id
     skillId: card.skill_id,
     title: details.item.title,
     type: details.item.type,
-    prompt: details.item.prompt
+    prompt: details.item.prompt,
+    explanation: details.item.explanation,
+    // getLearningItemById returns answer-key-free public choices.
+    choices: details.choices
   };
 }
 
