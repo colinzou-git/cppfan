@@ -121,7 +121,12 @@ describe("curriculum coverage", () => {
     "cpp.raii.resource_lifetime",
     "cpp.raii.destructor_cleanup",
     "cpp.raii.exception_safety_intro",
-    "cpp.raii.ownership_boundary"
+    "cpp.raii.ownership_boundary",
+    // smart pointers module (#43)
+    "cpp.smart_pointers.unique_ptr",
+    "cpp.smart_pointers.shared_ptr",
+    "cpp.smart_pointers.weak_ptr",
+    "cpp.smart_pointers.cyclic_reference"
   ];
 
   it("has at least one learning item for every covered skill", () => {
@@ -133,7 +138,10 @@ describe("curriculum coverage", () => {
 
   it("gives each constructors and raii skill at least two items (per the agreed density)", () => {
     const denseSkills = expectedSkillsWithContent.filter(
-      (id) => id.startsWith("cpp.constructors.") || id.startsWith("cpp.raii.")
+      (id) =>
+        id.startsWith("cpp.constructors.") ||
+        id.startsWith("cpp.raii.") ||
+        id.startsWith("cpp.smart_pointers.")
     );
     for (const skillId of denseSkills) {
       const itemIds = new Set(
