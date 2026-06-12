@@ -39,6 +39,18 @@ if ! command -v psql >/dev/null 2>&1; then
   sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
 fi
 
+# Show the target host:port (password hidden) so a misconfigured URL is obvious
+# without typing a separate command.
+target="$(printf '%s' "${SUPABASE_DB_URL}" | sed -E 's#^.*@##; s#/.*$##')"
+echo "==> Target host: ${target}"
+
+if printf '%s' "${target}" | grep -q '<'; then
+  echo "ERROR: the host still contains a placeholder like <region>. Copy the actual" >&2
+  echo "       Session pooler connection string from the Supabase dashboard (it has" >&2
+  echo "       the real region filled in) and update the SUPABASE_DB_URL secret." >&2
+  exit 1
+fi
+
 # Direct connections (db.<ref>.supabase.co) are IPv6-only; Codespaces are IPv4
 # and will fail with "Network is unreachable". Nudge toward the session pooler.
 if printf '%s' "${SUPABASE_DB_URL}" | grep -qE '@db\.[a-z0-9]+\.supabase\.co'; then
