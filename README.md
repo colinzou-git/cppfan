@@ -87,8 +87,7 @@ browser/session. Set `RUN_E2E=1` to include the Playwright suite:
 RUN_E2E=1 pnpm verify:codespace
 ```
 
-Run `pnpm verify:e2e` when you only need the end-to-end suite (it downloads Chromium and
-WebKit first).
+Run `pnpm verify:e2e` when you only need the end-to-end suite.
 
 Apply database changes with `pnpm db:migrate` — a single command that runs every
 migration idempotently. It needs a `SUPABASE_DB_URL` Codespace secret; see
@@ -142,11 +141,7 @@ It runs every file in `supabase/migrations/` in order via `psql`. The migrations
 idempotent, so it is safe to re-run and it always brings the database up to date
 (including new migrations as they are added). It needs a `SUPABASE_DB_URL` environment
 variable — the Postgres connection string from **Supabase → Project Settings → Database →
-Connection string**.
-
-> Use the **Session pooler** connection string (host `aws-0-<region>.pooler.supabase.com`,
-> port 5432), **not** the Direct connection. Supabase's direct connection is IPv6-only and
-> a Codespace (IPv4) cannot reach it — `psql` fails with `Network is unreachable`.
+Connection string → URI**.
 
 In a GitHub Codespace, add it once as a Codespace secret (repo **Settings → Secrets and
 variables → Codespaces → New repository secret**, name `SUPABASE_DB_URL`), reopen the
