@@ -73,7 +73,7 @@ Supabase CLI, with dependencies installed. Then:
 pnpm dev                 # port 3000 is auto-forwarded
 pnpm verify              # lint + typecheck + test + build (the CI gate, one command)
 pnpm verify:codespace    # install/check/build, optional DB migration, optional e2e
-pnpm verify:e2e          # installs browsers, then runs Playwright e2e
+pnpm verify:e2e          # installs required browsers, then runs Playwright e2e
 pnpm db:migrate          # apply all database migrations (needs SUPABASE_DB_URL secret)
 ```
 
