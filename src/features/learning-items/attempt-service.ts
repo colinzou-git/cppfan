@@ -30,6 +30,38 @@ export async function getGradingChoices(itemId: string): Promise<GradingChoice[]
 }
 
 /**
+ * Grade a choice via the SECURITY DEFINER database function, which keeps the
+ * answer key server-side. Returns null when Supabase is unconfigured, the
+ * function/migration is absent, or the submission is ungradeable — callers then
+ * fall back to seed grading.
+ */
+export async function gradeViaRpc(
+  itemId: string,
+  choiceId: string
+): Promise<{ isCorrect: boolean; correctChoiceId: string } | null> {
+  const supabase = await createClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase.rpc("grade_learning_item_choice", {
+    p_item_id: itemId,
+    p_choice_id: choiceId
+  });
+
+  if (error || !data) {
+    return null;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof row.is_correct !== "boolean" || typeof row.correct_choice_id !== "string") {
+    return null;
+  }
+
+  return { isCorrect: row.is_correct, correctChoiceId: row.correct_choice_id };
+}
+
+/**
  * Record an attempt for the signed-in learner. Best effort: returns false when
  * Supabase is unconfigured, the user is not signed in, or the attempts table is
  * not yet migrated, so grading still works offline / pre-migration.

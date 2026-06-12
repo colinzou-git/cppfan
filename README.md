@@ -153,6 +153,7 @@ supabase/migrations/20260612120000_create_learning_items.sql
 supabase/migrations/20260613090000_create_learning_item_attempts.sql
 supabase/migrations/20260613100000_create_review_cards.sql
 supabase/migrations/20260613110000_create_skill_events.sql
+supabase/migrations/20260613120000_harden_learning_item_choices.sql
 ```
 
 The `profiles` migration adds:
@@ -205,11 +206,13 @@ This is **per-user data**: RLS lets a learner select and insert only their own a
 in the `submitAnswer` server action — it works even when signed out or pre-migration
 (grading against the seed), and records an attempt only when the learner is signed in.
 
-> Known limitation: the read-only policy on `learning_item_choices` still allows a
-> determined client to read `is_correct` directly via the anon key. Grading no longer
-> needs the client to read it, but fully hiding the column needs a `SECURITY DEFINER`
-> grading RPC or a public view + column grants — a separately testable change deferred
-> to a dedicated follow-up rather than shipped untested here.
+The answer key is hardened: a later migration revokes column-level read access to
+`is_correct` for `anon`/`authenticated` (display columns stay readable) and adds a
+`SECURITY DEFINER` function `grade_learning_item_choice(...)` that grades server-side
+without exposing the column. `submitAnswer` prefers this RPC and falls back to seed-based
+grading when it is unavailable, so grading works offline and pre-migration. (The column
+lockdown's effect must be confirmed against the live database, since CI does not run
+migrations.)
 
 The review scheduling migration adds:
 
@@ -315,12 +318,11 @@ engine with a daily plan. The dashboard daily plan (`src/features/recommendation
 orders due reviews, regressed/weak skills, the next lesson, and recommended prerequisites,
 explaining each suggestion.
 
-Sensible next steps (not yet scoped as issues):
+Tracked follow-ups:
 
-- Harden the learning-item answer key (a `SECURITY DEFINER` grading RPC or a public view +
-  column grants), the follow-up noted in the quiz-attempt feature.
-- Bump the CI actions off the deprecated Node 20 runner (`actions/checkout@v4`,
-  `actions/setup-node@v4`).
-- Expand the curriculum beyond the structs/classes module.
+- Expand the curriculum beyond the structs/classes module (issue #16).
+
+Done since the initial roadmap: the answer-key hardening (server-side grading RPC +
+column lockdown) and the CI Node 24 action bump.
 
 Out of scope for now: an ML mastery model and in-browser code execution.
