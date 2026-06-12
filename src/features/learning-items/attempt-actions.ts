@@ -1,7 +1,7 @@
 "use server";
 
 import { gradeChoiceAttempt } from "./grading";
-import { getGradingChoices, recordAttempt } from "./attempt-service";
+import { getGradingChoices, gradeViaRpc, recordAttempt } from "./attempt-service";
 import { getPrimarySkillId } from "./learning-item-seed";
 import { recordSkillEvents } from "@/features/events/event-service";
 
@@ -23,8 +23,12 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
     return { status: "invalid" };
   }
 
-  const choices = await getGradingChoices(itemId);
-  const outcome = gradeChoiceAttempt(choices, choiceId);
+  // Prefer the DB-authoritative, answer-key-hiding RPC; fall back to seed-based
+  // grading when it is unavailable (unconfigured / pre-migration / offline).
+  const viaRpc = await gradeViaRpc(itemId, choiceId);
+  const outcome = viaRpc
+    ? ({ status: "graded", isCorrect: viaRpc.isCorrect, correctChoiceId: viaRpc.correctChoiceId } as const)
+    : gradeChoiceAttempt(await getGradingChoices(itemId), choiceId);
 
   if (outcome.status === "invalid") {
     return { status: "invalid" };
