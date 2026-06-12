@@ -104,3 +104,35 @@ describe("getLearningItemById", () => {
     expect(getLearningItemById("does.not.exist")).toBeNull();
   });
 });
+
+describe("curriculum coverage", () => {
+  const expectedSkillsWithContent = [
+    // structs/classes module
+    "cpp.structs_classes.syntax",
+    "cpp.structs_classes.public_private",
+    "cpp.structs_classes.const_methods_intro",
+    "cpp.structs_classes.invariants_intro",
+    // constructors module (#16)
+    "cpp.constructors.default_constructor",
+    "cpp.constructors.parameterized_constructor",
+    "cpp.constructors.member_initializer_list",
+    "cpp.constructors.destructor_intro"
+  ];
+
+  it("has at least one learning item for every covered skill", () => {
+    const skillsWithItems = new Set(learningItemSkills.map((mapping) => mapping.skill_id));
+    for (const skillId of expectedSkillsWithContent) {
+      expect(skillsWithItems.has(skillId)).toBe(true);
+    }
+  });
+
+  it("gives each constructors skill at least two items (per the agreed density)", () => {
+    const constructorSkills = expectedSkillsWithContent.filter((id) => id.startsWith("cpp.constructors."));
+    for (const skillId of constructorSkills) {
+      const itemIds = new Set(
+        learningItemSkills.filter((mapping) => mapping.skill_id === skillId).map((mapping) => mapping.learning_item_id)
+      );
+      expect(itemIds.size).toBeGreaterThanOrEqual(2);
+    }
+  });
+});
