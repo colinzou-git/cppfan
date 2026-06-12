@@ -50,6 +50,23 @@ Open:
 http://localhost:3000
 ```
 
+## Develop from a browser (Codespaces / iPhone)
+
+The repo ships a `.devcontainer` so you can do real terminal work without a local
+machine — useful from an iPhone. Open the repo in a GitHub Codespace (mobile Safari or
+the GitHub app) and the container comes up with Node 22, pnpm 10, the GitHub CLI, and the
+Supabase CLI, with dependencies installed. Then:
+
+```bash
+pnpm dev                 # port 3000 is auto-forwarded
+pnpm lint && pnpm typecheck && pnpm test
+supabase --version       # ready for migration work
+```
+
+Applying a migration from a Codespace still requires `supabase login` and
+`supabase link --project-ref <ref>` (DB password). For a one-off migration, the Supabase
+SQL Editor in the browser is often less friction — see "Database setup" below.
+
 ## Validation commands
 
 ```bash
