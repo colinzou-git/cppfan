@@ -1,16 +1,15 @@
-/**
- * Temporary bootstrap ESLint config.
+import tseslint from "typescript-eslint";
+
+/*
+ * ESLint 9 flat config for cppFan.
  *
- * The initial scaffold uses very new Next.js/ESLint packages. The official Next
- * shareable config can currently trigger a circular-config error with the newest
- * ESLint resolver path in some installs. This keeps `pnpm lint` passing as a
- * bootstrap sanity check without blocking the scaffold.
- *
- * TODO after app scaffold stabilizes:
- * Replace this with the current official Next.js flat ESLint config and add
- * TypeScript-aware linting.
+ * The official eslint-config-next shareable config currently throws a circular
+ * structure error when loaded through @eslint/eslintrc FlatCompat with these
+ * package versions, so we use a minimal, reliable typescript-eslint config that
+ * actually parses and lints .ts/.tsx app source. Only generated/output folders
+ * are ignored.
  */
-const eslintConfig = [
+export default tseslint.config(
   {
     ignores: [
       ".next/**",
@@ -19,19 +18,23 @@ const eslintConfig = [
       "test-results/**",
       "coverage/**",
       "out/**",
-      "dist/**",
-      "**/*.ts",
-      "**/*.tsx"
+      "dist/**"
     ]
   },
+  ...tseslint.configs.recommended,
   {
-    files: ["**/*.mjs", "**/*.js", "**/*.cjs"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module"
+      parserOptions: {
+        ecmaFeatures: { jsx: true }
+      }
     },
-    rules: {}
+    rules: {
+      // Allow intentionally-unused identifiers when prefixed with `_`.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }
+      ]
+    }
   }
-];
-
-export default eslintConfig;
+);
