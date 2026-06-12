@@ -73,16 +73,16 @@ Supabase CLI, with dependencies installed. Then:
 pnpm dev                 # port 3000 is auto-forwarded
 pnpm verify              # lint + typecheck + test + build (the CI gate, one command)
 pnpm verify:e2e          # installs browsers, then runs Playwright e2e
-supabase --version       # ready for migration work
+pnpm db:migrate          # apply all database migrations (needs SUPABASE_DB_URL secret)
 ```
 
 `pnpm verify` mirrors the CI "App checks" gate, so a clean run locally means CI should
 pass too. Run `pnpm verify:e2e` when you also need the end-to-end suite (it downloads
 Chromium and WebKit first).
 
-Applying a migration from a Codespace still requires `supabase login` and
-`supabase link --project-ref <ref>` (DB password). For a one-off migration, the Supabase
-SQL Editor in the browser is often less friction — see "Database setup" below.
+Apply database changes with `pnpm db:migrate` — a single command that runs every
+migration idempotently. It needs a `SUPABASE_DB_URL` Codespace secret; see
+"Database setup" below.
 
 ## Validation commands
 
@@ -119,8 +119,32 @@ The code prefers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and falls back to `NEXT_
 
 ## Database setup
 
-Apply these migrations in order. Each can be applied through either the Supabase
-SQL Editor (paste and run the SQL) or the Supabase CLI migration flow.
+### One command (recommended)
+
+All database migrations are applied with a single command — the only manual database
+step you need:
+
+```bash
+pnpm db:migrate
+```
+
+It runs every file in `supabase/migrations/` in order via `psql`. The migrations are
+idempotent, so it is safe to re-run and it always brings the database up to date
+(including new migrations as they are added). It needs a `SUPABASE_DB_URL` environment
+variable — the Postgres connection string from **Supabase → Project Settings → Database →
+Connection string → URI**.
+
+In a GitHub Codespace, add it once as a Codespace secret (repo **Settings → Secrets and
+variables → Codespaces → New repository secret**, name `SUPABASE_DB_URL`), reopen the
+terminal, then run `pnpm db:migrate`. (`psql` ships in the devcontainer; the script also
+installs it on demand.)
+
+> Convention: manual operational steps for this project funnel through scripts so there
+> is a single command to run from a Codespace. Database changes go through `pnpm db:migrate`.
+
+### Manual alternative
+
+Each migration can also be pasted into the Supabase **SQL Editor** and run in this order:
 
 ```text
 supabase/migrations/20260611113000_create_profiles.sql
