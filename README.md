@@ -30,15 +30,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - `ts-fsrs` wrapper (`src/lib/fsrs/scheduler.ts`) and a `/review` queue with rating + reschedule
 - Skill event ledger: `skill_events` migration with per-user RLS, stable event names
 - Rule-based mastery scoring v1 and a dashboard skill-mastery preview
+- Rule-based recommendation engine and a dashboard daily plan
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-The learning loop now covers answering, grading, FSRS-scheduled reviews, an event ledger,
-and rule-based mastery. Mastery is computed separately from FSRS card state. It
-intentionally does **not** implement an ML model, the recommendation engine, or code
-execution yet. The next feature is the recommendation engine and daily plan.
+The full initial learning loop is in place: skill map → learning items → quiz attempts
+with grading → FSRS reviews → skill event ledger → rule-based mastery → a daily plan that
+recommends what to do next. Mastery and recommendations are rule-based (no ML), and
+mastery stays separate from FSRS card state. Code execution is still intentionally out of
+scope.
 
 ## Requirements
 
@@ -283,16 +285,18 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-The skill map, learning-item content, quiz attempts with grading, FSRS review scheduling,
-and the skill event ledger with rule-based mastery are implemented. The next feature is
-the recommendation engine and daily plan:
+The initial roadmap (issues #1–#6) is complete: skill map, learning items, quiz attempts,
+FSRS reviews, the skill event ledger with rule-based mastery, and the recommendation
+engine with a daily plan. The dashboard daily plan (`src/features/recommendations/`)
+orders due reviews, regressed/weak skills, the next lesson, and recommended prerequisites,
+explaining each suggestion.
 
-```text
-Add recommendation engine and daily plan
-```
+Sensible next steps (not yet scoped as issues):
 
-Non-goals for the next step:
+- Harden the learning-item answer key (a `SECURITY DEFINER` grading RPC or a public view +
+  column grants), the follow-up noted in the quiz-attempt feature.
+- Bump the CI actions off the deprecated Node 20 runner (`actions/checkout@v4`,
+  `actions/setup-node@v4`).
+- Expand the curriculum beyond the structs/classes module.
 
-- Do not implement an ML model.
-- Do not implement code execution.
-- Do not redesign the whole UI.
+Out of scope for now: an ML mastery model and in-browser code execution.
