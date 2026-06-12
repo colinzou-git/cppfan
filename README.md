@@ -87,7 +87,8 @@ browser/session. Set `RUN_E2E=1` to include the Playwright suite:
 RUN_E2E=1 pnpm verify:codespace
 ```
 
-Run `pnpm verify:e2e` when you only need the end-to-end suite.
+Run `pnpm verify:e2e` when you only need the end-to-end suite; it installs the required
+Playwright browsers first.
 
 Apply database changes with `pnpm db:migrate` — a single command that runs every
 migration idempotently. It needs a `SUPABASE_DB_URL` Codespace secret; see
