@@ -18,8 +18,12 @@ if [ -z "${SUPABASE_DB_URL:-}" ]; then
   cat >&2 <<'MSG'
 SUPABASE_DB_URL is not set.
 
-1. In Supabase: Project Settings -> Database -> Connection string -> URI
-   (copy the connection string; it includes the password).
+1. In Supabase: Project Settings -> Database -> Connection string ->
+   choose "Session pooler" (NOT "Direct connection"). The direct connection is
+   IPv6-only and a Codespace cannot reach it ("Network is unreachable"); the
+   session pooler is IPv4. The host looks like:
+     aws-0-<region>.pooler.supabase.com  (port 5432, user postgres.<project-ref>)
+   Copy that URI and put your database password in place of [YOUR-PASSWORD].
 2. In GitHub: repo Settings -> Secrets and variables -> Codespaces ->
    New repository secret, name it SUPABASE_DB_URL, paste the URI.
 3. Reopen the Codespace terminal (so the secret is in the environment) and
@@ -33,6 +37,14 @@ if ! command -v psql >/dev/null 2>&1; then
   echo "==> Installing postgresql-client (one time)"
   sudo apt-get update -y >/dev/null
   sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
+fi
+
+# Direct connections (db.<ref>.supabase.co) are IPv6-only; Codespaces are IPv4
+# and will fail with "Network is unreachable". Nudge toward the session pooler.
+if printf '%s' "${SUPABASE_DB_URL}" | grep -qE '@db\.[a-z0-9]+\.supabase\.co'; then
+  echo "WARN: SUPABASE_DB_URL looks like the IPv6-only direct connection." >&2
+  echo "      If it fails with 'Network is unreachable', switch to the Session" >&2
+  echo "      pooler connection string (aws-0-<region>.pooler.supabase.com)." >&2
 fi
 
 migrations_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/supabase/migrations"
