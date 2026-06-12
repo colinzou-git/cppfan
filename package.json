@@ -18,6 +18,7 @@
     "verify:e2e": "pnpm exec playwright install --with-deps chromium webkit && pnpm test:e2e",
     "verify:codespace": "bash scripts/verify-codespace.sh",
     "db:migrate": "bash scripts/apply-migrations.sh",
+    "db:verify": "bash scripts/verify-db.sh",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
