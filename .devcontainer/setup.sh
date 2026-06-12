@@ -15,6 +15,11 @@ gh_api() {
   fi
 }
 
+echo "==> Installing postgresql-client (for pnpm db:migrate)"
+sudo apt-get update -y >/dev/null
+sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null || \
+  echo "WARN: postgresql-client install failed; 'pnpm db:migrate' will install it on demand." >&2
+
 echo "==> Enabling pnpm 10.0.0 via Corepack"
 corepack enable
 corepack prepare pnpm@10.0.0 --activate
