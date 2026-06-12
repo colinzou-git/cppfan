@@ -23,15 +23,17 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - Read-only dashboard skill map preview with database-to-seed fallback
 - Learning item data layer: `learning_items`, `learning_item_skills`, `learning_item_choices` migration with RLS
 - First C++ learning content (structs/classes module) mirrored in a TypeScript seed
-- Read-only learning item viewer at `/learn/[itemId]`, linked from the skill map preview
+- Learning item viewer at `/learn/[itemId]`, linked from the skill map preview
+- Quiz attempt flow: answer a multiple-choice item, server-side grading, retry
+- `learning_item_attempts` migration with per-user RLS; attempts recorded when signed in
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
 - Mobile-first landing page
 
-Learning content is read-only so far and intentionally does **not** implement quiz
-attempts, grading history, FSRS, review cards, mastery scoring, or code execution yet.
-The next feature is the quiz attempt flow and basic grading — still not FSRS.
+The learning loop now covers answering and basic grading. It intentionally does **not**
+implement FSRS, review cards, mastery scoring, recommendations, or code execution yet.
+The next feature is FSRS review cards and review logs.
 
 ## Requirements
 
@@ -117,6 +119,7 @@ SQL Editor (paste and run the SQL) or the Supabase CLI migration flow.
 supabase/migrations/20260611113000_create_profiles.sql
 supabase/migrations/20260612011000_create_skill_map.sql
 supabase/migrations/20260612120000_create_learning_items.sql
+supabase/migrations/20260613090000_create_learning_item_attempts.sql
 ```
 
 The `profiles` migration adds:
@@ -154,9 +157,26 @@ public.learning_item_choices
 These also hold shared curriculum content with read-only RLS for anon/authenticated
 users, and seed the first C++ module (structs/classes). The migration is idempotent.
 `learning_item_choices.is_correct` is the answer key: the client display query never
-selects it, and grading runs server-side (added with the quiz attempt feature). The
-`/learn/[itemId]` viewer falls back to the bundled seed
-(`src/features/learning-items/learning-item-seed.ts`) until this migration is applied.
+selects it, and grading runs server-side. The `/learn/[itemId]` viewer falls back to the
+bundled seed (`src/features/learning-items/learning-item-seed.ts`) until this migration
+is applied.
+
+The learning item attempt migration adds:
+
+```text
+public.learning_item_attempts
+```
+
+This is **per-user data**: RLS lets a learner select and insert only their own attempts
+(`auth.uid() = user_id`), with no update/delete (a retry is a new row). Grading happens
+in the `submitAnswer` server action — it works even when signed out or pre-migration
+(grading against the seed), and records an attempt only when the learner is signed in.
+
+> Known limitation: the read-only policy on `learning_item_choices` still allows a
+> determined client to read `is_correct` directly via the anon key. Grading no longer
+> needs the client to read it, but fully hiding the column needs a `SECURITY DEFINER`
+> grading RPC or a public view + column grants — a separately testable change deferred
+> to a dedicated follow-up rather than shipped untested here.
 
 ## Google OAuth setup
 
@@ -226,16 +246,15 @@ Keep these planning docs from the bootstrap phase:
 
 ## Next recommended GitHub issue
 
-The skill map and the first learning-item content layer are now implemented as
-read-only data layers with a dashboard preview and a `/learn/[itemId]` viewer. The next
-feature is the quiz attempt flow and basic grading:
+The skill map, the first learning-item content layer, and the quiz attempt flow with
+basic grading are implemented. The next feature is FSRS review cards and review logs:
 
 ```text
-Add quiz attempt flow and basic grading
+Add FSRS review cards and review logs
 ```
 
 Non-goals for the next step:
 
-- Do not implement FSRS yet.
-- Do not implement review cards yet.
-- Do not implement the full recommendation engine or mastery scoring yet.
+- Do not implement mastery scoring yet.
+- Do not implement the full recommendation engine yet.
+- Do not implement code execution yet.
