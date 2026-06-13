@@ -223,6 +223,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.references.lvalue_rvalue",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Lvalues and rvalues",
+    description: "Tell apart named objects (lvalues) and temporaries (rvalues).",
+    learner_goal: "Decide whether an expression is an lvalue or an rvalue and why it matters for binding.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 94,
+    is_active: true
+  },
+  {
+    id: "cpp.references.return_semantics",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Return by value vs by reference",
+    description: "Choose between returning a value and returning a reference safely.",
+    learner_goal: "Return by value by default; return a reference only to storage that outlives the call.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 95,
+    is_active: true
+  },
+  {
+    id: "cpp.references.dangling",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Dangling references and lifetimes",
+    description: "Spot references that outlive their referent and the limits of lifetime extension.",
+    learner_goal: "Identify a dangling reference and know that lifetime extension does not survive a return.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 96,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax",
     domain: "cpp",
     module_id: "cpp.structs_classes",
@@ -1176,6 +1212,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.references.pointers", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
   { skill_id: "cpp.references.const_correctness", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
   { skill_id: "cpp.references.parameter_passing", prerequisite_skill_id: "cpp.references.const_correctness", relationship_type: "recommended" },
+  { skill_id: "cpp.references.lvalue_rvalue", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
+  { skill_id: "cpp.references.return_semantics", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
+  { skill_id: "cpp.references.dangling", prerequisite_skill_id: "cpp.references.return_semantics", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.public_private", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.const_methods_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.invariants_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
