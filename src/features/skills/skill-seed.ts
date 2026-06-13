@@ -1123,6 +1123,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.pattern_recognition",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Recognizing the right pattern",
+    description: "Map common problem cues to a frequency map, two-pointer/window, prefix, or sort-then-scan approach.",
+    learner_goal: "Read a problem's cues and pick the standard pattern that fits before coding.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1010,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.container_selection",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Choosing a container from operations",
+    description: "Pick vector/map/unordered_map/set/stack/queue/priority_queue from the operations a task needs.",
+    learner_goal: "Choose a container by the operations and complexity a problem requires.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1011,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.recursion_choice",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Recursion, iteration, and backtracking",
+    description: "Decide when recursion or backtracking fits versus a plain iterative loop.",
+    learner_goal: "Recognize recursive/backtracking structure and when iteration is simpler.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1012,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -1574,6 +1610,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.amortized", prerequisite_skill_id: "dsa.complexity.growth_rates", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.constraints", prerequisite_skill_id: "dsa.complexity.growth_rates", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.pattern_recognition", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.container_selection", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.recursion_choice", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },

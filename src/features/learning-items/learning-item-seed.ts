@@ -1975,6 +1975,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.pattern_recognition.lesson",
+    type: "lesson",
+    title: "Recognizing the right pattern",
+    prompt:
+      "Most interview/competitive problems map to a small set of standard patterns; learning to read the cues saves you from reinventing one each time. \"How many times does X appear / are there duplicates / group by key\" points to a **frequency map / counting** (hash map). \"Find a pair/subarray in a sorted array\" or \"longest/shortest window satisfying a condition\" points to **two pointers / sliding window**. \"Many range-sum queries\" points to **prefix sums**. \"Find pairs/closest/overlaps\" often becomes easy after **sorting then scanning** once. The skill is matching the problem's wording and structure to the pattern *before* coding — then you only need to recall how that one pattern works.",
+    explanation:
+      "Map cues to patterns: counting/duplicates/group-by -> frequency map; sorted-pair or longest/shortest window -> two pointers/sliding window; many range sums -> prefix sums; pairs/overlaps -> sort then scan.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3450,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.pattern_recognition.mc_window",
+    type: "multiple_choice",
+    title: "Spotting a sliding window",
+    prompt: "\"Find the length of the longest contiguous subarray whose sum is at most K\" most directly suggests which pattern?",
+    explanation:
+      "A longest/shortest contiguous-subarray-under-a-constraint problem is the canonical sliding-window cue: grow/shrink a window in O(n) rather than checking every subarray.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3460,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.container_selection.lesson",
+    type: "lesson",
+    title: "Choosing a container from operations",
+    prompt:
+      "Pick the container from the operations a task actually needs, not by habit. Need indexed access and append at the back? `std::vector` (contiguous, cache-friendly). Need fast membership or keying by value with no order? `std::unordered_set`/`std::unordered_map` (average O(1)). Need keys kept in sorted order or range queries? `std::map`/`std::set` (O(log n), ordered). Need last-in-first-out? `std::stack`; first-in-first-out? `std::queue`; always pull the min/max? `std::priority_queue` (a heap). Write down the operations and their required complexity, then choose: \"membership in O(1)\" → hash set; \"ordered iteration\" → map/set; \"LIFO\" → stack. The right container often makes the algorithm obvious.",
+    explanation:
+      "Match container to required ops: vector (index/append), unordered_map/set (O(1) membership), map/set (ordered/range, O(log n)), stack (LIFO), queue (FIFO), priority_queue (min/max).",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3470,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.container_selection.mc_membership",
+    type: "multiple_choice",
+    title: "Container for fast membership",
+    prompt: "You need to repeatedly check whether a value has been seen, with no ordering requirement. Which container fits best?",
+    explanation:
+      "std::unordered_set gives average O(1) insert and membership checks. std::set is O(log n) and only needed when you also want sorted order; a vector would be O(n) per check.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3480,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.recursion_choice.lesson",
+    type: "lesson",
+    title: "Recursion, iteration, and backtracking",
+    prompt:
+      "Reach for recursion when a problem is naturally defined in terms of smaller instances of itself: trees, divide-and-conquer (merge/quick sort, binary search), and \"try each choice then recurse\" search. **Backtracking** is recursion that builds a candidate incrementally and undoes the last choice when it can't lead to a solution — the pattern behind permutations, subsets, N-queens, and maze/path search. Plain **iteration** is simpler and avoids call-stack overhead for linear scans and simple accumulation, and any recursion can be rewritten iteratively (sometimes with an explicit stack). The decision: if the structure or the set of choices is recursive, recursion/backtracking expresses it most clearly; if you're just walking a sequence once, a loop is better. Watch recursion depth — deep recursion on large inputs can overflow the stack.",
+    explanation:
+      "Use recursion for self-similar structure (trees, divide-and-conquer); backtracking for incremental choose/undo search (permutations, subsets, N-queens). Prefer iteration for linear scans; mind stack depth.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3490,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.recursion_choice.mc_backtracking",
+    type: "multiple_choice",
+    title: "When backtracking fits",
+    prompt: "Generating all permutations of a set by choosing an element, recursing, then undoing the choice is an example of which technique?",
+    explanation:
+      "That choose / recurse / undo structure is backtracking — recursion that builds candidates incrementally and reverts a choice when exploring the next branch.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3500,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -3198,6 +3273,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.complexity.amortized.mc_pushback", skill_id: "dsa.complexity.amortized", is_primary: true },
   { learning_item_id: "dsa.complexity.constraints.lesson", skill_id: "dsa.complexity.constraints", is_primary: true },
   { learning_item_id: "dsa.complexity.constraints.mc_feasible", skill_id: "dsa.complexity.constraints", is_primary: true },
+  { learning_item_id: "dsa.complexity.pattern_recognition.lesson", skill_id: "dsa.complexity.pattern_recognition", is_primary: true },
+  { learning_item_id: "dsa.complexity.pattern_recognition.mc_window", skill_id: "dsa.complexity.pattern_recognition", is_primary: true },
+  { learning_item_id: "dsa.complexity.container_selection.lesson", skill_id: "dsa.complexity.container_selection", is_primary: true },
+  { learning_item_id: "dsa.complexity.container_selection.mc_membership", skill_id: "dsa.complexity.container_selection", is_primary: true },
+  { learning_item_id: "dsa.complexity.recursion_choice.lesson", skill_id: "dsa.complexity.recursion_choice", is_primary: true },
+  { learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", skill_id: "dsa.complexity.recursion_choice", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -3667,6 +3748,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.complexity.constraints.mc_feasible.b", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n log n) approach", is_correct: false, order_index: 20 },
   { id: "dsa.complexity.constraints.mc_feasible.c", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n) approach", is_correct: false, order_index: 30 },
   { id: "dsa.complexity.constraints.mc_feasible.d", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(log n) approach", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.pattern_recognition.mc_window.a", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "Sliding window", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.pattern_recognition.mc_window.b", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "Binary search on the answer", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.pattern_recognition.mc_window.c", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "Depth-first search", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.pattern_recognition.mc_window.d", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "A frequency map", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.container_selection.mc_membership.a", learning_item_id: "dsa.complexity.container_selection.mc_membership", content: "std::unordered_set (average O(1) membership)", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.container_selection.mc_membership.b", learning_item_id: "dsa.complexity.container_selection.mc_membership", content: "std::vector (scan each time)", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.container_selection.mc_membership.c", learning_item_id: "dsa.complexity.container_selection.mc_membership", content: "std::stack", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.container_selection.mc_membership.d", learning_item_id: "dsa.complexity.container_selection.mc_membership", content: "std::priority_queue", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.recursion_choice.mc_backtracking.a", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "Backtracking", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.recursion_choice.mc_backtracking.b", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "Dynamic programming", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.recursion_choice.mc_backtracking.c", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "A greedy scan", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.recursion_choice.mc_backtracking.d", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "A single while loop", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
