@@ -672,6 +672,56 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 940,
     is_active: true
+  },
+  {
+    id: "dsa.searching.binary_search.lesson",
+    type: "lesson",
+    title: "Binary search",
+    prompt:
+      "Binary search finds a target in a sorted sequence in O(log n) by repeatedly halving the search range: compare the middle element, then keep the left or right half. It only works when the data is sorted. In C++, `std::binary_search(begin, end, value)` returns a bool, and `std::lower_bound(begin, end, value)` returns the first position not less than value.",
+    explanation:
+      "The key precondition is sorted input. On unsorted data, binary search gives wrong answers.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1310,
+    is_active: true
+  },
+  {
+    id: "dsa.searching.binary_search.mc_precondition",
+    type: "multiple_choice",
+    title: "Binary search precondition",
+    prompt: "What must be true about the data for binary search to work correctly?",
+    explanation:
+      "Binary search relies on order: each comparison discards half the range, which is only valid when the sequence is sorted.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1320,
+    is_active: true
+  },
+  {
+    id: "dsa.sorting.comparator.lesson",
+    type: "lesson",
+    title: "Sorting with a comparator",
+    prompt:
+      "`std::sort` orders elements with `<` by default (ascending). To sort by a custom order, pass a comparator: `std::sort(v.begin(), v.end(), [](int a, int b){ return a > b; })` sorts descending. The comparator returns `true` when `a` should come before `b`. The same idea sorts structs by a chosen field.",
+    explanation:
+      "A comparator is a small function or lambda. Keep it a strict weak ordering: it must return false when a and b are equivalent.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1330,
+    is_active: true
+  },
+  {
+    id: "dsa.sorting.comparator.mc_descending",
+    type: "multiple_choice",
+    title: "Sorting descending",
+    prompt: "Which comparator passed to `std::sort` orders a `std::vector<int>` from largest to smallest?",
+    explanation:
+      "A comparator returns true when its first argument should come first. `a > b` puts larger values first, giving descending order.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1340,
+    is_active: true
   }
 ];
 
@@ -735,7 +785,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.mc_safe_loop", skill_id: "dsa.arrays.traversal", is_primary: true },
-  { learning_item_id: "dsa.arrays.traversal.mc_safe_loop", skill_id: "dsa.arrays.indexing", is_primary: false }
+  { learning_item_id: "dsa.arrays.traversal.mc_safe_loop", skill_id: "dsa.arrays.indexing", is_primary: false },
+  { learning_item_id: "dsa.searching.binary_search.lesson", skill_id: "dsa.searching.binary_search", is_primary: true },
+  { learning_item_id: "dsa.searching.binary_search.mc_precondition", skill_id: "dsa.searching.binary_search", is_primary: true },
+  { learning_item_id: "dsa.sorting.comparator.lesson", skill_id: "dsa.sorting.comparator", is_primary: true },
+  { learning_item_id: "dsa.sorting.comparator.mc_descending", skill_id: "dsa.sorting.comparator", is_primary: true },
+  { learning_item_id: "dsa.searching.binary_search.lesson", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -857,7 +912,17 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.arrays.traversal.mc_safe_loop.a", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int x : v) { ... }", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.traversal.mc_safe_loop.b", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int i = 0; i <= v.size(); i++) { ... }", is_correct: false, order_index: 20 },
   { id: "dsa.arrays.traversal.mc_safe_loop.c", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int i = 1; i < v.size(); i++) { ... }", is_correct: false, order_index: 30 },
-  { id: "dsa.arrays.traversal.mc_safe_loop.d", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "while (true) { ... }", is_correct: false, order_index: 40 }
+  { id: "dsa.arrays.traversal.mc_safe_loop.d", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "while (true) { ... }", is_correct: false, order_index: 40 },
+
+  { id: "dsa.searching.binary_search.mc_precondition.a", learning_item_id: "dsa.searching.binary_search.mc_precondition", content: "The sequence must be sorted", is_correct: true, order_index: 10 },
+  { id: "dsa.searching.binary_search.mc_precondition.b", learning_item_id: "dsa.searching.binary_search.mc_precondition", content: "The sequence must contain only unique values", is_correct: false, order_index: 20 },
+  { id: "dsa.searching.binary_search.mc_precondition.c", learning_item_id: "dsa.searching.binary_search.mc_precondition", content: "The sequence must be a std::vector", is_correct: false, order_index: 30 },
+  { id: "dsa.searching.binary_search.mc_precondition.d", learning_item_id: "dsa.searching.binary_search.mc_precondition", content: "The sequence must be small", is_correct: false, order_index: 40 },
+
+  { id: "dsa.sorting.comparator.mc_descending.a", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a > b; }", is_correct: true, order_index: 10 },
+  { id: "dsa.sorting.comparator.mc_descending.b", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a < b; }", is_correct: false, order_index: 20 },
+  { id: "dsa.sorting.comparator.mc_descending.c", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a == b; }", is_correct: false, order_index: 30 },
+  { id: "dsa.sorting.comparator.mc_descending.d", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "No comparator; std::sort detects it automatically", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
