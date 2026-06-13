@@ -1039,6 +1039,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.preconditions",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Preconditions and input validation",
+    description: "Validate untrusted input at boundaries and assert internal preconditions.",
+    learner_goal: "Validate external input but assert (not validate) caller contracts you control.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 708,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.optional_expected",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Signaling failure with optional and expected",
+    description: "Return std::optional for absence and std::expected for a recoverable error value.",
+    learner_goal: "Choose std::optional for a maybe-value and std::expected to carry an error reason.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 709,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.error_strategy",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Choosing an error-handling strategy",
+    description: "Pick exceptions, error codes, or optional/expected, and avoid exceptions for control flow.",
+    learner_goal: "Select an error mechanism by recoverability and frequency; reserve exceptions for the exceptional.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 710,
+    is_active: true
+  },
+  {
     id: "cpp.concurrency.threads",
     domain: "cpp",
     module_id: "cpp.concurrency",
@@ -1675,6 +1711,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.tooling.warnings", prerequisite_skill_id: "cpp.tooling.build", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.sanitizers", prerequisite_skill_id: "cpp.tooling.debugging", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.cmake", prerequisite_skill_id: "cpp.tooling.build", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.preconditions", prerequisite_skill_id: "cpp.tooling.error_handling", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.optional_expected", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.error_strategy", prerequisite_skill_id: "cpp.tooling.optional_expected", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.threads", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.data_races", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.mutexes", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
