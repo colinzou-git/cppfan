@@ -871,6 +871,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.growth_rates",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Comparing growth rates",
+    description: "Order common complexities and count the dominant operations in a loop.",
+    learner_goal: "Rank O(1), O(log n), O(n), O(n log n), O(n^2), and exponential, and find the dominant term.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1007,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.amortized",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Amortized analysis",
+    description: "Reason about average cost per operation across a sequence, like vector::push_back.",
+    learner_goal: "Explain why vector::push_back is amortized O(1) despite occasional resizes.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1008,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.constraints",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Reading input constraints",
+    description: "Use input size limits to infer a feasible target complexity and spot hidden costs.",
+    learner_goal: "Reject infeasible approaches from input bounds and detect hidden nested-loop cost.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1009,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -1265,6 +1301,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.utilities.variant", prerequisite_skill_id: "cpp.templates.class_templates", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.amortized", prerequisite_skill_id: "dsa.complexity.growth_rates", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.constraints", prerequisite_skill_id: "dsa.complexity.growth_rates", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
