@@ -1450,6 +1450,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.growth_rates.lesson",
+    type: "lesson",
+    title: "Comparing growth rates",
+    prompt:
+      "Big-O describes how work grows with input size n, keeping only the dominant term and dropping constants: a loop doing `3n + 5` steps is O(n). The common rates, from fastest-growing-slowest to fastest, are O(1) < O(log n) < O(n) < O(n log n) < O(n^2) < O(2^n). To estimate, count how many times the innermost work runs: a single pass is O(n); a loop inside a loop over the same n is O(n^2); repeatedly halving the search space is O(log n); sorting then one pass is O(n log n). When you add phases you keep the biggest (`O(n) + O(n log n) = O(n log n)`); when you nest them you multiply. Big-Theta pins the growth from both sides; in everyday use we say Big-O but usually mean the tight bound.",
+    explanation:
+      "Drop constants and lower-order terms; rank O(1) < O(log n) < O(n) < O(n log n) < O(n^2) < O(2^n). Sequential phases keep the max; nested loops multiply.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2970,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.growth_rates.mc_order",
+    type: "multiple_choice",
+    title: "Ordering complexities",
+    prompt: "Which list orders these from slowest-growing to fastest-growing?",
+    explanation:
+      "From slowest to fastest growth: O(log n), O(n), O(n log n), O(n^2). Logarithmic grows slowest; the quadratic term dominates for large n.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2980,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.amortized.lesson",
+    type: "lesson",
+    title: "Amortized analysis",
+    prompt:
+      "Amortized analysis asks for the average cost per operation across a whole sequence, not the worst single step. `std::vector::push_back` is the classic example: most pushes are O(1), but when the buffer is full the vector allocates a bigger block (typically doubling) and copies all existing elements — an O(n) step. Because capacity doubles, those expensive copies happen rarely and geometrically less often, and the total copying work across n pushes sums to O(n). Spread over n operations that is O(1) *amortized* per push. The lesson: an occasional costly step does not make the operation O(n) if its cost is paid down across many cheap steps. (Note this differs from average-case analysis over random inputs — amortized bounds hold for any sequence.)",
+    explanation:
+      "Amortized cost averages an operation over a sequence. vector::push_back doubles capacity, so rare O(n) resizes sum to O(n) total across n pushes — O(1) amortized each.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2990,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.amortized.mc_pushback",
+    type: "multiple_choice",
+    title: "Cost of push_back",
+    prompt: "What is the amortized time complexity of a single `std::vector::push_back`?",
+    explanation:
+      "O(1) amortized: most pushes are constant time, and the occasional O(n) reallocation is rare enough (capacity doubles) that the total over n pushes is O(n).",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3000,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.constraints.lesson",
+    type: "lesson",
+    title: "Reading input constraints",
+    prompt:
+      "Input bounds tell you which complexities are feasible before you write code. A rough rule for a ~1-second limit: n up to ~10^8 needs O(n); ~10^6 allows O(n log n); n up to a few thousand tolerates O(n^2); n up to ~20 may permit O(2^n) brute force. So if the problem says n can be 10^5, an O(n^2) plan (~10^10 operations) is almost certainly too slow and you should look for O(n log n) or better. Constraints also expose *hidden* costs: a loop that calls `s.substr()` or scans a string each iteration hides an extra O(n) factor, turning an apparent O(n) loop into O(n^2). Read the limits first, pick a target complexity, then design to it.",
+    explanation:
+      "Use n's upper bound to pick a feasible target (n~1e8 -> O(n); ~1e6 -> O(n log n); ~1e3 -> O(n^2)); and watch for per-iteration work that hides an extra factor.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3010,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.constraints.mc_feasible",
+    type: "multiple_choice",
+    title: "Using constraints",
+    prompt: "If n can be up to 100,000 and the time limit is about one second, which approach is most likely too slow?",
+    explanation:
+      "An O(n^2) approach is ~10^10 operations at n = 100,000 — far beyond a one-second budget. O(n), O(n log n), and O(log n) all stay feasible.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3020,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -2556,6 +2631,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.problem_solving.lesson", skill_id: "dsa.complexity.problem_solving", is_primary: true },
   { learning_item_id: "dsa.complexity.problem_solving.mc_first_step", skill_id: "dsa.complexity.problem_solving", is_primary: true },
+  { learning_item_id: "dsa.complexity.growth_rates.lesson", skill_id: "dsa.complexity.growth_rates", is_primary: true },
+  { learning_item_id: "dsa.complexity.growth_rates.mc_order", skill_id: "dsa.complexity.growth_rates", is_primary: true },
+  { learning_item_id: "dsa.complexity.amortized.lesson", skill_id: "dsa.complexity.amortized", is_primary: true },
+  { learning_item_id: "dsa.complexity.amortized.mc_pushback", skill_id: "dsa.complexity.amortized", is_primary: true },
+  { learning_item_id: "dsa.complexity.constraints.lesson", skill_id: "dsa.complexity.constraints", is_primary: true },
+  { learning_item_id: "dsa.complexity.constraints.mc_feasible", skill_id: "dsa.complexity.constraints", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -2914,6 +2995,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.complexity.problem_solving.mc_first_step.b", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Pick the fastest known algorithm immediately", is_correct: false, order_index: 20 },
   { id: "dsa.complexity.problem_solving.mc_first_step.c", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Skip the examples and start coding", is_correct: false, order_index: 30 },
   { id: "dsa.complexity.problem_solving.mc_first_step.d", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Optimize memory usage first", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.growth_rates.mc_order.a", learning_item_id: "dsa.complexity.growth_rates.mc_order", content: "O(log n), O(n), O(n log n), O(n^2)", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.growth_rates.mc_order.b", learning_item_id: "dsa.complexity.growth_rates.mc_order", content: "O(n), O(log n), O(n^2), O(n log n)", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.growth_rates.mc_order.c", learning_item_id: "dsa.complexity.growth_rates.mc_order", content: "O(n^2), O(n log n), O(n), O(log n)", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.growth_rates.mc_order.d", learning_item_id: "dsa.complexity.growth_rates.mc_order", content: "O(n log n), O(n), O(log n), O(n^2)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.amortized.mc_pushback.a", learning_item_id: "dsa.complexity.amortized.mc_pushback", content: "O(1) amortized", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.amortized.mc_pushback.b", learning_item_id: "dsa.complexity.amortized.mc_pushback", content: "O(n) every time", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.amortized.mc_pushback.c", learning_item_id: "dsa.complexity.amortized.mc_pushback", content: "O(log n) amortized", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.amortized.mc_pushback.d", learning_item_id: "dsa.complexity.amortized.mc_pushback", content: "O(n log n) amortized", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.constraints.mc_feasible.a", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n^2) approach", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.constraints.mc_feasible.b", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n log n) approach", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.constraints.mc_feasible.c", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n) approach", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.constraints.mc_feasible.d", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(log n) approach", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
