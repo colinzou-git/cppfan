@@ -919,6 +919,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.multiple_params",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "Multiple and non-type template parameters",
+    description: "Use several type parameters and compile-time value (non-type) parameters.",
+    learner_goal: "Write templates with multiple type params and a non-type param like std::size_t N.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 608,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.deduction",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "Type deduction and instantiation",
+    description: "Reason about template argument deduction and why templates live in headers.",
+    learner_goal: "Predict deduced template arguments and explain header-only instantiation/linkage.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 609,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.aliases_specialization",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "Alias templates and specialization",
+    description: "Name types with using/alias templates and introduce template specialization.",
+    learner_goal: "Define an alias template and recognize when a specialization customizes behavior.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 610,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling",
     domain: "cpp",
     module_id: "cpp.tooling",
@@ -1629,6 +1665,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.templates.constexpr", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.templates.if_constexpr", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
   { skill_id: "cpp.templates.static_assert", prerequisite_skill_id: "cpp.templates.constexpr", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.multiple_params", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.deduction", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.aliases_specialization", prerequisite_skill_id: "cpp.templates.class_templates", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.error_handling", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.testing", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.debugging", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },

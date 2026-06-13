@@ -1751,6 +1751,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.multiple_params.lesson",
+    type: "lesson",
+    title: "Multiple and non-type template parameters",
+    prompt:
+      "A template can take more than one parameter, and they need not all be types. Multiple type parameters look like `template <typename K, typename V> struct Pair { K key; V value; };`. A **non-type template parameter (NTTP)** is a compile-time *value* rather than a type — most often an integer: `template <typename T, std::size_t N> struct Array { T data[N]; };` makes `N` part of the type, so `Array<int, 4>` and `Array<int, 8>` are distinct types with the size baked in at compile time (this is exactly how `std::array<T, N>` works). NTTPs must be constant expressions known at compile time (integers, enums, pointers/refs to objects with static storage, and in C++20 some literal class types). Use multiple type params when a template relates several types, and an NTTP when a compile-time size or constant should be part of the type.",
+    explanation:
+      "Templates can take several type params and non-type (value) params like `std::size_t N` (as in std::array<T, N>). An NTTP must be a compile-time constant and becomes part of the type.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3570,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.multiple_params.mc_nttp",
+    type: "multiple_choice",
+    title: "What is a non-type template parameter",
+    prompt: "In `template <typename T, std::size_t N> struct Array { T data[N]; };`, what is `N`?",
+    explanation:
+      "`N` is a non-type template parameter — a compile-time value (here a size) that becomes part of the type, so Array<int,4> and Array<int,8> are different types. `T` is the type parameter.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3580,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.deduction.lesson",
+    type: "lesson",
+    title: "Type deduction and instantiation",
+    prompt:
+      "When you call a function template, the compiler usually **deduces** the type arguments from the call: `template <typename T> T max(T a, T b);` called as `max(3, 4)` deduces `T = int`. Deduction has edge cases: `max(3, 4.0)` fails because the two arguments deduce conflicting `T` (int vs double) — you must cast or specify `max<double>(3, 4.0)`; and deduction strips top-level references/const, so plain-by-value params deduce the bare type. A template is also only **instantiated** (code generated) for the specific argument types you actually use, and that instantiation happens where it is used — which is why template definitions must be visible there, i.e. they live in **headers** rather than a .cpp. (Without that visibility you get linker errors for the missing instantiation.) So: let deduction work, disambiguate conflicting arguments, and keep template definitions header-visible.",
+    explanation:
+      "The compiler deduces template type args from the call (max(3,4) -> T=int); conflicting args (int vs double) fail to deduce. Templates instantiate per used type at the use site, so definitions must be header-visible.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3590,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.deduction.mc_headers",
+    type: "multiple_choice",
+    title: "Why templates live in headers",
+    prompt: "Why are template definitions usually placed in headers rather than a single .cpp file?",
+    explanation:
+      "A template is instantiated for each type at its point of use, so the full definition must be visible in every translation unit that uses it. Hiding it in one .cpp causes unresolved-symbol linker errors.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3600,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.aliases_specialization.lesson",
+    type: "lesson",
+    title: "Alias templates and specialization",
+    prompt:
+      "A **type alias** names an existing type: `using Index = std::size_t;`. An **alias template** parameterizes that: `template <typename T> using Vec = std::vector<T>;` lets you write `Vec<int>`, and the standard library uses this for traits shortcuts like `std::remove_const_t<T>` (an alias for `typename std::remove_const<T>::type`). Aliases are the modern replacement for `typedef` and never introduce a new distinct type — just a name. **Specialization** is different: it provides an alternative implementation of a template for specific arguments. A full specialization like `template <> struct Hash<bool> { ... };` customizes behavior for `bool` only, while the primary template serves everything else; partial specialization customizes a family (e.g. all pointer types `T*`). Reach for an alias to simplify a type name, and for a specialization when one type genuinely needs different behavior.",
+    explanation:
+      "Alias templates (template<...> using X = ...;) give a parameterized name for a type (e.g. remove_const_t) and never make a new type. Specialization provides a different implementation for specific template arguments.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3610,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.aliases_specialization.mc_alias",
+    type: "multiple_choice",
+    title: "What an alias template does",
+    prompt: "What does `template <typename T> using Vec = std::vector<T>;` create?",
+    explanation:
+      "It creates an alias template: `Vec<int>` is just another name for `std::vector<int>` — the same type, not a new one. It does not copy or specialize std::vector.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3620,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling.lesson",
     type: "lesson",
     title: "Error handling",
@@ -3329,6 +3404,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.templates.if_constexpr.mc_discarded", skill_id: "cpp.templates.if_constexpr", is_primary: true },
   { learning_item_id: "cpp.templates.static_assert.lesson", skill_id: "cpp.templates.static_assert", is_primary: true },
   { learning_item_id: "cpp.templates.static_assert.mc_when", skill_id: "cpp.templates.static_assert", is_primary: true },
+  { learning_item_id: "cpp.templates.multiple_params.lesson", skill_id: "cpp.templates.multiple_params", is_primary: true },
+  { learning_item_id: "cpp.templates.multiple_params.mc_nttp", skill_id: "cpp.templates.multiple_params", is_primary: true },
+  { learning_item_id: "cpp.templates.deduction.lesson", skill_id: "cpp.templates.deduction", is_primary: true },
+  { learning_item_id: "cpp.templates.deduction.mc_headers", skill_id: "cpp.templates.deduction", is_primary: true },
+  { learning_item_id: "cpp.templates.aliases_specialization.lesson", skill_id: "cpp.templates.aliases_specialization", is_primary: true },
+  { learning_item_id: "cpp.templates.aliases_specialization.mc_alias", skill_id: "cpp.templates.aliases_specialization", is_primary: true },
   { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.stl.vector", is_primary: false },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.tooling.error_handling", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.mc_unwind", skill_id: "cpp.tooling.error_handling", is_primary: true },
@@ -3780,6 +3861,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.templates.static_assert.mc_when.b", learning_item_id: "cpp.templates.static_assert.mc_when", content: "The program throws an exception at run time", is_correct: false, order_index: 20 },
   { id: "cpp.templates.static_assert.mc_when.c", learning_item_id: "cpp.templates.static_assert.mc_when", content: "It logs a warning and continues", is_correct: false, order_index: 30 },
   { id: "cpp.templates.static_assert.mc_when.d", learning_item_id: "cpp.templates.static_assert.mc_when", content: "Nothing until the assertion is reached at run time", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.multiple_params.mc_nttp.a", learning_item_id: "cpp.templates.multiple_params.mc_nttp", content: "A non-type template parameter (a compile-time value that becomes part of the type)", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.multiple_params.mc_nttp.b", learning_item_id: "cpp.templates.multiple_params.mc_nttp", content: "A second type parameter", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.multiple_params.mc_nttp.c", learning_item_id: "cpp.templates.multiple_params.mc_nttp", content: "A runtime function argument", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.multiple_params.mc_nttp.d", learning_item_id: "cpp.templates.multiple_params.mc_nttp", content: "A member variable of the struct", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.deduction.mc_headers.a", learning_item_id: "cpp.templates.deduction.mc_headers", content: "Each use instantiates the template, so its full definition must be visible there", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.deduction.mc_headers.b", learning_item_id: "cpp.templates.deduction.mc_headers", content: "Headers compile faster than .cpp files", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.deduction.mc_headers.c", learning_item_id: "cpp.templates.deduction.mc_headers", content: "Templates cannot contain statements", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.deduction.mc_headers.d", learning_item_id: "cpp.templates.deduction.mc_headers", content: "The linker runs before the compiler", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.aliases_specialization.mc_alias.a", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "An alias template: Vec<int> is another name for std::vector<int> (same type)", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.aliases_specialization.mc_alias.b", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A new container type distinct from std::vector", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.aliases_specialization.mc_alias.c", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A specialization of std::vector for int", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.aliases_specialization.mc_alias.d", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A runtime copy of the vector", is_correct: false, order_index: 40 },
 
   { id: "cpp.tooling.error_handling.mc_unwind.a", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They are destroyed by stack unwinding (their destructors run)", is_correct: true, order_index: 10 },
   { id: "cpp.tooling.error_handling.mc_unwind.b", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They leak; destructors are skipped", is_correct: false, order_index: 20 },
