@@ -174,6 +174,8 @@ supabase/migrations/20260613140000_seed_raii_items.sql
 supabase/migrations/20260613160000_seed_smart_pointers_items.sql
 supabase/migrations/20260613170000_add_smart_pointer_ownership_skills.sql
 supabase/migrations/20260613180000_seed_smart_pointer_ownership_items.sql
+supabase/migrations/20260613190000_add_stl_container_skills.sql
+supabase/migrations/20260613200000_seed_stl_container_items.sql
 ```
 
 The `profiles` migration adds:

@@ -472,6 +472,56 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 3,
     order_index: 740,
     is_active: true
+  },
+  {
+    id: "cpp.stl.vector.lesson",
+    type: "lesson",
+    title: "std::vector basics",
+    prompt:
+      "A `std::vector<T>` is a resizable array that owns its elements and frees them automatically. `push_back` appends to the end, `size()` returns the count, and elements are accessed with `v[i]` or `v.at(i)`. `at(i)` checks bounds and throws on an invalid index, while `v[i]` does not. Prefer vector over a raw `new[]` array.",
+    explanation:
+      "vector handles growth and cleanup for you, so you rarely need manual arrays. Use at() when an index might be out of range.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 810,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.vector.mc_at",
+    type: "multiple_choice",
+    title: "Bounds-checked vector access",
+    prompt: "Which `std::vector` access checks the index and throws if it is out of range?",
+    explanation:
+      "`v.at(i)` performs bounds checking and throws std::out_of_range for an invalid index. `v[i]` does not check and is undefined behavior when out of range.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 820,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.string.code_reading",
+    type: "code_reading",
+    title: "Reading std::string operations",
+    prompt:
+      "Read this code:\n\n```cpp\nstd::string s = \"cpp\";\ns += \"Fan\";\nstd::size_t n = s.size();\n```\n\nWhat are the value of `s` and the value of `n`?",
+    explanation:
+      "`+=` appends, so `s` becomes \"cppFan\", and `size()` returns the number of characters, so `n` is 6.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 830,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.string.mc_size",
+    type: "multiple_choice",
+    title: "Length of a std::string",
+    prompt: "Which member returns the number of characters in a `std::string`?",
+    explanation:
+      "`size()` (equivalently `length()`) returns the character count. std::string manages its own storage, so you never compute length manually.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 840,
+    is_active: true
   }
 ];
 
@@ -517,7 +567,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.smart_pointers.ownership_choice.mc_simplest", skill_id: "cpp.smart_pointers.ownership_choice", is_primary: true },
   { learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: true },
   { learning_item_id: "cpp.smart_pointers.ownership_transfer.bug_use_after_move", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: true },
-  { learning_item_id: "cpp.smart_pointers.ownership_transfer.bug_use_after_move", skill_id: "cpp.smart_pointers.unique_ptr", is_primary: false }
+  { learning_item_id: "cpp.smart_pointers.ownership_transfer.bug_use_after_move", skill_id: "cpp.smart_pointers.unique_ptr", is_primary: false },
+  { learning_item_id: "cpp.stl.vector.lesson", skill_id: "cpp.stl.vector", is_primary: true },
+  { learning_item_id: "cpp.stl.vector.mc_at", skill_id: "cpp.stl.vector", is_primary: true },
+  { learning_item_id: "cpp.stl.string.code_reading", skill_id: "cpp.stl.string", is_primary: true },
+  { learning_item_id: "cpp.stl.string.mc_size", skill_id: "cpp.stl.string", is_primary: true }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -599,7 +653,17 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.smart_pointers.ownership_transfer.mc_moved_from.a", learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", content: "a is empty (null); the object now belongs to b", is_correct: true, order_index: 10 },
   { id: "cpp.smart_pointers.ownership_transfer.mc_moved_from.b", learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", content: "a and b both own the object", is_correct: false, order_index: 20 },
   { id: "cpp.smart_pointers.ownership_transfer.mc_moved_from.c", learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", content: "a is unchanged and still owns the object", is_correct: false, order_index: 30 },
-  { id: "cpp.smart_pointers.ownership_transfer.mc_moved_from.d", learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", content: "a is destroyed and cannot be reassigned", is_correct: false, order_index: 40 }
+  { id: "cpp.smart_pointers.ownership_transfer.mc_moved_from.d", learning_item_id: "cpp.smart_pointers.ownership_transfer.mc_moved_from", content: "a is destroyed and cannot be reassigned", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.vector.mc_at.a", learning_item_id: "cpp.stl.vector.mc_at", content: "v.at(i)", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.vector.mc_at.b", learning_item_id: "cpp.stl.vector.mc_at", content: "v[i]", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.vector.mc_at.c", learning_item_id: "cpp.stl.vector.mc_at", content: "v.get(i)", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.vector.mc_at.d", learning_item_id: "cpp.stl.vector.mc_at", content: "v.index(i)", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.string.mc_size.a", learning_item_id: "cpp.stl.string.mc_size", content: "size()", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.string.mc_size.b", learning_item_id: "cpp.stl.string.mc_size", content: "count()", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.string.mc_size.c", learning_item_id: "cpp.stl.string.mc_size", content: "len()", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.string.mc_size.d", learning_item_id: "cpp.stl.string.mc_size", content: "chars()", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {

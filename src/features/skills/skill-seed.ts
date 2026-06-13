@@ -14,7 +14,8 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.structs_classes", title: "Structs and classes", description: "Members and access control.", order_index: 10 },
   { id: "cpp.constructors", title: "Constructors", description: "Object initialization and lifetime.", order_index: 20 },
   { id: "cpp.raii", title: "RAII", description: "Resource ownership and cleanup.", order_index: 30 },
-  { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 }
+  { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 },
+  { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -233,6 +234,30 @@ export const skillSeed: Skill[] = [
     item_types: ["lesson", "quiz", "bug_spotting"],
     order_index: 360,
     is_active: true
+  },
+  {
+    id: "cpp.stl.vector",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "std::vector",
+    description: "Use a resizable array that owns and manages its elements.",
+    learner_goal: "Add, access, and size a vector, and access elements safely with at().",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 410,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.string",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "std::string",
+    description: "Use a growable character sequence that manages its own memory.",
+    learner_goal: "Build, size, index, and search strings without manual memory management.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 420,
+    is_active: true
   }
 ];
 
@@ -253,7 +278,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.smart_pointers.weak_ptr", prerequisite_skill_id: "cpp.smart_pointers.shared_ptr", relationship_type: "recommended" },
   { skill_id: "cpp.smart_pointers.cyclic_reference", prerequisite_skill_id: "cpp.smart_pointers.weak_ptr", relationship_type: "recommended" },
   { skill_id: "cpp.smart_pointers.ownership_choice", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
-  { skill_id: "cpp.smart_pointers.ownership_transfer", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" }
+  { skill_id: "cpp.smart_pointers.ownership_transfer", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.vector", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.string", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {
