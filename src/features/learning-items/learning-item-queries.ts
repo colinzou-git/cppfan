@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMissingObjectError } from "@/lib/supabase/errors";
 import {
   getItemLinksBySkill as getSeedItemLinksBySkill,
   getLearningItemById as getSeedLearningItemById
@@ -10,6 +11,57 @@ import type {
   PublicLearningItemChoice
 } from "./learning-item-types";
 
+/**
+ * Outcome of a learning-item read (#146). `error` means a configured database
+ * failed — the page must show a recoverable message rather than silently
+ * serving seed content as if it were database content.
+ */
+export type LearningItemResult =
+  | { status: "ok"; data: LearningItemWithDetails }
+  | { status: "not_found" }
+  | { status: "error" };
+
+type ReadResult<T> = { data: T | null; error: { code?: string | null } | null };
+
+function fromSeed(seed: LearningItemWithDetails | null): LearningItemResult {
+  return seed ? { status: "ok", data: seed } : { status: "not_found" };
+}
+
+/**
+ * Pure decision for a learning-item read, separated for deterministic tests.
+ * Seed fallback is used only for missing-object (pre-migration) errors or a
+ * plain not-found; any other configured error returns `error` and never swaps
+ * database content for seed content.
+ */
+export function resolveLearningItemResult(
+  itemResult: ReadResult<LearningItem>,
+  skillsResult: ReadResult<LearningItemSkill[]>,
+  choicesResult: ReadResult<PublicLearningItemChoice[]>,
+  seed: LearningItemWithDetails | null
+): LearningItemResult {
+  if (itemResult.error) {
+    return isMissingObjectError(itemResult.error) ? fromSeed(seed) : { status: "error" };
+  }
+  if (!itemResult.data) {
+    // Not present in the configured database (pre-migration/partial rollout):
+    // a read may fall back to seed content; a real error would not reach here.
+    return fromSeed(seed);
+  }
+  for (const result of [skillsResult, choicesResult]) {
+    if (result.error) {
+      return isMissingObjectError(result.error) ? fromSeed(seed) : { status: "error" };
+    }
+  }
+  return {
+    status: "ok",
+    data: {
+      item: itemResult.data,
+      skills: skillsResult.data ?? [],
+      choices: choicesResult.data ?? []
+    }
+  };
+}
+
 const ITEM_COLUMNS =
   "id,type,title,prompt,explanation,difficulty,estimated_minutes,order_index,is_active,created_at,updated_at";
 const SKILL_MAP_COLUMNS = "learning_item_id,skill_id,is_primary,created_at";
@@ -19,14 +71,17 @@ const PUBLIC_CHOICE_COLUMNS = "id,learning_item_id,content,order_index,created_a
 
 /**
  * Read one learning item with its skill mappings and (answer-key-free) choices.
- * Falls back to the bundled seed when Supabase is unconfigured or the learning
- * item migration has not been applied yet.
+ * Seed fallback is used only when Supabase is unconfigured, the migration is
+ * absent (pre-migration), or the item is simply not found — a configured
+ * database error returns `{ status: "error" }` instead of silently serving seed
+ * content (#146).
  */
-export async function getLearningItemWithDetails(itemId: string): Promise<LearningItemWithDetails | null> {
+export async function getLearningItemWithDetails(itemId: string): Promise<LearningItemResult> {
   const supabase = await createClient();
+  const seed = getSeedLearningItemById(itemId);
 
   if (!supabase) {
-    return getSeedLearningItemById(itemId);
+    return fromSeed(seed);
   }
 
   const itemResult = await supabase
@@ -37,7 +92,16 @@ export async function getLearningItemWithDetails(itemId: string): Promise<Learni
     .maybeSingle();
 
   if (itemResult.error || !itemResult.data) {
-    return getSeedLearningItemById(itemId);
+    const resolved = resolveLearningItemResult(
+      itemResult as ReadResult<LearningItem>,
+      { data: null, error: null },
+      { data: null, error: null },
+      seed
+    );
+    if (resolved.status === "error") {
+      console.error(`[learning-items] item read failed (code=${itemResult.error?.code ?? "none"})`);
+    }
+    return resolved;
   }
 
   const [skillsResult, choicesResult] = await Promise.all([
@@ -49,15 +113,18 @@ export async function getLearningItemWithDetails(itemId: string): Promise<Learni
       .order("order_index", { ascending: true })
   ]);
 
-  if (skillsResult.error || choicesResult.error) {
-    return getSeedLearningItemById(itemId);
+  const resolved = resolveLearningItemResult(
+    itemResult as ReadResult<LearningItem>,
+    skillsResult as ReadResult<LearningItemSkill[]>,
+    choicesResult as ReadResult<PublicLearningItemChoice[]>,
+    seed
+  );
+  if (resolved.status === "error") {
+    console.error(
+      `[learning-items] item detail read failed (skills=${skillsResult.error?.code ?? "none"}, choices=${choicesResult.error?.code ?? "none"})`
+    );
   }
-
-  return {
-    item: itemResult.data as LearningItem,
-    skills: (skillsResult.data ?? []) as LearningItemSkill[],
-    choices: (choicesResult.data ?? []) as PublicLearningItemChoice[]
-  };
+  return resolved;
 }
 
 /**
