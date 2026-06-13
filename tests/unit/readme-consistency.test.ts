@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -67,5 +67,27 @@ describe("README documentation consistency", () => {
       filenameRefs.length,
       `README hardcodes ${filenameRefs.length} migration filenames; list with \`ls supabase/migrations\` instead`
     ).toBeLessThan(3);
+  });
+
+  // #148: the repo must not look like an un-applied scaffold/patch bundle.
+  it("has no package/patch-era operational docs at the repo root", () => {
+    const stale = [
+      "FILE_MANIFEST.md",
+      "FILE_MANIFEST_AUTH_PATCH.md",
+      "FILE_MANIFEST_PROFILE_ONBOARDING_PATCH.md",
+      "PATCH_README.md"
+    ];
+    const present = stale.filter((name) => existsSync(join(root, name)));
+    expect(present, `obsolete scaffold/patch docs still present: ${present.join(", ")}`).toEqual([]);
+  });
+
+  it("keeps obsolete scaffold/patch operational phrasing out of active setup docs", () => {
+    const OBSOLETE = [/unzip/i, /app scaffold/i, /overwrite (the )?files/i, /apply (the|this) patch/i];
+    for (const file of ["README.md", "CLAUDE.md"]) {
+      const text = readFileSync(join(root, file), "utf8");
+      for (const pattern of OBSOLETE) {
+        expect(pattern.test(text), `${file} contains obsolete phrasing matching ${pattern}`).toBe(false);
+      }
+    }
   });
 });
