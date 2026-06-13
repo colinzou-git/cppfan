@@ -18,7 +18,9 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 },
   { id: "dsa.arrays", title: "Arrays and sequences", description: "Indexing and traversal fundamentals.", order_index: 110 },
   { id: "dsa.searching", title: "Searching", description: "Finding values efficiently.", order_index: 120 },
-  { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 }
+  { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 },
+  { id: "dsa.stacks", title: "Stacks and queues", description: "LIFO and FIFO problem patterns.", order_index: 140 },
+  { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -381,6 +383,30 @@ export const skillSeed: Skill[] = [
     item_types: ["lesson", "quiz", "code_reading"],
     order_index: 1210,
     is_active: true
+  },
+  {
+    id: "dsa.stacks.basic_stack",
+    domain: "dsa",
+    module_id: "dsa.stacks",
+    title: "Stacks and queues for problems",
+    description: "Recognize when LIFO (stack) or FIFO (queue) structure fits a problem.",
+    learner_goal: "Choose a stack for nested/reversible problems and a queue for level-order processing.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 1310,
+    is_active: true
+  },
+  {
+    id: "dsa.hashing.lookup",
+    domain: "dsa",
+    module_id: "dsa.hashing",
+    title: "Hash maps and sets for lookup",
+    description: "Use hashing for average O(1) membership, counting, and duplicate detection.",
+    learner_goal: "Trade memory for speed with a hash map/set instead of repeated linear scans.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 1410,
+    is_active: true
   }
 ];
 
@@ -413,7 +439,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
-  { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" }
+  { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
+  { skill_id: "dsa.stacks.basic_stack", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
+  { skill_id: "dsa.hashing.lookup", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {

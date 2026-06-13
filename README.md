@@ -186,6 +186,8 @@ supabase/migrations/20260613270000_add_dsa_search_sort_skills.sql
 supabase/migrations/20260613280000_seed_dsa_search_sort_items.sql
 supabase/migrations/20260613290000_add_stl_adapter_lambda_skills.sql
 supabase/migrations/20260613300000_seed_stl_adapter_lambda_items.sql
+supabase/migrations/20260613310000_add_dsa_stacks_hashing_skills.sql
+supabase/migrations/20260613320000_seed_dsa_stacks_hashing_items.sql
 ```
 
 The `profiles` migration adds:
