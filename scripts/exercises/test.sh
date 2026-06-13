@@ -3,7 +3,7 @@
 # Build and run a write-code exercise's tests (#81).
 # By default builds the learner's work/ copy; pass --solution to build the
 # reference solution (used by maintainers / CI to validate the exercise itself).
-# Writes ONLY inside the exercise's own work/ (or a temp build dir for --solution).
+# Writes ONLY inside the exercise's own validated directory.
 #
 # Address + UB sanitizers are on by default; set EX_SANITIZE=0 to disable
 # (e.g. on toolchains without ASan, such as some Windows/MinGW setups).
@@ -12,6 +12,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=scripts/exercises/lib.sh
+source "$ROOT/scripts/exercises/lib.sh"
+
 ID="${1:-}"
 MODE="${2:-}"
 
@@ -20,12 +23,13 @@ if [[ -z "$ID" ]]; then
   exit 2
 fi
 
-EX_DIR="$ROOT/exercises/$ID"
+# Validate the id and resolve to a canonical, allowlisted exercise directory.
+EX_DIR="$(validate_exercise_id "$ROOT" "$ID")" || exit $?
 HARNESS="$ROOT/exercises/_harness"
 TESTS="$EX_DIR/tests/tests.cpp"
 
 if [[ ! -f "$TESTS" ]]; then
-  echo "error: no such exercise '$ID' (missing $TESTS)" >&2
+  echo "error: exercise '$ID' has no tests/tests.cpp" >&2
   exit 1
 fi
 
