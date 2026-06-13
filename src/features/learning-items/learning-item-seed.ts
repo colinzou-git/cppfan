@@ -1874,6 +1874,106 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2380,
     is_active: true
+  },
+  {
+    id: "cpp.oop.composition.lesson",
+    type: "lesson",
+    title: "Composition",
+    prompt:
+      "Composition models a \"has-a\" relationship: a class owns other objects as data members and delegates work to them. A `Car` has-an `Engine` and has-a set of `Wheel`s; a `Logger` member gives a class logging without the class being a logger. Composition is the default reuse mechanism in modern C++ because it keeps coupling loose — you depend on a member's public interface, not its internals — and it sidesteps the fragility of deep inheritance hierarchies. The guideline \"prefer composition over inheritance\" means: reach for a member first, and only inherit when there is a genuine is-a relationship plus a need for polymorphism.",
+    explanation:
+      "Composition is a has-a relationship: hold other objects as members and delegate to them. Prefer it over inheritance for reuse because coupling stays loose.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2410,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.composition.mc_relationship",
+    type: "multiple_choice",
+    title: "Composition vs inheritance",
+    prompt: "Which relationship is best modeled by composition (holding an object as a member)?",
+    explanation:
+      "Composition expresses \"has-a\": a Car has-an Engine. \"Is-a\" relationships (a Car is-a Vehicle) are what inheritance models. Prefer composition unless you genuinely need an is-a relationship with polymorphism.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2420,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.inheritance.lesson",
+    type: "lesson",
+    title: "Inheritance",
+    prompt:
+      "Inheritance models an \"is-a\" relationship: a derived class extends a base class, inheriting its public and protected members. Writing `class Dog : public Animal { ... }` means a `Dog` is-an `Animal` and can be used wherever an `Animal` is expected. The derived class adds its own members and can reuse base behavior. Use public inheritance only when the derived type truly is a kind of the base and honors the base's contract (the Liskov substitution principle). Private/protected inheritance exists but is rare; when you only want to reuse code, composition is usually the better tool.",
+    explanation:
+      "Public inheritance models is-a: a derived class extends a base and can stand in for it. Use it only when the derived type genuinely is a kind of the base.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2430,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.inheritance.mc_access",
+    type: "multiple_choice",
+    title: "What a derived class inherits",
+    prompt: "With `class Dog : public Animal`, which members of Animal can Dog's own methods access directly?",
+    explanation:
+      "A derived class can access the public and protected members of its base, but not the base's private members. Private members remain encapsulated within the base class.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2440,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.virtual_polymorphism.lesson",
+    type: "lesson",
+    title: "Virtual functions and polymorphism",
+    prompt:
+      "Runtime polymorphism lets a call through a base pointer or reference run the derived class's version of a function. Declare the function `virtual` in the base; the override runs based on the object's actual type, resolved at run time via the vtable. This is what makes `Animal* a = new Dog(); a->speak();` print the dog's sound. One rule is non-negotiable: a base class meant to be deleted through a base pointer must have a `virtual` destructor, otherwise `delete a;` only runs the base destructor and leaks the derived part. Mark overrides with `override` so the compiler catches signature mistakes.",
+    explanation:
+      "A `virtual` function dispatches on the object's real type at run time. A polymorphic base class needs a virtual destructor, or deleting through a base pointer leaks the derived part.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2450,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.virtual_polymorphism.mc_destructor",
+    type: "multiple_choice",
+    title: "Why a virtual destructor",
+    prompt: "Why must a base class deleted through a base-class pointer have a virtual destructor?",
+    explanation:
+      "Without a virtual destructor, `delete basePtr;` runs only the base destructor, skipping the derived destructor — leaking the derived part's resources. A virtual destructor ensures the full chain runs.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2460,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.abstract_interfaces.lesson",
+    type: "lesson",
+    title: "Abstract classes and interfaces",
+    prompt:
+      "A pure virtual function — declared `virtual void draw() = 0;` — has no implementation in the base and makes the class abstract: you cannot instantiate it directly. A class made entirely of pure virtual functions (plus a virtual destructor) acts as an interface: it specifies what derived classes must do without saying how. Concrete derived classes must override every pure virtual function before they can be instantiated. Interfaces let code depend on an abstraction — `void render(Shape& s) { s.draw(); }` works for any shape — which is the backbone of dependency inversion and testable, swappable designs.",
+    explanation:
+      "A pure virtual function (`= 0`) makes a class abstract and can't be instantiated; a class of only pure virtuals is an interface that derived classes must fully implement.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2470,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.abstract_interfaces.mc_pure_virtual",
+    type: "multiple_choice",
+    title: "Effect of a pure virtual function",
+    prompt: "What does declaring `virtual void draw() = 0;` in a class do?",
+    explanation:
+      "The `= 0` makes draw a pure virtual function, which makes the class abstract: it cannot be instantiated, and any concrete derived class must override draw.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2480,
+    is_active: true
   }
 ];
 
@@ -2039,6 +2139,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.strings.palindrome.mc_anagram", skill_id: "dsa.strings.palindrome", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.lesson", skill_id: "dsa.strings.parsing", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.mc_delim", skill_id: "dsa.strings.parsing", is_primary: true },
+  { learning_item_id: "cpp.oop.composition.lesson", skill_id: "cpp.oop.composition", is_primary: true },
+  { learning_item_id: "cpp.oop.composition.mc_relationship", skill_id: "cpp.oop.composition", is_primary: true },
+  { learning_item_id: "cpp.oop.inheritance.lesson", skill_id: "cpp.oop.inheritance", is_primary: true },
+  { learning_item_id: "cpp.oop.inheritance.mc_access", skill_id: "cpp.oop.inheritance", is_primary: true },
+  { learning_item_id: "cpp.oop.virtual_polymorphism.lesson", skill_id: "cpp.oop.virtual_polymorphism", is_primary: true },
+  { learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", skill_id: "cpp.oop.virtual_polymorphism", is_primary: true },
+  { learning_item_id: "cpp.oop.abstract_interfaces.lesson", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
+  { learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2401,7 +2509,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.parsing.mc_delim.a", learning_item_id: "dsa.strings.parsing.mc_delim", content: "std::getline(stream, token, ',')", is_correct: true, order_index: 10 },
   { id: "dsa.strings.parsing.mc_delim.b", learning_item_id: "dsa.strings.parsing.mc_delim", content: "stream >> token", is_correct: false, order_index: 20 },
   { id: "dsa.strings.parsing.mc_delim.c", learning_item_id: "dsa.strings.parsing.mc_delim", content: "std::sort(token.begin(), token.end())", is_correct: false, order_index: 30 },
-  { id: "dsa.strings.parsing.mc_delim.d", learning_item_id: "dsa.strings.parsing.mc_delim", content: "token.push_back(',')", is_correct: false, order_index: 40 }
+  { id: "dsa.strings.parsing.mc_delim.d", learning_item_id: "dsa.strings.parsing.mc_delim", content: "token.push_back(',')", is_correct: false, order_index: 40 },
+
+  { id: "cpp.oop.composition.mc_relationship.a", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Car has-an Engine", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.composition.mc_relationship.b", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Dog is-an Animal", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.composition.mc_relationship.c", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Square is-a Shape", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.composition.mc_relationship.d", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Manager is-an Employee", is_correct: false, order_index: 40 },
+
+  { id: "cpp.oop.inheritance.mc_access.a", learning_item_id: "cpp.oop.inheritance.mc_access", content: "Its public and protected members", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.inheritance.mc_access.b", learning_item_id: "cpp.oop.inheritance.mc_access", content: "Only its public members", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.inheritance.mc_access.c", learning_item_id: "cpp.oop.inheritance.mc_access", content: "All members including private ones", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.inheritance.mc_access.d", learning_item_id: "cpp.oop.inheritance.mc_access", content: "None of them", is_correct: false, order_index: 40 },
+
+  { id: "cpp.oop.virtual_polymorphism.mc_destructor.a", learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", content: "Otherwise deleting through the base pointer skips the derived destructor and leaks", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.virtual_polymorphism.mc_destructor.b", learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", content: "Otherwise the class cannot have any members", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.virtual_polymorphism.mc_destructor.c", learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", content: "Because constructors must also be virtual", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.virtual_polymorphism.mc_destructor.d", learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", content: "It makes the class smaller in memory", is_correct: false, order_index: 40 },
+
+  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.a", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes the class abstract so it cannot be instantiated and must be overridden", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.b", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It gives draw a default empty body", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.c", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It deletes the draw function", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.d", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes draw a static function", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {

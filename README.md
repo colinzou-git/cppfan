@@ -212,6 +212,8 @@ supabase/migrations/20260613530000_add_dsa_technique_skills.sql
 supabase/migrations/20260613540000_seed_dsa_technique_items.sql
 supabase/migrations/20260613550000_add_dsa_string_skills.sql
 supabase/migrations/20260613560000_seed_dsa_string_items.sql
+supabase/migrations/20260613570000_add_cpp_oop_skills.sql
+supabase/migrations/20260613580000_seed_cpp_oop_items.sql
 ```
 
 The `profiles` migration adds:
