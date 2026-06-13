@@ -624,6 +624,56 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.stl.adapters.lesson",
+    type: "lesson",
+    title: "Container adapters",
+    prompt:
+      "Container adapters wrap an underlying container to give a restricted interface. `std::stack<T>` is LIFO (`push`, `pop`, `top`); `std::queue<T>` is FIFO (`push`, `pop`, `front`); `std::priority_queue<T>` always exposes the largest element first by default (`push`, `pop`, `top`). Use a stack for depth-first/undo work, a queue for breadth-first/ordering, and a priority_queue when you repeatedly need the max (or min).",
+    explanation:
+      "Adapters express intent: reach for the one whose ordering matches the problem instead of managing a raw container by hand.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1410,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.adapters.mc_lifo",
+    type: "multiple_choice",
+    title: "Which adapter is LIFO",
+    prompt: "Which container adapter gives Last-In-First-Out (LIFO) order?",
+    explanation:
+      "`std::stack` is LIFO: the most recently pushed element is the first popped. `std::queue` is FIFO, and `std::priority_queue` pops by priority.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1420,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.lambdas.lesson",
+    type: "lesson",
+    title: "Lambdas",
+    prompt:
+      "A lambda is an inline anonymous function, for example `[](int x){ return x * 2; }`. The leading `[]` is the capture list: it controls which surrounding variables the lambda can use and how — `[=]` captures by value, `[&]` by reference, and `[x]` captures just `x`. Lambdas are most often passed to algorithms, such as a comparator for `std::sort` or a predicate for `std::find_if`.",
+    explanation:
+      "Capture only what you need. Prefer capturing by value unless you must observe or modify the original, and be careful with [&] capturing locals that outlive the lambda.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1430,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.lambdas.mc_capture",
+    type: "multiple_choice",
+    title: "What the capture list controls",
+    prompt: "In a lambda, what does the capture list `[]` control?",
+    explanation:
+      "The capture list controls which surrounding variables the lambda can use and whether they are captured by value or by reference. It does not declare the parameters or the return type.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1440,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -781,6 +831,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.stl.iterators.lesson", skill_id: "cpp.stl.iterators", is_primary: true },
   { learning_item_id: "cpp.stl.iterators.mc_end", skill_id: "cpp.stl.iterators", is_primary: true },
   { learning_item_id: "cpp.stl.algorithms.lesson", skill_id: "cpp.stl.iterators", is_primary: false },
+  { learning_item_id: "cpp.stl.adapters.lesson", skill_id: "cpp.stl.adapters", is_primary: true },
+  { learning_item_id: "cpp.stl.adapters.mc_lifo", skill_id: "cpp.stl.adapters", is_primary: true },
+  { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.lambdas", is_primary: true },
+  { learning_item_id: "cpp.stl.lambdas.mc_capture", skill_id: "cpp.stl.lambdas", is_primary: true },
+  { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.algorithms", is_primary: false },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -903,6 +958,16 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.stl.iterators.mc_end.b", learning_item_id: "cpp.stl.iterators.mc_end", content: "The last element of the container", is_correct: false, order_index: 20 },
   { id: "cpp.stl.iterators.mc_end.c", learning_item_id: "cpp.stl.iterators.mc_end", content: "The first element of the container", is_correct: false, order_index: 30 },
   { id: "cpp.stl.iterators.mc_end.d", learning_item_id: "cpp.stl.iterators.mc_end", content: "A null pointer", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.adapters.mc_lifo.a", learning_item_id: "cpp.stl.adapters.mc_lifo", content: "std::stack", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.adapters.mc_lifo.b", learning_item_id: "cpp.stl.adapters.mc_lifo", content: "std::queue", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.adapters.mc_lifo.c", learning_item_id: "cpp.stl.adapters.mc_lifo", content: "std::priority_queue", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.adapters.mc_lifo.d", learning_item_id: "cpp.stl.adapters.mc_lifo", content: "std::vector", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.lambdas.mc_capture.a", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "Which surrounding variables the lambda uses, and whether by value or reference", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.lambdas.mc_capture.b", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The return type of the lambda", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.lambdas.mc_capture.c", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The parameters of the lambda", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.lambdas.mc_capture.d", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The name of the lambda", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
