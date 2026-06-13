@@ -136,6 +136,11 @@ describe("curriculum coverage", () => {
     "cpp.concurrency.data_races",
     "cpp.concurrency.mutexes",
     "cpp.concurrency.async",
+    // utility libraries (#80)
+    "cpp.utilities.file_io",
+    "cpp.utilities.chrono",
+    "cpp.utilities.random",
+    "cpp.utilities.variant",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -228,6 +233,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.templates.") ||
         id.startsWith("cpp.tooling.") ||
         id.startsWith("cpp.concurrency.") ||
+        id.startsWith("cpp.utilities.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||

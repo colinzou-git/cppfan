@@ -216,6 +216,8 @@ supabase/migrations/20260613570000_add_cpp_oop_skills.sql
 supabase/migrations/20260613580000_seed_cpp_oop_items.sql
 supabase/migrations/20260613590000_add_cpp_concurrency_skills.sql
 supabase/migrations/20260613600000_seed_cpp_concurrency_items.sql
+supabase/migrations/20260613610000_add_cpp_utility_skills.sql
+supabase/migrations/20260613620000_seed_cpp_utility_items.sql
 ```
 
 The `profiles` migration adds:
