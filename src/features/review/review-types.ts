@@ -1,5 +1,8 @@
 import type { ReviewCardState } from "@/lib/fsrs/scheduler";
-import type { LearningItemType } from "@/features/learning-items/learning-item-types";
+import type {
+  LearningItemType,
+  PublicLearningItemChoice
+} from "@/features/learning-items/learning-item-types";
 
 export type ReviewCard = {
   id: string;
@@ -28,6 +31,10 @@ export type DueReviewEntry = {
   title: string;
   type: LearningItemType;
   prompt: string;
+  /** Revealed only after the learner attempts recall. May be null for items with no explanation. */
+  explanation: string | null;
+  /** Public choices (no answer key) shown as neutral reference after reveal. */
+  choices: PublicLearningItemChoice[];
 };
 
 /** An eligible item shown before the learner has signed in / created cards. */
