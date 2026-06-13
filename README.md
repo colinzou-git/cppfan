@@ -208,6 +208,8 @@ supabase/migrations/20260613490000_add_dsa_tree_skills.sql
 supabase/migrations/20260613500000_seed_dsa_tree_items.sql
 supabase/migrations/20260613510000_add_dsa_graph_skills.sql
 supabase/migrations/20260613520000_seed_dsa_graph_items.sql
+supabase/migrations/20260613530000_add_dsa_technique_skills.sql
+supabase/migrations/20260613540000_seed_dsa_technique_items.sql
 ```
 
 The `profiles` migration adds:

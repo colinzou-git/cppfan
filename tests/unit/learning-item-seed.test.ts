@@ -185,7 +185,12 @@ describe("curriculum coverage", () => {
     "dsa.graphs.representation",
     "dsa.graphs.bfs",
     "dsa.graphs.dfs",
-    "dsa.graphs.shortest_path"
+    "dsa.graphs.shortest_path",
+    // algorithmic techniques (#76)
+    "dsa.techniques.prefix_sums",
+    "dsa.techniques.sliding_window",
+    "dsa.techniques.greedy",
+    "dsa.techniques.dynamic_programming"
   ];
 
   it("has at least one learning item for every covered skill", () => {

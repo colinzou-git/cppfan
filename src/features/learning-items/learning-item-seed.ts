@@ -1674,6 +1674,106 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2180,
     is_active: true
+  },
+  {
+    id: "dsa.techniques.prefix_sums.lesson",
+    type: "lesson",
+    title: "Prefix sums",
+    prompt:
+      "A prefix-sum array stores the running total of a sequence: `prefix[i]` is the sum of the first i elements, with `prefix[0] = 0`. Building it takes one O(n) pass. Once built, the sum of any subarray from index l to r (inclusive) is `prefix[r + 1] - prefix[l]` in O(1) — no re-scanning. This turns many repeated range-sum queries from O(n) each into O(1) each after O(n) preprocessing. The same idea extends to 2D grids and to difference arrays for range updates.",
+    explanation:
+      "Precomputing cumulative sums lets each range-sum query be answered as a subtraction of two prefix values in O(1), after an O(n) build.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2210,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.prefix_sums.mc_query",
+    type: "multiple_choice",
+    title: "Range-sum query cost",
+    prompt: "After building a prefix-sum array, what is the cost of answering one subarray-sum query?",
+    explanation:
+      "The subarray sum equals prefix[r + 1] - prefix[l], a single subtraction, so each query is O(1) once the prefix array is built.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2220,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.sliding_window.lesson",
+    type: "lesson",
+    title: "Sliding window",
+    prompt:
+      "A sliding window keeps two indices that bound a contiguous range of a sequence. As the right edge advances to include new elements, the left edge advances to drop elements that violate a constraint (a fixed length, a sum limit, or a uniqueness rule). Because each element enters and leaves the window at most once, the whole scan is O(n) instead of the O(n^2) you'd get from re-examining every subarray. It is the go-to pattern for \"longest/shortest subarray that satisfies X\" problems.",
+    explanation:
+      "A sliding window advances two pointers so each element is added and removed at most once, scanning all relevant subarrays in O(n).",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2230,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.sliding_window.mc_complexity",
+    type: "multiple_choice",
+    title: "Why the window is fast",
+    prompt: "What makes the sliding-window technique run in O(n) rather than O(n^2)?",
+    explanation:
+      "Each element is added to the window once (when the right pointer passes it) and removed at most once (when the left pointer passes it), so total work is linear.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2240,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.greedy.lesson",
+    type: "lesson",
+    title: "Greedy algorithms",
+    prompt:
+      "A greedy algorithm builds a solution by always taking the choice that looks best right now, never reconsidering. It is fast and simple, but only correct when the problem has the greedy-choice property — a locally optimal choice leads to a globally optimal solution — usually backed by an exchange argument. Activity selection (always pick the next-finishing compatible interval) and Huffman coding are classic greedy wins. But for problems like the 0/1 knapsack, greedy fails and you need dynamic programming. Always justify why the greedy choice is safe before trusting it.",
+    explanation:
+      "Greedy takes the best immediate choice and never backtracks; it is correct only when a locally optimal choice provably leads to a global optimum.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2250,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.greedy.mc_fails",
+    type: "multiple_choice",
+    title: "When greedy is wrong",
+    prompt: "For which problem does a greedy strategy generally fail to give the optimal answer?",
+    explanation:
+      "The 0/1 knapsack (each item taken whole or not at all) is not solved optimally by greedy; it needs dynamic programming. The fractional knapsack, by contrast, is solvable greedily.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2260,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dynamic_programming.lesson",
+    type: "lesson",
+    title: "Dynamic programming",
+    prompt:
+      "Dynamic programming solves a problem by combining solutions to overlapping subproblems, computing each subproblem once and reusing the result. It applies when a problem has optimal substructure (an optimal solution is built from optimal solutions to subproblems) and overlapping subproblems (the same subproblem recurs). Two styles: top-down memoization caches recursive results; bottom-up tabulation fills a table in dependency order. For example, naive Fibonacci is exponential, but memoizing it makes it O(n). Many DP problems then optimize space by keeping only the rows the recurrence depends on.",
+    explanation:
+      "DP applies when there is optimal substructure and overlapping subproblems; caching each subproblem once (memoization or tabulation) avoids exponential recomputation.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2270,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dynamic_programming.mc_when",
+    type: "multiple_choice",
+    title: "When DP applies",
+    prompt: "Which pair of properties signals that dynamic programming is the right approach?",
+    explanation:
+      "DP is the right tool when a problem has both optimal substructure (optimal solutions built from optimal subproblem solutions) and overlapping subproblems (the same subproblems recur and can be cached).",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2280,
+    is_active: true
   }
 ];
 
@@ -1823,6 +1923,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.graphs.dfs.mc_structure", skill_id: "dsa.graphs.dfs", is_primary: true },
   { learning_item_id: "dsa.graphs.shortest_path.lesson", skill_id: "dsa.graphs.shortest_path", is_primary: true },
   { learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", skill_id: "dsa.graphs.shortest_path", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_sums.lesson", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_sums.mc_query", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
+  { learning_item_id: "dsa.techniques.sliding_window.lesson", skill_id: "dsa.techniques.sliding_window", is_primary: true },
+  { learning_item_id: "dsa.techniques.sliding_window.mc_complexity", skill_id: "dsa.techniques.sliding_window", is_primary: true },
+  { learning_item_id: "dsa.techniques.greedy.lesson", skill_id: "dsa.techniques.greedy", is_primary: true },
+  { learning_item_id: "dsa.techniques.greedy.mc_fails", skill_id: "dsa.techniques.greedy", is_primary: true },
+  { learning_item_id: "dsa.techniques.dynamic_programming.lesson", skill_id: "dsa.techniques.dynamic_programming", is_primary: true },
+  { learning_item_id: "dsa.techniques.dynamic_programming.mc_when", skill_id: "dsa.techniques.dynamic_programming", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2145,7 +2253,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.graphs.shortest_path.mc_dijkstra.a", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It finalizes a vertex's distance once visited, which a negative edge can later undercut", is_correct: true, order_index: 10 },
   { id: "dsa.graphs.shortest_path.mc_dijkstra.b", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It cannot use a priority queue", is_correct: false, order_index: 20 },
   { id: "dsa.graphs.shortest_path.mc_dijkstra.c", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It only works on trees", is_correct: false, order_index: 30 },
-  { id: "dsa.graphs.shortest_path.mc_dijkstra.d", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It requires the graph to be undirected", is_correct: false, order_index: 40 }
+  { id: "dsa.graphs.shortest_path.mc_dijkstra.d", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It requires the graph to be undirected", is_correct: false, order_index: 40 },
+
+  { id: "dsa.techniques.prefix_sums.mc_query.a", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(1)", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.prefix_sums.mc_query.b", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(log n)", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.prefix_sums.mc_query.c", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(n)", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.prefix_sums.mc_query.d", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(n^2)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.techniques.sliding_window.mc_complexity.a", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "Each element enters and leaves the window at most once", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.sliding_window.mc_complexity.b", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "It sorts the array first", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.sliding_window.mc_complexity.c", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "It uses recursion to skip elements", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.sliding_window.mc_complexity.d", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "It examines every subarray explicitly", is_correct: false, order_index: 40 },
+
+  { id: "dsa.techniques.greedy.mc_fails.a", learning_item_id: "dsa.techniques.greedy.mc_fails", content: "The 0/1 knapsack problem", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.greedy.mc_fails.b", learning_item_id: "dsa.techniques.greedy.mc_fails", content: "Activity selection by earliest finish time", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.greedy.mc_fails.c", learning_item_id: "dsa.techniques.greedy.mc_fails", content: "The fractional knapsack problem", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.greedy.mc_fails.d", learning_item_id: "dsa.techniques.greedy.mc_fails", content: "Huffman coding", is_correct: false, order_index: 40 },
+
+  { id: "dsa.techniques.dynamic_programming.mc_when.a", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "Optimal substructure and overlapping subproblems", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.dynamic_programming.mc_when.b", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "Sorted input and a single answer", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.dynamic_programming.mc_when.c", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "No recursion and constant memory", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.dynamic_programming.mc_when.d", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "A greedy choice that is always safe", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
