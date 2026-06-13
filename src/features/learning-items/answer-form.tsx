@@ -4,15 +4,26 @@ import { useState, useTransition } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { submitAnswer, type SubmitAnswerResult } from "./attempt-actions";
+import { ExplanationPanel } from "./explanation-panel";
 import type { PublicLearningItemChoice } from "./learning-item-types";
 
 /*
  * Interactive answering for a choice-based learning item. Grading runs in the
  * submitAnswer server action; this component only renders the choices, the
  * result, and a retry control. The answer key is never sent here — the correct
- * choice id arrives in the result only after a submission.
+ * choice id arrives in the result only after a submission. The answer-bearing
+ * explanation is likewise revealed only after grading (#145), and hidden again
+ * on retry.
  */
-export function AnswerForm({ itemId, choices }: { itemId: string; choices: PublicLearningItemChoice[] }) {
+export function AnswerForm({
+  itemId,
+  choices,
+  explanation
+}: {
+  itemId: string;
+  choices: PublicLearningItemChoice[];
+  explanation?: string | null;
+}) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitAnswerResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +118,12 @@ export function AnswerForm({ itemId, choices }: { itemId: string; choices: Publi
               Sign in to save your progress. This attempt was not recorded.
             </span>
           ) : null}
+        </div>
+      ) : null}
+
+      {graded && explanation ? (
+        <div aria-live="polite">
+          <ExplanationPanel explanation={explanation} />
         </div>
       ) : null}
 
