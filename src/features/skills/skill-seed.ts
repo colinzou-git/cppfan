@@ -823,6 +823,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.warnings",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Warnings and warnings-as-errors",
+    description: "Enable strong warnings and treat them as build-failing signals.",
+    learner_goal: "Build with -Wall -Wextra and explain why -Werror keeps warnings from piling up.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 705,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.sanitizers",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Address and UB sanitizers",
+    description: "Catch memory and undefined-behavior bugs at run time with ASan/UBSan.",
+    learner_goal: "Build with -fsanitize=address,undefined to surface UB and memory errors in tests.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 706,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.cmake",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "CMake builds",
+    description: "Define targets and link dependencies; choose Debug vs Release.",
+    learner_goal: "Read a small CMakeLists with a target plus includes/links and pick a build type.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 707,
+    is_active: true
+  },
+  {
     id: "cpp.concurrency.threads",
     domain: "cpp",
     module_id: "cpp.concurrency",
@@ -1369,6 +1405,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.tooling.testing", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.debugging", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.build", prerequisite_skill_id: "cpp.functions.decomposition", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.warnings", prerequisite_skill_id: "cpp.tooling.build", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.sanitizers", prerequisite_skill_id: "cpp.tooling.debugging", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.cmake", prerequisite_skill_id: "cpp.tooling.build", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.threads", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.data_races", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.mutexes", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
