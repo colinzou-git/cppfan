@@ -16,9 +16,9 @@ Core ideas:
 - Keep the learning loop fast, mobile-friendly, and motivating.
 - Prefer small, reviewable changes over large rewrites.
 
-## Target stack
+## Stack
 
-Planned stack:
+Implemented stack (in use today):
 
 - Framework: Next.js App Router with TypeScript
 - Backend/auth/sync: Supabase Auth, Supabase Postgres, RLS, and Storage
@@ -62,7 +62,7 @@ After implementation:
 - Report exact command results.
 - Explain known limitations or follow-up work.
 
-When the app scaffold exists, run these unless the task explains why not:
+Run these unless the task explains why not:
 
 ```bash
 pnpm lint

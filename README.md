@@ -129,9 +129,20 @@ For Playwright on a new machine, install browsers first:
 pnpm exec playwright install
 ```
 
+## Documentation
+
+This README is the canonical setup and operations entry point. Focused docs:
+
+- Auth setup: [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md)
+- Database migrations: "Database setup" below (`pnpm db:migrate`)
+- Codespaces / iPhone workflow: "Develop from a browser" above
+- Write-code exercises: [docs/WRITE_CODE_EXERCISES.md](docs/WRITE_CODE_EXERCISES.md)
+- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · skill engine: [docs/SKILL_ENGINE.md](docs/SKILL_ENGINE.md) · events: [docs/EVENT_SCHEMA_STABLE_NAMES.md](docs/EVENT_SCHEMA_STABLE_NAMES.md)
+- End-to-end tests: [docs/PLAYWRIGHT_E2E.md](docs/PLAYWRIGHT_E2E.md)
+
 ## Supabase setup
 
-The scaffold is safe to run without Supabase environment variables. Auth and onboarding pages will show setup guidance until these are configured:
+The app is safe to run without Supabase environment variables. Auth and onboarding pages will show setup guidance until these are configured:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
