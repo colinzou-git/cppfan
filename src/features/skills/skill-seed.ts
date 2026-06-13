@@ -535,6 +535,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.self_assignment",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Self-assignment safety",
+    description: "Write assignment that stays correct when an object is assigned to itself.",
+    learner_goal: "Make a hand-written assignment self-assignment safe (guard or copy-and-swap).",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 257,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.deep_copy",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Shallow vs deep copy",
+    description: "Spot a shallow copy of an owned pointer that leads to double free or shared state.",
+    learner_goal: "Recognize a shallow-copy bug and fix it with a deep copy or self-managing member.",
+    level: "advanced",
+    item_types: ["lesson", "bug_spotting"],
+    order_index: 258,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.stream_insertion",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Stream insertion (operator<<)",
+    description: "Print a type by overloading operator<< as a non-member taking std::ostream&.",
+    learner_goal: "Define operator<<(std::ostream&, const T&) to make a type printable.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 259,
+    is_active: true
+  },
+  {
     id: "cpp.oop.composition",
     domain: "cpp",
     module_id: "cpp.oop",
@@ -1561,6 +1597,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.value_semantics.special_members", prerequisite_skill_id: "cpp.value_semantics.move", relationship_type: "recommended" },
   { skill_id: "cpp.value_semantics.copy_elision", prerequisite_skill_id: "cpp.value_semantics.copy", relationship_type: "recommended" },
   { skill_id: "cpp.value_semantics.operators", prerequisite_skill_id: "cpp.value_semantics.rule_of_zero_five", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.self_assignment", prerequisite_skill_id: "cpp.value_semantics.special_members", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.deep_copy", prerequisite_skill_id: "cpp.value_semantics.copy", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.stream_insertion", prerequisite_skill_id: "cpp.value_semantics.operators", relationship_type: "recommended" },
   { skill_id: "cpp.oop.composition", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.oop.inheritance", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.oop.virtual_polymorphism", prerequisite_skill_id: "cpp.oop.inheritance", relationship_type: "recommended" },

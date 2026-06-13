@@ -1048,6 +1048,82 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.self_assignment.lesson",
+    type: "lesson",
+    title: "Self-assignment safety",
+    prompt:
+      "A hand-written copy-assignment operator must still work when an object is assigned to itself (`a = a;`, or aliased through references/pointers). The danger is the classic \"release then copy\" order: if you `delete[] data_;` first and then copy from `other.data_`, a self-assignment has already freed the very buffer you are about to read — use-after-free. Two robust fixes: (1) a self-check guard, `if (this == &other) return *this;` before doing the work; or, better, (2) the **copy-and-swap** idiom — take the parameter by value (a copy), then `swap` your members with it and let the old state be destroyed with the temporary. Copy-and-swap is self-assignment-safe and exception-safe by construction. Best of all, follow the Rule of Zero so members manage themselves and you write no assignment operator at all.",
+    explanation:
+      "Hand-written operator= must survive a = a. Guard with `if (this == &other) return *this;`, or use copy-and-swap (by-value param + swap), which is self-assignment- and exception-safe. Better: Rule of Zero.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3510,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.self_assignment.mc_guard",
+    type: "multiple_choice",
+    title: "Why self-assignment matters",
+    prompt: "In a hand-written `operator=` that does `delete[] data_;` then copies from `other`, what breaks on `a = a;`?",
+    explanation:
+      "`this` and `&other` are the same object, so `delete[] data_;` frees the buffer that is then read from `other.data_` — a use-after-free. A self-check or copy-and-swap avoids it.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3520,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.deep_copy.lesson",
+    type: "lesson",
+    title: "Shallow vs deep copy",
+    prompt:
+      "When a class owns a resource through a raw pointer, the compiler-generated copy is a **shallow** copy: it copies the pointer value, so two objects end up owning the same buffer. When both destructors run, the buffer is `delete`d twice (a double free / crash), and a write through one object is unexpectedly visible through the other. A **deep** copy allocates a new buffer and copies the contents, giving each object independent state. The modern fix is almost always to stop managing the raw pointer yourself: hold a `std::vector`/`std::string`/`std::unique_ptr` member so the correct copy (or move-only) behavior comes for free (Rule of Zero). Reach for a hand-written deep copy only when you truly must own a raw resource.",
+    explanation:
+      "A shallow copy duplicates a pointer (two owners → double free / shared writes). A deep copy duplicates the pointee. Prefer self-managing members (vector/string/unique_ptr) so copies are correct automatically.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3530,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.deep_copy.bug_double_free",
+    type: "bug_spotting",
+    title: "Spot the shallow-copy bug",
+    prompt:
+      "```cpp\nstruct Buffer {\n  int* data;\n  int size;\n  Buffer(int n) : data(new int[n]), size(n) {}\n  ~Buffer() { delete[] data; }\n  // uses the compiler-generated copy constructor and copy assignment\n};\n\nvoid use() {\n  Buffer a(10);\n  Buffer b = a;   // <-- what goes wrong here and at scope exit?\n}\n```\nWhat is the defect, and how would you fix it?",
+    explanation:
+      "`Buffer b = a;` uses the implicit copy constructor, which copies the `data` pointer (shallow), so `a.data` and `b.data` point at the same array. At scope exit both destructors run `delete[] data` on it — a double free (undefined behavior). Fix it by giving Buffer value semantics: store `std::vector<int>` (Rule of Zero), or write a deep-copy copy constructor and assignment that allocate and copy the elements (and handle self-assignment).",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 3540,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.stream_insertion.lesson",
+    type: "lesson",
+    title: "Stream insertion (operator<<)",
+    prompt:
+      "To make your type printable with `std::cout << x`, overload the stream-insertion operator as a **non-member** function: `std::ostream& operator<<(std::ostream& os, const T& value) { os << ...; return os; }`. It must be a non-member because the left operand is the stream, not your type; take the stream by non-const reference and your value by `const&`, write the fields to `os`, and **return `os`** so calls can chain (`cout << a << b`). If it needs private data, declare it a `friend` of the class. Keep formatting minimal and side-effect-free. The symmetric `operator>>` reads from an `std::istream&` the same way.",
+    explanation:
+      "Overload `std::ostream& operator<<(std::ostream& os, const T&)` as a non-member, write fields to os, and return os so `<<` chains. Use friend if it needs private members.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 3550,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.stream_insertion.mc_signature",
+    type: "multiple_choice",
+    title: "operator<< signature",
+    prompt: "What is the correct signature to make `std::cout << p` work for a type `Point`?",
+    explanation:
+      "`std::ostream& operator<<(std::ostream& os, const Point& p)` — a non-member taking the stream by reference and the value by const reference, returning the stream so calls chain. A member `operator<<` would put the stream on the wrong side.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3560,
+    is_active: true
+  },
+  {
     id: "cpp.raii.resource_lifetime.lesson",
     type: "lesson",
     title: "RAII: tie a resource to an object",
@@ -3191,6 +3267,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.value_semantics.copy_elision.mc_return", skill_id: "cpp.value_semantics.copy_elision", is_primary: true },
   { learning_item_id: "cpp.value_semantics.operators.lesson", skill_id: "cpp.value_semantics.operators", is_primary: true },
   { learning_item_id: "cpp.value_semantics.operators.mc_explicit", skill_id: "cpp.value_semantics.operators", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.self_assignment.lesson", skill_id: "cpp.value_semantics.self_assignment", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.self_assignment.mc_guard", skill_id: "cpp.value_semantics.self_assignment", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.deep_copy.lesson", skill_id: "cpp.value_semantics.deep_copy", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.deep_copy.bug_double_free", skill_id: "cpp.value_semantics.deep_copy", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.stream_insertion.lesson", skill_id: "cpp.value_semantics.stream_insertion", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", skill_id: "cpp.value_semantics.stream_insertion", is_primary: true },
   { learning_item_id: "cpp.value_semantics.move.lesson", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: false },
   { learning_item_id: "cpp.raii.resource_lifetime.lesson", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
   { learning_item_id: "cpp.raii.resource_lifetime.mc_ties", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
@@ -3563,6 +3645,16 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.value_semantics.operators.mc_explicit.b", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Make the constructor private", is_correct: false, order_index: 20 },
   { id: "cpp.value_semantics.operators.mc_explicit.c", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Add a second int parameter", is_correct: false, order_index: 30 },
   { id: "cpp.value_semantics.operators.mc_explicit.d", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Mark the constructor const", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.self_assignment.mc_guard.a", learning_item_id: "cpp.value_semantics.self_assignment.mc_guard", content: "this and &other are the same object, so the buffer is freed then read (use-after-free)", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.self_assignment.mc_guard.b", learning_item_id: "cpp.value_semantics.self_assignment.mc_guard", content: "Nothing — self-assignment is always a no-op", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.self_assignment.mc_guard.c", learning_item_id: "cpp.value_semantics.self_assignment.mc_guard", content: "The compiler rejects a = a at build time", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.self_assignment.mc_guard.d", learning_item_id: "cpp.value_semantics.self_assignment.mc_guard", content: "It leaks memory but is otherwise correct", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.stream_insertion.mc_signature.a", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "std::ostream& operator<<(std::ostream& os, const Point& p)", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.stream_insertion.mc_signature.b", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "void Point::operator<<(std::ostream& os)", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.stream_insertion.mc_signature.c", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "std::ostream operator<<(Point p, std::ostream os)", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.stream_insertion.mc_signature.d", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "Point operator<<(const Point& p)", is_correct: false, order_index: 40 },
 
   { id: "cpp.raii.resource_lifetime.mc_ties.a", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of an object (constructor acquires, destructor releases)", is_correct: true, order_index: 10 },
   { id: "cpp.raii.resource_lifetime.mc_ties.b", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of the whole program", is_correct: false, order_index: 20 },
