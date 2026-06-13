@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logConfiguredFailure } from "@/lib/supabase/errors";
 import { skillSeed } from "@/features/skills/skill-seed";
 import { RECENCY_WINDOW_DAYS, scoreSkillFromEvents } from "./mastery-scoring";
 import { emptyStatusCounts, type MasterySummary, type SkillMastery, type SkillStatus } from "./mastery-types";
@@ -48,6 +49,9 @@ export async function getMasterySummary(): Promise<MasterySummary> {
     .order("event_time", { ascending: true });
 
   if (error) {
+    // Empty summary is acceptable degraded UI, but log a configured failure so
+    // a backend outage/permission regression is observable, not silent (#146).
+    logConfiguredFailure("mastery", error);
     return { authenticated: true, skills: [], counts: emptyStatusCounts() };
   }
 
