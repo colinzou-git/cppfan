@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { isMissingObjectError } from "@/lib/supabase/errors";
+import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
 import {
   getItemLinksBySkill as getSeedItemLinksBySkill,
   getLearningItemById as getSeedLearningItemById
@@ -148,6 +148,9 @@ export async function getItemLinksBySkill(): Promise<Record<string, string>> {
   ]);
 
   if (itemsResult.error || mapResult.error || (itemsResult.data ?? []).length === 0) {
+    // Non-authoritative convenience map; seed fallback is fine, but a configured
+    // failure must be observable rather than silently swallowed (#146).
+    logConfiguredFailure("learning-items", itemsResult.error ?? mapResult.error);
     return getSeedItemLinksBySkill();
   }
 

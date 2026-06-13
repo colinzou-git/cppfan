@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isMissingObjectError } from "@/lib/supabase/errors";
+import { isConfiguredFailure, isMissingObjectError } from "@/lib/supabase/errors";
 import { resolveLearningItemResult } from "@/features/learning-items/learning-item-queries";
 import type { LearningItemWithDetails } from "@/features/learning-items/learning-item-types";
 
@@ -32,6 +32,13 @@ describe("isMissingObjectError (#146)", () => {
     expect(isMissingObjectError({ code: "42501" })).toBe(false);
     expect(isMissingObjectError({ code: null })).toBe(false);
     expect(isMissingObjectError(null)).toBe(false);
+  });
+
+  it("isConfiguredFailure flags real errors but not pre-migration or no-error", () => {
+    expect(isConfiguredFailure({ code: "42501" })).toBe(true); // permission
+    expect(isConfiguredFailure({ code: null })).toBe(true); // network/unknown
+    expect(isConfiguredFailure({ code: "42P01" })).toBe(false); // missing object
+    expect(isConfiguredFailure(null)).toBe(false); // no error
   });
 });
 

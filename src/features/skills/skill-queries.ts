@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logConfiguredFailure } from "@/lib/supabase/errors";
 import { getSeedSkillMapPreview, skillModules } from "./skill-seed";
 import type { Skill, SkillMapPreviewData, SkillPrerequisite } from "./skill-types";
 
@@ -25,6 +26,9 @@ export async function getSkillMapFromDatabase(): Promise<SkillMapPreviewData | n
   ]);
 
   if (skillsResult.error || prerequisitesResult.error) {
+    // Read-only preview: a labeled seed fallback is acceptable, but a configured
+    // failure must be observable rather than silently swallowed (#146).
+    logConfiguredFailure("skills", skillsResult.error ?? prerequisitesResult.error);
     return null;
   }
 
