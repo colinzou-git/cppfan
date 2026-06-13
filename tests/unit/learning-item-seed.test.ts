@@ -140,6 +140,11 @@ describe("curriculum coverage", () => {
     "cpp.value_semantics.copy",
     "cpp.value_semantics.move",
     "cpp.value_semantics.rule_of_zero_five",
+    // object-oriented design (#77)
+    "cpp.oop.composition",
+    "cpp.oop.inheritance",
+    "cpp.oop.virtual_polymorphism",
+    "cpp.oop.abstract_interfaces",
     // constructors module (#16)
     "cpp.constructors.default_constructor",
     "cpp.constructors.parameterized_constructor",
@@ -214,6 +219,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.functions.") ||
         id.startsWith("cpp.references.") ||
         id.startsWith("cpp.value_semantics.") ||
+        id.startsWith("cpp.oop.") ||
         id.startsWith("cpp.templates.") ||
         id.startsWith("cpp.tooling.") ||
         id.startsWith("cpp.constructors.") ||
