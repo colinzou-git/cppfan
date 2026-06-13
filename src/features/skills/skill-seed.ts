@@ -311,6 +311,30 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.stl.adapters",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "Container adapters",
+    description: "Use stack (LIFO), queue (FIFO), and priority_queue (highest priority first).",
+    learner_goal: "Pick the right adapter for LIFO, FIFO, or priority access.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 470,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.lambdas",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "Lambdas",
+    description: "Write inline anonymous functions and capture surrounding variables.",
+    learner_goal: "Pass a lambda to an algorithm and control what it captures.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 480,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -384,6 +408,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.stl.set", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
   { skill_id: "cpp.stl.iterators", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "cpp.stl.algorithms", prerequisite_skill_id: "cpp.stl.iterators", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.adapters", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.lambdas", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
