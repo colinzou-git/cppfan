@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { skillSeed } from "@/features/skills/skill-seed";
-import { scoreSkillFromEvents } from "./mastery-scoring";
+import { RECENCY_WINDOW_DAYS, scoreSkillFromEvents } from "./mastery-scoring";
 import { emptyStatusCounts, type MasterySummary, type SkillMastery, type SkillStatus } from "./mastery-types";
 import type { ScoringEvent } from "@/features/events/event-types";
 
@@ -33,11 +33,18 @@ export async function getMasterySummary(): Promise<MasterySummary> {
     return { authenticated: false, skills: [], counts: emptyStatusCounts() };
   }
 
+  // Bound the work (#144): only load evidence within the recency window the
+  // scorer actually uses, instead of the learner's entire event history.
+  const now = new Date();
+  const since = new Date(now.getTime() - RECENCY_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const nowIso = now.toISOString();
+
   const { data, error } = await supabase
     .from("skill_events")
     .select("skill_id,event_type,event_time")
     .eq("user_id", user.id)
     .not("skill_id", "is", null)
+    .gte("event_time", since)
     .order("event_time", { ascending: true });
 
   if (error) {
@@ -61,7 +68,7 @@ export async function getMasterySummary(): Promise<MasterySummary> {
   const skills: SkillMastery[] = [];
 
   for (const [skillId, events] of bySkill) {
-    const score = scoreSkillFromEvents(events);
+    const score = scoreSkillFromEvents(events, nowIso);
     counts[score.status] += 1;
     skills.push({
       skillId,
