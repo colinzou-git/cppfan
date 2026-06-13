@@ -2001,6 +2001,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.preconditions.lesson",
+    type: "lesson",
+    title: "Preconditions and input validation",
+    prompt:
+      "Distinguish two kinds of checks. **Input validation** handles untrusted data crossing a real boundary — user input, files, network, parsing — where bad data is *expected*; validate it and return/report a recoverable error (or throw). **Preconditions** are the contract a function requires of its caller — e.g. \"index must be in range,\" \"pointer must be non-null.\" Those describe a *programming bug* if violated, so the right tool is an `assert` (active in debug builds, compiled out in release) rather than runtime validation in every call, which would be slow and would mask the bug. Rule of thumb: validate at the edges of your program; `assert` internal invariants you control. Don't trust external input, but don't defensively re-check things your own code already guarantees — that is the \"only validate at real boundaries\" principle.",
+    explanation:
+      "Validate untrusted input at real boundaries (user/file/network) and report recoverable errors; use assert for caller-contract preconditions (a bug if violated), not runtime checks on every call.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3630,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.preconditions.mc_assert",
+    type: "multiple_choice",
+    title: "Validate or assert?",
+    prompt: "A private helper requires its caller to pass a non-null pointer (a contract your own code guarantees). How should it enforce that?",
+    explanation:
+      "Use an assert: a violated internal precondition is a programming bug, caught in debug builds and compiled out of release. Full runtime validation is for untrusted input crossing a boundary, not contracts your own code already guarantees.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3640,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.optional_expected.lesson",
+    type: "lesson",
+    title: "Signaling failure with optional and expected",
+    prompt:
+      "Two return-based ways to report failure without exceptions. `std::optional<T>` says \"a `T` or nothing\" — perfect when absence is normal and the reason doesn't matter (a lookup miss, a parse that found no value). `std::expected<T, E>` (C++23) says \"a `T` or an error of type `E`\" — use it when the caller needs to know *why* it failed (an error code, message, or enum). Both make failure part of the type, so the caller must handle it (check `has_value()` / `if (opt)` before using `*`), unlike a bare sentinel that's easy to ignore. They cost nothing when there's no exception machinery and read linearly. Reach for `optional` when \"missing\" is enough information, and `expected` when you must carry an error value back.",
+    explanation:
+      "std::optional<T> = value or nothing (absence, reason irrelevant). std::expected<T,E> = value or an error E (caller needs the reason). Both put failure in the type so it can't be silently ignored.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3650,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.optional_expected.mc_choose",
+    type: "multiple_choice",
+    title: "optional or expected?",
+    prompt: "A function can fail and the caller needs to know the specific reason it failed. Which return type fits best?",
+    explanation:
+      "std::expected<T, E> carries either the value or an error E describing why it failed. std::optional<T> only signals presence/absence with no reason.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3660,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.error_strategy.lesson",
+    type: "lesson",
+    title: "Choosing an error-handling strategy",
+    prompt:
+      "Match the mechanism to the failure. Use **exceptions** for genuinely exceptional, hard-to-handle-locally failures (constructor failure, out-of-memory, deep call stacks) — they unwind cleanly with RAII and keep the happy path uncluttered, but shouldn't drive ordinary control flow because throwing is costly and hides flow. Use **`std::optional`/`std::expected`** for expected, recoverable outcomes a caller will handle right away (lookup miss, parse failure) — failure is in the return type and there's no unwinding cost. Use **error codes** (or `std::error_code`) at C-style or performance-critical boundaries and when interoperating with C. The deciding questions: is the failure expected or truly exceptional? Must every caller handle it now, or can it propagate far up? Is throwing on the hot path? Avoid using exceptions for normal branching like \"not found,\" which is better expressed as `optional`.",
+    explanation:
+      "Exceptions for truly exceptional failures that unwind far (with RAII); optional/expected for expected, locally-handled outcomes; error codes at C/perf boundaries. Don't use exceptions for ordinary control flow.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 3670,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.error_strategy.mc_controlflow",
+    type: "multiple_choice",
+    title: "Not-found is not exceptional",
+    prompt: "A lookup that frequently finds nothing should report \"not found\" how?",
+    explanation:
+      "Return a std::optional (or expected) — \"not found\" is an expected, recoverable outcome the caller handles immediately. Throwing an exception for ordinary, frequent control flow is costly and obscures the logic.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3680,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o.lesson",
     type: "lesson",
     title: "Big-O notation",
@@ -3425,6 +3500,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.tooling.sanitizers.mc_asan", skill_id: "cpp.tooling.sanitizers", is_primary: true },
   { learning_item_id: "cpp.tooling.cmake.lesson", skill_id: "cpp.tooling.cmake", is_primary: true },
   { learning_item_id: "cpp.tooling.cmake.mc_link", skill_id: "cpp.tooling.cmake", is_primary: true },
+  { learning_item_id: "cpp.tooling.preconditions.lesson", skill_id: "cpp.tooling.preconditions", is_primary: true },
+  { learning_item_id: "cpp.tooling.preconditions.mc_assert", skill_id: "cpp.tooling.preconditions", is_primary: true },
+  { learning_item_id: "cpp.tooling.optional_expected.lesson", skill_id: "cpp.tooling.optional_expected", is_primary: true },
+  { learning_item_id: "cpp.tooling.optional_expected.mc_choose", skill_id: "cpp.tooling.optional_expected", is_primary: true },
+  { learning_item_id: "cpp.tooling.error_strategy.lesson", skill_id: "cpp.tooling.error_strategy", is_primary: true },
+  { learning_item_id: "cpp.tooling.error_strategy.mc_controlflow", skill_id: "cpp.tooling.error_strategy", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.raii.exception_safety_intro", is_primary: false },
   { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
@@ -3911,6 +3992,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.tooling.cmake.mc_link.b", learning_item_id: "cpp.tooling.cmake.mc_link", content: "add_executable(app main.cpp)", is_correct: false, order_index: 20 },
   { id: "cpp.tooling.cmake.mc_link.c", learning_item_id: "cpp.tooling.cmake.mc_link", content: "target_include_directories(app PRIVATE include)", is_correct: false, order_index: 30 },
   { id: "cpp.tooling.cmake.mc_link.d", learning_item_id: "cpp.tooling.cmake.mc_link", content: "cmake --build build", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.preconditions.mc_assert.a", learning_item_id: "cpp.tooling.preconditions.mc_assert", content: "assert the pointer is non-null (a violated contract is a bug)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.preconditions.mc_assert.b", learning_item_id: "cpp.tooling.preconditions.mc_assert", content: "Throw an exception on every call", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.preconditions.mc_assert.c", learning_item_id: "cpp.tooling.preconditions.mc_assert", content: "Return an error code from the helper", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.preconditions.mc_assert.d", learning_item_id: "cpp.tooling.preconditions.mc_assert", content: "Ignore it; the caller is responsible", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.optional_expected.mc_choose.a", learning_item_id: "cpp.tooling.optional_expected.mc_choose", content: "std::expected<T, E> (carries the value or an error reason)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.optional_expected.mc_choose.b", learning_item_id: "cpp.tooling.optional_expected.mc_choose", content: "std::optional<T> (presence only, no reason)", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.optional_expected.mc_choose.c", learning_item_id: "cpp.tooling.optional_expected.mc_choose", content: "A bare bool return", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.optional_expected.mc_choose.d", learning_item_id: "cpp.tooling.optional_expected.mc_choose", content: "A magic sentinel value like -1", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.error_strategy.mc_controlflow.a", learning_item_id: "cpp.tooling.error_strategy.mc_controlflow", content: "Return std::optional (not found is an expected, recoverable outcome)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.error_strategy.mc_controlflow.b", learning_item_id: "cpp.tooling.error_strategy.mc_controlflow", content: "Throw an exception each time nothing is found", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.error_strategy.mc_controlflow.c", learning_item_id: "cpp.tooling.error_strategy.mc_controlflow", content: "Call std::abort", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.error_strategy.mc_controlflow.d", learning_item_id: "cpp.tooling.error_strategy.mc_controlflow", content: "Set a global errno-style flag", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
