@@ -16,7 +16,9 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.raii", title: "RAII", description: "Resource ownership and cleanup.", order_index: 30 },
   { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 },
   { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 },
-  { id: "dsa.arrays", title: "Arrays and sequences", description: "Indexing and traversal fundamentals.", order_index: 110 }
+  { id: "dsa.arrays", title: "Arrays and sequences", description: "Indexing and traversal fundamentals.", order_index: 110 },
+  { id: "dsa.searching", title: "Searching", description: "Finding values efficiently.", order_index: 120 },
+  { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -331,6 +333,30 @@ export const skillSeed: Skill[] = [
     item_types: ["lesson", "quiz", "code_reading"],
     order_index: 1020,
     is_active: true
+  },
+  {
+    id: "dsa.searching.binary_search",
+    domain: "dsa",
+    module_id: "dsa.searching",
+    title: "Binary search",
+    description: "Find a target in a sorted sequence by repeatedly halving the search range.",
+    learner_goal: "Use binary search on sorted data and explain why sorting is required.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 1110,
+    is_active: true
+  },
+  {
+    id: "dsa.sorting.comparator",
+    domain: "dsa",
+    module_id: "dsa.sorting",
+    title: "Sorting with a comparator",
+    description: "Sort by a custom order using a comparator function or lambda.",
+    learner_goal: "Pass a comparator to std::sort to order by a custom key or direction.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 1210,
+    is_active: true
   }
 ];
 
@@ -359,7 +385,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.stl.iterators", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "cpp.stl.algorithms", prerequisite_skill_id: "cpp.stl.iterators", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
-  { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" }
+  { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
+  { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
+  { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {

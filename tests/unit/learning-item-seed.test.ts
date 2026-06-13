@@ -136,9 +136,11 @@ describe("curriculum coverage", () => {
     "cpp.stl.set",
     "cpp.stl.algorithms",
     "cpp.stl.iterators",
-    // DSA arrays (#48, first slice)
+    // DSA (#48)
     "dsa.arrays.indexing",
-    "dsa.arrays.traversal"
+    "dsa.arrays.traversal",
+    "dsa.searching.binary_search",
+    "dsa.sorting.comparator"
   ];
 
   it("has at least one learning item for every covered skill", () => {
@@ -155,7 +157,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||
         id.startsWith("cpp.stl.") ||
-        id.startsWith("dsa.arrays.")
+        id.startsWith("dsa.")
     );
     for (const skillId of denseSkills) {
       const itemIds = new Set(
