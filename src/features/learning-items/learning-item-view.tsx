@@ -1,6 +1,8 @@
 import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnswerForm } from "./answer-form";
+import { ExplanationPanel } from "./explanation-panel";
+import { RevealExplanation } from "./reveal-explanation";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
@@ -18,6 +20,10 @@ const TYPE_LABELS: Record<LearningItemType, string> = {
 export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   const { item, choices } = data;
   const hasChoices = choices.length > 0;
+  // Lessons show their explanation as lesson content. For graded/retrieval item
+  // types the explanation often reveals the answer, so it is gated until after a
+  // submission (in AnswerForm) or an explicit reveal (RevealExplanation) — #145.
+  const isLesson = item.type === "lesson";
 
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
@@ -43,15 +49,14 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
 
         {hasChoices ? (
           <div data-testid="learning-item-choices">
-            <AnswerForm itemId={item.id} choices={choices} />
+            <AnswerForm itemId={item.id} choices={choices} explanation={item.explanation ?? null} />
           </div>
         ) : null}
 
-        {item.explanation ? (
-          <details className="rounded-2xl bg-emerald-50/80 p-4 text-sm text-emerald-950">
-            <summary className="cursor-pointer font-bold">Show explanation</summary>
-            <p className="mt-2 whitespace-pre-wrap break-words leading-6">{item.explanation}</p>
-          </details>
+        {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
+
+        {item.explanation && !isLesson && !hasChoices ? (
+          <RevealExplanation explanation={item.explanation} />
         ) : null}
       </CardContent>
     </Card>
