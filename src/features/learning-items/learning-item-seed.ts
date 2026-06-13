@@ -1150,6 +1150,106 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.error_handling.lesson",
+    type: "lesson",
+    title: "Error handling",
+    prompt:
+      'C++ reports failures in two main ways. Exceptions (`throw std::runtime_error("...")` caught by `try { ... } catch (const std::exception& e) { ... }`) unwind the stack to a handler and run destructors along the way (RAII makes this safe). Error returns (a status code or `std::optional`/`std::expected`) make failure part of the value. Use exceptions for exceptional, hard-to-handle-locally errors; use return values for expected, routine failures.',
+    explanation:
+      "Exceptions unwind to a handler and run destructors (so RAII cleans up). Prefer return-value errors for expected outcomes and exceptions for truly exceptional ones.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1910,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.error_handling.mc_unwind",
+    type: "multiple_choice",
+    title: "What happens when an exception is thrown",
+    prompt: "When an exception is thrown and caught higher up, what happens to local objects in between?",
+    explanation:
+      "Stack unwinding destroys the local objects between the throw and the handler, running their destructors — which is why RAII makes exception handling safe.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1920,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.testing.lesson",
+    type: "lesson",
+    title: "Testing",
+    prompt:
+      "A unit test calls your code with known inputs and checks the output against the expected result, failing loudly when they differ. A good bug-fix workflow writes a test that fails before the fix and passes after, locking the bug out for good. Frameworks like GoogleTest or Catch2 structure tests and assertions; even a few `assert`-style checks are far better than manual inspection.",
+    explanation:
+      'Tests turn "I think it works" into "it is verified". Write a failing test first, then make it pass.',
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1930,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.testing.mc_regression",
+    type: "multiple_choice",
+    title: "A good bug-fix workflow",
+    prompt: "What is the recommended way to fix a bug so it stays fixed?",
+    explanation:
+      "Write a test that reproduces the bug (fails before the fix) and passes after the fix. The test guards against the bug returning.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1940,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.debugging.lesson",
+    type: "lesson",
+    title: "Debugging",
+    prompt:
+      "When code misbehaves, reproduce it reliably with the smallest input you can, then narrow down where the actual differs from the expected. A debugger (gdb/lldb or an IDE) lets you set breakpoints, step line by line, and inspect variables; targeted print/log statements work too. Change one thing at a time and re-check, rather than guessing broadly.",
+    explanation:
+      "Reproduce small, then bisect: find the first point where state goes wrong. A debugger and a minimal repro beat random edits.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1950,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.debugging.mc_firststep",
+    type: "multiple_choice",
+    title: "First step when debugging",
+    prompt: "What is a good first step when investigating a bug?",
+    explanation:
+      "Get a small, reliable reproduction. Once you can trigger the bug consistently with minimal input, you can bisect to the cause.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1960,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.build.lesson",
+    type: "lesson",
+    title: "Compiling and building",
+    prompt:
+      'Building a C++ program has two key stages: compiling each source file into an object file (syntax/type checks happen here), then linking the object files and libraries into an executable (unresolved symbols are errors here). A build system like CMake describes targets and dependencies so the right files are compiled and linked with one command, instead of typing compiler invocations by hand.',
+    explanation:
+      'A "compile error" is in one file; an "undefined reference" is usually a link error (a definition is missing). Build systems automate the compile+link steps.',
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1970,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.build.mc_linkstage",
+    type: "multiple_choice",
+    title: "Compile vs link",
+    prompt: 'An "undefined reference to foo()" error most likely comes from which stage?',
+    explanation:
+      "That is a linker error: the code compiled, but no definition of foo() was found to link against. Compile errors are about syntax/types within a single translation unit.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1980,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o.lesson",
     type: "lesson",
     title: "Big-O notation",
@@ -1503,6 +1603,15 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.templates.ranges.lesson", skill_id: "cpp.templates.ranges", is_primary: true },
   { learning_item_id: "cpp.templates.ranges.mc_views", skill_id: "cpp.templates.ranges", is_primary: true },
   { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.stl.vector", is_primary: false },
+  { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.tooling.error_handling", is_primary: true },
+  { learning_item_id: "cpp.tooling.error_handling.mc_unwind", skill_id: "cpp.tooling.error_handling", is_primary: true },
+  { learning_item_id: "cpp.tooling.testing.lesson", skill_id: "cpp.tooling.testing", is_primary: true },
+  { learning_item_id: "cpp.tooling.testing.mc_regression", skill_id: "cpp.tooling.testing", is_primary: true },
+  { learning_item_id: "cpp.tooling.debugging.lesson", skill_id: "cpp.tooling.debugging", is_primary: true },
+  { learning_item_id: "cpp.tooling.debugging.mc_firststep", skill_id: "cpp.tooling.debugging", is_primary: true },
+  { learning_item_id: "cpp.tooling.build.lesson", skill_id: "cpp.tooling.build", is_primary: true },
+  { learning_item_id: "cpp.tooling.build.mc_linkstage", skill_id: "cpp.tooling.build", is_primary: true },
+  { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.raii.exception_safety_intro", is_primary: false },
   { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.problem_solving.lesson", skill_id: "dsa.complexity.problem_solving", is_primary: true },
@@ -1743,6 +1852,26 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.templates.ranges.mc_views.b", learning_item_id: "cpp.templates.ranges.mc_views", content: "They run on the GPU automatically", is_correct: false, order_index: 20 },
   { id: "cpp.templates.ranges.mc_views.c", learning_item_id: "cpp.templates.ranges.mc_views", content: "They always copy the container first", is_correct: false, order_index: 30 },
   { id: "cpp.templates.ranges.mc_views.d", learning_item_id: "cpp.templates.ranges.mc_views", content: "They remove the need for any includes", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.error_handling.mc_unwind.a", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They are destroyed by stack unwinding (their destructors run)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.error_handling.mc_unwind.b", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They leak; destructors are skipped", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.error_handling.mc_unwind.c", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They are copied to the handler", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.error_handling.mc_unwind.d", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "Nothing happens until the program exits", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.testing.mc_regression.a", learning_item_id: "cpp.tooling.testing.mc_regression", content: "Write a test that fails before the fix and passes after", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.testing.mc_regression.b", learning_item_id: "cpp.tooling.testing.mc_regression", content: "Inspect the output once by hand and move on", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.testing.mc_regression.c", learning_item_id: "cpp.tooling.testing.mc_regression", content: "Add a try/catch around the whole program", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.testing.mc_regression.d", learning_item_id: "cpp.tooling.testing.mc_regression", content: "Delete the failing code path", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.debugging.mc_firststep.a", learning_item_id: "cpp.tooling.debugging.mc_firststep", content: "Get a small, reliable reproduction of the bug", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.debugging.mc_firststep.b", learning_item_id: "cpp.tooling.debugging.mc_firststep", content: "Rewrite large parts at random", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.debugging.mc_firststep.c", learning_item_id: "cpp.tooling.debugging.mc_firststep", content: "Disable the compiler warnings", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.debugging.mc_firststep.d", learning_item_id: "cpp.tooling.debugging.mc_firststep", content: "Ship it and wait for reports", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.build.mc_linkstage.a", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "The link stage (a definition is missing)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.build.mc_linkstage.b", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "The compile stage (a syntax error)", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.build.mc_linkstage.c", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "Runtime", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.build.mc_linkstage.d", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "Preprocessing only", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
