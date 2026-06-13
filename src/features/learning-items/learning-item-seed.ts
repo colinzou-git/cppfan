@@ -194,6 +194,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.values_types.fundamental_types.lesson",
+    type: "lesson",
+    title: "Choosing a fundamental type",
+    prompt:
+      "C++ gives you a few fundamental types, and picking the right one matters. Use `int` for whole numbers (counts, indices) — it is exact, but has a limited range, so use a wider type like `long long` for very large values. Use `double` for real numbers and measurements; it is approximate, so equality comparisons like `0.1 + 0.2 == 0.3` can be false and money is better stored in integer cents than in `double`. Use `bool` for true/false flags rather than an `int` 0/1. Use `char` for a single character/byte. The guiding questions: does the value need a fractional part (then `double`), is it a yes/no (then `bool`), how large can it get (size the integer accordingly)? Choosing by intent makes code clearer and avoids precision and overflow surprises.",
+    explanation:
+      "int for exact whole numbers (widen to long long for big values), double for approximate reals (avoid == and money), bool for flags, char for one character. Choose by range and intent.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 3270,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.fundamental_types.mc_money",
+    type: "multiple_choice",
+    title: "Picking a type for money",
+    prompt: "Why is `double` a poor choice for storing exact money amounts like $0.10?",
+    explanation:
+      "double is binary floating point and cannot represent most decimal fractions exactly, so values like 0.10 are approximate and sums drift. Store money as integer cents (an exact int) instead.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 3280,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.signed_unsigned.lesson",
+    type: "lesson",
+    title: "Signed and unsigned pitfalls",
+    prompt:
+      "Mixing signed and unsigned integers is a classic bug source. Unsigned types cannot represent negatives: `unsigned int u = 0; u - 1` does not give -1, it wraps around to a huge value (modular arithmetic). When you compare a signed and an unsigned value, the signed one is converted to unsigned first, so `int i = -1; unsigned u = 1; i < u` is *false* — because -1 becomes a large unsigned number. This bites most often with container sizes: `v.size()` returns an unsigned `size_t`, so a loop like `for (int i = 0; i <= v.size() - 1; ++i)` breaks when `v` is empty (`0u - 1` is huge). Prefer signed indices, range-based for loops, or cast deliberately, and enable `-Wsign-compare` so the compiler flags risky mixes.",
+    explanation:
+      "Unsigned can't be negative and wraps (0u - 1 is huge); signed/unsigned comparisons convert the signed value to unsigned, so -1 < 1u is false. Beware loops using container .size().",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3290,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.signed_unsigned.mc_compare",
+    type: "multiple_choice",
+    title: "A signed/unsigned comparison",
+    prompt: "With `int i = -1; unsigned u = 1;`, what does `i < u` evaluate to in C++?",
+    explanation:
+      "false. The signed -1 is converted to unsigned for the comparison, becoming a very large value, so it is not less than 1. This surprising result is the core signed/unsigned pitfall.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3300,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.literals.lesson",
+    type: "lesson",
+    title: "Literals and expression evaluation",
+    prompt:
+      "A literal is a value written directly in code: `42` (int), `42LL` (long long), `3.14` (double), `3.14f` (float), `'A'` (char), `true` (bool), `\"hi\"` (string literal). The literal's form determines its type, which then drives how an expression evaluates. The biggest beginner trap is **integer division**: `7 / 2` is `3`, not `3.5`, because both operands are `int` — the fractional part is discarded and `%` gives the remainder (`7 % 2 == 1`). To get `3.5` you make an operand floating point: `7.0 / 2` or `7 / 2.0`. Operator precedence also matters: `2 + 3 * 4` is `14`, not `20`, because `*` binds tighter than `+`; use parentheses when in doubt. Reading the literal types first makes an expression's result predictable.",
+    explanation:
+      "A literal's form sets its type. Integer division truncates (7 / 2 == 3); make an operand floating point (7.0 / 2) for a real result. Respect precedence (* before +) or parenthesize.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 3310,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.literals.mc_intdiv",
+    type: "multiple_choice",
+    title: "Integer division",
+    prompt: "In C++, what is the value of the expression `7 / 2`?",
+    explanation:
+      "Both operands are int, so this is integer division: the result is 3 (the fractional part is discarded). Use 7.0 / 2 to get 3.5.",
+    difficulty: "beginner",
+    estimated_minutes: 1,
+    order_index: 3320,
+    is_active: true
+  },
+  {
     id: "cpp.control_flow.conditionals.lesson",
     type: "lesson",
     title: "Conditionals: if, else, and switch",
@@ -2820,6 +2895,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.values_types.variables.mc_auto", skill_id: "cpp.values_types.variables", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.lesson", skill_id: "cpp.values_types.conversions", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.mc_static_cast", skill_id: "cpp.values_types.conversions", is_primary: true },
+  { learning_item_id: "cpp.values_types.fundamental_types.lesson", skill_id: "cpp.values_types.fundamental_types", is_primary: true },
+  { learning_item_id: "cpp.values_types.fundamental_types.mc_money", skill_id: "cpp.values_types.fundamental_types", is_primary: true },
+  { learning_item_id: "cpp.values_types.signed_unsigned.lesson", skill_id: "cpp.values_types.signed_unsigned", is_primary: true },
+  { learning_item_id: "cpp.values_types.signed_unsigned.mc_compare", skill_id: "cpp.values_types.signed_unsigned", is_primary: true },
+  { learning_item_id: "cpp.values_types.literals.lesson", skill_id: "cpp.values_types.literals", is_primary: true },
+  { learning_item_id: "cpp.values_types.literals.mc_intdiv", skill_id: "cpp.values_types.literals", is_primary: true },
   { learning_item_id: "cpp.control_flow.conditionals.lesson", skill_id: "cpp.control_flow.conditionals", is_primary: true },
   { learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", skill_id: "cpp.control_flow.conditionals", is_primary: true },
   { learning_item_id: "cpp.control_flow.loops.lesson", skill_id: "cpp.control_flow.loops", is_primary: true },
@@ -3079,6 +3160,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.values_types.conversions.mc_static_cast.b", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "4 (rounded)", is_correct: false, order_index: 20 },
   { id: "cpp.values_types.conversions.mc_static_cast.c", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "3.9 (unchanged)", is_correct: false, order_index: 30 },
   { id: "cpp.values_types.conversions.mc_static_cast.d", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "a compile error", is_correct: false, order_index: 40 },
+
+  { id: "cpp.values_types.fundamental_types.mc_money.a", learning_item_id: "cpp.values_types.fundamental_types.mc_money", content: "double is binary floating point, so decimals like 0.10 are approximate and drift", is_correct: true, order_index: 10 },
+  { id: "cpp.values_types.fundamental_types.mc_money.b", learning_item_id: "cpp.values_types.fundamental_types.mc_money", content: "double cannot hold numbers below 1.0", is_correct: false, order_index: 20 },
+  { id: "cpp.values_types.fundamental_types.mc_money.c", learning_item_id: "cpp.values_types.fundamental_types.mc_money", content: "double is slower than int for all programs", is_correct: false, order_index: 30 },
+  { id: "cpp.values_types.fundamental_types.mc_money.d", learning_item_id: "cpp.values_types.fundamental_types.mc_money", content: "double rounds every value to two decimal places", is_correct: false, order_index: 40 },
+
+  { id: "cpp.values_types.signed_unsigned.mc_compare.a", learning_item_id: "cpp.values_types.signed_unsigned.mc_compare", content: "false (the signed -1 converts to a large unsigned value)", is_correct: true, order_index: 10 },
+  { id: "cpp.values_types.signed_unsigned.mc_compare.b", learning_item_id: "cpp.values_types.signed_unsigned.mc_compare", content: "true (-1 is less than 1)", is_correct: false, order_index: 20 },
+  { id: "cpp.values_types.signed_unsigned.mc_compare.c", learning_item_id: "cpp.values_types.signed_unsigned.mc_compare", content: "It is a compile error", is_correct: false, order_index: 30 },
+  { id: "cpp.values_types.signed_unsigned.mc_compare.d", learning_item_id: "cpp.values_types.signed_unsigned.mc_compare", content: "It throws an exception at run time", is_correct: false, order_index: 40 },
+
+  { id: "cpp.values_types.literals.mc_intdiv.a", learning_item_id: "cpp.values_types.literals.mc_intdiv", content: "3", is_correct: true, order_index: 10 },
+  { id: "cpp.values_types.literals.mc_intdiv.b", learning_item_id: "cpp.values_types.literals.mc_intdiv", content: "3.5", is_correct: false, order_index: 20 },
+  { id: "cpp.values_types.literals.mc_intdiv.c", learning_item_id: "cpp.values_types.literals.mc_intdiv", content: "4", is_correct: false, order_index: 30 },
+  { id: "cpp.values_types.literals.mc_intdiv.d", learning_item_id: "cpp.values_types.literals.mc_intdiv", content: "2", is_correct: false, order_index: 40 },
 
   { id: "cpp.control_flow.conditionals.mc_fallthrough.a", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "Execution falls through into the next case", is_correct: true, order_index: 10 },
   { id: "cpp.control_flow.conditionals.mc_fallthrough.b", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "It is a compile error", is_correct: false, order_index: 20 },
