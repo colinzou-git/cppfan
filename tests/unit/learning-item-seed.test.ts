@@ -121,6 +121,11 @@ describe("curriculum coverage", () => {
     "cpp.references.pointers",
     "cpp.references.const_correctness",
     "cpp.references.parameter_passing",
+    // templates (#70)
+    "cpp.templates.function_templates",
+    "cpp.templates.class_templates",
+    "cpp.templates.concepts",
+    "cpp.templates.ranges",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -185,6 +190,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.functions.") ||
         id.startsWith("cpp.references.") ||
         id.startsWith("cpp.value_semantics.") ||
+        id.startsWith("cpp.templates.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||
