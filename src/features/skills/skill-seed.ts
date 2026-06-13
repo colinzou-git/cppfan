@@ -11,6 +11,8 @@ import type { Skill, SkillMapPreviewData, SkillModule, SkillPrerequisite } from 
  */
 
 export const skillModules: SkillModule[] = [
+  { id: "cpp.program_basics", title: "Program basics", description: "Program structure and console I/O.", order_index: 2 },
+  { id: "cpp.values_types", title: "Values and types", description: "Variables, types, and conversions.", order_index: 4 },
   { id: "cpp.structs_classes", title: "Structs and classes", description: "Members and access control.", order_index: 10 },
   { id: "cpp.constructors", title: "Constructors", description: "Object initialization and lifetime.", order_index: 20 },
   { id: "cpp.raii", title: "RAII", description: "Resource ownership and cleanup.", order_index: 30 },
@@ -25,6 +27,54 @@ export const skillModules: SkillModule[] = [
 ];
 
 export const skillSeed: Skill[] = [
+  {
+    id: "cpp.program_basics.structure",
+    domain: "cpp",
+    module_id: "cpp.program_basics",
+    title: "Program structure and main()",
+    description: "Read a minimal program: includes, main(), statements, and return values.",
+    learner_goal: "Explain where a program starts and what main()'s return value means.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 1,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.io",
+    domain: "cpp",
+    module_id: "cpp.program_basics",
+    title: "Console input and output",
+    description: "Print with std::cout and read with std::cin.",
+    learner_goal: "Write output and read input using the iostream operators.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 2,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.variables",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Variables, types, and initialization",
+    description: "Declare and initialize variables of the fundamental types.",
+    learner_goal: "Choose a fundamental type, initialize on declaration, and use auto/const.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 3,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.conversions",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Conversions and casts",
+    description: "Understand truncation, narrowing, and static_cast.",
+    learner_goal: "Predict the result of a numeric conversion and cast explicitly with static_cast.",
+    level: "beginner",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 4,
+    is_active: true
+  },
   {
     id: "cpp.structs_classes.syntax",
     domain: "cpp",
@@ -436,6 +486,9 @@ export const skillSeed: Skill[] = [
 ];
 
 export const skillPrerequisitesSeed: SkillPrerequisite[] = [
+  { skill_id: "cpp.program_basics.io", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.variables", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.conversions", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.public_private", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.const_methods_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.invariants_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },

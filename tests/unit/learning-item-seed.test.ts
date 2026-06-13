@@ -107,6 +107,11 @@ describe("getLearningItemById", () => {
 
 describe("curriculum coverage", () => {
   const expectedSkillsWithContent = [
+    // foundations (#66)
+    "cpp.program_basics.structure",
+    "cpp.program_basics.io",
+    "cpp.values_types.variables",
+    "cpp.values_types.conversions",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -159,6 +164,8 @@ describe("curriculum coverage", () => {
   it("gives each constructors and raii skill at least two items (per the agreed density)", () => {
     const denseSkills = expectedSkillsWithContent.filter(
       (id) =>
+        id.startsWith("cpp.program_basics.") ||
+        id.startsWith("cpp.values_types.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||
