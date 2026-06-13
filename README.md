@@ -190,6 +190,8 @@ supabase/migrations/20260613310000_add_dsa_stacks_hashing_skills.sql
 supabase/migrations/20260613320000_seed_dsa_stacks_hashing_items.sql
 supabase/migrations/20260613330000_add_dsa_recursion_twopointer_skills.sql
 supabase/migrations/20260613340000_seed_dsa_recursion_twopointer_items.sql
+supabase/migrations/20260613350000_add_foundation_basics_types_skills.sql
+supabase/migrations/20260613360000_seed_foundation_basics_types_items.sql
 ```
 
 The `profiles` migration adds:

@@ -19,6 +19,106 @@ import type {
 
 export const learningItems: LearningItem[] = [
   {
+    id: "cpp.program_basics.structure.lesson",
+    type: "lesson",
+    title: "A minimal C++ program",
+    prompt:
+      'A C++ program is built from functions, and execution begins in `int main()`. `main` returns an `int` to the operating system, where `0` means success. Statements end with a semicolon, and `#include <...>` brings in library facilities such as `<iostream>`. Example:\n\n```cpp\n#include <iostream>\nint main() {\n  std::cout << "Hello";\n  return 0;\n}\n```',
+    explanation:
+      "Every standard C++ program has exactly one main(). Returning 0 signals success; the compiler even lets you omit the return in main (it defaults to 0).",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 1,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.structure.mc_entry",
+    type: "multiple_choice",
+    title: "Where a program starts",
+    prompt: "Where does a standard C++ program begin executing?",
+    explanation:
+      "Execution begins in the `main` function regardless of where it appears in the file. #include lines and other functions do not run on their own.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 2,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.io.lesson",
+    type: "lesson",
+    title: "Console input and output",
+    prompt:
+      'The `<iostream>` header provides `std::cout` for output and `std::cin` for input. `std::cout << value;` prints a value, and `<<` chains: `std::cout << "x = " << x << "\\n";`. `std::cin >> x;` reads a value from the keyboard into `x`. Use `"\\n"` or `std::endl` to end a line.',
+    explanation:
+      'Think of << as "send to output" and >> as "read from input". They can be chained to handle several values in one statement.',
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 3,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.io.mc_read",
+    type: "multiple_choice",
+    title: "Reading input",
+    prompt: "Which statement reads a value typed by the user into an `int x`?",
+    explanation:
+      "`std::cin >> x;` extracts input into x. `std::cout << x;` prints x instead of reading it.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 4,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.variables.lesson",
+    type: "lesson",
+    title: "Variables and fundamental types",
+    prompt:
+      "A variable has a type and a name, and should be initialized when declared: `int count = 0;`. Fundamental types include `int` (whole numbers), `double` (floating point), `bool` (true/false), and `char` (a single character). `auto` deduces the type from the initializer (`auto n = 0;` is an int), `const` marks a value that must not change, and `constexpr` marks a compile-time constant.",
+    explanation:
+      "Prefer initializing on declaration to avoid using an indeterminate value. Use auto when the type is obvious from the right-hand side.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 5,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.variables.mc_auto",
+    type: "multiple_choice",
+    title: "Type deduced by auto",
+    prompt: "What type does `auto x = 3.0;` give `x`?",
+    explanation:
+      "The initializer `3.0` is a double literal, so `auto` deduces `x` as `double`. `3` (no dot) would deduce `int`.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 6,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.conversions.lesson",
+    type: "lesson",
+    title: "Conversions, truncation, and static_cast",
+    prompt:
+      "Converting between numeric types can lose information. Assigning a `double` to an `int` truncates toward zero (drops the fractional part). A *narrowing* conversion inside braces (`int x{3.9};`) is rejected by the compiler. Use `static_cast<int>(d)` to convert explicitly and signal intent. Mixing signed and unsigned values in comparisons can also give surprising results.",
+    explanation:
+      "Make lossy conversions explicit with static_cast so the intent is clear and the compiler stops warning. Watch for signed/unsigned mixing.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 7,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.conversions.mc_static_cast",
+    type: "multiple_choice",
+    title: "Result of a cast",
+    prompt: "What value does `static_cast<int>(3.9)` produce?",
+    explanation:
+      "Converting a double to an int truncates toward zero, discarding the fractional part, so the result is 3 (not rounded to 4).",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 8,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -877,6 +977,14 @@ export const learningItems: LearningItem[] = [
 ];
 
 export const learningItemSkills: LearningItemSkill[] = [
+  { learning_item_id: "cpp.program_basics.structure.lesson", skill_id: "cpp.program_basics.structure", is_primary: true },
+  { learning_item_id: "cpp.program_basics.structure.mc_entry", skill_id: "cpp.program_basics.structure", is_primary: true },
+  { learning_item_id: "cpp.program_basics.io.lesson", skill_id: "cpp.program_basics.io", is_primary: true },
+  { learning_item_id: "cpp.program_basics.io.mc_read", skill_id: "cpp.program_basics.io", is_primary: true },
+  { learning_item_id: "cpp.values_types.variables.lesson", skill_id: "cpp.values_types.variables", is_primary: true },
+  { learning_item_id: "cpp.values_types.variables.mc_auto", skill_id: "cpp.values_types.variables", is_primary: true },
+  { learning_item_id: "cpp.values_types.conversions.lesson", skill_id: "cpp.values_types.conversions", is_primary: true },
+  { learning_item_id: "cpp.values_types.conversions.mc_static_cast", skill_id: "cpp.values_types.conversions", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -959,6 +1067,26 @@ export const learningItemSkills: LearningItemSkill[] = [
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
+  { id: "cpp.program_basics.structure.mc_entry.a", learning_item_id: "cpp.program_basics.structure.mc_entry", content: "The main() function", is_correct: true, order_index: 10 },
+  { id: "cpp.program_basics.structure.mc_entry.b", learning_item_id: "cpp.program_basics.structure.mc_entry", content: "The first #include line", is_correct: false, order_index: 20 },
+  { id: "cpp.program_basics.structure.mc_entry.c", learning_item_id: "cpp.program_basics.structure.mc_entry", content: "The first line of the file", is_correct: false, order_index: 30 },
+  { id: "cpp.program_basics.structure.mc_entry.d", learning_item_id: "cpp.program_basics.structure.mc_entry", content: "Any function named start()", is_correct: false, order_index: 40 },
+
+  { id: "cpp.program_basics.io.mc_read.a", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::cin >> x;", is_correct: true, order_index: 10 },
+  { id: "cpp.program_basics.io.mc_read.b", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::cout << x;", is_correct: false, order_index: 20 },
+  { id: "cpp.program_basics.io.mc_read.c", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::read(x);", is_correct: false, order_index: 30 },
+  { id: "cpp.program_basics.io.mc_read.d", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::cin << x;", is_correct: false, order_index: 40 },
+
+  { id: "cpp.values_types.variables.mc_auto.a", learning_item_id: "cpp.values_types.variables.mc_auto", content: "double", is_correct: true, order_index: 10 },
+  { id: "cpp.values_types.variables.mc_auto.b", learning_item_id: "cpp.values_types.variables.mc_auto", content: "int", is_correct: false, order_index: 20 },
+  { id: "cpp.values_types.variables.mc_auto.c", learning_item_id: "cpp.values_types.variables.mc_auto", content: "float", is_correct: false, order_index: 30 },
+  { id: "cpp.values_types.variables.mc_auto.d", learning_item_id: "cpp.values_types.variables.mc_auto", content: "auto is not a real type here", is_correct: false, order_index: 40 },
+
+  { id: "cpp.values_types.conversions.mc_static_cast.a", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "3 (truncated toward zero)", is_correct: true, order_index: 10 },
+  { id: "cpp.values_types.conversions.mc_static_cast.b", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "4 (rounded)", is_correct: false, order_index: 20 },
+  { id: "cpp.values_types.conversions.mc_static_cast.c", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "3.9 (unchanged)", is_correct: false, order_index: 30 },
+  { id: "cpp.values_types.conversions.mc_static_cast.d", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "a compile error", is_correct: false, order_index: 40 },
+
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },
   { id: "cpp.structs_classes.syntax.mc_default_access.c", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Protected", is_correct: false, order_index: 30 },
