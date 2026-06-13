@@ -33,7 +33,8 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.trees", title: "Trees, heaps, and DSU", description: "Tree traversal, heaps, and union-find.", order_index: 160 },
   { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 },
   { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 },
-  { id: "dsa.techniques", title: "Algorithmic techniques", description: "Prefix sums, sliding window, greedy, and dynamic programming.", order_index: 180 }
+  { id: "dsa.techniques", title: "Algorithmic techniques", description: "Prefix sums, sliding window, greedy, and dynamic programming.", order_index: 180 },
+  { id: "dsa.strings", title: "String algorithms", description: "String manipulation, searching, palindromes, and parsing.", order_index: 190 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -866,6 +867,54 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.manipulation",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "String manipulation",
+    description: "Build and transform strings efficiently, avoiding hidden copies.",
+    learner_goal: "Concatenate, slice, and mutate strings without accidental O(n^2) cost.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1910,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.searching",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Substring search",
+    description: "Find a pattern inside text with naive scanning or KMP.",
+    learner_goal: "Compare naive O(nm) search with linear-time KMP and know when each matters.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1920,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Palindromes and anagrams",
+    description: "Check palindromes with two pointers and anagrams with frequency counts.",
+    learner_goal: "Use two pointers for palindromes and character counts for anagrams.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1930,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Tokenizing and parsing",
+    description: "Split text into tokens and parse structured input.",
+    learner_goal: "Split a string on delimiters and parse fields from a line of input.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1940,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -947,6 +996,10 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.dynamic_programming", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.manipulation", prerequisite_skill_id: "cpp.stl.string", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.searching", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.palindrome", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.parsing", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];

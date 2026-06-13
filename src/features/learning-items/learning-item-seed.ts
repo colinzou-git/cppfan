@@ -1774,6 +1774,106 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2280,
     is_active: true
+  },
+  {
+    id: "dsa.strings.manipulation.lesson",
+    type: "lesson",
+    title: "String manipulation",
+    prompt:
+      "A C++ `std::string` is a growable array of characters with size, `operator[]`, `substr`, `append`, and `+=`. The key performance trap is building a long string with repeated `result = result + piece` inside a loop: each `+` may allocate and copy the whole accumulated string, giving O(n^2) total work. Prefer `+=` (append in place) or reserve capacity up front. Use `substr(pos, len)` to slice and remember it returns a new string (a copy). For read-only views that avoid copies, `std::string_view` refers to existing characters without owning them.",
+    explanation:
+      "Repeated `s = s + piece` is O(n^2) because each concatenation copies the whole string; append in place with `+=` (or reserve) for linear cost.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2310,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.manipulation.mc_concat",
+    type: "multiple_choice",
+    title: "Concatenation cost",
+    prompt: "Why can building a long string with `result = result + piece` inside a loop be O(n^2)?",
+    explanation:
+      "Each `result + piece` builds a brand-new string by copying all characters accumulated so far, so over n iterations the copying work grows quadratically. Appending in place with `+=` avoids the repeated full copies.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2320,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.searching.lesson",
+    type: "lesson",
+    title: "Substring search",
+    prompt:
+      "Finding a pattern of length m inside text of length n can be done naively by trying every start position and comparing characters, which is O(n*m) in the worst case (think \"aaaa...a\" searched for \"aaab\"). The Knuth-Morris-Pratt (KMP) algorithm precomputes a failure table from the pattern so that after a mismatch it never re-examines already-matched text characters, giving O(n + m) time. For most everyday cases `std::string::find` is fine; KMP matters when the text is huge or worst-case inputs are adversarial.",
+    explanation:
+      "Naive substring search is O(n*m) worst case; KMP uses a precomputed failure table to avoid re-scanning matched characters and runs in O(n + m).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2330,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.searching.mc_kmp",
+    type: "multiple_choice",
+    title: "KMP complexity",
+    prompt: "What is the time complexity of KMP substring search on text length n and pattern length m?",
+    explanation:
+      "KMP precomputes a failure table in O(m) and scans the text once without backtracking, so the total is O(n + m) — better than naive O(n*m) on adversarial inputs.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2340,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome.lesson",
+    type: "lesson",
+    title: "Palindromes and anagrams",
+    prompt:
+      "To check whether a string is a palindrome, put one pointer at the start and one at the end, compare the characters, and step both inward until they meet — O(n) time and O(1) extra space. To check whether two strings are anagrams (same letters, any order), count the frequency of each character in both and compare the counts (an array of 26 for lowercase letters, or a hash map for arbitrary characters), also O(n). Both problems are about structure of characters rather than order of comparison, so counting and two pointers beat sorting.",
+    explanation:
+      "Palindrome checks use two pointers moving inward (O(n), O(1) space); anagram checks compare per-character frequency counts (O(n)).",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2350,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome.mc_anagram",
+    type: "multiple_choice",
+    title: "Detecting an anagram",
+    prompt: "What is an O(n) way to decide whether two strings are anagrams of each other?",
+    explanation:
+      "Count how many times each character appears in each string and compare the counts. If every character's count matches, the strings are anagrams — this is O(n), faster than sorting both strings.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2360,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing.lesson",
+    type: "lesson",
+    title: "Tokenizing and parsing",
+    prompt:
+      "Parsing turns raw text into meaningful pieces. The simplest step is tokenizing: splitting a line into tokens on a delimiter. In C++ you can feed a line into a `std::istringstream` and read tokens with `>>` (whitespace-separated) or use `std::getline(stream, token, ',')` to split on a custom delimiter such as a comma. Reading numbers with `>>` into an `int` or `double` does the conversion for you. Watch the edge cases: empty fields, trailing delimiters, and leading/trailing whitespace all change how many tokens you get.",
+    explanation:
+      "Tokenize by streaming a line through `istringstream` and extracting with `>>` or `getline(.., delim)`; mind empty fields and trailing delimiters.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2370,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing.mc_delim",
+    type: "multiple_choice",
+    title: "Splitting on a delimiter",
+    prompt: "Which standard tool splits a string into fields on a custom delimiter such as a comma?",
+    explanation:
+      "`std::getline(stream, token, ',')` reads up to each comma, making it the idiomatic way to split a line into comma-separated fields. Plain `>>` only splits on whitespace.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2380,
+    is_active: true
   }
 ];
 
@@ -1931,6 +2031,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.techniques.greedy.mc_fails", skill_id: "dsa.techniques.greedy", is_primary: true },
   { learning_item_id: "dsa.techniques.dynamic_programming.lesson", skill_id: "dsa.techniques.dynamic_programming", is_primary: true },
   { learning_item_id: "dsa.techniques.dynamic_programming.mc_when", skill_id: "dsa.techniques.dynamic_programming", is_primary: true },
+  { learning_item_id: "dsa.strings.manipulation.lesson", skill_id: "dsa.strings.manipulation", is_primary: true },
+  { learning_item_id: "dsa.strings.manipulation.mc_concat", skill_id: "dsa.strings.manipulation", is_primary: true },
+  { learning_item_id: "dsa.strings.searching.lesson", skill_id: "dsa.strings.searching", is_primary: true },
+  { learning_item_id: "dsa.strings.searching.mc_kmp", skill_id: "dsa.strings.searching", is_primary: true },
+  { learning_item_id: "dsa.strings.palindrome.lesson", skill_id: "dsa.strings.palindrome", is_primary: true },
+  { learning_item_id: "dsa.strings.palindrome.mc_anagram", skill_id: "dsa.strings.palindrome", is_primary: true },
+  { learning_item_id: "dsa.strings.parsing.lesson", skill_id: "dsa.strings.parsing", is_primary: true },
+  { learning_item_id: "dsa.strings.parsing.mc_delim", skill_id: "dsa.strings.parsing", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2273,7 +2381,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.techniques.dynamic_programming.mc_when.a", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "Optimal substructure and overlapping subproblems", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.dynamic_programming.mc_when.b", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "Sorted input and a single answer", is_correct: false, order_index: 20 },
   { id: "dsa.techniques.dynamic_programming.mc_when.c", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "No recursion and constant memory", is_correct: false, order_index: 30 },
-  { id: "dsa.techniques.dynamic_programming.mc_when.d", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "A greedy choice that is always safe", is_correct: false, order_index: 40 }
+  { id: "dsa.techniques.dynamic_programming.mc_when.d", learning_item_id: "dsa.techniques.dynamic_programming.mc_when", content: "A greedy choice that is always safe", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.manipulation.mc_concat.a", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "Each concatenation copies all characters accumulated so far", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.manipulation.mc_concat.b", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "Strings are immutable, so it cannot be done at all", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.manipulation.mc_concat.c", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "The compiler inserts a sort on every step", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.manipulation.mc_concat.d", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "It allocates exactly one byte per iteration", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.searching.mc_kmp.a", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(n + m)", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.searching.mc_kmp.b", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(n * m)", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.searching.mc_kmp.c", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(n^2)", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.searching.mc_kmp.d", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(m log n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.palindrome.mc_anagram.a", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Count each character's frequency in both strings and compare the counts", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.palindrome.mc_anagram.b", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Compare the strings with two pointers from both ends", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.palindrome.mc_anagram.c", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Reverse one string and check equality", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.palindrome.mc_anagram.d", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Hash the whole string and compare hashes", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.parsing.mc_delim.a", learning_item_id: "dsa.strings.parsing.mc_delim", content: "std::getline(stream, token, ',')", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.parsing.mc_delim.b", learning_item_id: "dsa.strings.parsing.mc_delim", content: "stream >> token", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.parsing.mc_delim.c", learning_item_id: "dsa.strings.parsing.mc_delim", content: "std::sort(token.begin(), token.end())", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.parsing.mc_delim.d", learning_item_id: "dsa.strings.parsing.mc_delim", content: "token.push_back(',')", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
