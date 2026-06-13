@@ -3,15 +3,17 @@ import { expect, test } from "@playwright/test";
 test("landing page shows cppFan product direction", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /learn c\+\+ and dsa/i })).toBeVisible();
-  await expect(page.getByText(/FSRS-ready review scheduling/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /FSRS review scheduling/i })).toBeVisible();
   await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open scaffold dashboard", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open dashboard", exact: true })).toBeVisible();
+  // Stale scaffold wording must not return (#149).
+  await expect(page.getByText(/scaffold/i)).toHaveCount(0);
 });
 
-test("dashboard route reaches scaffold or auth/onboarding gate", async ({ page }) => {
+test("dashboard route reaches the dashboard or auth/onboarding gate", async ({ page }) => {
   await page.goto("/dashboard");
 
-  const dashboardHeading = page.getByRole("heading", { name: /dashboard scaffold/i });
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
   const loginHeading = page.getByRole("heading", { name: /sign in to cppFan/i });
   const onboardingHeading = page.getByRole("heading", { name: /onboarding/i });
 
@@ -19,7 +21,7 @@ test("dashboard route reaches scaffold or auth/onboarding gate", async ({ page }
 
   if (dashboardVisible) {
     await expect(dashboardHeading).toBeVisible();
-    await expect(page.getByText(/review queue/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /review/i }).first()).toBeVisible();
     return;
   }
 

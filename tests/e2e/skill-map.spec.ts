@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("dashboard shows the read-only C++ skill map preview or an auth gate", async ({ page }) => {
   await page.goto("/dashboard");
 
-  const dashboardHeading = page.getByRole("heading", { name: /dashboard scaffold/i });
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
   const loginHeading = page.getByRole("heading", { name: /sign in to cppFan/i });
   const onboardingHeading = page.getByRole("heading", { name: /onboarding/i });
 

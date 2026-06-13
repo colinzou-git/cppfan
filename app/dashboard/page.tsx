@@ -1,15 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  BookOpenCheck,
-  Brain,
-  CalendarClock,
-  FlaskConical,
-  Library,
-  Settings,
-  ShieldAlert,
-  UserCircle
-} from "lucide-react";
+import { CalendarClock, FlaskConical, Library, Settings, ShieldAlert, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -22,24 +13,6 @@ import { getMasterySummary } from "@/features/mastery/mastery-queries";
 import { MasteryPreview } from "@/features/mastery/mastery-preview";
 import { getDailyPlan } from "@/features/recommendations/recommendation-queries";
 import { DailyPlan } from "@/features/recommendations/daily-plan";
-
-const nextItems = [
-  {
-    icon: CalendarClock,
-    title: "Review queue",
-    body: "Study cards scheduled with FSRS. Open it from the Review button above; sign in to start scheduling."
-  },
-  {
-    icon: Brain,
-    title: "Weak skills",
-    body: "Skill mastery and regression signals will appear after the event ledger is implemented."
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Next lesson",
-    body: "The first learning modules will cover structs/classes, constructors, RAII, and smart pointers."
-  }
-];
 
 async function signOut() {
   "use server";
@@ -95,10 +68,10 @@ export default async function DashboardPage() {
             ← cppFan
           </Link>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
-            Dashboard scaffold
+            Your learning dashboard
           </h1>
           <p className="mt-1 text-slate-600">
-            This protected dashboard placeholder is ready for reviews, mastery, and recommendations.
+            Your daily plan, due reviews, skill mastery, and skill map in one place.
           </p>
         </div>
 
@@ -181,50 +154,11 @@ export default async function DashboardPage() {
         </Card>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {nextItems.map((item) => (
-          <Card key={item.title} className="border-white/70 bg-white/80 shadow-sm backdrop-blur">
-            <CardHeader>
-              <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-blue-100 text-blue-700">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <CardTitle>{item.title}</CardTitle>
-              <CardDescription>{item.body}</CardDescription>
-            </CardHeader>
-          </Card>
-        ))}
-      </section>
-
       <DailyPlan plan={dailyPlan} />
 
       <MasteryPreview summary={masterySummary} />
 
       <SkillMapPreview data={skillMap} itemLinksBySkill={itemLinksBySkill} />
-
-      <Card className="border-white/70 bg-white/80 shadow-sm backdrop-blur">
-        <CardHeader>
-          <CardTitle>Next implementation milestones</CardTitle>
-          <CardDescription>
-            Keep these in separate focused PRs so Claude Code can use tests and CI as feedback.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ol className="grid gap-3 text-sm font-semibold text-slate-700 sm:grid-cols-2">
-            {[
-              "Add skill map database model",
-              "Add learning item and quiz model",
-              "Add FSRS review cards and logs",
-              "Add skill event ledger and mastery scoring",
-              "Add first real structs/classes learning module",
-              "Add personalized recommendation rules"
-            ].map((item) => (
-              <li key={item} className="rounded-2xl bg-slate-100 px-4 py-3">
-                {item}
-              </li>
-            ))}
-          </ol>
-        </CardContent>
-      </Card>
     </main>
   );
 }

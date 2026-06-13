@@ -9,25 +9,25 @@ const features = [
     icon: Brain,
     title: "Skill mastery, not just lessons",
     description:
-      "Track C++, DSA, review results, hints, and practice attempts as evidence for mastery."
+      "Quiz results, review outcomes, hints, and practice attempts feed a rule-based mastery model for each skill."
   },
   {
     icon: LineChart,
-    title: "FSRS-ready review scheduling",
+    title: "FSRS review scheduling",
     description:
-      "The scaffold prepares for review cards and logs while keeping mastery as a separate model."
+      "Spaced review schedules cards and logs results with FSRS, kept separate from skill mastery."
   },
   {
     icon: Code2,
     title: "Practice-first learning",
     description:
-      "Designed for quizzes, code-reading, bug-spotting, predict-output, and future coding tasks."
+      "Lessons, multiple-choice, code-reading, and bug-spotting across C++ and DSA, plus Codespaces write-code exercises."
   },
   {
     icon: GitBranch,
-    title: "AI-assisted development loop",
+    title: "A daily plan that adapts",
     description:
-      "Specs, allowed edit zones, tests, CI, and repo maps keep Claude Code focused and safe."
+      "Recommendations turn your mastery and due reviews into the next best action to take today."
   }
 ];
 
@@ -63,7 +63,7 @@ export default function HomePage() {
         <div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
             <Sparkles className="h-4 w-4" />
-            Scaffold ready for Next.js + Supabase + AI development
+            Adaptive C++, data structures &amp; algorithms — practice, spaced review, mastery
           </div>
 
           <h1 className="max-w-4xl text-5xl font-black tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
@@ -71,14 +71,14 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-            cppFan is designed for short lessons, immediate practice, FSRS-ready reviews,
-            skill-event tracking, and mastery recommendations across Windows PC, iPad, and iPhone.
+            cppFan turns short lessons and immediate practice into spaced FSRS reviews, skill-event
+            tracking, and mastery-based recommendations across Windows PC, iPad, and iPhone.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild>
               <Link href="/dashboard">
-                Open scaffold dashboard
+                Open dashboard
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </Button>
@@ -153,9 +153,9 @@ export default function HomePage() {
             <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <CardTitle>Scaffold stack</CardTitle>
+            <CardTitle>Built with</CardTitle>
             <CardDescription>
-              The app is intentionally scaffolded before learning features are implemented.
+              The production stack powering cppFan today.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -163,10 +163,10 @@ export default function HomePage() {
               {[
                 "Next.js App Router",
                 "TypeScript",
-                "Supabase placeholders",
+                "Supabase (Auth + Postgres + RLS)",
                 "Tailwind CSS",
                 "shadcn/ui-compatible",
-                "TanStack Query",
+                "ts-fsrs review scheduling",
                 "Vitest",
                 "Playwright"
               ].map((item) => (
