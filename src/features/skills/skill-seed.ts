@@ -127,6 +127,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.values_types.fundamental_types",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Choosing a fundamental type",
+    description: "Pick among integers, floating point, bool, and char by range and intent.",
+    learner_goal: "Choose int/double/bool/char appropriately and know integers are exact while doubles are approximate.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 5,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.signed_unsigned",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Signed and unsigned pitfalls",
+    description: "Avoid bugs from mixing signed and unsigned integers and from unsigned wraparound.",
+    learner_goal: "Spot signed/unsigned comparison and wraparound bugs, e.g. with container .size().",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 6,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.literals",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Literals and expression evaluation",
+    description: "Read literals and evaluate expressions, including integer division.",
+    learner_goal: "Predict an expression's value, including integer division and operator precedence.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 7,
+    is_active: true
+  },
+  {
     id: "cpp.control_flow.conditionals",
     domain: "cpp",
     module_id: "cpp.control_flow",
@@ -1383,6 +1419,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.program_basics.error_kinds", prerequisite_skill_id: "cpp.program_basics.statements_comments", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.variables", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.conversions", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.fundamental_types", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.signed_unsigned", prerequisite_skill_id: "cpp.values_types.fundamental_types", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.literals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.control_flow.conditionals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.control_flow.loops", prerequisite_skill_id: "cpp.control_flow.conditionals", relationship_type: "recommended" },
   { skill_id: "cpp.functions.basics", prerequisite_skill_id: "cpp.control_flow.loops", relationship_type: "recommended" },
