@@ -32,7 +32,8 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 },
   { id: "dsa.trees", title: "Trees, heaps, and DSU", description: "Tree traversal, heaps, and union-find.", order_index: 160 },
   { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 },
-  { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 }
+  { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 },
+  { id: "dsa.techniques", title: "Algorithmic techniques", description: "Prefix sums, sliding window, greedy, and dynamic programming.", order_index: 180 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -817,6 +818,54 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.prefix_sums",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Prefix sums",
+    description: "Precompute cumulative sums to answer range-sum queries in O(1).",
+    learner_goal: "Build a prefix-sum array and use it to answer subarray-sum queries fast.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1810,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.sliding_window",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Sliding window",
+    description: "Maintain a moving window over a sequence to scan subarrays in O(n).",
+    learner_goal: "Use a sliding window for fixed- or variable-length subarray problems.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1820,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.greedy",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Greedy algorithms",
+    description: "Make the locally optimal choice at each step when it yields a global optimum.",
+    learner_goal: "Recognize when a greedy choice is provably optimal versus when it fails.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1830,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dynamic_programming",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Dynamic programming",
+    description: "Solve overlapping subproblems once and reuse results via memoization or tabulation.",
+    learner_goal: "Identify optimal substructure and overlapping subproblems and write a DP recurrence.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1840,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -894,6 +943,10 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.graphs.bfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.dfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.shortest_path", prerequisite_skill_id: "dsa.graphs.bfs", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.prefix_sums", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.dynamic_programming", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
