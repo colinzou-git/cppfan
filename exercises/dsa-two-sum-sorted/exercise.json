@@ -1,0 +1,17 @@
+{
+  "id": "dsa-two-sum-sorted",
+  "title": "DSA: two-sum on a sorted array",
+  "skill_ids": ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["two_sum.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-two-sum-sorted/work exercises/dsa-two-sum-sorted/tests/tests.cpp -o exercises/dsa-two-sum-sorted/work/run",
+  "test_command": "exercises/dsa-two-sum-sorted/work/run",
+  "required_tests": ["test_middle_pair", "test_smallest_i_pair", "test_first_two", "test_no_solution", "test_too_small_input", "test_handles_negatives"],
+  "hints": [
+    "Start one index at 0 and another at nums.size() - 1.",
+    "If the sum is too small, move the low index right; if too big, move the high index left.",
+    "Stop when the indices meet; if you never hit the target, return {-1, -1}."
+  ],
+  "project_lab": "csv-table-summarizer"
+}
