@@ -190,7 +190,12 @@ describe("curriculum coverage", () => {
     "dsa.techniques.prefix_sums",
     "dsa.techniques.sliding_window",
     "dsa.techniques.greedy",
-    "dsa.techniques.dynamic_programming"
+    "dsa.techniques.dynamic_programming",
+    // string algorithms (#79)
+    "dsa.strings.manipulation",
+    "dsa.strings.searching",
+    "dsa.strings.palindrome",
+    "dsa.strings.parsing"
   ];
 
   it("has at least one learning item for every covered skill", () => {
