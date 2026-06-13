@@ -25,7 +25,7 @@ test("a multiple-choice item lists its choices without revealing the answer", as
 test("the dashboard skill map links into a learning item or shows an auth gate", async ({ page }) => {
   await page.goto("/dashboard");
 
-  const dashboardHeading = page.getByRole("heading", { name: /dashboard scaffold/i });
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
   const dashboardVisible = await dashboardHeading.isVisible().catch(() => false);
 
   if (!dashboardVisible) {

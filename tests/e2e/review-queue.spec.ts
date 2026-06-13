@@ -25,7 +25,7 @@ test("the review queue opens", async ({ page }) => {
 test("the dashboard links to the review queue or shows an auth gate", async ({ page }) => {
   await page.goto("/dashboard");
 
-  const dashboardHeading = page.getByRole("heading", { name: /dashboard scaffold/i });
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
   const dashboardVisible = await dashboardHeading.isVisible().catch(() => false);
 
   if (!dashboardVisible) {

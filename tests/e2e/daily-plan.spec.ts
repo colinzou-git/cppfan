@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("the dashboard shows the daily plan or an auth gate", async ({ page }) => {
   await page.goto("/dashboard");
 
-  const dashboardHeading = page.getByRole("heading", { name: /dashboard scaffold/i });
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
   const dashboardVisible = await dashboardHeading.isVisible().catch(() => false);
 
   if (!dashboardVisible) {
