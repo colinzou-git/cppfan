@@ -15,7 +15,8 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.constructors", title: "Constructors", description: "Object initialization and lifetime.", order_index: 20 },
   { id: "cpp.raii", title: "RAII", description: "Resource ownership and cleanup.", order_index: 30 },
   { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 },
-  { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 }
+  { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 },
+  { id: "dsa.arrays", title: "Arrays and sequences", description: "Indexing and traversal fundamentals.", order_index: 110 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -258,6 +259,30 @@ export const skillSeed: Skill[] = [
     item_types: ["lesson", "quiz", "code_reading"],
     order_index: 420,
     is_active: true
+  },
+  {
+    id: "dsa.arrays.indexing",
+    domain: "dsa",
+    module_id: "dsa.arrays",
+    title: "Array indexing",
+    description: "Access elements by zero-based index and avoid off-by-one and out-of-bounds errors.",
+    learner_goal: "Identify the valid index range of a sequence and spot off-by-one mistakes.",
+    level: "beginner",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 1010,
+    is_active: true
+  },
+  {
+    id: "dsa.arrays.traversal",
+    domain: "dsa",
+    module_id: "dsa.arrays",
+    title: "Array traversal",
+    description: "Iterate through arrays and vectors correctly, visiting each element once.",
+    learner_goal: "Write a loop that visits every element exactly once without skipping or overrunning.",
+    level: "beginner",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 1020,
+    is_active: true
   }
 ];
 
@@ -280,7 +305,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.smart_pointers.ownership_choice", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
   { skill_id: "cpp.smart_pointers.ownership_transfer", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" },
   { skill_id: "cpp.stl.vector", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
-  { skill_id: "cpp.stl.string", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" }
+  { skill_id: "cpp.stl.string", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {

@@ -131,7 +131,10 @@ describe("curriculum coverage", () => {
     "cpp.smart_pointers.ownership_transfer",
     // STL containers (#46, first slice)
     "cpp.stl.vector",
-    "cpp.stl.string"
+    "cpp.stl.string",
+    // DSA arrays (#48, first slice)
+    "dsa.arrays.indexing",
+    "dsa.arrays.traversal"
   ];
 
   it("has at least one learning item for every covered skill", () => {
@@ -147,7 +150,8 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||
-        id.startsWith("cpp.stl.")
+        id.startsWith("cpp.stl.") ||
+        id.startsWith("dsa.arrays.")
     );
     for (const skillId of denseSkills) {
       const itemIds = new Set(
