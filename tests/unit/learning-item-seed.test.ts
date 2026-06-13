@@ -180,7 +180,12 @@ describe("curriculum coverage", () => {
     // trees/heaps/DSU (#74)
     "dsa.trees.traversal",
     "dsa.trees.heap",
-    "dsa.trees.disjoint_set"
+    "dsa.trees.disjoint_set",
+    // graphs (#75)
+    "dsa.graphs.representation",
+    "dsa.graphs.bfs",
+    "dsa.graphs.dfs",
+    "dsa.graphs.shortest_path"
   ];
 
   it("has at least one learning item for every covered skill", () => {

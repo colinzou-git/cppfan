@@ -31,7 +31,8 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.stacks", title: "Stacks and queues", description: "LIFO and FIFO problem patterns.", order_index: 140 },
   { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 },
   { id: "dsa.trees", title: "Trees, heaps, and DSU", description: "Tree traversal, heaps, and union-find.", order_index: 160 },
-  { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 }
+  { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 },
+  { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -768,6 +769,54 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.representation",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Graph representation",
+    description: "Model graphs with adjacency lists or adjacency matrices.",
+    learner_goal: "Choose an adjacency list or matrix based on density and the operations needed.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1710,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bfs",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Breadth-first search",
+    description: "Explore a graph level by level with a queue.",
+    learner_goal: "Use BFS to find shortest paths in an unweighted graph.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1720,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.dfs",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Depth-first search",
+    description: "Explore as deep as possible before backtracking, using recursion or a stack.",
+    learner_goal: "Use DFS for reachability, cycle detection, and topological ordering.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1730,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.shortest_path",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Shortest paths",
+    description: "Find minimum-cost paths with BFS, Dijkstra, or Bellman-Ford.",
+    learner_goal: "Pick the right shortest-path algorithm for weighted vs unweighted graphs.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1740,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -841,6 +890,10 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.trees.traversal", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.trees.heap", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
   { skill_id: "dsa.trees.disjoint_set", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.representation", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.bfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.dfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.shortest_path", prerequisite_skill_id: "dsa.graphs.bfs", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];

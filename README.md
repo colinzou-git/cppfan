@@ -206,6 +206,8 @@ supabase/migrations/20260613470000_add_tooling_skills.sql
 supabase/migrations/20260613480000_seed_tooling_items.sql
 supabase/migrations/20260613490000_add_dsa_tree_skills.sql
 supabase/migrations/20260613500000_seed_dsa_tree_items.sql
+supabase/migrations/20260613510000_add_dsa_graph_skills.sql
+supabase/migrations/20260613520000_seed_dsa_graph_items.sql
 ```
 
 The `profiles` migration adds:

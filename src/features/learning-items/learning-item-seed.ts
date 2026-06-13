@@ -1574,6 +1574,106 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2060,
     is_active: true
+  },
+  {
+    id: "dsa.graphs.representation.lesson",
+    type: "lesson",
+    title: "Graph representation",
+    prompt:
+      "A graph is a set of vertices connected by edges. Two common representations trade space for speed. An adjacency list stores, for each vertex, a list of its neighbors — compact at O(V + E) space and ideal for sparse graphs and iterating a vertex's neighbors. An adjacency matrix is a V-by-V grid where cell [i][j] marks an edge from i to j — it uses O(V^2) space but answers \"is there an edge between i and j?\" in O(1), which suits dense graphs. Most competitive and interview graph code uses adjacency lists (for example `vector<vector<int>>`).",
+    explanation:
+      "Adjacency lists cost O(V + E) and favor sparse graphs and neighbor iteration; adjacency matrices cost O(V^2) but give O(1) edge lookup, favoring dense graphs.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2110,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.representation.mc_sparse",
+    type: "multiple_choice",
+    title: "Choosing a representation",
+    prompt: "Which representation uses the least memory for a large, sparse graph (few edges per vertex)?",
+    explanation:
+      "An adjacency list stores only the edges that exist, so it uses O(V + E) space. For a sparse graph E is small, making the list far more memory-efficient than an O(V^2) adjacency matrix.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2120,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bfs.lesson",
+    type: "lesson",
+    title: "Breadth-first search",
+    prompt:
+      "Breadth-first search explores a graph in expanding rings: it visits the start vertex, then all neighbors at distance 1, then distance 2, and so on. It uses a FIFO queue and a visited set to avoid revisiting nodes. Because BFS reaches nodes in nondecreasing distance order, it finds the shortest path (fewest edges) in an unweighted graph. The whole traversal runs in O(V + E) time with an adjacency list.",
+    explanation:
+      "BFS visits vertices in order of distance from the start using a queue, so it finds shortest paths by edge count in unweighted graphs in O(V + E).",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2130,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bfs.mc_shortest",
+    type: "multiple_choice",
+    title: "What BFS finds",
+    prompt: "In an unweighted graph, what does BFS from a source vertex give you?",
+    explanation:
+      "BFS expands by distance, so the first time it reaches a vertex is along a path with the fewest edges — the shortest path in an unweighted graph.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2140,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.dfs.lesson",
+    type: "lesson",
+    title: "Depth-first search",
+    prompt:
+      "Depth-first search follows one path as far as it can, then backtracks to the most recent vertex with unexplored neighbors. It is naturally written with recursion (the call stack does the bookkeeping) or with an explicit stack, plus a visited set. DFS runs in O(V + E) and underpins reachability, connected-component counting, cycle detection, and topological sorting of a DAG. Unlike BFS, DFS does not generally find shortest paths.",
+    explanation:
+      "DFS dives deep then backtracks (via recursion or a stack); it powers reachability, cycle detection, and topological sort, but does not find shortest paths in general.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2150,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.dfs.mc_structure",
+    type: "multiple_choice",
+    title: "How DFS is implemented",
+    prompt: "Which data structure naturally backs a depth-first search?",
+    explanation:
+      "DFS explores the most recently discovered vertex first, which is LIFO behavior — a stack. Recursion uses the call stack implicitly; an iterative DFS uses an explicit stack.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2160,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.shortest_path.lesson",
+    type: "lesson",
+    title: "Shortest paths",
+    prompt:
+      "The right shortest-path algorithm depends on the edge weights. On an unweighted graph, plain BFS gives shortest paths in O(V + E). With non-negative weights, Dijkstra's algorithm uses a min-priority queue to always expand the closest unsettled vertex, running in O((V + E) log V). When edges can be negative, Dijkstra breaks and Bellman-Ford applies, relaxing every edge V-1 times in O(V * E) and also detecting negative cycles. Matching the algorithm to the weight model is the key decision.",
+    explanation:
+      "Use BFS for unweighted graphs, Dijkstra for non-negative weights, and Bellman-Ford when negative edges are possible (it also detects negative cycles).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2170,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.shortest_path.mc_dijkstra",
+    type: "multiple_choice",
+    title: "When Dijkstra fails",
+    prompt: "Why can Dijkstra's algorithm give wrong answers when a graph has negative edge weights?",
+    explanation:
+      "Dijkstra finalizes a vertex's distance once it is popped as the closest unsettled node, assuming no later path can be shorter. A negative edge can make a later path shorter, violating that assumption — so Bellman-Ford is used instead.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2180,
+    is_active: true
   }
 ];
 
@@ -1715,6 +1815,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.trees.heap.mc_top_cost", skill_id: "dsa.trees.heap", is_primary: true },
   { learning_item_id: "dsa.trees.disjoint_set.lesson", skill_id: "dsa.trees.disjoint_set", is_primary: true },
   { learning_item_id: "dsa.trees.disjoint_set.mc_use_case", skill_id: "dsa.trees.disjoint_set", is_primary: true },
+  { learning_item_id: "dsa.graphs.representation.lesson", skill_id: "dsa.graphs.representation", is_primary: true },
+  { learning_item_id: "dsa.graphs.representation.mc_sparse", skill_id: "dsa.graphs.representation", is_primary: true },
+  { learning_item_id: "dsa.graphs.bfs.lesson", skill_id: "dsa.graphs.bfs", is_primary: true },
+  { learning_item_id: "dsa.graphs.bfs.mc_shortest", skill_id: "dsa.graphs.bfs", is_primary: true },
+  { learning_item_id: "dsa.graphs.dfs.lesson", skill_id: "dsa.graphs.dfs", is_primary: true },
+  { learning_item_id: "dsa.graphs.dfs.mc_structure", skill_id: "dsa.graphs.dfs", is_primary: true },
+  { learning_item_id: "dsa.graphs.shortest_path.lesson", skill_id: "dsa.graphs.shortest_path", is_primary: true },
+  { learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", skill_id: "dsa.graphs.shortest_path", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2017,7 +2125,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.trees.disjoint_set.mc_use_case.a", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Detecting whether adding an edge forms a cycle in a graph", is_correct: true, order_index: 10 },
   { id: "dsa.trees.disjoint_set.mc_use_case.b", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Sorting an array in place", is_correct: false, order_index: 20 },
   { id: "dsa.trees.disjoint_set.mc_use_case.c", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Finding the shortest string in a list", is_correct: false, order_index: 30 },
-  { id: "dsa.trees.disjoint_set.mc_use_case.d", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Reversing a linked list", is_correct: false, order_index: 40 }
+  { id: "dsa.trees.disjoint_set.mc_use_case.d", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Reversing a linked list", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.representation.mc_sparse.a", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency list", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.representation.mc_sparse.b", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency matrix", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.representation.mc_sparse.c", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "A V-by-V boolean grid", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.representation.mc_sparse.d", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "They use the same memory", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.bfs.mc_shortest.a", learning_item_id: "dsa.graphs.bfs.mc_shortest", content: "The shortest path by number of edges to every reachable vertex", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.bfs.mc_shortest.b", learning_item_id: "dsa.graphs.bfs.mc_shortest", content: "The minimum spanning tree", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.bfs.mc_shortest.c", learning_item_id: "dsa.graphs.bfs.mc_shortest", content: "A topological ordering", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.bfs.mc_shortest.d", learning_item_id: "dsa.graphs.bfs.mc_shortest", content: "The longest path in the graph", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.dfs.mc_structure.a", learning_item_id: "dsa.graphs.dfs.mc_structure", content: "A stack (often the recursion call stack)", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.dfs.mc_structure.b", learning_item_id: "dsa.graphs.dfs.mc_structure", content: "A FIFO queue", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.dfs.mc_structure.c", learning_item_id: "dsa.graphs.dfs.mc_structure", content: "A min-priority queue", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.dfs.mc_structure.d", learning_item_id: "dsa.graphs.dfs.mc_structure", content: "A hash map", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.shortest_path.mc_dijkstra.a", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It finalizes a vertex's distance once visited, which a negative edge can later undercut", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.shortest_path.mc_dijkstra.b", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It cannot use a priority queue", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.shortest_path.mc_dijkstra.c", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It only works on trees", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.shortest_path.mc_dijkstra.d", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It requires the graph to be undirected", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
