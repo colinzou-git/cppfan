@@ -180,6 +180,8 @@ supabase/migrations/20260613210000_add_dsa_array_skills.sql
 supabase/migrations/20260613220000_seed_dsa_array_items.sql
 supabase/migrations/20260613230000_add_stl_associative_skills.sql
 supabase/migrations/20260613240000_seed_stl_associative_items.sql
+supabase/migrations/20260613250000_add_stl_algorithm_skills.sql
+supabase/migrations/20260613260000_seed_stl_algorithm_items.sql
 ```
 
 The `profiles` migration adds:
