@@ -30,35 +30,76 @@ export async function getGradingChoices(itemId: string): Promise<GradingChoice[]
 }
 
 /**
- * Grade a choice via the SECURITY DEFINER database function, which keeps the
- * answer key server-side. Returns null when Supabase is unconfigured, the
- * function/migration is absent, or the submission is ungradeable — callers then
- * fall back to seed grading.
+ * Outcome of grading via the database RPC (#146). The caller must treat these
+ * differently: `unconfigured`/`unavailable` are legitimate non-database modes
+ * where seed grading is allowed; `error` is a configured-database failure that
+ * must NOT silently fall back to seed answer keys.
  */
-export async function gradeViaRpc(
-  itemId: string,
-  choiceId: string
-): Promise<{ isCorrect: boolean; correctChoiceId: string } | null> {
-  const supabase = await createClient();
-  if (!supabase) {
-    return null;
+export type RpcGradeOutcome =
+  | { status: "graded"; isCorrect: boolean; correctChoiceId: string }
+  | { status: "unconfigured" } // no Supabase env: demo/seed mode
+  | { status: "unavailable" } // configured, but the function/table is not migrated yet
+  | { status: "error" }; // configured database failure (permission/network/drift/bad data)
+
+// PostgREST/Postgres error codes that mean the grading function or its table
+// does not exist yet — a legitimate pre-migration state, not a backend failure.
+const MISSING_OBJECT_CODES = new Set(["PGRST202", "PGRST205", "42883", "42P01", "42P17"]);
+
+type RpcResult = {
+  data: unknown;
+  error: { code?: string | null; message?: string | null } | null;
+};
+
+/**
+ * Pure classification of a grade-RPC result, separated for deterministic tests.
+ * Distinguishes not-found / missing-object from permission/network/schema
+ * failures so a configured-database error never masquerades as a seed grade.
+ */
+export function classifyGradeRpc(result: RpcResult): RpcGradeOutcome {
+  const { data, error } = result;
+
+  if (error) {
+    return MISSING_OBJECT_CODES.has(error.code ?? "") ? { status: "unavailable" } : { status: "error" };
   }
 
-  const { data, error } = await supabase.rpc("grade_learning_item_choice", {
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof (row as { is_correct?: unknown }).is_correct !== "boolean") {
+    // Configured database returned no usable row: item/choice missing or drift.
+    // Surface it rather than grading against possibly-different seed data.
+    return { status: "error" };
+  }
+  const typed = row as { is_correct: boolean; correct_choice_id?: unknown };
+  if (typeof typed.correct_choice_id !== "string") {
+    return { status: "error" };
+  }
+  return { status: "graded", isCorrect: typed.is_correct, correctChoiceId: typed.correct_choice_id };
+}
+
+/**
+ * Grade a choice via the SECURITY DEFINER database function, which keeps the
+ * answer key server-side. Returns a typed outcome (#146): seed grading is only
+ * legitimate for `unconfigured`/`unavailable`; an `error` must not be silently
+ * graded against the seed.
+ */
+export async function gradeViaRpc(itemId: string, choiceId: string): Promise<RpcGradeOutcome> {
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+
+  const result = await supabase.rpc("grade_learning_item_choice", {
     p_item_id: itemId,
     p_choice_id: choiceId
   });
 
-  if (error || !data) {
-    return null;
+  const outcome = classifyGradeRpc(result);
+  if (outcome.status === "error") {
+    // Structured, secret-free server log so configured failures are observable.
+    console.error(
+      `[grading] grade_learning_item_choice failed (code=${result.error?.code ?? "none"}); not falling back to seed`
+    );
   }
-
-  const row = Array.isArray(data) ? data[0] : data;
-  if (!row || typeof row.is_correct !== "boolean" || typeof row.correct_choice_id !== "string") {
-    return null;
-  }
-
-  return { isCorrect: row.is_correct, correctChoiceId: row.correct_choice_id };
+  return outcome;
 }
 
 /**
