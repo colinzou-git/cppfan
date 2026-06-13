@@ -2627,6 +2627,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.bst_search.lesson",
+    type: "lesson",
+    title: "Binary search tree search",
+    prompt:
+      "A binary search tree keeps an ordering invariant at every node: all keys in the left subtree are smaller, all keys in the right subtree are larger. That lets you search like binary search on a sorted array: compare the target to the current node, go left if smaller or right if larger, and stop when you match or hit null. Each step drops a level, so search, insert, and delete cost O(h) where h is the height. The catch is balance: a BST built from already-sorted inputs degenerates into a linked list with h = n, making operations O(n). Self-balancing trees (`std::map`/`std::set` use red-black trees) keep h ~ O(log n) automatically, which is why you rarely hand-roll a raw BST in production. An inorder traversal of a BST visits keys in sorted order.",
+    explanation:
+      "A BST keeps smaller keys left, larger right, so search/insert/delete are O(h) by comparing and descending. Unbalanced (e.g. sorted input) degenerates to O(n); std::map/std::set stay balanced at O(log n).",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3690,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.bst_search.mc_cost",
+    type: "multiple_choice",
+    title: "BST search cost",
+    prompt: "What is the time complexity of searching a binary search tree of height h?",
+    explanation:
+      "Each comparison descends one level, so search is O(h). For a balanced tree h is O(log n); for a degenerate (list-like) tree h is n, giving O(n).",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3700,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap_applications.lesson",
+    type: "lesson",
+    title: "Heap applications and selection",
+    prompt:
+      "A heap (`std::priority_queue`) shines whenever you repeatedly need the current best element. **Top-k**: to keep the k largest of a stream, maintain a min-heap of size k — push each element and pop the smallest when the size exceeds k, giving O(n log k) and O(k) space instead of sorting everything. **Scheduling / merging**: a heap keyed by next-available-time or next-smallest-element drives event simulation, Dijkstra, and merging sorted streams. Choose a heap over the alternatives by the operations: if you need the min/max repeatedly but not full ordering, a heap's O(log n) push/pop and O(1) peek beat re-sorting a `std::vector` each time; if you need keys kept fully sorted or range queries, use a `std::map`/`std::set`; if you only sort once and then read, a sorted vector is simplest. The cue is \"repeatedly extract the best.\"",
+    explanation:
+      "Use a heap when you repeatedly need the best element: top-k with a size-k min-heap (O(n log k)), scheduling/merging, Dijkstra. Prefer it over re-sorting a vector; use map/set for full ordering/range queries.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3710,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap_applications.mc_topk",
+    type: "multiple_choice",
+    title: "Top-k with a heap",
+    prompt: "To keep the k largest elements of a large stream efficiently, what should you maintain?",
+    explanation:
+      "A min-heap of size k: push each element and pop the smallest whenever the size exceeds k, so the heap always holds the k largest seen — O(n log k) time and O(k) space, without sorting the whole stream.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3720,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.dsu_internals.lesson",
+    type: "lesson",
+    title: "Union-find internals",
+    prompt:
+      "Union-find stores each element's parent; the representative of a set is the root you reach by following parents. Two optimizations make it nearly free. **Union by rank/size** always attaches the smaller (or shallower) tree under the larger root, keeping trees shallow instead of letting them grow into chains. **Path compression** points every node visited during a `find` directly at the root, so future finds are flat. Used together, m operations on n elements run in O(m * α(n)), where α is the inverse Ackermann function — effectively a small constant (< 5) for any realistic n, so each operation is \"near-constant amortized.\" Without these, naive union-find can degrade to O(n) per operation. This is what makes union-find the tool of choice for connected components and Kruskal's MST.",
+    explanation:
+      "Union by rank/size keeps trees shallow; path compression flattens the path to the root on each find. Together they give O(α(n)) ~ near-constant amortized per operation, vs O(n) for naive union-find.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3730,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.dsu_internals.mc_compression",
+    type: "multiple_choice",
+    title: "What path compression does",
+    prompt: "What does path compression do during a union-find `find` operation?",
+    explanation:
+      "It repoints the nodes visited on the way to the root directly at the root, flattening the tree so subsequent finds on those nodes are nearly O(1). Combined with union by rank it yields near-constant amortized cost.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3740,
+    is_active: true
+  },
+  {
     id: "dsa.graphs.representation.lesson",
     type: "lesson",
     title: "Graph representation",
@@ -3553,6 +3628,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.trees.heap.mc_top_cost", skill_id: "dsa.trees.heap", is_primary: true },
   { learning_item_id: "dsa.trees.disjoint_set.lesson", skill_id: "dsa.trees.disjoint_set", is_primary: true },
   { learning_item_id: "dsa.trees.disjoint_set.mc_use_case", skill_id: "dsa.trees.disjoint_set", is_primary: true },
+  { learning_item_id: "dsa.trees.bst_search.lesson", skill_id: "dsa.trees.bst_search", is_primary: true },
+  { learning_item_id: "dsa.trees.bst_search.mc_cost", skill_id: "dsa.trees.bst_search", is_primary: true },
+  { learning_item_id: "dsa.trees.heap_applications.lesson", skill_id: "dsa.trees.heap_applications", is_primary: true },
+  { learning_item_id: "dsa.trees.heap_applications.mc_topk", skill_id: "dsa.trees.heap_applications", is_primary: true },
+  { learning_item_id: "dsa.trees.dsu_internals.lesson", skill_id: "dsa.trees.dsu_internals", is_primary: true },
+  { learning_item_id: "dsa.trees.dsu_internals.mc_compression", skill_id: "dsa.trees.dsu_internals", is_primary: true },
   { learning_item_id: "dsa.graphs.representation.lesson", skill_id: "dsa.graphs.representation", is_primary: true },
   { learning_item_id: "dsa.graphs.representation.mc_sparse", skill_id: "dsa.graphs.representation", is_primary: true },
   { learning_item_id: "dsa.graphs.bfs.lesson", skill_id: "dsa.graphs.bfs", is_primary: true },
@@ -4117,6 +4198,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.trees.disjoint_set.mc_use_case.b", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Sorting an array in place", is_correct: false, order_index: 20 },
   { id: "dsa.trees.disjoint_set.mc_use_case.c", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Finding the shortest string in a list", is_correct: false, order_index: 30 },
   { id: "dsa.trees.disjoint_set.mc_use_case.d", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Reversing a linked list", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.bst_search.mc_cost.a", learning_item_id: "dsa.trees.bst_search.mc_cost", content: "O(h), the tree height", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.bst_search.mc_cost.b", learning_item_id: "dsa.trees.bst_search.mc_cost", content: "O(n) always", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.bst_search.mc_cost.c", learning_item_id: "dsa.trees.bst_search.mc_cost", content: "O(1)", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.bst_search.mc_cost.d", learning_item_id: "dsa.trees.bst_search.mc_cost", content: "O(n log n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.heap_applications.mc_topk.a", learning_item_id: "dsa.trees.heap_applications.mc_topk", content: "A min-heap of size k", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.heap_applications.mc_topk.b", learning_item_id: "dsa.trees.heap_applications.mc_topk", content: "A max-heap holding every element", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.heap_applications.mc_topk.c", learning_item_id: "dsa.trees.heap_applications.mc_topk", content: "A fully sorted copy of the whole stream", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.heap_applications.mc_topk.d", learning_item_id: "dsa.trees.heap_applications.mc_topk", content: "A hash set of all elements", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.dsu_internals.mc_compression.a", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Repoints visited nodes directly at the root, flattening the tree", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.dsu_internals.mc_compression.b", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Sorts the elements by rank", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.dsu_internals.mc_compression.c", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Deletes elements from the set", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.dsu_internals.mc_compression.d", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Balances the tree by rotating nodes", is_correct: false, order_index: 40 },
 
   { id: "dsa.graphs.representation.mc_sparse.a", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency list", is_correct: true, order_index: 10 },
   { id: "dsa.graphs.representation.mc_sparse.b", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency matrix", is_correct: false, order_index: 20 },
