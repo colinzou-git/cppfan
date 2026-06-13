@@ -1,6 +1,7 @@
 // Server-only: createClient relies on next/headers cookies, so this module
 // cannot be imported into a client component.
 import { createClient } from "@/lib/supabase/server";
+import { isMissingObjectError } from "@/lib/supabase/errors";
 import { getChoicesForItem } from "./learning-item-seed";
 import type { GradingChoice } from "./grading";
 
@@ -41,10 +42,6 @@ export type RpcGradeOutcome =
   | { status: "unavailable" } // configured, but the function/table is not migrated yet
   | { status: "error" }; // configured database failure (permission/network/drift/bad data)
 
-// PostgREST/Postgres error codes that mean the grading function or its table
-// does not exist yet — a legitimate pre-migration state, not a backend failure.
-const MISSING_OBJECT_CODES = new Set(["PGRST202", "PGRST205", "42883", "42P01", "42P17"]);
-
 type RpcResult = {
   data: unknown;
   error: { code?: string | null; message?: string | null } | null;
@@ -59,7 +56,7 @@ export function classifyGradeRpc(result: RpcResult): RpcGradeOutcome {
   const { data, error } = result;
 
   if (error) {
-    return MISSING_OBJECT_CODES.has(error.code ?? "") ? { status: "unavailable" } : { status: "error" };
+    return isMissingObjectError(error) ? { status: "unavailable" } : { status: "error" };
   }
 
   const row = Array.isArray(data) ? data[0] : data;

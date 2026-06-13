@@ -5,9 +5,9 @@ import { getLearningItemWithDetails } from "@/features/learning-items/learning-i
 
 export default async function LearningItemPage({ params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
-  const data = await getLearningItemWithDetails(decodeURIComponent(itemId));
+  const result = await getLearningItemWithDetails(decodeURIComponent(itemId));
 
-  if (!data) {
+  if (result.status === "not_found") {
     notFound();
   }
 
@@ -18,7 +18,17 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
           ← Back to dashboard
         </Link>
       </header>
-      <LearningItemView data={data} />
+      {result.status === "error" ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          <p className="font-bold">This item is temporarily unavailable.</p>
+          <p className="mt-1">We couldn’t load it from the database just now. Please refresh or try again shortly.</p>
+        </div>
+      ) : (
+        <LearningItemView data={result.data} />
+      )}
     </main>
   );
 }
