@@ -21,6 +21,7 @@ export const skillModules: SkillModule[] = [
   { id: "cpp.raii", title: "RAII", description: "Resource ownership and cleanup.", order_index: 30 },
   { id: "cpp.smart_pointers", title: "Smart pointers", description: "Modern ownership helpers.", order_index: 40 },
   { id: "cpp.stl", title: "STL containers", description: "Everyday standard-library containers.", order_index: 50 },
+  { id: "dsa.complexity", title: "Complexity and problem solving", description: "Big-O and a systematic solving process.", order_index: 105 },
   { id: "dsa.arrays", title: "Arrays and sequences", description: "Indexing and traversal fundamentals.", order_index: 110 },
   { id: "dsa.searching", title: "Searching", description: "Finding values efficiently.", order_index: 120 },
   { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 },
@@ -487,6 +488,30 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.big_o",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Big-O notation",
+    description: "Describe how running time grows with input size, ignoring constants.",
+    learner_goal: "Name the Big-O of common loops and pick the dominant term.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1005,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.problem_solving",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Systematic problem solving",
+    description: "Work from understanding to brute force to an optimized, tested solution.",
+    learner_goal: "Follow a repeatable process: understand, example, brute force, optimize, test.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1006,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -623,6 +648,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.stl.adapters", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "cpp.stl.lambdas", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
+  { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
   { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
