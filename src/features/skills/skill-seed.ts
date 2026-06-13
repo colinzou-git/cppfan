@@ -187,6 +187,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.control_flow.logical_operators",
+    domain: "cpp",
+    module_id: "cpp.control_flow",
+    title: "Logical operators and compound conditions",
+    description: "Combine conditions with &&, ||, and ! and rely on short-circuit evaluation.",
+    learner_goal: "Build compound conditions and use short-circuiting to guard later operands.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 7,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.switch_statement",
+    domain: "cpp",
+    module_id: "cpp.control_flow",
+    title: "switch and break",
+    description: "Branch on a value with switch, and understand break and fallthrough.",
+    learner_goal: "Write a switch with break per case and know what happens without break.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 8,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.loop_invariants",
+    domain: "cpp",
+    module_id: "cpp.control_flow",
+    title: "Loop invariants and off-by-one",
+    description: "Reason about what stays true each iteration and pick correct loop bounds.",
+    learner_goal: "State a loop invariant and choose bounds that avoid off-by-one errors.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 9,
+    is_active: true
+  },
+  {
     id: "cpp.functions.basics",
     domain: "cpp",
     module_id: "cpp.functions",
@@ -1424,6 +1460,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.values_types.literals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.control_flow.conditionals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.control_flow.loops", prerequisite_skill_id: "cpp.control_flow.conditionals", relationship_type: "recommended" },
+  { skill_id: "cpp.control_flow.logical_operators", prerequisite_skill_id: "cpp.control_flow.conditionals", relationship_type: "recommended" },
+  { skill_id: "cpp.control_flow.switch_statement", prerequisite_skill_id: "cpp.control_flow.conditionals", relationship_type: "recommended" },
+  { skill_id: "cpp.control_flow.loop_invariants", prerequisite_skill_id: "cpp.control_flow.loops", relationship_type: "recommended" },
   { skill_id: "cpp.functions.basics", prerequisite_skill_id: "cpp.control_flow.loops", relationship_type: "recommended" },
   { skill_id: "cpp.functions.decomposition", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.syntax", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
