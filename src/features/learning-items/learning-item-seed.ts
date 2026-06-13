@@ -2074,8 +2074,109 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2580,
     is_active: true
+  },
+  {
+    id: "cpp.utilities.file_io.lesson",
+    type: "lesson",
+    title: "File I/O and filesystem",
+    prompt:
+      "C++ file streams mirror console I/O: `std::ofstream out(\"data.txt\");` opens a file for writing and you use `out << value;` just like `std::cout`; `std::ifstream in(\"data.txt\");` reads with `in >> value` or `std::getline`. Always check the stream is open and good before trusting reads. Files close automatically when the stream object is destroyed (RAII). For paths and metadata, `std::filesystem` (since C++17) provides `fs::path`, `fs::exists(p)`, `fs::create_directory(p)`, and iteration over directory entries — portable across operating systems so you avoid hand-built path strings.",
+    explanation:
+      "ofstream/ifstream do file I/O with the same << / >> as console streams and close via RAII; std::filesystem gives portable path, existence, and directory operations.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2610,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.file_io.mc_exists",
+    type: "multiple_choice",
+    title: "Checking a file exists",
+    prompt: "Which standard facility portably checks whether a file or directory exists?",
+    explanation:
+      "std::filesystem::exists(path) reports whether a path exists, portably across operating systems. It replaces ad-hoc tricks like trying to open the file just to test for it.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2620,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.chrono.lesson",
+    type: "lesson",
+    title: "Time with chrono",
+    prompt:
+      "`std::chrono` represents time with strong types instead of bare numbers. A `duration` is a span (e.g. `std::chrono::milliseconds(5)`); a `time_point` is a moment read from a clock. To measure elapsed time, capture `auto start = std::chrono::steady_clock::now();`, run the work, then subtract: `auto elapsed = std::chrono::steady_clock::now() - start;` and convert with `std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()`. Use `steady_clock` for measuring intervals (it never jumps backward), and `system_clock` only for wall-clock calendar time. The type system prevents accidentally mixing seconds with milliseconds.",
+    explanation:
+      "Use steady_clock::now() before and after a block and subtract to get a duration; duration_cast converts it to the units you want. steady_clock is the right clock for measuring intervals.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2630,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.chrono.mc_clock",
+    type: "multiple_choice",
+    title: "Which clock for timing",
+    prompt: "Which chrono clock is the right choice for measuring how long a code block takes?",
+    explanation:
+      "steady_clock is monotonic — it never jumps backward when the system time is adjusted — so it is the correct clock for measuring elapsed intervals. system_clock can shift and is for calendar time.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2640,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.random.lesson",
+    type: "lesson",
+    title: "Random numbers",
+    prompt:
+      "Modern C++ separates the source of randomness from how it is shaped. A random engine such as `std::mt19937` produces raw random bits; a distribution such as `std::uniform_int_distribution<int> dist(1, 6)` maps those bits to the range and shape you want. You seed the engine once (often from `std::random_device`) and then call `dist(engine)` to draw values. This beats the old `rand() % n` idiom, which has modulo bias (some outcomes are slightly more likely) and a low-quality generator. For a fair die roll, `uniform_int_distribution(1, 6)` is correct and unbiased.",
+    explanation:
+      "Pair a random engine (e.g. mt19937) with a distribution (e.g. uniform_int_distribution) for unbiased values; this replaces the biased rand() % n idiom.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2650,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.random.mc_bias",
+    type: "multiple_choice",
+    title: "Avoiding modulo bias",
+    prompt: "What is the recommended way to generate an unbiased random integer in a range like 1 to 6?",
+    explanation:
+      "Use a random engine with std::uniform_int_distribution<int>(1, 6). The classic rand() % 6 + 1 introduces modulo bias and relies on a weaker generator.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2660,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.variant.lesson",
+    type: "lesson",
+    title: "Variant and optional",
+    prompt:
+      "`std::optional<T>` models a value that might be absent: it either holds a T or nothing, replacing sentinel values like -1 or null pointers. Check it with `if (opt)` and read it with `*opt` or `opt.value()`. `std::variant<A, B, C>` is a type-safe union that holds exactly one of several alternative types at a time; you query the active type and access it safely with `std::visit` or `std::get_if`. Together they let you express \"maybe a value\" and \"one of these types\" without unsafe casts or out-of-band flags, with the compiler enforcing that you handle the cases.",
+    explanation:
+      "std::optional<T> represents a maybe-present value (no sentinels); std::variant holds exactly one of several types and is accessed safely with std::visit/std::get_if.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2670,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.variant.mc_optional",
+    type: "multiple_choice",
+    title: "Representing a maybe-value",
+    prompt: "What is std::optional<int> best used for?",
+    explanation:
+      "std::optional<int> represents an int that may or may not be present, replacing magic sentinel values (like -1) or nullable pointers with an explicit, type-safe maybe-value.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2680,
+    is_active: true
   }
 ];
+
 
 
 export const learningItemSkills: LearningItemSkill[] = [
@@ -2256,6 +2357,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", skill_id: "cpp.concurrency.mutexes", is_primary: true },
   { learning_item_id: "cpp.concurrency.async.lesson", skill_id: "cpp.concurrency.async", is_primary: true },
   { learning_item_id: "cpp.concurrency.async.mc_get", skill_id: "cpp.concurrency.async", is_primary: true },
+  { learning_item_id: "cpp.utilities.file_io.lesson", skill_id: "cpp.utilities.file_io", is_primary: true },
+  { learning_item_id: "cpp.utilities.file_io.mc_exists", skill_id: "cpp.utilities.file_io", is_primary: true },
+  { learning_item_id: "cpp.utilities.chrono.lesson", skill_id: "cpp.utilities.chrono", is_primary: true },
+  { learning_item_id: "cpp.utilities.chrono.mc_clock", skill_id: "cpp.utilities.chrono", is_primary: true },
+  { learning_item_id: "cpp.utilities.random.lesson", skill_id: "cpp.utilities.random", is_primary: true },
+  { learning_item_id: "cpp.utilities.random.mc_bias", skill_id: "cpp.utilities.random", is_primary: true },
+  { learning_item_id: "cpp.utilities.variant.lesson", skill_id: "cpp.utilities.variant", is_primary: true },
+  { learning_item_id: "cpp.utilities.variant.mc_optional", skill_id: "cpp.utilities.variant", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2658,7 +2767,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.concurrency.async.mc_get.a", learning_item_id: "cpp.concurrency.async.mc_get", content: "Blocks until the task finishes, then returns its result or rethrows its exception", is_correct: true, order_index: 10 },
   { id: "cpp.concurrency.async.mc_get.b", learning_item_id: "cpp.concurrency.async.mc_get", content: "Cancels the task immediately", is_correct: false, order_index: 20 },
   { id: "cpp.concurrency.async.mc_get.c", learning_item_id: "cpp.concurrency.async.mc_get", content: "Returns a default value without waiting", is_correct: false, order_index: 30 },
-  { id: "cpp.concurrency.async.mc_get.d", learning_item_id: "cpp.concurrency.async.mc_get", content: "Starts a brand-new thread each time it is called", is_correct: false, order_index: 40 }
+  { id: "cpp.concurrency.async.mc_get.d", learning_item_id: "cpp.concurrency.async.mc_get", content: "Starts a brand-new thread each time it is called", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.file_io.mc_exists.a", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::filesystem::exists(path)", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.file_io.mc_exists.b", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::cout << path", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.file_io.mc_exists.c", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::string::find on the path text", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.file_io.mc_exists.d", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::sort on the directory", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.chrono.mc_clock.a", learning_item_id: "cpp.utilities.chrono.mc_clock", content: "std::chrono::steady_clock", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.chrono.mc_clock.b", learning_item_id: "cpp.utilities.chrono.mc_clock", content: "std::chrono::system_clock", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.chrono.mc_clock.c", learning_item_id: "cpp.utilities.chrono.mc_clock", content: "The wall clock on the screen", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.chrono.mc_clock.d", learning_item_id: "cpp.utilities.chrono.mc_clock", content: "std::time(nullptr)", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.random.mc_bias.a", learning_item_id: "cpp.utilities.random.mc_bias", content: "A random engine with std::uniform_int_distribution(1, 6)", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.random.mc_bias.b", learning_item_id: "cpp.utilities.random.mc_bias", content: "rand() % 6 + 1", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.random.mc_bias.c", learning_item_id: "cpp.utilities.random.mc_bias", content: "Taking the system time modulo 6", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.random.mc_bias.d", learning_item_id: "cpp.utilities.random.mc_bias", content: "Hashing a counter modulo 6", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.variant.mc_optional.a", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int that may or may not be present, without a magic sentinel value", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.variant.mc_optional.b", learning_item_id: "cpp.utilities.variant.mc_optional", content: "A list of many ints", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.variant.mc_optional.c", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int shared safely between threads", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.variant.mc_optional.d", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int guaranteed to be prime", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
