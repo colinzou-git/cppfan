@@ -285,6 +285,30 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.stl.algorithms",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "Standard algorithms",
+    description: "Use <algorithm> and <numeric> functions instead of hand-written loops.",
+    learner_goal: "Reach for sort, find, count, accumulate, and min/max_element on iterator ranges.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 450,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.iterators",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "Iterators and range-based for",
+    description: "Understand begin/end ranges and iterate with range-based for loops.",
+    learner_goal: "Explain the half-open [begin, end) range and iterate without manual index bookkeeping.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 460,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -332,6 +356,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.stl.string", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "cpp.stl.map", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "cpp.stl.set", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.iterators", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.algorithms", prerequisite_skill_id: "cpp.stl.iterators", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" }
 ];

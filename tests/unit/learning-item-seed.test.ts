@@ -134,6 +134,8 @@ describe("curriculum coverage", () => {
     "cpp.stl.string",
     "cpp.stl.map",
     "cpp.stl.set",
+    "cpp.stl.algorithms",
+    "cpp.stl.iterators",
     // DSA arrays (#48, first slice)
     "dsa.arrays.indexing",
     "dsa.arrays.traversal"

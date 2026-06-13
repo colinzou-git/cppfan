@@ -574,6 +574,56 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.stl.algorithms.lesson",
+    type: "lesson",
+    title: "Standard algorithms",
+    prompt:
+      "The `<algorithm>` and `<numeric>` headers provide reusable operations that take iterator ranges. `std::sort(v.begin(), v.end())` sorts in place; `std::find(v.begin(), v.end(), value)` returns an iterator (or `end()` if not found); `std::count` counts matches; `std::accumulate(v.begin(), v.end(), 0)` sums; `std::min_element` and `std::max_element` return iterators to the smallest and largest elements. Prefer these over writing the loop by hand.",
+    explanation:
+      "Standard algorithms are tested, expressive, and hard to get wrong. Pass a custom comparator or lambda when you need ordering other than the default.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1110,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.algorithms.mc_sort",
+    type: "multiple_choice",
+    title: "Sorting a vector",
+    prompt: "Which expression sorts a `std::vector<int> v` into ascending order in place?",
+    explanation:
+      "`std::sort(v.begin(), v.end())` sorts the range in place using `<` by default. vector has no `.sort()` member (that is std::list); the others are not real functions.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1120,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.iterators.lesson",
+    type: "lesson",
+    title: "Iterators and range-based for",
+    prompt:
+      'An iterator points into a container. `begin()` refers to the first element and `end()` refers to one position past the last, so a range is the half-open interval `[begin, end)`. Range-based for (`for (auto& x : v)`) walks every element without manual iterators. Algorithms operate on `[begin, end)` ranges, and search functions like `find` return `end()` to mean "not found".',
+    explanation:
+      "end() is a sentinel, not a real element — never dereference it. Compare an iterator to end() to test whether a search succeeded.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1130,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.iterators.mc_end",
+    type: "multiple_choice",
+    title: "What end() refers to",
+    prompt: "In a standard container, what does `container.end()` refer to?",
+    explanation:
+      "`end()` is a sentinel one position past the last element. It is not a real element and must not be dereferenced; it marks the end of the `[begin, end)` range.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1140,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -676,6 +726,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.stl.map.mc_check_key", skill_id: "cpp.stl.map", is_primary: true },
   { learning_item_id: "cpp.stl.set.lesson", skill_id: "cpp.stl.set", is_primary: true },
   { learning_item_id: "cpp.stl.set.mc_insert_dup", skill_id: "cpp.stl.set", is_primary: true },
+  { learning_item_id: "cpp.stl.algorithms.lesson", skill_id: "cpp.stl.algorithms", is_primary: true },
+  { learning_item_id: "cpp.stl.algorithms.mc_sort", skill_id: "cpp.stl.algorithms", is_primary: true },
+  { learning_item_id: "cpp.stl.iterators.lesson", skill_id: "cpp.stl.iterators", is_primary: true },
+  { learning_item_id: "cpp.stl.iterators.mc_end", skill_id: "cpp.stl.iterators", is_primary: true },
+  { learning_item_id: "cpp.stl.algorithms.lesson", skill_id: "cpp.stl.iterators", is_primary: false },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -783,6 +838,16 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.stl.set.mc_insert_dup.b", learning_item_id: "cpp.stl.set.mc_insert_dup", content: "The value is stored a second time", is_correct: false, order_index: 20 },
   { id: "cpp.stl.set.mc_insert_dup.c", learning_item_id: "cpp.stl.set.mc_insert_dup", content: "insert throws an exception", is_correct: false, order_index: 30 },
   { id: "cpp.stl.set.mc_insert_dup.d", learning_item_id: "cpp.stl.set.mc_insert_dup", content: "The whole set is cleared", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.algorithms.mc_sort.a", learning_item_id: "cpp.stl.algorithms.mc_sort", content: "std::sort(v.begin(), v.end())", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.algorithms.mc_sort.b", learning_item_id: "cpp.stl.algorithms.mc_sort", content: "v.sort()", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.algorithms.mc_sort.c", learning_item_id: "cpp.stl.algorithms.mc_sort", content: "std::order(v)", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.algorithms.mc_sort.d", learning_item_id: "cpp.stl.algorithms.mc_sort", content: "sort(v, ascending)", is_correct: false, order_index: 40 },
+
+  { id: "cpp.stl.iterators.mc_end.a", learning_item_id: "cpp.stl.iterators.mc_end", content: "One position past the last element (a sentinel, not a real element)", is_correct: true, order_index: 10 },
+  { id: "cpp.stl.iterators.mc_end.b", learning_item_id: "cpp.stl.iterators.mc_end", content: "The last element of the container", is_correct: false, order_index: 20 },
+  { id: "cpp.stl.iterators.mc_end.c", learning_item_id: "cpp.stl.iterators.mc_end", content: "The first element of the container", is_correct: false, order_index: 30 },
+  { id: "cpp.stl.iterators.mc_end.d", learning_item_id: "cpp.stl.iterators.mc_end", content: "A null pointer", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
