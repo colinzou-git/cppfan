@@ -772,6 +772,56 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 1340,
     is_active: true
+  },
+  {
+    id: "dsa.stacks.basic_stack.lesson",
+    type: "lesson",
+    title: "When to use a stack or a queue",
+    prompt:
+      "A stack (LIFO) fits problems with nested or reversible structure: matching brackets, undo, depth-first search, and expression evaluation — push when you enter something, pop when you resolve it. A queue (FIFO) fits processing in arrival order and breadth-first search, where you handle items level by level. Choosing the structure that matches the order of work usually makes the algorithm simple.",
+    explanation:
+      "Ask: do I resolve the most recent thing first (stack) or the oldest thing first (queue)? The answer picks the structure.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1510,
+    is_active: true
+  },
+  {
+    id: "dsa.stacks.basic_stack.mc_parens",
+    type: "multiple_choice",
+    title: "Checking balanced brackets",
+    prompt: "Which data structure most naturally checks whether brackets like `(()())` are balanced?",
+    explanation:
+      "A stack matches nested structure: push each opening bracket and pop when a closing bracket matches the top. A leftover or mismatched bracket means it is unbalanced.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1520,
+    is_active: true
+  },
+  {
+    id: "dsa.hashing.lookup.lesson",
+    type: "lesson",
+    title: "Hashing for fast lookup",
+    prompt:
+      'A hash map (`std::unordered_map`) gives average O(1) lookup by key, and a hash set (`std::unordered_set`) gives average O(1) membership tests. Common patterns: count how often values appear, detect duplicates, or check "have I seen this before?" in a single pass. You trade extra memory for speed compared with repeatedly scanning a list.',
+    explanation:
+      "When a brute-force solution does repeated linear searches, a hash set/map often turns an O(n^2) scan into O(n).",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1530,
+    is_active: true
+  },
+  {
+    id: "dsa.hashing.lookup.mc_advantage",
+    type: "multiple_choice",
+    title: "Why hashing for lookups",
+    prompt: "What is the main advantage of `std::unordered_set` over scanning a `std::vector` to test membership?",
+    explanation:
+      "A hash set tests membership in average O(1), versus O(n) for scanning a vector. That speedup is the reason to use hashing for lookups and duplicate detection.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1540,
+    is_active: true
   }
 ];
 
@@ -845,7 +895,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.searching.binary_search.mc_precondition", skill_id: "dsa.searching.binary_search", is_primary: true },
   { learning_item_id: "dsa.sorting.comparator.lesson", skill_id: "dsa.sorting.comparator", is_primary: true },
   { learning_item_id: "dsa.sorting.comparator.mc_descending", skill_id: "dsa.sorting.comparator", is_primary: true },
-  { learning_item_id: "dsa.searching.binary_search.lesson", skill_id: "dsa.sorting.comparator", is_primary: false }
+  { learning_item_id: "dsa.searching.binary_search.lesson", skill_id: "dsa.sorting.comparator", is_primary: false },
+  { learning_item_id: "dsa.stacks.basic_stack.lesson", skill_id: "dsa.stacks.basic_stack", is_primary: true },
+  { learning_item_id: "dsa.stacks.basic_stack.mc_parens", skill_id: "dsa.stacks.basic_stack", is_primary: true },
+  { learning_item_id: "dsa.hashing.lookup.lesson", skill_id: "dsa.hashing.lookup", is_primary: true },
+  { learning_item_id: "dsa.hashing.lookup.mc_advantage", skill_id: "dsa.hashing.lookup", is_primary: true }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -987,7 +1041,17 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.sorting.comparator.mc_descending.a", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a > b; }", is_correct: true, order_index: 10 },
   { id: "dsa.sorting.comparator.mc_descending.b", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a < b; }", is_correct: false, order_index: 20 },
   { id: "dsa.sorting.comparator.mc_descending.c", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "[](int a, int b){ return a == b; }", is_correct: false, order_index: 30 },
-  { id: "dsa.sorting.comparator.mc_descending.d", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "No comparator; std::sort detects it automatically", is_correct: false, order_index: 40 }
+  { id: "dsa.sorting.comparator.mc_descending.d", learning_item_id: "dsa.sorting.comparator.mc_descending", content: "No comparator; std::sort detects it automatically", is_correct: false, order_index: 40 },
+
+  { id: "dsa.stacks.basic_stack.mc_parens.a", learning_item_id: "dsa.stacks.basic_stack.mc_parens", content: "A stack", is_correct: true, order_index: 10 },
+  { id: "dsa.stacks.basic_stack.mc_parens.b", learning_item_id: "dsa.stacks.basic_stack.mc_parens", content: "A queue", is_correct: false, order_index: 20 },
+  { id: "dsa.stacks.basic_stack.mc_parens.c", learning_item_id: "dsa.stacks.basic_stack.mc_parens", content: "A priority_queue", is_correct: false, order_index: 30 },
+  { id: "dsa.stacks.basic_stack.mc_parens.d", learning_item_id: "dsa.stacks.basic_stack.mc_parens", content: "A sorted vector", is_correct: false, order_index: 40 },
+
+  { id: "dsa.hashing.lookup.mc_advantage.a", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "Average O(1) membership instead of O(n) scanning", is_correct: true, order_index: 10 },
+  { id: "dsa.hashing.lookup.mc_advantage.b", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It keeps the elements sorted", is_correct: false, order_index: 20 },
+  { id: "dsa.hashing.lookup.mc_advantage.c", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It always uses less memory", is_correct: false, order_index: 30 },
+  { id: "dsa.hashing.lookup.mc_advantage.d", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It allows duplicate keys", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
