@@ -1050,6 +1050,106 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.function_templates.lesson",
+    type: "lesson",
+    title: "Function templates",
+    prompt:
+      "A function template lets one definition work for many types. `template <typename T> T maxOf(T a, T b) { return a > b ? a : b; }` works for ints, doubles, and any type with `>`. The compiler deduces `T` from the call arguments and generates a concrete function for each type actually used.",
+    explanation:
+      "You usually do not write the type explicitly; the compiler deduces T from the arguments. Each distinct T produces its own instantiation.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1810,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.function_templates.mc_purpose",
+    type: "multiple_choice",
+    title: "What a function template provides",
+    prompt: "What does writing `template <typename T>` before a function let you do?",
+    explanation:
+      "It defines one function that works for many types, with T deduced from the call. The compiler instantiates a concrete version per type used.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1820,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.class_templates.lesson",
+    type: "lesson",
+    title: "Class templates",
+    prompt:
+      "A class template parameterizes a class by one or more types: `template <typename T> class Box { T value; public: T get() const { return value; } };`, used as `Box<int> b;`. The standard containers (`std::vector<T>`, `std::map<K,V>`) are class templates. Each instantiation (`Box<int>`, `Box<std::string>`) is a separate type.",
+    explanation:
+      "Class templates are how the standard library provides type-safe containers. You supply the type argument in angle brackets.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1830,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.class_templates.mc_vector",
+    type: "multiple_choice",
+    title: "Recognizing a class template",
+    prompt: "`std::vector<int>` is an example of what?",
+    explanation:
+      "`std::vector` is a class template; `std::vector<int>` is that template instantiated with the type int.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1840,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.concepts.lesson",
+    type: "lesson",
+    title: "Concepts",
+    prompt:
+      "A concept (C++20) constrains a template parameter to types that meet stated requirements, e.g. `template <std::integral T> T twice(T x) { return x + x; }` only accepts integer types. Concepts make intent explicit and produce much clearer error messages than unconstrained templates, replacing most older SFINAE tricks.",
+    explanation:
+      'Concepts say "this template only works for types like X". They turn confusing template errors into a clear "constraint not satisfied" message.',
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 1850,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.concepts.mc_role",
+    type: "multiple_choice",
+    title: "What a concept does",
+    prompt: "What does applying a concept to a template parameter do?",
+    explanation:
+      "It constrains the parameter to types that satisfy the concept's requirements, giving clearer errors and documenting intent.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 1860,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges.lesson",
+    type: "lesson",
+    title: "Ranges and views",
+    prompt:
+      "C++20 ranges let you call algorithms on a whole range without spelling out `begin`/`end`: `std::ranges::sort(v);`. Views compose lazy pipelines: `auto evens = v | std::views::filter([](int x){ return x % 2 == 0; });` produces elements on demand without copying the container.",
+    explanation:
+      "Range algorithms take the container directly; views are lazy and non-owning, so they compose cheaply.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 1870,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges.mc_views",
+    type: "multiple_choice",
+    title: "Advantage of ranges and views",
+    prompt: "What is an advantage of C++20 ranges and views?",
+    explanation:
+      "They let you operate on whole ranges directly and compose lazy views that transform/filter without copying the underlying data.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 1880,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o.lesson",
     type: "lesson",
     title: "Big-O notation",
@@ -1394,6 +1494,15 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.lambdas", is_primary: true },
   { learning_item_id: "cpp.stl.lambdas.mc_capture", skill_id: "cpp.stl.lambdas", is_primary: true },
   { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.algorithms", is_primary: false },
+  { learning_item_id: "cpp.templates.function_templates.lesson", skill_id: "cpp.templates.function_templates", is_primary: true },
+  { learning_item_id: "cpp.templates.function_templates.mc_purpose", skill_id: "cpp.templates.function_templates", is_primary: true },
+  { learning_item_id: "cpp.templates.class_templates.lesson", skill_id: "cpp.templates.class_templates", is_primary: true },
+  { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.templates.class_templates", is_primary: true },
+  { learning_item_id: "cpp.templates.concepts.lesson", skill_id: "cpp.templates.concepts", is_primary: true },
+  { learning_item_id: "cpp.templates.concepts.mc_role", skill_id: "cpp.templates.concepts", is_primary: true },
+  { learning_item_id: "cpp.templates.ranges.lesson", skill_id: "cpp.templates.ranges", is_primary: true },
+  { learning_item_id: "cpp.templates.ranges.mc_views", skill_id: "cpp.templates.ranges", is_primary: true },
+  { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.stl.vector", is_primary: false },
   { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.problem_solving.lesson", skill_id: "dsa.complexity.problem_solving", is_primary: true },
@@ -1614,6 +1723,26 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.stl.lambdas.mc_capture.b", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The return type of the lambda", is_correct: false, order_index: 20 },
   { id: "cpp.stl.lambdas.mc_capture.c", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The parameters of the lambda", is_correct: false, order_index: 30 },
   { id: "cpp.stl.lambdas.mc_capture.d", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The name of the lambda", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.function_templates.mc_purpose.a", learning_item_id: "cpp.templates.function_templates.mc_purpose", content: "Write one function for many types, with T deduced from arguments", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.function_templates.mc_purpose.b", learning_item_id: "cpp.templates.function_templates.mc_purpose", content: "Make the function run at compile time only", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.function_templates.mc_purpose.c", learning_item_id: "cpp.templates.function_templates.mc_purpose", content: "Force all callers to pass the type explicitly", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.function_templates.mc_purpose.d", learning_item_id: "cpp.templates.function_templates.mc_purpose", content: "Hide the function from other files", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.class_templates.mc_vector.a", learning_item_id: "cpp.templates.class_templates.mc_vector", content: "A class template instantiated with int", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.class_templates.mc_vector.b", learning_item_id: "cpp.templates.class_templates.mc_vector", content: "A function template", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.class_templates.mc_vector.c", learning_item_id: "cpp.templates.class_templates.mc_vector", content: "A macro", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.class_templates.mc_vector.d", learning_item_id: "cpp.templates.class_templates.mc_vector", content: "A concept", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.concepts.mc_role.a", learning_item_id: "cpp.templates.concepts.mc_role", content: "Constrains the parameter to types meeting a requirement, with clearer errors", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.concepts.mc_role.b", learning_item_id: "cpp.templates.concepts.mc_role", content: "Makes the template run faster", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.concepts.mc_role.c", learning_item_id: "cpp.templates.concepts.mc_role", content: "Allows any type with no checking", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.concepts.mc_role.d", learning_item_id: "cpp.templates.concepts.mc_role", content: "Replaces the need for a return type", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.ranges.mc_views.a", learning_item_id: "cpp.templates.ranges.mc_views", content: "Operate on whole ranges and compose lazy views without copying", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.ranges.mc_views.b", learning_item_id: "cpp.templates.ranges.mc_views", content: "They run on the GPU automatically", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.ranges.mc_views.c", learning_item_id: "cpp.templates.ranges.mc_views", content: "They always copy the container first", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.ranges.mc_views.d", learning_item_id: "cpp.templates.ranges.mc_views", content: "They remove the need for any includes", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
