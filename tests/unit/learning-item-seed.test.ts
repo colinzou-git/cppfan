@@ -129,9 +129,11 @@ describe("curriculum coverage", () => {
     "cpp.smart_pointers.cyclic_reference",
     "cpp.smart_pointers.ownership_choice",
     "cpp.smart_pointers.ownership_transfer",
-    // STL containers (#46, first slice)
+    // STL containers (#46)
     "cpp.stl.vector",
     "cpp.stl.string",
+    "cpp.stl.map",
+    "cpp.stl.set",
     // DSA arrays (#48, first slice)
     "dsa.arrays.indexing",
     "dsa.arrays.traversal"

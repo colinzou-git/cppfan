@@ -261,6 +261,30 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.stl.map",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "std::map and unordered_map",
+    description: "Store key-value pairs with unique keys; choose ordered vs hashed lookup.",
+    learner_goal: "Insert, look up, and check keys without accidentally inserting via operator[].",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 430,
+    is_active: true
+  },
+  {
+    id: "cpp.stl.set",
+    domain: "cpp",
+    module_id: "cpp.stl",
+    title: "std::set and unordered_set",
+    description: "Store unique elements and test membership efficiently.",
+    learner_goal: "Use a set to deduplicate and to check membership.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 440,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -306,6 +330,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.smart_pointers.ownership_transfer", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" },
   { skill_id: "cpp.stl.vector", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
   { skill_id: "cpp.stl.string", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.map", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
+  { skill_id: "cpp.stl.set", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" }
 ];
