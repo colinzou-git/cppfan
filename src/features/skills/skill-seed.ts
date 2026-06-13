@@ -34,7 +34,7 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.stacks", title: "Stacks and queues", description: "LIFO and FIFO problem patterns.", order_index: 140 },
   { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 },
   { id: "dsa.trees", title: "Trees, heaps, and DSU", description: "Tree traversal, heaps, and union-find.", order_index: 160 },
-  { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 },
+  { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 155 },
   { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 },
   { id: "dsa.techniques", title: "Algorithmic techniques", description: "Prefix sums, sliding window, greedy, and dynamic programming.", order_index: 180 },
   { id: "dsa.strings", title: "String algorithms", description: "String manipulation, searching, palindromes, and parsing.", order_index: 190 },

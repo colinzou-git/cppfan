@@ -37,3 +37,24 @@ first pass, so coverage stays even.
 Once breadth is in place, the highest-value depth additions are `code_reading` and
 `bug_spotting` items for the constructors and RAII modules, which currently lean on
 lessons and multiple-choice.
+
+## Skill-map integrity rule (#97)
+
+Coverage is enforced automatically by `tests/unit/skill-map-integrity.test.ts`,
+which derives expectations from the **active skill seed** — there is no
+hand-maintained list to update. Run it (and everything else) with `pnpm verify`
+(or `pnpm test`) locally or in a Codespace. The invariants:
+
+- module ids are unique and module `order_index` values are unambiguous (unique);
+- every skill belongs to a declared module;
+- prerequisite edges are unique, have no self-edges, reference only active skills,
+  and form no direct or indirect cycles;
+- **every active skill has at least one learning item**, and every covered skill
+  has at least two, unless it is listed in `CONTENT_FREE_SKILLS` /
+  `SINGLE_ITEM_SKILLS` in that test (each exception is itself validated, so stale
+  exceptions fail too).
+
+So: when you add an active skill, add its content in the same change — or add an
+explicit, justified exception. (The DB↔TypeScript-seed *parity* exporter that
+compares the migrated database against the seed is tracked separately in #97 and
+still to do; this slice covers the seed-side integrity + derived coverage.)
