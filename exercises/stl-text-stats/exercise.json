@@ -1,0 +1,17 @@
+{
+  "id": "stl-text-stats",
+  "title": "STL: text statistics",
+  "skill_ids": ["cpp.stl.map", "cpp.stl.algorithms", "dsa.strings.parsing"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["text_stats.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/stl-text-stats/work exercises/stl-text-stats/tests/tests.cpp -o exercises/stl-text-stats/work/run",
+  "test_command": "exercises/stl-text-stats/work/run",
+  "required_tests": ["test_counts_and_lowercasing", "test_empty_text", "test_top_n_orders_by_count_then_word", "test_top_n_clamps_to_distinct"],
+  "hints": [
+    "Feed the text into a std::istringstream and read words with `>>` — it splits on whitespace for you.",
+    "Lowercase each character with std::tolower (cast to unsigned char first to avoid UB).",
+    "For top_n, copy the map into a vector and std::sort with a comparator: count descending, then word ascending."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

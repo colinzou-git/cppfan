@@ -34,3 +34,7 @@ pnpm-debug.log*
 # ai/generated context
 .ai/repomix-output.*
 .ai/repo-map.*
+
+# write-code exercise working copies and build output (#81)
+exercises/*/work/
+exercises/*/.build-solution/
