@@ -739,6 +739,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.constexpr",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "constexpr functions and values",
+    description: "Evaluate functions and values at compile time with constexpr.",
+    learner_goal: "Write a constexpr function and know when it runs at compile time vs run time.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 605,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.if_constexpr",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "if constexpr",
+    description: "Select a branch at compile time so the discarded branch is not instantiated.",
+    learner_goal: "Use if constexpr to pick code per type without invalid branches being compiled.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 606,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.static_assert",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "static_assert",
+    description: "Enforce compile-time invariants with a clear message.",
+    learner_goal: "Add a static_assert that fails the build with a readable message when an assumption breaks.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 607,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling",
     domain: "cpp",
     module_id: "cpp.tooling",
@@ -1326,6 +1362,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.templates.class_templates", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
   { skill_id: "cpp.templates.concepts", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
   { skill_id: "cpp.templates.ranges", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.constexpr", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.if_constexpr", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.static_assert", prerequisite_skill_id: "cpp.templates.constexpr", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.error_handling", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.testing", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.debugging", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
