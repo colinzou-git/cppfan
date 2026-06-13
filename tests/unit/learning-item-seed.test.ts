@@ -122,11 +122,13 @@ describe("curriculum coverage", () => {
     "cpp.raii.destructor_cleanup",
     "cpp.raii.exception_safety_intro",
     "cpp.raii.ownership_boundary",
-    // smart pointers module (#43)
+    // smart pointers module (#43, #45)
     "cpp.smart_pointers.unique_ptr",
     "cpp.smart_pointers.shared_ptr",
     "cpp.smart_pointers.weak_ptr",
-    "cpp.smart_pointers.cyclic_reference"
+    "cpp.smart_pointers.cyclic_reference",
+    "cpp.smart_pointers.ownership_choice",
+    "cpp.smart_pointers.ownership_transfer"
   ];
 
   it("has at least one learning item for every covered skill", () => {
