@@ -141,10 +141,12 @@ describe("curriculum coverage", () => {
     // DSA (#48)
     "dsa.arrays.indexing",
     "dsa.arrays.traversal",
+    "dsa.arrays.two_pointers",
     "dsa.searching.binary_search",
     "dsa.sorting.comparator",
     "dsa.stacks.basic_stack",
-    "dsa.hashing.lookup"
+    "dsa.hashing.lookup",
+    "dsa.recursion.base_case"
   ];
 
   it("has at least one learning item for every covered skill", () => {

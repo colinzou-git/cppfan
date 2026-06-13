@@ -822,6 +822,57 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 1540,
     is_active: true
+  },
+  {
+    id: "dsa.arrays.two_pointers.lesson",
+    type: "lesson",
+    title: "Two pointers and sliding window",
+    prompt:
+      'The two-pointer technique uses two indices moving through a sequence to solve pair and window problems in O(n) instead of O(n^2). On a sorted array you can find a pair summing to a target by starting one pointer at each end and moving inward based on the current sum. A sliding window keeps a moving range [left, right) and updates a running result as it grows and shrinks, which suits "longest/shortest subarray" style problems.',
+    explanation:
+      "Two pointers turn many nested-loop scans into a single linear pass. The array often needs to be sorted for the pair variant.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1610,
+    is_active: true
+  },
+  {
+    id: "dsa.arrays.two_pointers.mc_complexity",
+    type: "multiple_choice",
+    title: "Two-pointer time complexity",
+    prompt:
+      "On a sorted array, finding a pair that sums to a target using two pointers from both ends runs in what time?",
+    explanation:
+      "Each step moves one pointer inward, so the pointers meet after at most n steps: O(n). A brute-force double loop would be O(n^2).",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1620,
+    is_active: true
+  },
+  {
+    id: "dsa.recursion.base_case.lesson",
+    type: "lesson",
+    title: "Recursion and base cases",
+    prompt:
+      "A recursive function solves a problem by calling itself on a smaller input. It needs a base case that stops the recursion (for example `n == 0`) and a recursive case that makes progress toward that base case. For example, `factorial(n)` returns 1 when `n == 0`, otherwise `n * factorial(n - 1)`. Without a reachable base case the calls never stop and the call stack overflows.",
+    explanation:
+      "Every recursion needs two things: a base case to stop, and a step that moves strictly toward it.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1630,
+    is_active: true
+  },
+  {
+    id: "dsa.recursion.base_case.mc_no_base",
+    type: "multiple_choice",
+    title: "Missing base case",
+    prompt: "What happens if a recursive function never reaches a base case?",
+    explanation:
+      "With no reachable base case the function calls itself forever, growing the call stack until it overflows (a crash), rather than returning a value.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1640,
+    is_active: true
   }
 ];
 
@@ -899,7 +950,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.stacks.basic_stack.lesson", skill_id: "dsa.stacks.basic_stack", is_primary: true },
   { learning_item_id: "dsa.stacks.basic_stack.mc_parens", skill_id: "dsa.stacks.basic_stack", is_primary: true },
   { learning_item_id: "dsa.hashing.lookup.lesson", skill_id: "dsa.hashing.lookup", is_primary: true },
-  { learning_item_id: "dsa.hashing.lookup.mc_advantage", skill_id: "dsa.hashing.lookup", is_primary: true }
+  { learning_item_id: "dsa.hashing.lookup.mc_advantage", skill_id: "dsa.hashing.lookup", is_primary: true },
+  { learning_item_id: "dsa.arrays.two_pointers.lesson", skill_id: "dsa.arrays.two_pointers", is_primary: true },
+  { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.arrays.two_pointers", is_primary: true },
+  { learning_item_id: "dsa.recursion.base_case.lesson", skill_id: "dsa.recursion.base_case", is_primary: true },
+  { learning_item_id: "dsa.recursion.base_case.mc_no_base", skill_id: "dsa.recursion.base_case", is_primary: true },
+  { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -1051,7 +1107,17 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.hashing.lookup.mc_advantage.a", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "Average O(1) membership instead of O(n) scanning", is_correct: true, order_index: 10 },
   { id: "dsa.hashing.lookup.mc_advantage.b", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It keeps the elements sorted", is_correct: false, order_index: 20 },
   { id: "dsa.hashing.lookup.mc_advantage.c", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It always uses less memory", is_correct: false, order_index: 30 },
-  { id: "dsa.hashing.lookup.mc_advantage.d", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It allows duplicate keys", is_correct: false, order_index: 40 }
+  { id: "dsa.hashing.lookup.mc_advantage.d", learning_item_id: "dsa.hashing.lookup.mc_advantage", content: "It allows duplicate keys", is_correct: false, order_index: 40 },
+
+  { id: "dsa.arrays.two_pointers.mc_complexity.a", learning_item_id: "dsa.arrays.two_pointers.mc_complexity", content: "O(n)", is_correct: true, order_index: 10 },
+  { id: "dsa.arrays.two_pointers.mc_complexity.b", learning_item_id: "dsa.arrays.two_pointers.mc_complexity", content: "O(n^2)", is_correct: false, order_index: 20 },
+  { id: "dsa.arrays.two_pointers.mc_complexity.c", learning_item_id: "dsa.arrays.two_pointers.mc_complexity", content: "O(log n)", is_correct: false, order_index: 30 },
+  { id: "dsa.arrays.two_pointers.mc_complexity.d", learning_item_id: "dsa.arrays.two_pointers.mc_complexity", content: "O(1)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.recursion.base_case.mc_no_base.a", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It recurses forever and overflows the call stack", is_correct: true, order_index: 10 },
+  { id: "dsa.recursion.base_case.mc_no_base.b", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It returns 0", is_correct: false, order_index: 20 },
+  { id: "dsa.recursion.base_case.mc_no_base.c", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "The compiler refuses to build it", is_correct: false, order_index: 30 },
+  { id: "dsa.recursion.base_case.mc_no_base.d", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It runs once and stops", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
