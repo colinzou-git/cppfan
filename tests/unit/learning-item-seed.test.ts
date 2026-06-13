@@ -112,6 +112,10 @@ describe("curriculum coverage", () => {
     "cpp.program_basics.io",
     "cpp.values_types.variables",
     "cpp.values_types.conversions",
+    "cpp.control_flow.conditionals",
+    "cpp.control_flow.loops",
+    "cpp.functions.basics",
+    "cpp.functions.decomposition",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -166,6 +170,8 @@ describe("curriculum coverage", () => {
       (id) =>
         id.startsWith("cpp.program_basics.") ||
         id.startsWith("cpp.values_types.") ||
+        id.startsWith("cpp.control_flow.") ||
+        id.startsWith("cpp.functions.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||

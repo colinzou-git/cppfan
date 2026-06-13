@@ -119,6 +119,107 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.control_flow.conditionals.lesson",
+    type: "lesson",
+    title: "Conditionals: if, else, and switch",
+    prompt:
+      "An `if (condition) { ... } else { ... }` runs one branch based on a `bool` condition built from comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`) and logical operators (`&&`, `||`, `!`). Chain choices with `else if`. A `switch` selects among integer or enum cases; put a `break` at the end of each case, or execution falls through into the next case.",
+    explanation:
+      "Use == for comparison (not =, which assigns). In a switch, missing break causes fall-through, which is a common bug.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 9,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.conditionals.mc_fallthrough",
+    type: "multiple_choice",
+    title: "Forgetting break in a switch",
+    prompt: "In a `switch`, what happens if a case does not end with `break`?",
+    explanation:
+      "Without break, execution falls through and continues running the statements of the following case(s) until a break or the end of the switch.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 10,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.loops.lesson",
+    type: "lesson",
+    title: "Loops: for, while, break, continue",
+    prompt:
+      "A `for (init; condition; step)` loop is ideal for counting; a `while (condition)` loop repeats until the condition is false. `break` exits the loop immediately; `continue` skips to the next iteration. To visit indices `0` to `n - 1` exactly once, use `for (int i = 0; i < n; ++i)`. Using `<=` or starting at the wrong index causes off-by-one errors.",
+    explanation:
+      "The condition `i < n` (with i starting at 0) visits each of the n elements once. `i <= n` runs one time too many.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 11,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.loops.mc_offbyone",
+    type: "multiple_choice",
+    title: "Looping over n elements",
+    prompt:
+      "To visit indices `0` through `n - 1` exactly once with `for (int i = 0; <cond>; ++i)`, what should `<cond>` be?",
+    explanation:
+      "`i < n` runs for i = 0..n-1, visiting each of the n elements once. `i <= n` overruns by one (out of bounds); `i < n - 1` skips the last element.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 12,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.basics.lesson",
+    type: "lesson",
+    title: "Function basics",
+    prompt:
+      "A function has a return type, a name, parameters, and a body: `int add(int a, int b) { return a + b; }`. By default parameters are copies of the arguments, so changing them does not affect the caller. Variables declared inside a function are local to it and disappear when it returns. A function must be declared (or defined) before the line that calls it.",
+    explanation:
+      "Parameters are local copies unless you take them by reference. Local variables exist only during the call.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 13,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.basics.mc_scope",
+    type: "multiple_choice",
+    title: "Scope of a local variable",
+    prompt: "What is the scope of a variable declared inside a function body?",
+    explanation:
+      "A variable declared in a function body is local: it is visible only within that function (and the block it is declared in) and does not exist outside the call.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 14,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.decomposition.lesson",
+    type: "lesson",
+    title: "Decomposition and headers",
+    prompt:
+      "Break a large task into small, well-named functions that each do one thing — this makes code easier to read, test, and reuse. In larger projects, put function declarations in a header file (`.h`) and their definitions in a source file (`.cpp`), so other files can include the header and call the functions. Avoid giant functions that do many unrelated things.",
+    explanation:
+      "Small functions with clear names are the building blocks of readable C++. Headers share declarations; source files hold the definitions.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 15,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.decomposition.mc_why",
+    type: "multiple_choice",
+    title: "Why decompose into functions",
+    prompt: "What is the main reason to split a large function into several smaller ones?",
+    explanation:
+      "Smaller, single-purpose functions are easier to read, test, and reuse. It is a design/clarity benefit, not a performance trick or a language requirement.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 16,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -985,6 +1086,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.values_types.variables.mc_auto", skill_id: "cpp.values_types.variables", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.lesson", skill_id: "cpp.values_types.conversions", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.mc_static_cast", skill_id: "cpp.values_types.conversions", is_primary: true },
+  { learning_item_id: "cpp.control_flow.conditionals.lesson", skill_id: "cpp.control_flow.conditionals", is_primary: true },
+  { learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", skill_id: "cpp.control_flow.conditionals", is_primary: true },
+  { learning_item_id: "cpp.control_flow.loops.lesson", skill_id: "cpp.control_flow.loops", is_primary: true },
+  { learning_item_id: "cpp.control_flow.loops.mc_offbyone", skill_id: "cpp.control_flow.loops", is_primary: true },
+  { learning_item_id: "cpp.functions.basics.lesson", skill_id: "cpp.functions.basics", is_primary: true },
+  { learning_item_id: "cpp.functions.basics.mc_scope", skill_id: "cpp.functions.basics", is_primary: true },
+  { learning_item_id: "cpp.functions.decomposition.lesson", skill_id: "cpp.functions.decomposition", is_primary: true },
+  { learning_item_id: "cpp.functions.decomposition.mc_why", skill_id: "cpp.functions.decomposition", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -1086,6 +1195,26 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.values_types.conversions.mc_static_cast.b", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "4 (rounded)", is_correct: false, order_index: 20 },
   { id: "cpp.values_types.conversions.mc_static_cast.c", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "3.9 (unchanged)", is_correct: false, order_index: 30 },
   { id: "cpp.values_types.conversions.mc_static_cast.d", learning_item_id: "cpp.values_types.conversions.mc_static_cast", content: "a compile error", is_correct: false, order_index: 40 },
+
+  { id: "cpp.control_flow.conditionals.mc_fallthrough.a", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "Execution falls through into the next case", is_correct: true, order_index: 10 },
+  { id: "cpp.control_flow.conditionals.mc_fallthrough.b", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "It is a compile error", is_correct: false, order_index: 20 },
+  { id: "cpp.control_flow.conditionals.mc_fallthrough.c", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "Nothing; break is automatic", is_correct: false, order_index: 30 },
+  { id: "cpp.control_flow.conditionals.mc_fallthrough.d", learning_item_id: "cpp.control_flow.conditionals.mc_fallthrough", content: "The program crashes at runtime", is_correct: false, order_index: 40 },
+
+  { id: "cpp.control_flow.loops.mc_offbyone.a", learning_item_id: "cpp.control_flow.loops.mc_offbyone", content: "i < n", is_correct: true, order_index: 10 },
+  { id: "cpp.control_flow.loops.mc_offbyone.b", learning_item_id: "cpp.control_flow.loops.mc_offbyone", content: "i <= n", is_correct: false, order_index: 20 },
+  { id: "cpp.control_flow.loops.mc_offbyone.c", learning_item_id: "cpp.control_flow.loops.mc_offbyone", content: "i < n - 1", is_correct: false, order_index: 30 },
+  { id: "cpp.control_flow.loops.mc_offbyone.d", learning_item_id: "cpp.control_flow.loops.mc_offbyone", content: "i != n + 1", is_correct: false, order_index: 40 },
+
+  { id: "cpp.functions.basics.mc_scope.a", learning_item_id: "cpp.functions.basics.mc_scope", content: "Local to that function (and its blocks)", is_correct: true, order_index: 10 },
+  { id: "cpp.functions.basics.mc_scope.b", learning_item_id: "cpp.functions.basics.mc_scope", content: "Global to the whole program", is_correct: false, order_index: 20 },
+  { id: "cpp.functions.basics.mc_scope.c", learning_item_id: "cpp.functions.basics.mc_scope", content: "Visible to every function in the file", is_correct: false, order_index: 30 },
+  { id: "cpp.functions.basics.mc_scope.d", learning_item_id: "cpp.functions.basics.mc_scope", content: "Shared with the caller automatically", is_correct: false, order_index: 40 },
+
+  { id: "cpp.functions.decomposition.mc_why.a", learning_item_id: "cpp.functions.decomposition.mc_why", content: "Readability, testability, and reuse", is_correct: true, order_index: 10 },
+  { id: "cpp.functions.decomposition.mc_why.b", learning_item_id: "cpp.functions.decomposition.mc_why", content: "It always makes the program run faster", is_correct: false, order_index: 20 },
+  { id: "cpp.functions.decomposition.mc_why.c", learning_item_id: "cpp.functions.decomposition.mc_why", content: "C++ requires functions under 10 lines", is_correct: false, order_index: 30 },
+  { id: "cpp.functions.decomposition.mc_why.d", learning_item_id: "cpp.functions.decomposition.mc_why", content: "It uses more memory", is_correct: false, order_index: 40 },
 
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },

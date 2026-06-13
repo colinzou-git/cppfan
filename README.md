@@ -192,6 +192,8 @@ supabase/migrations/20260613330000_add_dsa_recursion_twopointer_skills.sql
 supabase/migrations/20260613340000_seed_dsa_recursion_twopointer_items.sql
 supabase/migrations/20260613350000_add_foundation_basics_types_skills.sql
 supabase/migrations/20260613360000_seed_foundation_basics_types_items.sql
+supabase/migrations/20260613370000_add_foundation_control_functions_skills.sql
+supabase/migrations/20260613380000_seed_foundation_control_functions_items.sql
 ```
 
 The `profiles` migration adds:
