@@ -38,6 +38,10 @@ export function AnswerForm({
     setError(null);
     startTransition(async () => {
       const response = await submitAnswer({ itemId, choiceId: selectedId });
+      if (response.status === "error") {
+        setError("Grading is temporarily unavailable. Please try again in a moment.");
+        return;
+      }
       if (response.status === "invalid") {
         setError("That answer could not be graded. Please try again.");
         return;

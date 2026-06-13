@@ -7,13 +7,15 @@ import { recordSkillEvents } from "@/features/events/event-service";
 
 export type SubmitAnswerResult =
   | { status: "invalid" }
+  | { status: "error" }
   | { status: "graded"; isCorrect: boolean; correctChoiceId: string; persisted: boolean };
 
 /**
  * Grade a submitted choice for a learning item and, when the learner is signed
- * in, record the attempt. Grading works even when Supabase is unconfigured or
- * the migration is not applied (it falls back to the bundled seed); recording
- * is best-effort.
+ * in, record the attempt. Seed grading is used only in deliberate non-database
+ * modes (Supabase unconfigured, or the grading function not migrated yet); a
+ * configured-database failure returns a degraded `error` result rather than
+ * silently grading against the bundled seed (#146). Recording is best-effort.
  */
 export async function submitAnswer(input: { itemId: string; choiceId: string }): Promise<SubmitAnswerResult> {
   const itemId = typeof input?.itemId === "string" ? input.itemId : "";
@@ -23,12 +25,20 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
     return { status: "invalid" };
   }
 
-  // Prefer the DB-authoritative, answer-key-hiding RPC; fall back to seed-based
-  // grading when it is unavailable (unconfigured / pre-migration / offline).
+  // Prefer the DB-authoritative, answer-key-hiding RPC.
   const viaRpc = await gradeViaRpc(itemId, choiceId);
-  const outcome = viaRpc
-    ? ({ status: "graded", isCorrect: viaRpc.isCorrect, correctChoiceId: viaRpc.correctChoiceId } as const)
-    : gradeChoiceAttempt(await getGradingChoices(itemId), choiceId);
+
+  if (viaRpc.status === "error") {
+    // Configured database failed — do not grade against the seed answer key.
+    return { status: "error" };
+  }
+
+  // graded → use the database result; unconfigured/unavailable → legitimate
+  // seed grading (demo or pre-migration mode).
+  const outcome =
+    viaRpc.status === "graded"
+      ? ({ status: "graded", isCorrect: viaRpc.isCorrect, correctChoiceId: viaRpc.correctChoiceId } as const)
+      : gradeChoiceAttempt(await getGradingChoices(itemId), choiceId);
 
   if (outcome.status === "invalid") {
     return { status: "invalid" };
