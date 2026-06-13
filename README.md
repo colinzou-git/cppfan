@@ -4,45 +4,59 @@ cppFan is an adaptive web app for learning C++, data structures, and algorithms 
 
 ## Current status
 
-This scaffold now includes the first auth/profile-ready web app foundation:
+cppFan is a working adaptive learning app, not a scaffold. The full learning loop is in
+place — skill map → learning items → quiz attempts with server-side grading → FSRS reviews
+→ skill event ledger → rule-based mastery → a daily plan that recommends what to do next.
+Mastery and recommendations are rule-based (no ML) and stay separate from FSRS card state.
+Arbitrary code execution stays off the web server by design; write-code practice runs in
+Codespaces (see "Write-code exercises").
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- shadcn/ui-compatible component setup
-- Supabase browser/server clients
-- Supabase session refresh through Next.js `proxy.ts`
-- Google OAuth login UI
-- Passwordless email magic-link login UI
-- Auth callback route
-- Protected dashboard placeholder with sign-out
-- Profile and onboarding flow
-- `profiles` table migration with RLS
-- Skill map data layer: `skills` and `skill_prerequisites` migration with RLS
-- C++ skill seed (structs/classes, constructors, RAII, smart pointers) mirrored in TypeScript
-- Read-only dashboard skill map preview with database-to-seed fallback
-- Learning item data layer: `learning_items`, `learning_item_skills`, `learning_item_choices` migration with RLS
-- First C++ learning content (structs/classes, constructors, RAII, and smart pointers modules) mirrored in a TypeScript seed
-- Learning item viewer at `/learn/[itemId]`, linked from the skill map preview
-- Quiz attempt flow: answer a multiple-choice item, server-side grading, retry
-- `learning_item_attempts` migration with per-user RLS; attempts recorded when signed in
-- FSRS review scheduling: `review_cards` + `review_logs` migration with per-user RLS
-- `ts-fsrs` wrapper (`src/lib/fsrs/scheduler.ts`) and a `/review` queue with rating + reschedule
-- Skill event ledger: `skill_events` migration with per-user RLS, stable event names
-- Rule-based mastery scoring v1 and a dashboard skill-mastery preview
-- Rule-based recommendation engine and a dashboard daily plan
-- Curated external C++/DSA resource catalog at `/resources`
-- Guided project-lab catalog at `/labs`
-- Vitest unit test setup
-- Playwright end-to-end test setup
-- GitHub Actions CI
-- Mobile-first landing page
+### Platform
 
-The full initial learning loop is in place: skill map → learning items → quiz attempts
-with grading → FSRS reviews → skill event ledger → rule-based mastery → a daily plan that
-recommends what to do next. Mastery and recommendations are rule-based (no ML), and
-mastery stays separate from FSRS card state. Code execution is still intentionally out of
-scope.
+- Next.js App Router + TypeScript, Tailwind, shadcn/ui-compatible components
+- Supabase browser/server clients with session refresh via `proxy.ts`
+- Google OAuth + passwordless magic-link login, auth callback, profile/onboarding flow
+- Per-user data (`profiles`, `learning_item_attempts`, `review_cards`, `review_logs`,
+  `skill_events`) protected by RLS; shared curriculum tables (`skills`,
+  `skill_prerequisites`, `learning_items`, `learning_item_skills`,
+  `learning_item_choices`) are read-only to anon/authenticated
+- Answer keys hardened: `learning_item_choices.is_correct` is not client-readable; grading
+  runs server-side via the `grade_learning_item_choice` `SECURITY DEFINER` RPC
+- FSRS scheduling (`ts-fsrs` wrapper in `src/lib/fsrs/scheduler.ts`) and a `/review` queue
+- Mobile-first UI across Windows PC, iPhone, and iPad viewports
+
+### Curriculum
+
+The curriculum spans the full roadmap (#65), each module mirrored in Supabase migrations
+**and** the TypeScript seed for signed-out/offline/pre-migration fallback:
+
+- **C++:** program basics, values/types, control flow, functions, references/pointers/const,
+  structs & classes, constructors, value semantics, RAII, smart pointers, STL containers,
+  templates/concepts/ranges, tooling (testing/debugging/build), object-oriented design,
+  concurrency, and utility libraries (file I/O, chrono, random, variant)
+- **DSA:** complexity, arrays, searching, sorting, stacks/queues, hashing, recursion,
+  trees/heaps/DSU, graphs, algorithmic techniques (prefix sums/sliding window/greedy/DP),
+  string algorithms, and math (bit manipulation/number theory/combinatorics/geometry)
+- Curated external resource catalog at `/resources` and a guided project-lab catalog at `/labs`
+- Design landed (ADRs / docs) for adaptive practice & Parsons (#72), placement &
+  remediation (#73), and sequenced capstones (#82); a first write-code exercise workflow
+  (#81) ships under `exercises/`
+
+### CI and tests
+
+GitHub Actions runs two jobs on every PR:
+
+- **App checks** — `pnpm verify` (lint + typecheck + Vitest unit tests + build) plus
+  Playwright e2e. Unit tests validate the **TypeScript seed** (the signed-out/offline
+  fallback) and app logic.
+- **DB migrations** — spins up Postgres, applies **every** migration in
+  `supabase/migrations/` in order, and smoke-tests the grading RPC and answer-key column
+  permissions (`scripts/ci/`).
+
+Authenticated, per-user, full-loop + RLS-isolation testing against migrated infrastructure
+is tracked separately by issue #96 and is not yet part of CI; until then those paths are
+verified manually (`pnpm db:verify` checks the live answer-key hardening over the anon REST
+API).
 
 ## Requirements
 
@@ -159,68 +173,20 @@ installs it on demand.)
 
 ### Manual alternative
 
-Each migration can also be pasted into the Supabase **SQL Editor** and run in this order:
+If you can't use `pnpm db:migrate`, paste each file from `supabase/migrations/` into the
+Supabase **SQL Editor** and run them in **ascending filename order** — the timestamp prefix
+(`YYYYMMDDHHMMSS_*.sql`) is the apply order. Every migration is idempotent, so re-running is
+safe.
 
-```text
-supabase/migrations/20260611113000_create_profiles.sql
-supabase/migrations/20260612011000_create_skill_map.sql
-supabase/migrations/20260612120000_create_learning_items.sql
-supabase/migrations/20260613090000_create_learning_item_attempts.sql
-supabase/migrations/20260613100000_create_review_cards.sql
-supabase/migrations/20260613110000_create_skill_events.sql
-supabase/migrations/20260613120000_harden_learning_item_choices.sql
-supabase/migrations/20260613130000_seed_constructors_items.sql
-supabase/migrations/20260613140000_seed_raii_items.sql
-supabase/migrations/20260613160000_seed_smart_pointers_items.sql
-supabase/migrations/20260613170000_add_smart_pointer_ownership_skills.sql
-supabase/migrations/20260613180000_seed_smart_pointer_ownership_items.sql
-supabase/migrations/20260613190000_add_stl_container_skills.sql
-supabase/migrations/20260613200000_seed_stl_container_items.sql
-supabase/migrations/20260613210000_add_dsa_array_skills.sql
-supabase/migrations/20260613220000_seed_dsa_array_items.sql
-supabase/migrations/20260613230000_add_stl_associative_skills.sql
-supabase/migrations/20260613240000_seed_stl_associative_items.sql
-supabase/migrations/20260613250000_add_stl_algorithm_skills.sql
-supabase/migrations/20260613260000_seed_stl_algorithm_items.sql
-supabase/migrations/20260613270000_add_dsa_search_sort_skills.sql
-supabase/migrations/20260613280000_seed_dsa_search_sort_items.sql
-supabase/migrations/20260613290000_add_stl_adapter_lambda_skills.sql
-supabase/migrations/20260613300000_seed_stl_adapter_lambda_items.sql
-supabase/migrations/20260613310000_add_dsa_stacks_hashing_skills.sql
-supabase/migrations/20260613320000_seed_dsa_stacks_hashing_items.sql
-supabase/migrations/20260613330000_add_dsa_recursion_twopointer_skills.sql
-supabase/migrations/20260613340000_seed_dsa_recursion_twopointer_items.sql
-supabase/migrations/20260613350000_add_foundation_basics_types_skills.sql
-supabase/migrations/20260613360000_seed_foundation_basics_types_items.sql
-supabase/migrations/20260613370000_add_foundation_control_functions_skills.sql
-supabase/migrations/20260613380000_seed_foundation_control_functions_items.sql
-supabase/migrations/20260613390000_add_references_skills.sql
-supabase/migrations/20260613400000_seed_references_items.sql
-supabase/migrations/20260613410000_add_complexity_skills.sql
-supabase/migrations/20260613420000_seed_complexity_items.sql
-supabase/migrations/20260613430000_add_value_semantics_skills.sql
-supabase/migrations/20260613440000_seed_value_semantics_items.sql
-supabase/migrations/20260613450000_add_template_skills.sql
-supabase/migrations/20260613460000_seed_template_items.sql
-supabase/migrations/20260613470000_add_tooling_skills.sql
-supabase/migrations/20260613480000_seed_tooling_items.sql
-supabase/migrations/20260613490000_add_dsa_tree_skills.sql
-supabase/migrations/20260613500000_seed_dsa_tree_items.sql
-supabase/migrations/20260613510000_add_dsa_graph_skills.sql
-supabase/migrations/20260613520000_seed_dsa_graph_items.sql
-supabase/migrations/20260613530000_add_dsa_technique_skills.sql
-supabase/migrations/20260613540000_seed_dsa_technique_items.sql
-supabase/migrations/20260613550000_add_dsa_string_skills.sql
-supabase/migrations/20260613560000_seed_dsa_string_items.sql
-supabase/migrations/20260613570000_add_cpp_oop_skills.sql
-supabase/migrations/20260613580000_seed_cpp_oop_items.sql
-supabase/migrations/20260613590000_add_cpp_concurrency_skills.sql
-supabase/migrations/20260613600000_seed_cpp_concurrency_items.sql
-supabase/migrations/20260613610000_add_cpp_utility_skills.sql
-supabase/migrations/20260613620000_seed_cpp_utility_items.sql
-supabase/migrations/20260613630000_add_dsa_math_skills.sql
-supabase/migrations/20260613640000_seed_dsa_math_items.sql
+There is no hand-maintained list to keep in sync: the `supabase/migrations/` directory is
+the source of truth. List the files in apply order with:
+
+```bash
+ls supabase/migrations
 ```
+
+CI's **DB migrations** job applies every file in this directory to a fresh Postgres on each
+PR, so the full set is always validated.
 
 The `profiles` migration adds:
 
@@ -276,9 +242,10 @@ The answer key is hardened: a later migration revokes column-level read access t
 `is_correct` for `anon`/`authenticated` (display columns stay readable) and adds a
 `SECURITY DEFINER` function `grade_learning_item_choice(...)` that grades server-side
 without exposing the column. `submitAnswer` prefers this RPC and falls back to seed-based
-grading when it is unavailable, so grading works offline and pre-migration. (The column
-lockdown's effect must be confirmed against the live database, since CI does not run
-migrations.)
+grading when it is unavailable, so grading works offline and pre-migration. CI's **DB
+migrations** job applies this migration and smoke-tests both the grading RPC and the
+`is_correct` column lockdown on a fresh Postgres; `pnpm db:verify` additionally confirms the
+lockdown against the live deployed database over the anon REST API.
 
 The review scheduling migration adds:
 
