@@ -1951,6 +1951,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.linked_list.lesson",
+    type: "lesson",
+    title: "Singly linked lists",
+    prompt:
+      "A singly linked list is a chain of nodes, each holding a value and a pointer to the next node; the last node's next is null. Unlike an array, the elements are not contiguous — you reach the k-th element by following k pointers from the head, so indexed access is O(n). Its strength is O(1) insertion or deletion *once you already hold the node before the spot*: you splice by rewiring `prev->next`. Traverse with `for (Node* p = head; p != nullptr; p = p->next)`. The safety traps are real: to delete a node you must keep a handle to its predecessor and free the removed node, and after freeing you must not touch it (dangling). In modern C++ you would own nodes with `std::unique_ptr<Node>` so the chain cleans itself up, avoiding manual `delete` and leaks.",
+    explanation:
+      "A singly linked list chains value+next nodes ending in null. Indexed access is O(n); splice insert/delete is O(1) with the predecessor in hand. Own nodes (e.g. unique_ptr) to avoid leaks/dangling.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3210,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.linked_list.mc_access",
+    type: "multiple_choice",
+    title: "Indexed access cost",
+    prompt: "What is the time complexity of reaching the k-th element of a singly linked list?",
+    explanation:
+      "Nodes are not contiguous, so you must follow next pointers from the head k times — O(n) in the worst case. Arrays/vectors give O(1) indexed access instead.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3220,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.list_vs_vector.lesson",
+    type: "lesson",
+    title: "List vs vector tradeoffs",
+    prompt:
+      "`std::vector` is the right default container and `std::list` (a doubly linked list) is rarely worth it. The reason is memory locality: a vector stores elements contiguously, so iterating it streams through cache and is dramatically faster than chasing a linked list's scattered node pointers — even for workloads with mid-sequence inserts, the vector's cheap traversal usually wins. A linked list's theoretical advantage is O(1) insertion/deletion *given an iterator to the position* and stable references that survive insertions elsewhere; it pays off only when you frequently splice in the middle while holding that position, or must keep node addresses stable. For appends and scans, `vector::push_back` (amortized O(1)) plus contiguous storage beats it. Rule of thumb: reach for `vector` first; justify `list` with a concrete locality-or-stability reason.",
+    explanation:
+      "Prefer std::vector: contiguous storage gives cache-friendly traversal that usually beats a linked list. std::list only helps for frequent mid-sequence splicing with a held position or stable node references.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3230,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.list_vs_vector.mc_default",
+    type: "multiple_choice",
+    title: "Why vector is the default",
+    prompt: "Why is `std::vector` usually preferred over `std::list` even when there are some insertions?",
+    explanation:
+      "Vector stores elements contiguously, so it is cache-friendly and fast to traverse, whereas a linked list chases scattered pointers. That locality advantage usually outweighs list's O(1) mid-sequence splice.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3240,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_terminology.lesson",
+    type: "lesson",
+    title: "Tree terminology and shape",
+    prompt:
+      "A tree is a hierarchy of nodes with one **root** (no parent); every other node has exactly one parent, and nodes with no children are **leaves**. An **edge** connects a parent and child. Any node plus all its descendants form a **subtree** — which is why trees are naturally *recursive*: a tree is a root whose children are themselves trees. Two measures matter: the **depth** of a node is the number of edges from the root down to it (the root has depth 0), and the **height** of a node is the number of edges on the longest path down to a leaf (a leaf has height 0); the height of the tree is the height of its root. This recursive view is what lets traversals and most tree algorithms be written as a base case (null/leaf) plus a combination of the results on each child subtree.",
+    explanation:
+      "Root (no parent), leaves (no children), subtree (a node + its descendants). Depth counts edges from the root down; height counts edges down to the farthest leaf. Trees are recursive: children are subtrees.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3250,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_terminology.mc_height",
+    type: "multiple_choice",
+    title: "Height of a leaf",
+    prompt: "Using the convention that height counts edges to the farthest leaf, what is the height of a leaf node?",
+    explanation:
+      "A leaf has no children, so the longest downward path from it has zero edges — height 0. Its depth, by contrast, is however many edges separate it from the root.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3260,
+    is_active: true
+  },
+  {
     id: "dsa.trees.traversal.lesson",
     type: "lesson",
     title: "Binary tree traversal",
@@ -2898,6 +2973,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.arrays.two_pointers", is_primary: true },
   { learning_item_id: "dsa.recursion.base_case.lesson", skill_id: "dsa.recursion.base_case", is_primary: true },
   { learning_item_id: "dsa.recursion.base_case.mc_no_base", skill_id: "dsa.recursion.base_case", is_primary: true },
+  { learning_item_id: "dsa.trees.linked_list.lesson", skill_id: "dsa.trees.linked_list", is_primary: true },
+  { learning_item_id: "dsa.trees.linked_list.mc_access", skill_id: "dsa.trees.linked_list", is_primary: true },
+  { learning_item_id: "dsa.trees.list_vs_vector.lesson", skill_id: "dsa.trees.list_vs_vector", is_primary: true },
+  { learning_item_id: "dsa.trees.list_vs_vector.mc_default", skill_id: "dsa.trees.list_vs_vector", is_primary: true },
+  { learning_item_id: "dsa.trees.tree_terminology.lesson", skill_id: "dsa.trees.tree_terminology", is_primary: true },
+  { learning_item_id: "dsa.trees.tree_terminology.mc_height", skill_id: "dsa.trees.tree_terminology", is_primary: true },
   { learning_item_id: "dsa.trees.traversal.lesson", skill_id: "dsa.trees.traversal", is_primary: true },
   { learning_item_id: "dsa.trees.traversal.mc_inorder_bst", skill_id: "dsa.trees.traversal", is_primary: true },
   { learning_item_id: "dsa.trees.heap.lesson", skill_id: "dsa.trees.heap", is_primary: true },
@@ -3338,6 +3419,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.recursion.base_case.mc_no_base.b", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It returns 0", is_correct: false, order_index: 20 },
   { id: "dsa.recursion.base_case.mc_no_base.c", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "The compiler refuses to build it", is_correct: false, order_index: 30 },
   { id: "dsa.recursion.base_case.mc_no_base.d", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It runs once and stops", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.linked_list.mc_access.a", learning_item_id: "dsa.trees.linked_list.mc_access", content: "O(n)", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.linked_list.mc_access.b", learning_item_id: "dsa.trees.linked_list.mc_access", content: "O(1)", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.linked_list.mc_access.c", learning_item_id: "dsa.trees.linked_list.mc_access", content: "O(log n)", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.linked_list.mc_access.d", learning_item_id: "dsa.trees.linked_list.mc_access", content: "O(n log n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.list_vs_vector.mc_default.a", learning_item_id: "dsa.trees.list_vs_vector.mc_default", content: "Contiguous storage makes vector cache-friendly and fast to traverse", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.list_vs_vector.mc_default.b", learning_item_id: "dsa.trees.list_vs_vector.mc_default", content: "std::list cannot store more than 100 elements", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.list_vs_vector.mc_default.c", learning_item_id: "dsa.trees.list_vs_vector.mc_default", content: "std::vector gives O(1) mid-sequence insertion", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.list_vs_vector.mc_default.d", learning_item_id: "dsa.trees.list_vs_vector.mc_default", content: "std::list cannot be iterated", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.tree_terminology.mc_height.a", learning_item_id: "dsa.trees.tree_terminology.mc_height", content: "0", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.tree_terminology.mc_height.b", learning_item_id: "dsa.trees.tree_terminology.mc_height", content: "1", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.tree_terminology.mc_height.c", learning_item_id: "dsa.trees.tree_terminology.mc_height", content: "Its depth from the root", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.tree_terminology.mc_height.d", learning_item_id: "dsa.trees.tree_terminology.mc_height", content: "The number of nodes in the tree", is_correct: false, order_index: 40 },
 
   { id: "dsa.trees.traversal.mc_inorder_bst.a", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Ascending sorted order", is_correct: true, order_index: 10 },
   { id: "dsa.trees.traversal.mc_inorder_bst.b", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Descending sorted order", is_correct: false, order_index: 20 },

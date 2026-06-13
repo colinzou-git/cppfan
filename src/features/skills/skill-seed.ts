@@ -1099,6 +1099,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.linked_list",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Singly linked lists",
+    description: "Model nodes that point to the next, and traverse/insert/delete safely.",
+    learner_goal: "Traverse a singly linked list and insert/delete a node without leaking or dangling.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1600,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.list_vs_vector",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "List vs vector tradeoffs",
+    description: "Weigh memory locality against mid-sequence insertion when choosing a container.",
+    learner_goal: "Explain why std::vector is the default and when a linked list actually helps.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1601,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_terminology",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Tree terminology and shape",
+    description: "Name parts of a tree and reason about its recursive structure, height, and depth.",
+    learner_goal: "Use root/leaf/subtree/height/depth correctly and see a tree as a recursive structure.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1605,
+    is_active: true
+  },
+  {
     id: "dsa.trees.traversal",
     domain: "dsa",
     module_id: "dsa.trees",
@@ -1427,6 +1463,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
   { skill_id: "dsa.stacks.basic_stack", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
   { skill_id: "dsa.hashing.lookup", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.linked_list", prerequisite_skill_id: "cpp.references.pointers", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.list_vs_vector", prerequisite_skill_id: "dsa.trees.linked_list", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.tree_terminology", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.trees.traversal", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.trees.heap", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
   { skill_id: "dsa.trees.disjoint_set", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
