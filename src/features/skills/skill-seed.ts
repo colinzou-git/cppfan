@@ -37,7 +37,8 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 },
   { id: "dsa.graphs", title: "Graphs", description: "Graph representation, traversal, and shortest paths.", order_index: 170 },
   { id: "dsa.techniques", title: "Algorithmic techniques", description: "Prefix sums, sliding window, greedy, and dynamic programming.", order_index: 180 },
-  { id: "dsa.strings", title: "String algorithms", description: "String manipulation, searching, palindromes, and parsing.", order_index: 190 }
+  { id: "dsa.strings", title: "String algorithms", description: "String manipulation, searching, palindromes, and parsing.", order_index: 190 },
+  { id: "dsa.math", title: "Math for programming", description: "Bit manipulation, number theory, combinatorics, and geometry.", order_index: 200 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -1062,6 +1063,54 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.math.bit_manipulation",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Bit manipulation",
+    description: "Use bitwise operators and masks to test, set, and clear bits.",
+    learner_goal: "Test, set, and clear individual bits and use common bit tricks.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2010,
+    is_active: true
+  },
+  {
+    id: "dsa.math.number_theory",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Number theory",
+    description: "Apply GCD, primality, and modular arithmetic in algorithms.",
+    learner_goal: "Compute GCD with Euclid's algorithm and reason about modular arithmetic.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2020,
+    is_active: true
+  },
+  {
+    id: "dsa.math.combinatorics",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Combinatorics",
+    description: "Count arrangements and selections with permutations and combinations.",
+    learner_goal: "Choose between permutations and combinations and count outcomes.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2030,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Computational geometry",
+    description: "Work with points, distances, and orientation tests.",
+    learner_goal: "Compute distances and use the cross product to test orientation.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2040,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -1159,6 +1208,10 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.strings.searching", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.strings.palindrome", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.strings.parsing", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.math.bit_manipulation", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
+  { skill_id: "dsa.math.number_theory", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
+  { skill_id: "dsa.math.combinatorics", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
+  { skill_id: "dsa.math.geometry", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];

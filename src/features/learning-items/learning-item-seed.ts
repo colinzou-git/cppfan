@@ -2174,8 +2174,109 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2680,
     is_active: true
+  },
+  {
+    id: "dsa.math.bit_manipulation.lesson",
+    type: "lesson",
+    title: "Bit manipulation",
+    prompt:
+      "Integers are sequences of bits, and bitwise operators let you work with them directly. AND (`&`) masks bits, OR (`|`) sets them, XOR (`^`) toggles them, and the shifts `<<`/`>>` multiply or divide by powers of two. Common one-liners: test bit i with `(x >> i) & 1`; set it with `x | (1 << i)`; clear it with `x & ~(1 << i)`; toggle it with `x ^ (1 << i)`. A neat trick, `x & (x - 1)`, clears the lowest set bit, which makes counting set bits easy. Bit masks also encode small sets compactly — a single `int` can represent a subset of up to 32 elements.",
+    explanation:
+      "Use & to test/mask, | to set, ^ to toggle, and shifts to move bits; `(x >> i) & 1` reads bit i and `x | (1 << i)` sets it.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2710,
+    is_active: true
+  },
+  {
+    id: "dsa.math.bit_manipulation.mc_test_bit",
+    type: "multiple_choice",
+    title: "Testing a bit",
+    prompt: "Which expression checks whether bit i of an integer x is set (equal to 1)?",
+    explanation:
+      "Shifting x right by i brings bit i to the lowest position, and `& 1` isolates it: `(x >> i) & 1` is 1 when the bit is set, 0 otherwise.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2720,
+    is_active: true
+  },
+  {
+    id: "dsa.math.number_theory.lesson",
+    type: "lesson",
+    title: "Number theory",
+    prompt:
+      "A few number-theory tools recur constantly. The greatest common divisor is computed with Euclid's algorithm: `gcd(a, b) = gcd(b, a % b)` until b is 0, running in O(log min(a, b)); `std::gcd` provides it directly. Primality of n can be tested by trial division up to sqrt(n). Modular arithmetic keeps numbers in range: `(a + b) % m` and `(a * b) % m` let you compute large results without overflow, which is why competitive problems ask for answers \"modulo 1e9+7\". Remember that in C++ the `%` operator can return a negative result for negative operands, so normalize when needed.",
+    explanation:
+      "Euclid's algorithm computes gcd in O(log n); test primality by trial division to sqrt(n); use modular arithmetic to keep large products in range.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2730,
+    is_active: true
+  },
+  {
+    id: "dsa.math.number_theory.mc_gcd",
+    type: "multiple_choice",
+    title: "Euclid's algorithm",
+    prompt: "Euclid's algorithm computes gcd(a, b) by repeatedly applying which step?",
+    explanation:
+      "Euclid's algorithm replaces (a, b) with (b, a % b) until the second value is 0; the remaining first value is the gcd. This runs in O(log min(a, b)).",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2740,
+    is_active: true
+  },
+  {
+    id: "dsa.math.combinatorics.lesson",
+    type: "lesson",
+    title: "Combinatorics",
+    prompt:
+      "Combinatorics counts how many ways things can happen. A permutation counts ordered arrangements: the number of ways to order r of n distinct items is P(n, r) = n! / (n - r)!. A combination counts unordered selections: C(n, r) = n! / (r! (n - r)!), often read \"n choose r\". The deciding question is whether order matters — picking a 3-person committee from 10 people is a combination (order irrelevant), while awarding gold/silver/bronze to 3 of 10 runners is a permutation (order matters). For repeated counting, Pascal's rule C(n, r) = C(n-1, r-1) + C(n-1, r) builds a table that avoids recomputing factorials.",
+    explanation:
+      "Permutations count ordered arrangements (order matters); combinations count unordered selections (order does not). C(n, r) = n! / (r!(n-r)!).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2750,
+    is_active: true
+  },
+  {
+    id: "dsa.math.combinatorics.mc_committee",
+    type: "multiple_choice",
+    title: "Permutation or combination",
+    prompt: "Counting how many 3-person committees can be formed from 10 people uses which?",
+    explanation:
+      "A committee has no internal order — the same three people are one committee regardless of who is named first — so it is a combination, C(10, 3). If order mattered (e.g. president/VP/secretary) it would be a permutation.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2760,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry.lesson",
+    type: "lesson",
+    title: "Computational geometry",
+    prompt:
+      "Geometry problems start with points in the plane, often as a pair of coordinates. The Euclidean distance between (x1, y1) and (x2, y2) is sqrt((x2-x1)^2 + (y2-y1)^2); when you only need to compare distances, skip the sqrt and compare squared distances to avoid floating-point error. The cross product of vectors AB and AC, (Bx-Ax)(Cy-Ay) - (By-Ay)(Cx-Ax), is a workhorse: its sign tells you whether C is to the left of AB (positive, counter-clockwise turn), to the right (negative, clockwise), or collinear (zero). That orientation test underlies convex-hull and segment-intersection algorithms.",
+    explanation:
+      "Compare squared distances to avoid sqrt error; the sign of the cross product gives orientation (left/right/collinear), the basis of hull and intersection tests.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2770,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry.mc_cross",
+    type: "multiple_choice",
+    title: "What the cross product tells you",
+    prompt: "What does the sign of the 2D cross product of vectors AB and AC tell you?",
+    explanation:
+      "The cross product's sign gives orientation: positive means C is a counter-clockwise (left) turn from AB, negative means clockwise (right), and zero means the three points are collinear.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2780,
+    is_active: true
   }
 ];
+
 
 
 
@@ -2365,6 +2466,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.random.mc_bias", skill_id: "cpp.utilities.random", is_primary: true },
   { learning_item_id: "cpp.utilities.variant.lesson", skill_id: "cpp.utilities.variant", is_primary: true },
   { learning_item_id: "cpp.utilities.variant.mc_optional", skill_id: "cpp.utilities.variant", is_primary: true },
+  { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
+  { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
+  { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
+  { learning_item_id: "dsa.math.number_theory.mc_gcd", skill_id: "dsa.math.number_theory", is_primary: true },
+  { learning_item_id: "dsa.math.combinatorics.lesson", skill_id: "dsa.math.combinatorics", is_primary: true },
+  { learning_item_id: "dsa.math.combinatorics.mc_committee", skill_id: "dsa.math.combinatorics", is_primary: true },
+  { learning_item_id: "dsa.math.geometry.lesson", skill_id: "dsa.math.geometry", is_primary: true },
+  { learning_item_id: "dsa.math.geometry.mc_cross", skill_id: "dsa.math.geometry", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2787,7 +2896,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.utilities.variant.mc_optional.a", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int that may or may not be present, without a magic sentinel value", is_correct: true, order_index: 10 },
   { id: "cpp.utilities.variant.mc_optional.b", learning_item_id: "cpp.utilities.variant.mc_optional", content: "A list of many ints", is_correct: false, order_index: 20 },
   { id: "cpp.utilities.variant.mc_optional.c", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int shared safely between threads", is_correct: false, order_index: 30 },
-  { id: "cpp.utilities.variant.mc_optional.d", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int guaranteed to be prime", is_correct: false, order_index: 40 }
+  { id: "cpp.utilities.variant.mc_optional.d", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int guaranteed to be prime", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.bit_manipulation.mc_test_bit.a", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "(x >> i) & 1", is_correct: true, order_index: 10 },
+  { id: "dsa.math.bit_manipulation.mc_test_bit.b", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x % i", is_correct: false, order_index: 20 },
+  { id: "dsa.math.bit_manipulation.mc_test_bit.c", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x ^ i", is_correct: false, order_index: 30 },
+  { id: "dsa.math.bit_manipulation.mc_test_bit.d", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x << i", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.number_theory.mc_gcd.a", learning_item_id: "dsa.math.number_theory.mc_gcd", content: "Replace (a, b) with (b, a % b) until b is 0", is_correct: true, order_index: 10 },
+  { id: "dsa.math.number_theory.mc_gcd.b", learning_item_id: "dsa.math.number_theory.mc_gcd", content: "Multiply a and b repeatedly", is_correct: false, order_index: 20 },
+  { id: "dsa.math.number_theory.mc_gcd.c", learning_item_id: "dsa.math.number_theory.mc_gcd", content: "Subtract 1 from both until they match", is_correct: false, order_index: 30 },
+  { id: "dsa.math.number_theory.mc_gcd.d", learning_item_id: "dsa.math.number_theory.mc_gcd", content: "Add a and b until one is prime", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.combinatorics.mc_committee.a", learning_item_id: "dsa.math.combinatorics.mc_committee", content: "A combination, because order does not matter", is_correct: true, order_index: 10 },
+  { id: "dsa.math.combinatorics.mc_committee.b", learning_item_id: "dsa.math.combinatorics.mc_committee", content: "A permutation, because order matters", is_correct: false, order_index: 20 },
+  { id: "dsa.math.combinatorics.mc_committee.c", learning_item_id: "dsa.math.combinatorics.mc_committee", content: "Neither; it is just 10 times 3", is_correct: false, order_index: 30 },
+  { id: "dsa.math.combinatorics.mc_committee.d", learning_item_id: "dsa.math.combinatorics.mc_committee", content: "A factorial of 10", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.geometry.mc_cross.a", learning_item_id: "dsa.math.geometry.mc_cross", content: "The orientation: left turn, right turn, or collinear", is_correct: true, order_index: 10 },
+  { id: "dsa.math.geometry.mc_cross.b", learning_item_id: "dsa.math.geometry.mc_cross", content: "The exact distance between the points", is_correct: false, order_index: 20 },
+  { id: "dsa.math.geometry.mc_cross.c", learning_item_id: "dsa.math.geometry.mc_cross", content: "Whether the points are integers", is_correct: false, order_index: 30 },
+  { id: "dsa.math.geometry.mc_cross.d", learning_item_id: "dsa.math.geometry.mc_cross", content: "The number of points on the line", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {

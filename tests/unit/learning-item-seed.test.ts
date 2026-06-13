@@ -210,7 +210,12 @@ describe("curriculum coverage", () => {
     "dsa.strings.manipulation",
     "dsa.strings.searching",
     "dsa.strings.palindrome",
-    "dsa.strings.parsing"
+    "dsa.strings.parsing",
+    // math (#83)
+    "dsa.math.bit_manipulation",
+    "dsa.math.number_theory",
+    "dsa.math.combinatorics",
+    "dsa.math.geometry"
   ];
 
   it("has at least one learning item for every covered skill", () => {
