@@ -331,6 +331,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.references.pointer_const",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Pointer-to-const vs const pointer",
+    description: "Tell apart a pointer to const data and a const pointer to mutable data.",
+    learner_goal: "Read const placement to know whether the pointee or the pointer itself is const.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 97,
+    is_active: true
+  },
+  {
+    id: "cpp.references.non_owning",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Non-owning pointers and selection",
+    description: "Use raw pointers only as non-owning observers and choose pointer vs reference.",
+    learner_goal: "Treat a raw pointer as a non-owning, nullable observer and pick reference when non-null.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 98,
+    is_active: true
+  },
+  {
+    id: "cpp.references.views",
+    domain: "cpp",
+    module_id: "cpp.references",
+    title: "Non-owning views: span and string_view",
+    description: "Pass arrays/strings as std::span / std::string_view without unsafe pointer arithmetic.",
+    learner_goal: "Use a view to borrow a range safely instead of pointer+length and raw arithmetic.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 99,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax",
     domain: "cpp",
     module_id: "cpp.structs_classes",
@@ -1473,6 +1509,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.references.lvalue_rvalue", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
   { skill_id: "cpp.references.return_semantics", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },
   { skill_id: "cpp.references.dangling", prerequisite_skill_id: "cpp.references.return_semantics", relationship_type: "recommended" },
+  { skill_id: "cpp.references.pointer_const", prerequisite_skill_id: "cpp.references.const_correctness", relationship_type: "recommended" },
+  { skill_id: "cpp.references.non_owning", prerequisite_skill_id: "cpp.references.pointers", relationship_type: "recommended" },
+  { skill_id: "cpp.references.views", prerequisite_skill_id: "cpp.references.non_owning", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.public_private", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.const_methods_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.invariants_intro", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
