@@ -620,6 +620,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.references.pointer_const.lesson",
+    type: "lesson",
+    title: "Pointer-to-const vs const pointer",
+    prompt:
+      "`const` on a pointer can lock the data, the pointer, or both — read it right-to-left around the `*`. `const int* p` (same as `int const* p`) is a **pointer to const**: you may repoint `p`, but you cannot modify `*p` through it. `int* const p` is a **const pointer**: you may modify `*p`, but `p` must always point at the same object. `const int* const p` locks both. The common case for parameters is pointer-to-const (`const T*`), which says \"I will read what you point at, not change it,\" mirroring `const T&`. A quick trick: whatever is immediately left of `const` is what is constant (or the thing to its right if `const` is leftmost).",
+    explanation:
+      "Read const around the *: `const int*` = pointer to const (data locked, pointer movable); `int* const` = const pointer (pointer fixed, data writable); `const int* const` locks both.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 3390,
+    is_active: true
+  },
+  {
+    id: "cpp.references.pointer_const.mc_which",
+    type: "multiple_choice",
+    title: "What is const here?",
+    prompt: "Given `const int* p;`, what does `const` apply to?",
+    explanation:
+      "`const int* p` is a pointer to const int: the pointed-to value cannot be changed through `p`, but `p` itself can be reassigned to point elsewhere. (A const pointer would be `int* const p`.)",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3400,
+    is_active: true
+  },
+  {
+    id: "cpp.references.non_owning.lesson",
+    type: "lesson",
+    title: "Non-owning pointers and selection",
+    prompt:
+      "A raw pointer in modern C++ should mean \"I observe this object but do not own it\" — ownership belongs to a value, a container, or a smart pointer (`unique_ptr`/`shared_ptr`). A non-owning raw pointer must never be `delete`d by the observer and must not outlive what it points at. Choosing between a reference and a pointer comes down to nullability and rebinding: use a **reference** (`T&`/`const T&`) when the thing is always present and fixed, and a **pointer** (`T*`) when it may be absent (`nullptr`) or needs to be repointed. So an optional, observe-only parameter is `const T*`; a required one is `const T&`. Document the contract — a `T*` parameter that can be null should check for null before dereferencing.",
+    explanation:
+      "Raw pointers = non-owning observers (never delete, don't outlive the target). Pick a reference when always-present and fixed; a pointer when it can be null or must be repointed.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3410,
+    is_active: true
+  },
+  {
+    id: "cpp.references.non_owning.mc_select",
+    type: "multiple_choice",
+    title: "Reference or pointer?",
+    prompt: "A function parameter refers to an object that is always present and never repointed. What should it be?",
+    explanation:
+      "A reference (`T&` / `const T&`): it cannot be null and always binds the same object, expressing \"always present\" directly. Use a pointer only when the argument can be absent (nullable) or needs to be repointed.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3420,
+    is_active: true
+  },
+  {
+    id: "cpp.references.views.lesson",
+    type: "lesson",
+    title: "Non-owning views: span and string_view",
+    prompt:
+      "A **view** borrows a contiguous range without owning it. `std::span<T>` is a non-owning (pointer, length) pair over an array, `std::vector`, or C array; `std::string_view` is the same for character data. Taking `std::span<const int>` or `std::string_view` as a parameter replaces the error-prone `(const T* ptr, size_t len)` idiom and raw pointer arithmetic with a bounds-aware object you can range-for, `.size()`, and `.subspan()`/`.substr()` safely. The one rule: a view does **not** extend the lifetime of what it points at, so never return a view to a local and never keep a `string_view` to a temporary string — that dangles just like a raw pointer. Use views for read-only/borrowing parameters; use owning types (`std::string`, `std::vector`) for storage.",
+    explanation:
+      "std::span / std::string_view are non-owning (pointer+length) views that replace raw pointer+length APIs and arithmetic with bounds-aware borrowing. They don't extend lifetime — never return or store a view of a temporary/local.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3430,
+    is_active: true
+  },
+  {
+    id: "cpp.references.views.mc_use",
+    type: "multiple_choice",
+    title: "Choosing a view parameter",
+    prompt: "What is the idiomatic modern C++ way for a function to read a sequence of characters it does not own?",
+    explanation:
+      "Take a `std::string_view`: a non-owning, bounds-aware view that accepts `std::string`, string literals, and substrings without copying — replacing the `(const char*, size_t)` pair. Just don't store it beyond the argument's lifetime.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3440,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -3004,6 +3079,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.references.return_semantics.mc_local", skill_id: "cpp.references.return_semantics", is_primary: true },
   { learning_item_id: "cpp.references.dangling.lesson", skill_id: "cpp.references.dangling", is_primary: true },
   { learning_item_id: "cpp.references.dangling.mc_extension", skill_id: "cpp.references.dangling", is_primary: true },
+  { learning_item_id: "cpp.references.pointer_const.lesson", skill_id: "cpp.references.pointer_const", is_primary: true },
+  { learning_item_id: "cpp.references.pointer_const.mc_which", skill_id: "cpp.references.pointer_const", is_primary: true },
+  { learning_item_id: "cpp.references.non_owning.lesson", skill_id: "cpp.references.non_owning", is_primary: true },
+  { learning_item_id: "cpp.references.non_owning.mc_select", skill_id: "cpp.references.non_owning", is_primary: true },
+  { learning_item_id: "cpp.references.views.lesson", skill_id: "cpp.references.views", is_primary: true },
+  { learning_item_id: "cpp.references.views.mc_use", skill_id: "cpp.references.views", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -3326,6 +3407,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.references.dangling.mc_extension.b", learning_item_id: "cpp.references.dangling.mc_extension", content: "Yes — the const reference keeps the temporary alive for the caller", is_correct: false, order_index: 20 },
   { id: "cpp.references.dangling.mc_extension.c", learning_item_id: "cpp.references.dangling.mc_extension", content: "Yes — string literals live forever", is_correct: false, order_index: 30 },
   { id: "cpp.references.dangling.mc_extension.d", learning_item_id: "cpp.references.dangling.mc_extension", content: "Only if the caller marks the result const", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.pointer_const.mc_which.a", learning_item_id: "cpp.references.pointer_const.mc_which", content: "The pointed-to int (it can't be changed through p), but p can be reassigned", is_correct: true, order_index: 10 },
+  { id: "cpp.references.pointer_const.mc_which.b", learning_item_id: "cpp.references.pointer_const.mc_which", content: "The pointer p itself (it can't be reassigned)", is_correct: false, order_index: 20 },
+  { id: "cpp.references.pointer_const.mc_which.c", learning_item_id: "cpp.references.pointer_const.mc_which", content: "Both the pointer and the pointee", is_correct: false, order_index: 30 },
+  { id: "cpp.references.pointer_const.mc_which.d", learning_item_id: "cpp.references.pointer_const.mc_which", content: "Nothing; const is ignored on pointers", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.non_owning.mc_select.a", learning_item_id: "cpp.references.non_owning.mc_select", content: "A reference (T& / const T&)", is_correct: true, order_index: 10 },
+  { id: "cpp.references.non_owning.mc_select.b", learning_item_id: "cpp.references.non_owning.mc_select", content: "A raw pointer so it can be null", is_correct: false, order_index: 20 },
+  { id: "cpp.references.non_owning.mc_select.c", learning_item_id: "cpp.references.non_owning.mc_select", content: "A std::shared_ptr to share ownership", is_correct: false, order_index: 30 },
+  { id: "cpp.references.non_owning.mc_select.d", learning_item_id: "cpp.references.non_owning.mc_select", content: "A std::unique_ptr passed by value", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.views.mc_use.a", learning_item_id: "cpp.references.views.mc_use", content: "Take a std::string_view", is_correct: true, order_index: 10 },
+  { id: "cpp.references.views.mc_use.b", learning_item_id: "cpp.references.views.mc_use", content: "Take a const char* and a separate length", is_correct: false, order_index: 20 },
+  { id: "cpp.references.views.mc_use.c", learning_item_id: "cpp.references.views.mc_use", content: "Take a std::string by value (copy it)", is_correct: false, order_index: 30 },
+  { id: "cpp.references.views.mc_use.d", learning_item_id: "cpp.references.views.mc_use", content: "Take a char* and use pointer arithmetic", is_correct: false, order_index: 40 },
 
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },
