@@ -1499,6 +1499,81 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 1640,
     is_active: true
+  },
+  {
+    id: "dsa.trees.traversal.lesson",
+    type: "lesson",
+    title: "Binary tree traversal",
+    prompt:
+      "A binary tree node holds a value and links to a left and right child. Depth-first traversals visit nodes recursively in one of three orders: preorder (node, left, right), inorder (left, node, right), and postorder (left, right, node). Breadth-first (level-order) traversal visits nodes level by level using a queue. On a binary search tree, an inorder traversal visits values in sorted ascending order, which is why inorder is the go-to for printing or validating a BST.",
+    explanation:
+      "Preorder, inorder, and postorder differ only in when the node itself is visited relative to its children; inorder on a BST yields sorted order.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2010,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.traversal.mc_inorder_bst",
+    type: "multiple_choice",
+    title: "Inorder on a BST",
+    prompt: "On a binary search tree, what order does an inorder traversal visit the values in?",
+    explanation:
+      "Inorder visits left subtree, then the node, then the right subtree. Because a BST keeps smaller values left and larger values right, this produces ascending sorted order.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2020,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap.lesson",
+    type: "lesson",
+    title: "Heaps and priority queues",
+    prompt:
+      "A binary heap is a complete binary tree stored in an array where every parent compares ahead of its children: a max-heap keeps the largest value at the root, a min-heap the smallest. This makes reading the top element O(1), while pushing or popping reshuffles the heap in O(log n). In C++ the `std::priority_queue` adapter is a heap, and `std::make_heap`/`push_heap`/`pop_heap` operate on a range directly. Reach for a heap when you repeatedly need the current best element, such as in Dijkstra's algorithm or merging sorted streams.",
+    explanation:
+      "A heap gives O(1) access to the min or max and O(log n) insert/remove, which is ideal when you keep pulling the best remaining element.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2030,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap.mc_top_cost",
+    type: "multiple_choice",
+    title: "Reading the heap top",
+    prompt: "What is the time complexity of reading the maximum element from a max-heap?",
+    explanation:
+      "The largest element is always at the root of a max-heap, so reading it (the `top()` of a priority_queue) is O(1). Removing it costs O(log n) to restore the heap.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2040,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.disjoint_set.lesson",
+    type: "lesson",
+    title: "Disjoint set (union-find)",
+    prompt:
+      "A disjoint-set (union-find) structure tracks elements partitioned into non-overlapping groups. It supports two operations: `find(x)` returns a representative for x's group, and `union(a, b)` merges the two groups. With path compression and union by rank, both run in near-constant amortized time. Union-find shines for connected-components questions and cycle detection — for example, Kruskal's minimum spanning tree algorithm uses it to reject an edge whose endpoints already share a group.",
+    explanation:
+      "Union-find answers \"are these two elements in the same group?\" and merges groups in near-constant time, which is why it powers connectivity and cycle-detection problems.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2050,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.disjoint_set.mc_use_case",
+    type: "multiple_choice",
+    title: "When to use union-find",
+    prompt: "Which task is union-find (disjoint set) best suited for?",
+    explanation:
+      "Union-find is built for grouping and connectivity: detecting whether adding an edge connects two already-connected vertices (a cycle), tracking connected components, and merging groups efficiently.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2060,
+    is_active: true
   }
 ];
 
@@ -1634,6 +1709,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.arrays.two_pointers", is_primary: true },
   { learning_item_id: "dsa.recursion.base_case.lesson", skill_id: "dsa.recursion.base_case", is_primary: true },
   { learning_item_id: "dsa.recursion.base_case.mc_no_base", skill_id: "dsa.recursion.base_case", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal.lesson", skill_id: "dsa.trees.traversal", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal.mc_inorder_bst", skill_id: "dsa.trees.traversal", is_primary: true },
+  { learning_item_id: "dsa.trees.heap.lesson", skill_id: "dsa.trees.heap", is_primary: true },
+  { learning_item_id: "dsa.trees.heap.mc_top_cost", skill_id: "dsa.trees.heap", is_primary: true },
+  { learning_item_id: "dsa.trees.disjoint_set.lesson", skill_id: "dsa.trees.disjoint_set", is_primary: true },
+  { learning_item_id: "dsa.trees.disjoint_set.mc_use_case", skill_id: "dsa.trees.disjoint_set", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -1921,7 +2002,22 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.recursion.base_case.mc_no_base.a", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It recurses forever and overflows the call stack", is_correct: true, order_index: 10 },
   { id: "dsa.recursion.base_case.mc_no_base.b", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It returns 0", is_correct: false, order_index: 20 },
   { id: "dsa.recursion.base_case.mc_no_base.c", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "The compiler refuses to build it", is_correct: false, order_index: 30 },
-  { id: "dsa.recursion.base_case.mc_no_base.d", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It runs once and stops", is_correct: false, order_index: 40 }
+  { id: "dsa.recursion.base_case.mc_no_base.d", learning_item_id: "dsa.recursion.base_case.mc_no_base", content: "It runs once and stops", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.traversal.mc_inorder_bst.a", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Ascending sorted order", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.traversal.mc_inorder_bst.b", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Descending sorted order", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.traversal.mc_inorder_bst.c", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Level by level from the root", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.traversal.mc_inorder_bst.d", learning_item_id: "dsa.trees.traversal.mc_inorder_bst", content: "Random order", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.heap.mc_top_cost.a", learning_item_id: "dsa.trees.heap.mc_top_cost", content: "O(1)", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.heap.mc_top_cost.b", learning_item_id: "dsa.trees.heap.mc_top_cost", content: "O(log n)", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.heap.mc_top_cost.c", learning_item_id: "dsa.trees.heap.mc_top_cost", content: "O(n)", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.heap.mc_top_cost.d", learning_item_id: "dsa.trees.heap.mc_top_cost", content: "O(n log n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.trees.disjoint_set.mc_use_case.a", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Detecting whether adding an edge forms a cycle in a graph", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.disjoint_set.mc_use_case.b", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Sorting an array in place", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.disjoint_set.mc_use_case.c", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Finding the shortest string in a list", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.disjoint_set.mc_use_case.d", learning_item_id: "dsa.trees.disjoint_set.mc_use_case", content: "Reversing a linked list", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {

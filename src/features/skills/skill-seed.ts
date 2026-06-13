@@ -30,6 +30,7 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 },
   { id: "dsa.stacks", title: "Stacks and queues", description: "LIFO and FIFO problem patterns.", order_index: 140 },
   { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 },
+  { id: "dsa.trees", title: "Trees, heaps, and DSU", description: "Tree traversal, heaps, and union-find.", order_index: 160 },
   { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 }
 ];
 
@@ -731,6 +732,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.traversal",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Binary tree traversal",
+    description: "Visit tree nodes in preorder, inorder, postorder, or level order.",
+    learner_goal: "Choose the traversal that fits a task and know inorder sorts a BST.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1610,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Heaps and priority queues",
+    description: "Use a binary heap for O(1) min/max access and O(log n) updates.",
+    learner_goal: "Recognize when a heap (priority_queue) is the right tool.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1620,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.disjoint_set",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Disjoint set (union-find)",
+    description: "Track grouped elements with near-constant find and union.",
+    learner_goal: "Use union-find for connected components and cycle detection.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1630,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -801,6 +838,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
   { skill_id: "dsa.stacks.basic_stack", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
   { skill_id: "dsa.hashing.lookup", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.traversal", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.heap", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.disjoint_set", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
