@@ -395,6 +395,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.references.lvalue_rvalue.lesson",
+    type: "lesson",
+    title: "Lvalues and rvalues",
+    prompt:
+      "Every expression is either an lvalue or an rvalue. An **lvalue** names a persistent object you can take the address of — a variable like `x`, or `arr[i]`. An **rvalue** is a temporary value with no lasting identity — a literal like `42`, or the result of `a + b`. The distinction drives reference binding: a non-const lvalue reference (`int&`) binds only to a modifiable lvalue, which is why `int& r = 42;` is an error but `const int& r = 42;` is fine (a const lvalue reference may bind to a temporary, extending its lifetime to the reference's scope). An rvalue reference (`int&&`) binds to temporaries and is the basis of move semantics. A quick test: if you can assign to it or take its address, it's an lvalue.",
+    explanation:
+      "Lvalues name persistent, addressable objects; rvalues are temporaries. `int&` binds only to modifiable lvalues; `const int&` and `int&&` can bind to temporaries.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 2910,
+    is_active: true
+  },
+  {
+    id: "cpp.references.lvalue_rvalue.mc_classify",
+    type: "multiple_choice",
+    title: "Lvalue or rvalue?",
+    prompt: "In `int x = 1; int y = x + 2;`, which is an rvalue?",
+    explanation:
+      "`x + 2` is a temporary computed value with no address — an rvalue. `x` and `y` are named, addressable objects, so they are lvalues.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2920,
+    is_active: true
+  },
+  {
+    id: "cpp.references.return_semantics.lesson",
+    type: "lesson",
+    title: "Return by value vs by reference",
+    prompt:
+      "Returning **by value** is the safe default: the caller gets its own copy (and modern compilers elide the copy, so it's cheap). Return **by reference** only when the referent outlives the call — for example a member function returning a reference to a data member of `*this`, or `operator[]` returning a reference into a container that the caller still owns. Returning a reference (or pointer) to a **local** variable is a bug: the local is destroyed when the function returns, leaving the caller with a dangling reference. So: return by value unless you have a specific, lifetime-safe reason to hand back a reference to storage the caller can rely on.",
+    explanation:
+      "Return by value by default. Return a reference only to storage that outlives the call (a member, or a container element); never to a local.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 2930,
+    is_active: true
+  },
+  {
+    id: "cpp.references.return_semantics.mc_local",
+    type: "multiple_choice",
+    title: "Returning a reference to a local",
+    prompt: "What is wrong with `int& f() { int n = 5; return n; }`?",
+    explanation:
+      "`n` is a local destroyed when `f` returns, so the returned reference dangles — using it is undefined behavior. Return by value (`int f()`) instead.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2940,
+    is_active: true
+  },
+  {
+    id: "cpp.references.dangling.lesson",
+    type: "lesson",
+    title: "Dangling references and lifetimes",
+    prompt:
+      "A reference is **dangling** when the object it refers to has been destroyed; reading or writing through it is undefined behavior. The classic cases: returning a reference to a local, keeping a reference to an element of a `std::vector` across a reallocating `push_back`, or binding a reference to a temporary that then expires. Binding a `const` reference to a temporary *extends* that temporary's lifetime — but only to the lifetime of the reference, and **lifetime extension does not apply across a function return**: `const std::string& bad() { return std::string(\"hi\"); }` still dangles. The fix is almost always to return or store by value, or to ensure the referent's owner outlives every reference to it.",
+    explanation:
+      "A dangling reference points at a destroyed object (UB). `const&` lifetime-extends a temporary only to the reference's own scope — not across a return; prefer by-value there.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2950,
+    is_active: true
+  },
+  {
+    id: "cpp.references.dangling.mc_extension",
+    type: "multiple_choice",
+    title: "Limits of lifetime extension",
+    prompt: "Does `const std::string& f() { return std::string(\"hi\"); }` return a usable reference?",
+    explanation:
+      "No — lifetime extension of a temporary by a const reference does not survive the function return, so the returned reference dangles. Return `std::string` by value instead.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2960,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -2386,6 +2461,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.references.const_correctness.mc_constref", skill_id: "cpp.references.const_correctness", is_primary: true },
   { learning_item_id: "cpp.references.parameter_passing.lesson", skill_id: "cpp.references.parameter_passing", is_primary: true },
   { learning_item_id: "cpp.references.parameter_passing.mc_large", skill_id: "cpp.references.parameter_passing", is_primary: true },
+  { learning_item_id: "cpp.references.lvalue_rvalue.lesson", skill_id: "cpp.references.lvalue_rvalue", is_primary: true },
+  { learning_item_id: "cpp.references.lvalue_rvalue.mc_classify", skill_id: "cpp.references.lvalue_rvalue", is_primary: true },
+  { learning_item_id: "cpp.references.return_semantics.lesson", skill_id: "cpp.references.return_semantics", is_primary: true },
+  { learning_item_id: "cpp.references.return_semantics.mc_local", skill_id: "cpp.references.return_semantics", is_primary: true },
+  { learning_item_id: "cpp.references.dangling.lesson", skill_id: "cpp.references.dangling", is_primary: true },
+  { learning_item_id: "cpp.references.dangling.mc_extension", skill_id: "cpp.references.dangling", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -2633,6 +2714,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.references.parameter_passing.mc_large.b", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By value (std::vector<int>)", is_correct: false, order_index: 20 },
   { id: "cpp.references.parameter_passing.mc_large.c", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By non-const reference (std::vector<int>&)", is_correct: false, order_index: 30 },
   { id: "cpp.references.parameter_passing.mc_large.d", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By raw pointer to non-const", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.lvalue_rvalue.mc_classify.a", learning_item_id: "cpp.references.lvalue_rvalue.mc_classify", content: "x + 2", is_correct: true, order_index: 10 },
+  { id: "cpp.references.lvalue_rvalue.mc_classify.b", learning_item_id: "cpp.references.lvalue_rvalue.mc_classify", content: "x", is_correct: false, order_index: 20 },
+  { id: "cpp.references.lvalue_rvalue.mc_classify.c", learning_item_id: "cpp.references.lvalue_rvalue.mc_classify", content: "y", is_correct: false, order_index: 30 },
+  { id: "cpp.references.lvalue_rvalue.mc_classify.d", learning_item_id: "cpp.references.lvalue_rvalue.mc_classify", content: "The variable named x after assignment", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.return_semantics.mc_local.a", learning_item_id: "cpp.references.return_semantics.mc_local", content: "It returns a reference to a local that is destroyed when f returns (dangling)", is_correct: true, order_index: 10 },
+  { id: "cpp.references.return_semantics.mc_local.b", learning_item_id: "cpp.references.return_semantics.mc_local", content: "Nothing — it is correct and idiomatic", is_correct: false, order_index: 20 },
+  { id: "cpp.references.return_semantics.mc_local.c", learning_item_id: "cpp.references.return_semantics.mc_local", content: "It copies the int unnecessarily", is_correct: false, order_index: 30 },
+  { id: "cpp.references.return_semantics.mc_local.d", learning_item_id: "cpp.references.return_semantics.mc_local", content: "It fails to compile", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.dangling.mc_extension.a", learning_item_id: "cpp.references.dangling.mc_extension", content: "No — lifetime extension does not survive the return, so it dangles", is_correct: true, order_index: 10 },
+  { id: "cpp.references.dangling.mc_extension.b", learning_item_id: "cpp.references.dangling.mc_extension", content: "Yes — the const reference keeps the temporary alive for the caller", is_correct: false, order_index: 20 },
+  { id: "cpp.references.dangling.mc_extension.c", learning_item_id: "cpp.references.dangling.mc_extension", content: "Yes — string literals live forever", is_correct: false, order_index: 30 },
+  { id: "cpp.references.dangling.mc_extension.d", learning_item_id: "cpp.references.dangling.mc_extension", content: "Only if the caller marks the result const", is_correct: false, order_index: 40 },
 
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },
