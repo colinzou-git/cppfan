@@ -1423,6 +1423,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.bst_search",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Binary search tree search",
+    description: "Use the BST ordering invariant to search, insert, and reason about balance.",
+    learner_goal: "Search a BST in O(h) by comparing and descending, and know why balance matters.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1615,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.heap_applications",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Heap applications and selection",
+    description: "Apply a heap to top-k and scheduling, and choose it over a sorted vector or map.",
+    learner_goal: "Use a priority_queue for top-k/scheduling and pick a heap when you repeatedly need the best.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1625,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.dsu_internals",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Union-find internals",
+    description: "Understand path compression and union by rank/size and their near-constant cost.",
+    learner_goal: "Explain how path compression and union by rank give near-constant amortized operations.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1635,
+    is_active: true
+  },
+  {
     id: "dsa.graphs.representation",
     domain: "dsa",
     module_id: "dsa.graphs",
@@ -1742,6 +1778,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.trees.traversal", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
   { skill_id: "dsa.trees.heap", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
   { skill_id: "dsa.trees.disjoint_set", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.bst_search", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.heap_applications", prerequisite_skill_id: "dsa.trees.heap", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.dsu_internals", prerequisite_skill_id: "dsa.trees.disjoint_set", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.representation", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.bfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.dfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
