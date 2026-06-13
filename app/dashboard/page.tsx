@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpenCheck, Brain, CalendarClock, Settings, ShieldAlert, UserCircle } from "lucide-react";
+import { BookOpenCheck, Brain, CalendarClock, Library, Settings, ShieldAlert, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -98,6 +98,12 @@ export default async function DashboardPage() {
             <Link href="/review">
               <CalendarClock className="h-4 w-4" />
               Review
+            </Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/resources">
+              <Library className="h-4 w-4" />
+              Resources
             </Link>
           </Button>
           <Button asChild variant="secondary">
