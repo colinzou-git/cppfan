@@ -748,6 +748,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.special_members.lesson",
+    type: "lesson",
+    title: "Which special member runs",
+    prompt:
+      "Four special members move and copy objects, and *construction* differs from *assignment*. `T b = a;` and `T b(a);` run the **copy constructor** (building a new object); `b = a;` on an existing `b` runs the **copy assignment** operator. With an rvalue source, `T b = std::move(a);` runs the **move constructor** and `b = std::move(a);` the **move assignment** operator. You can ask for the compiler's version with `= default` or forbid one with `= delete` (e.g. delete the copy operations to make a type move-only). After a move, the source object is left in a *valid but unspecified* state — you may destroy it or assign it a new value, but you must not assume what it holds. Move operations should be marked `noexcept` so containers like `std::vector` can move (not copy) elements when they grow.",
+    explanation:
+      "Construction (T b = a / T b(a)) builds a new object; assignment (b = a) updates an existing one. =default/=delete control the members; a moved-from object is valid but unspecified; mark moves noexcept.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3030,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.special_members.mc_which",
+    type: "multiple_choice",
+    title: "Construction or assignment?",
+    prompt: "Given an already-constructed `Widget b;`, which special member does `b = a;` invoke (where `a` is an lvalue `Widget`)?",
+    explanation:
+      "`b` already exists, so `b = a;` is assignment, and `a` is an lvalue, so it is the copy assignment operator. A move would need an rvalue source (e.g. `std::move(a)`); constructing a new object would run a constructor instead.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3040,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.copy_elision.lesson",
+    type: "lesson",
+    title: "Copy elision and return by value",
+    prompt:
+      "Returning a big object by value is not the performance problem beginners fear. Under copy elision the compiler constructs the returned object directly in the caller's storage, skipping any copy or move — for a local returned by value this is mandatory in C++17 for a pure prvalue and routine (NRVO) otherwise. So `std::string make()` that builds and returns a local string does not copy it out. Returning by value also gives the caller a clean, independent object, avoiding the dangling-reference traps of returning a reference to a local. Deep vs shallow still matters for the object's *members*: a class holding a pointer needs a deep copy (or, better, a self-managing member) so two copies do not share and double-free the same buffer. Rule of thumb: return by value, and let elision and move semantics make it cheap.",
+    explanation:
+      "Copy elision builds the returned value directly in the caller, so return-by-value is cheap and safe. Deep copy still matters for pointer-owning members to avoid shared/double-freed buffers.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3050,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.copy_elision.mc_return",
+    type: "multiple_choice",
+    title: "Returning a local by value",
+    prompt: "Why is returning a large local `std::string` by value usually NOT an expensive copy?",
+    explanation:
+      "Copy elision (and NRVO) lets the compiler construct the returned string directly in the caller's storage, eliding the copy/move entirely. Returning by value is both efficient and safe.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3060,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.operators.lesson",
+    type: "lesson",
+    title: "Operator overloading and conversions",
+    prompt:
+      "Overloaded operators should mean what callers expect. `operator==` must be an equivalence (reflexive, symmetric, transitive) and is usually paired with `!=`; in C++20 a defaulted `operator<=>` (the three-way \"spaceship\") generates the ordering and comparison operators consistently for you. Define `operator<<(std::ostream&, const T&)` as a non-member to print a type. Be careful with conversions: a single-argument constructor like `Money(int)` doubles as an *implicit* conversion, so `Money m = 5;` silently compiles — often surprising. Mark such constructors `explicit` unless the implicit conversion is genuinely desirable, and prefer named functions over conversion operators when intent could be ambiguous. The design test is whether a reader can predict an operator's behavior without reading its body.",
+    explanation:
+      "Give operators conventional meaning (== as equivalence; C++20 <=> for ordering; non-member << for printing). Mark single-arg constructors explicit to avoid surprising implicit conversions.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3070,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.operators.mc_explicit",
+    type: "multiple_choice",
+    title: "Avoiding surprising conversions",
+    prompt: "How do you stop a single-argument constructor `Money(int)` from allowing the implicit conversion `Money m = 5;`?",
+    explanation:
+      "Mark the constructor `explicit`. Then `Money m = 5;` no longer compiles, while the intended `Money m(5);` still works — preventing silent, surprising conversions.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3080,
+    is_active: true
+  },
+  {
     id: "cpp.raii.resource_lifetime.lesson",
     type: "lesson",
     title: "RAII: tie a resource to an object",
@@ -2567,6 +2642,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.value_semantics.move.mc_source", skill_id: "cpp.value_semantics.move", is_primary: true },
   { learning_item_id: "cpp.value_semantics.rule_of_zero_five.lesson", skill_id: "cpp.value_semantics.rule_of_zero_five", is_primary: true },
   { learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", skill_id: "cpp.value_semantics.rule_of_zero_five", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.special_members.lesson", skill_id: "cpp.value_semantics.special_members", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.special_members.mc_which", skill_id: "cpp.value_semantics.special_members", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.copy_elision.lesson", skill_id: "cpp.value_semantics.copy_elision", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.copy_elision.mc_return", skill_id: "cpp.value_semantics.copy_elision", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.operators.lesson", skill_id: "cpp.value_semantics.operators", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.operators.mc_explicit", skill_id: "cpp.value_semantics.operators", is_primary: true },
   { learning_item_id: "cpp.value_semantics.move.lesson", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: false },
   { learning_item_id: "cpp.raii.resource_lifetime.lesson", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
   { learning_item_id: "cpp.raii.resource_lifetime.mc_ties", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
@@ -2855,6 +2936,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.b", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Always write all five special members", is_correct: false, order_index: 20 },
   { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.c", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Never use destructors", is_correct: false, order_index: 30 },
   { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.d", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Make every member public", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.special_members.mc_which.a", learning_item_id: "cpp.value_semantics.special_members.mc_which", content: "Copy assignment operator", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.special_members.mc_which.b", learning_item_id: "cpp.value_semantics.special_members.mc_which", content: "Copy constructor", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.special_members.mc_which.c", learning_item_id: "cpp.value_semantics.special_members.mc_which", content: "Move constructor", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.special_members.mc_which.d", learning_item_id: "cpp.value_semantics.special_members.mc_which", content: "Move assignment operator", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.copy_elision.mc_return.a", learning_item_id: "cpp.value_semantics.copy_elision.mc_return", content: "Copy elision constructs the result directly in the caller, eliding the copy/move", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.copy_elision.mc_return.b", learning_item_id: "cpp.value_semantics.copy_elision.mc_return", content: "The compiler returns a reference to the local instead", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.copy_elision.mc_return.c", learning_item_id: "cpp.value_semantics.copy_elision.mc_return", content: "std::string is always stored on the heap and shared", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.copy_elision.mc_return.d", learning_item_id: "cpp.value_semantics.copy_elision.mc_return", content: "Returning by value is in fact always an expensive copy", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.operators.mc_explicit.a", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Mark the constructor explicit", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.operators.mc_explicit.b", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Make the constructor private", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.operators.mc_explicit.c", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Add a second int parameter", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.operators.mc_explicit.d", learning_item_id: "cpp.value_semantics.operators.mc_explicit", content: "Mark the constructor const", is_correct: false, order_index: 40 },
 
   { id: "cpp.raii.resource_lifetime.mc_ties.a", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of an object (constructor acquires, destructor releases)", is_correct: true, order_index: 10 },
   { id: "cpp.raii.resource_lifetime.mc_ties.b", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of the whole program", is_correct: false, order_index: 20 },

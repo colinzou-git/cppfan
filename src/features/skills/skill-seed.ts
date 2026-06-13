@@ -391,6 +391,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.special_members",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Which special member runs",
+    description: "Tell apart copy/move construction and assignment, and control them with =default/=delete.",
+    learner_goal: "Predict which special member a statement invokes and know moved-from objects are valid but unspecified.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 254,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.copy_elision",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Copy elision and return by value",
+    description: "Reason about why returning by value is cheap and when deep vs shallow copies matter.",
+    learner_goal: "Explain copy elision so returning a local by value is efficient, not a costly copy.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 255,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.operators",
+    domain: "cpp",
+    module_id: "cpp.value_semantics",
+    title: "Operator overloading and conversions",
+    description: "Design equality/ordering and conversions that behave the way callers expect.",
+    learner_goal: "Give operators their conventional meaning and use explicit to avoid surprising conversions.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 256,
+    is_active: true
+  },
+  {
     id: "cpp.oop.composition",
     domain: "cpp",
     module_id: "cpp.oop",
@@ -1261,6 +1297,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.value_semantics.copy", prerequisite_skill_id: "cpp.constructors.destructor_intro", relationship_type: "recommended" },
   { skill_id: "cpp.value_semantics.move", prerequisite_skill_id: "cpp.value_semantics.copy", relationship_type: "recommended" },
   { skill_id: "cpp.value_semantics.rule_of_zero_five", prerequisite_skill_id: "cpp.value_semantics.move", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.special_members", prerequisite_skill_id: "cpp.value_semantics.move", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.copy_elision", prerequisite_skill_id: "cpp.value_semantics.copy", relationship_type: "recommended" },
+  { skill_id: "cpp.value_semantics.operators", prerequisite_skill_id: "cpp.value_semantics.rule_of_zero_five", relationship_type: "recommended" },
   { skill_id: "cpp.oop.composition", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.oop.inheritance", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.oop.virtual_polymorphism", prerequisite_skill_id: "cpp.oop.inheritance", relationship_type: "recommended" },
