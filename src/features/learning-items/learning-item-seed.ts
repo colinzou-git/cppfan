@@ -522,6 +522,56 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 840,
     is_active: true
+  },
+  {
+    id: "dsa.arrays.indexing.lesson",
+    type: "lesson",
+    title: "Zero-based indexing",
+    prompt:
+      "Arrays and vectors are zero-indexed: for a sequence of size `n`, the valid indices are `0` through `n - 1`. Reading or writing index `n` (or a negative index) is out of bounds and is undefined behavior with `operator[]`. Most off-by-one bugs come from looping while `i <= n` instead of `i < n`.",
+    explanation:
+      "Always reason about the half-open range [0, n): the first valid index is 0 and the last is n - 1.",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 910,
+    is_active: true
+  },
+  {
+    id: "dsa.arrays.indexing.mc_last_index",
+    type: "multiple_choice",
+    title: "Last valid index",
+    prompt: "For a vector with `n` elements, what is the last valid index?",
+    explanation:
+      "Indices run from 0 to n - 1, so the last valid index is n - 1. Index n is one past the end and is out of bounds.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 920,
+    is_active: true
+  },
+  {
+    id: "dsa.arrays.traversal.code_reading",
+    type: "code_reading",
+    title: "Reading a traversal loop",
+    prompt:
+      "Read this code:\n\n```cpp\nint sum = 0;\nfor (int x : v) {\n  sum += x;\n}\n```\n\nWhat does `sum` hold after the loop, for a vector `v`?",
+    explanation:
+      "The range-based for loop visits every element of `v` once, so `sum` holds the total of all elements in `v`.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 930,
+    is_active: true
+  },
+  {
+    id: "dsa.arrays.traversal.mc_safe_loop",
+    type: "multiple_choice",
+    title: "A correct traversal",
+    prompt: "Which loop visits every element of a vector `v` exactly once, with no out-of-bounds access?",
+    explanation:
+      "A range-based for loop (`for (int x : v)`) visits each element exactly once and cannot run off the end. The index loop must use `i < v.size()` (not `<=`) and start at 0.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 940,
+    is_active: true
   }
 ];
 
@@ -571,7 +621,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.stl.vector.lesson", skill_id: "cpp.stl.vector", is_primary: true },
   { learning_item_id: "cpp.stl.vector.mc_at", skill_id: "cpp.stl.vector", is_primary: true },
   { learning_item_id: "cpp.stl.string.code_reading", skill_id: "cpp.stl.string", is_primary: true },
-  { learning_item_id: "cpp.stl.string.mc_size", skill_id: "cpp.stl.string", is_primary: true }
+  { learning_item_id: "cpp.stl.string.mc_size", skill_id: "cpp.stl.string", is_primary: true },
+  { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
+  { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
+  { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
+  { learning_item_id: "dsa.arrays.traversal.mc_safe_loop", skill_id: "dsa.arrays.traversal", is_primary: true },
+  { learning_item_id: "dsa.arrays.traversal.mc_safe_loop", skill_id: "dsa.arrays.indexing", is_primary: false }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -663,7 +718,17 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.stl.string.mc_size.a", learning_item_id: "cpp.stl.string.mc_size", content: "size()", is_correct: true, order_index: 10 },
   { id: "cpp.stl.string.mc_size.b", learning_item_id: "cpp.stl.string.mc_size", content: "count()", is_correct: false, order_index: 20 },
   { id: "cpp.stl.string.mc_size.c", learning_item_id: "cpp.stl.string.mc_size", content: "len()", is_correct: false, order_index: 30 },
-  { id: "cpp.stl.string.mc_size.d", learning_item_id: "cpp.stl.string.mc_size", content: "chars()", is_correct: false, order_index: 40 }
+  { id: "cpp.stl.string.mc_size.d", learning_item_id: "cpp.stl.string.mc_size", content: "chars()", is_correct: false, order_index: 40 },
+
+  { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
+  { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
+  { id: "dsa.arrays.indexing.mc_last_index.c", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n + 1", is_correct: false, order_index: 30 },
+  { id: "dsa.arrays.indexing.mc_last_index.d", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "1", is_correct: false, order_index: 40 },
+
+  { id: "dsa.arrays.traversal.mc_safe_loop.a", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int x : v) { ... }", is_correct: true, order_index: 10 },
+  { id: "dsa.arrays.traversal.mc_safe_loop.b", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int i = 0; i <= v.size(); i++) { ... }", is_correct: false, order_index: 20 },
+  { id: "dsa.arrays.traversal.mc_safe_loop.c", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "for (int i = 1; i < v.size(); i++) { ... }", is_correct: false, order_index: 30 },
+  { id: "dsa.arrays.traversal.mc_safe_loop.d", learning_item_id: "dsa.arrays.traversal.mc_safe_loop", content: "while (true) { ... }", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
