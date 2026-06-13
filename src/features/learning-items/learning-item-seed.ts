@@ -1550,6 +1550,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.warnings.lesson",
+    type: "lesson",
+    title: "Warnings and warnings-as-errors",
+    prompt:
+      "Compiler warnings flag code that compiles but is probably wrong — an unused variable, a signed/unsigned comparison, a function that falls off the end without returning. Turn them on: `-Wall -Wextra` (and often `-Wpedantic`) on GCC/Clang surface the common mistakes, and many real bugs show up first as a warning you would otherwise ignore. The discipline that keeps them useful is `-Werror`, which makes any warning fail the build. Without it, warnings accumulate until nobody reads them; with it, the codebase stays clean because a new warning stops CI immediately. In practice teams enable a strong warning set plus `-Werror` in CI, and treat a warning as a defect to fix, not noise to scroll past.",
+    explanation:
+      "-Wall -Wextra enable strong warnings that catch likely bugs; -Werror promotes them to build failures so warnings never pile up unread.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 3150,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.warnings.mc_werror",
+    type: "multiple_choice",
+    title: "Why -Werror",
+    prompt: "What does compiling with `-Werror` do, and why is it useful?",
+    explanation:
+      "-Werror turns warnings into errors that fail the build, so warnings can't accumulate unnoticed — every new one must be fixed (or explicitly suppressed) before the code merges.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3160,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.sanitizers.lesson",
+    type: "lesson",
+    title: "Address and UB sanitizers",
+    prompt:
+      "Sanitizers are compiler instrumentation that catch bugs while the program runs, with a clear report instead of silent corruption. **AddressSanitizer** (`-fsanitize=address`) detects heap/stack buffer overflows, use-after-free, and leaks. **UndefinedBehaviorSanitizer** (`-fsanitize=undefined`) flags signed overflow, invalid casts, null dereferences, and other UB. You enable them at build time — `g++ -fsanitize=address,undefined -g` — and run your tests; on a violation the program aborts with the faulting line and a stack trace. They add run-time overhead, so they are used in debug/test/CI builds rather than shipped in Release. (ThreadSanitizer similarly finds data races but runs in a separate build.) Sanitizer-backed tests turn 'works on my machine' UB into a reproducible, located failure.",
+    explanation:
+      "ASan (-fsanitize=address) catches memory errors (overflow/use-after-free/leaks); UBSan (-fsanitize=undefined) catches undefined behavior. Use them in debug/test/CI builds, not Release.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3170,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.sanitizers.mc_asan",
+    type: "multiple_choice",
+    title: "What AddressSanitizer catches",
+    prompt: "Which kind of bug is AddressSanitizer (`-fsanitize=address`) designed to catch?",
+    explanation:
+      "ASan targets memory errors — heap/stack buffer overflows, use-after-free, and leaks — reporting the faulting access and a stack trace instead of letting the program corrupt memory silently.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3180,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.cmake.lesson",
+    type: "lesson",
+    title: "CMake builds",
+    prompt:
+      "CMake describes a build in `CMakeLists.txt` so the same project compiles across compilers and IDEs. The essentials: `add_executable(app main.cpp)` (or `add_library(...)`) defines a *target*; `target_include_directories(app PRIVATE include)` adds header search paths; `target_link_libraries(app PRIVATE fmt)` links dependencies. You configure once (`cmake -S . -B build`) then build (`cmake --build build`). Choose a build type with `-DCMAKE_BUILD_TYPE=Debug` (no optimization, full debug info, assertions) or `Release` (optimized, `NDEBUG`); Debug is for developing and sanitizer runs, Release for shipping. Thinking in targets — each with its own includes, definitions, and links — keeps large projects modular instead of relying on one global flag soup.",
+    explanation:
+      "CMake builds around targets: add_executable/add_library, then target_include_directories/target_link_libraries. Pick CMAKE_BUILD_TYPE=Debug for development/sanitizers, Release for shipping.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3190,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.cmake.mc_link",
+    type: "multiple_choice",
+    title: "Linking a library in CMake",
+    prompt: "Which CMake command links an external library into your executable target?",
+    explanation:
+      "target_link_libraries(<target> PRIVATE <lib>) links a dependency to a target. add_executable defines the target; target_include_directories adds header paths.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3200,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o.lesson",
     type: "lesson",
     title: "Big-O notation",
@@ -2788,6 +2863,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.tooling.debugging.mc_firststep", skill_id: "cpp.tooling.debugging", is_primary: true },
   { learning_item_id: "cpp.tooling.build.lesson", skill_id: "cpp.tooling.build", is_primary: true },
   { learning_item_id: "cpp.tooling.build.mc_linkstage", skill_id: "cpp.tooling.build", is_primary: true },
+  { learning_item_id: "cpp.tooling.warnings.lesson", skill_id: "cpp.tooling.warnings", is_primary: true },
+  { learning_item_id: "cpp.tooling.warnings.mc_werror", skill_id: "cpp.tooling.warnings", is_primary: true },
+  { learning_item_id: "cpp.tooling.sanitizers.lesson", skill_id: "cpp.tooling.sanitizers", is_primary: true },
+  { learning_item_id: "cpp.tooling.sanitizers.mc_asan", skill_id: "cpp.tooling.sanitizers", is_primary: true },
+  { learning_item_id: "cpp.tooling.cmake.lesson", skill_id: "cpp.tooling.cmake", is_primary: true },
+  { learning_item_id: "cpp.tooling.cmake.mc_link", skill_id: "cpp.tooling.cmake", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.raii.exception_safety_intro", is_primary: false },
   { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
@@ -3177,6 +3258,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.tooling.build.mc_linkstage.b", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "The compile stage (a syntax error)", is_correct: false, order_index: 20 },
   { id: "cpp.tooling.build.mc_linkstage.c", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "Runtime", is_correct: false, order_index: 30 },
   { id: "cpp.tooling.build.mc_linkstage.d", learning_item_id: "cpp.tooling.build.mc_linkstage", content: "Preprocessing only", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.warnings.mc_werror.a", learning_item_id: "cpp.tooling.warnings.mc_werror", content: "It turns warnings into build-failing errors so they can't accumulate unnoticed", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.warnings.mc_werror.b", learning_item_id: "cpp.tooling.warnings.mc_werror", content: "It silences all warnings", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.warnings.mc_werror.c", learning_item_id: "cpp.tooling.warnings.mc_werror", content: "It speeds up compilation", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.warnings.mc_werror.d", learning_item_id: "cpp.tooling.warnings.mc_werror", content: "It enables optimizations", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.sanitizers.mc_asan.a", learning_item_id: "cpp.tooling.sanitizers.mc_asan", content: "Memory errors: buffer overflows, use-after-free, and leaks", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.sanitizers.mc_asan.b", learning_item_id: "cpp.tooling.sanitizers.mc_asan", content: "Slow algorithms with poor Big-O", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.sanitizers.mc_asan.c", learning_item_id: "cpp.tooling.sanitizers.mc_asan", content: "Spelling mistakes in comments", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.sanitizers.mc_asan.d", learning_item_id: "cpp.tooling.sanitizers.mc_asan", content: "Missing header includes", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.cmake.mc_link.a", learning_item_id: "cpp.tooling.cmake.mc_link", content: "target_link_libraries(app PRIVATE lib)", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.cmake.mc_link.b", learning_item_id: "cpp.tooling.cmake.mc_link", content: "add_executable(app main.cpp)", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.cmake.mc_link.c", learning_item_id: "cpp.tooling.cmake.mc_link", content: "target_include_directories(app PRIVATE include)", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.cmake.mc_link.d", learning_item_id: "cpp.tooling.cmake.mc_link", content: "cmake --build build", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
