@@ -131,6 +131,11 @@ describe("curriculum coverage", () => {
     "cpp.tooling.testing",
     "cpp.tooling.debugging",
     "cpp.tooling.build",
+    // concurrency (#78)
+    "cpp.concurrency.threads",
+    "cpp.concurrency.data_races",
+    "cpp.concurrency.mutexes",
+    "cpp.concurrency.async",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -222,6 +227,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.oop.") ||
         id.startsWith("cpp.templates.") ||
         id.startsWith("cpp.tooling.") ||
+        id.startsWith("cpp.concurrency.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||

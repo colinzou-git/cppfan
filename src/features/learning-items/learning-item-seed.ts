@@ -1974,8 +1974,109 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2480,
     is_active: true
+  },
+  {
+    id: "cpp.concurrency.threads.lesson",
+    type: "lesson",
+    title: "Threads",
+    prompt:
+      "A thread runs a function concurrently with the rest of the program. `std::thread t(work);` starts `work` immediately on a new thread; `t.join()` blocks until that thread finishes. Every `std::thread` must be either joined or detached before it is destroyed — otherwise its destructor calls `std::terminate` and the program aborts. `detach()` lets the thread run independently, but then you can no longer wait for it, so joining is the safe default. Threads let you overlap I/O or use multiple cores, but any data shared between threads now needs careful synchronization.",
+    explanation:
+      "A std::thread must be joined or detached before destruction or the program terminates; join() waits for the thread to finish.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2510,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.threads.mc_join",
+    type: "multiple_choice",
+    title: "Joining a thread",
+    prompt: "What happens if a joinable std::thread is destroyed without being joined or detached?",
+    explanation:
+      "Destroying a still-joinable std::thread calls std::terminate, aborting the program. You must join() (wait for it) or detach() (let it run free) before the thread object goes out of scope.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2520,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.data_races.lesson",
+    type: "lesson",
+    title: "Data races",
+    prompt:
+      "A data race occurs when two or more threads access the same memory location concurrently, at least one of them writes, and there is no synchronization ordering the accesses. In C++ a data race is undefined behavior — the program may produce wrong results, crash, or appear to work until it doesn't. Even a simple `counter++` is a read-modify-write that can interleave badly across threads, losing increments. The fix is to establish a happens-before ordering: protect the shared data with a mutex, or use `std::atomic` for simple values. Read-only sharing (no writers) is safe without synchronization.",
+    explanation:
+      "A data race is concurrent access to the same memory with at least one writer and no synchronization — undefined behavior in C++. Guard shared mutable data with a mutex or atomic.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2530,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.data_races.mc_define",
+    type: "multiple_choice",
+    title: "What is a data race",
+    prompt: "Which situation is a data race?",
+    explanation:
+      "A data race needs concurrent access to the same location with at least one writer and no synchronization. Multiple threads only reading shared data is not a race; writes guarded by a mutex are not a race either.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2540,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.mutexes.lesson",
+    type: "lesson",
+    title: "Mutexes and locks",
+    prompt:
+      "A `std::mutex` enforces mutual exclusion: only one thread can hold it at a time, so the code between locking and unlocking — the critical section — runs without interference. Rather than calling `lock()`/`unlock()` by hand (and risking a leak if an exception is thrown in between), wrap it in an RAII guard: `std::lock_guard<std::mutex> guard(m);` locks on construction and unlocks when the guard goes out of scope. `std::unique_lock` is a more flexible variant that can defer locking or be unlocked early. Keep critical sections short, and always acquire multiple mutexes in a consistent order to avoid deadlock.",
+    explanation:
+      "A mutex serializes access to shared data; std::lock_guard locks it via RAII and releases it automatically, even if an exception is thrown.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 2550,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.mutexes.mc_lock_guard",
+    type: "multiple_choice",
+    title: "Why use lock_guard",
+    prompt: "What is the main advantage of std::lock_guard over manual mutex lock()/unlock() calls?",
+    explanation:
+      "std::lock_guard releases the mutex in its destructor, so the lock is freed even if the critical section throws or returns early — avoiding the leaked-lock and deadlock bugs that manual unlock() invites.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2560,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.async.lesson",
+    type: "lesson",
+    title: "Async tasks and futures",
+    prompt:
+      "`std::async` runs a function and hands you a `std::future` that will eventually hold its result. Calling `fut.get()` blocks until the task finishes and returns the value (or rethrows an exception it threw). With the `std::launch::async` policy the task runs on a new thread; the default policy may instead run it lazily when you call `get()`. Futures are a higher-level alternative to managing threads by hand: no manual join, and results and exceptions flow back to you cleanly. Note that `get()` may only be called once per future.",
+    explanation:
+      "std::async returns a future; future::get() blocks until the result is ready and returns it (or rethrows). It is a higher-level alternative to manual thread management.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2570,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.async.mc_get",
+    type: "multiple_choice",
+    title: "Getting an async result",
+    prompt: "What does calling get() on the std::future returned by std::async do?",
+    explanation:
+      "future::get() blocks until the async task has finished, then returns its result (or rethrows any exception the task threw). It can only be called once.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2580,
+    is_active: true
   }
 ];
+
 
 export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.program_basics.structure.lesson", skill_id: "cpp.program_basics.structure", is_primary: true },
@@ -2147,6 +2248,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", skill_id: "cpp.oop.virtual_polymorphism", is_primary: true },
   { learning_item_id: "cpp.oop.abstract_interfaces.lesson", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
   { learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
+  { learning_item_id: "cpp.concurrency.threads.lesson", skill_id: "cpp.concurrency.threads", is_primary: true },
+  { learning_item_id: "cpp.concurrency.threads.mc_join", skill_id: "cpp.concurrency.threads", is_primary: true },
+  { learning_item_id: "cpp.concurrency.data_races.lesson", skill_id: "cpp.concurrency.data_races", is_primary: true },
+  { learning_item_id: "cpp.concurrency.data_races.mc_define", skill_id: "cpp.concurrency.data_races", is_primary: true },
+  { learning_item_id: "cpp.concurrency.mutexes.lesson", skill_id: "cpp.concurrency.mutexes", is_primary: true },
+  { learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", skill_id: "cpp.concurrency.mutexes", is_primary: true },
+  { learning_item_id: "cpp.concurrency.async.lesson", skill_id: "cpp.concurrency.async", is_primary: true },
+  { learning_item_id: "cpp.concurrency.async.mc_get", skill_id: "cpp.concurrency.async", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -2529,7 +2638,27 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.a", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes the class abstract so it cannot be instantiated and must be overridden", is_correct: true, order_index: 10 },
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.b", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It gives draw a default empty body", is_correct: false, order_index: 20 },
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.c", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It deletes the draw function", is_correct: false, order_index: 30 },
-  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.d", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes draw a static function", is_correct: false, order_index: 40 }
+  { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.d", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes draw a static function", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.threads.mc_join.a", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The program calls std::terminate and aborts", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.threads.mc_join.b", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The thread is silently joined for you", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.threads.mc_join.c", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The thread keeps running with no consequences", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.threads.mc_join.d", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The compiler rejects the program", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.data_races.mc_define.a", learning_item_id: "cpp.concurrency.data_races.mc_define", content: "Two threads access the same variable concurrently and at least one writes, with no synchronization", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.data_races.mc_define.b", learning_item_id: "cpp.concurrency.data_races.mc_define", content: "Several threads only read the same shared constant", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.data_races.mc_define.c", learning_item_id: "cpp.concurrency.data_races.mc_define", content: "One thread writes a variable that no other thread touches", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.data_races.mc_define.d", learning_item_id: "cpp.concurrency.data_races.mc_define", content: "Threads write shared data while holding the same mutex", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.mutexes.mc_lock_guard.a", learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", content: "It releases the mutex automatically, even if the critical section throws", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.mutexes.mc_lock_guard.b", learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", content: "It makes the mutex faster to lock", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.mutexes.mc_lock_guard.c", learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", content: "It allows many threads to hold the mutex at once", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.mutexes.mc_lock_guard.d", learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", content: "It removes the need for a mutex entirely", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.async.mc_get.a", learning_item_id: "cpp.concurrency.async.mc_get", content: "Blocks until the task finishes, then returns its result or rethrows its exception", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.async.mc_get.b", learning_item_id: "cpp.concurrency.async.mc_get", content: "Cancels the task immediately", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.async.mc_get.c", learning_item_id: "cpp.concurrency.async.mc_get", content: "Returns a default value without waiting", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.async.mc_get.d", learning_item_id: "cpp.concurrency.async.mc_get", content: "Starts a brand-new thread each time it is called", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
