@@ -198,6 +198,8 @@ supabase/migrations/20260613390000_add_references_skills.sql
 supabase/migrations/20260613400000_seed_references_items.sql
 supabase/migrations/20260613410000_add_complexity_skills.sql
 supabase/migrations/20260613420000_seed_complexity_items.sql
+supabase/migrations/20260613430000_add_value_semantics_skills.sql
+supabase/migrations/20260613440000_seed_value_semantics_items.sql
 ```
 
 The `profiles` migration adds:

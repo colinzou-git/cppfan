@@ -126,6 +126,10 @@ describe("curriculum coverage", () => {
     "cpp.structs_classes.public_private",
     "cpp.structs_classes.const_methods_intro",
     "cpp.structs_classes.invariants_intro",
+    // value semantics (#69)
+    "cpp.value_semantics.copy",
+    "cpp.value_semantics.move",
+    "cpp.value_semantics.rule_of_zero_five",
     // constructors module (#16)
     "cpp.constructors.default_constructor",
     "cpp.constructors.parameterized_constructor",
@@ -180,6 +184,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.control_flow.") ||
         id.startsWith("cpp.functions.") ||
         id.startsWith("cpp.references.") ||
+        id.startsWith("cpp.value_semantics.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||

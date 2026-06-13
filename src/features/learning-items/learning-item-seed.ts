@@ -523,6 +523,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.copy.lesson",
+    type: "lesson",
+    title: "Copy semantics",
+    prompt:
+      "Copying an object makes an independent duplicate. The copy constructor `T(const T&)` and copy assignment `operator=(const T&)` define how. By default the compiler copies each member, which is fine for values but wrong when the class holds a raw owning pointer: a member-wise (shallow) copy leaves two objects pointing at the same resource, so both try to free it. A deep copy duplicates the owned resource instead.",
+    explanation:
+      "Default copies are member-wise. For a class that owns a raw resource you must implement a deep copy (or, better, use a member that copies correctly on its own).",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 145,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.copy.mc_shallow",
+    type: "multiple_choice",
+    title: "Danger of a shallow copy",
+    prompt: "A class stores a raw owning `T* p` and uses the default copy. What goes wrong when an object is copied?",
+    explanation:
+      "The default member-wise copy duplicates the pointer value, so both objects point at the same T and each destructor deletes it — a double free.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 146,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.move.lesson",
+    type: "lesson",
+    title: "Move semantics",
+    prompt:
+      "Moving transfers resources from an expendable source instead of copying them. The move constructor `T(T&&)` and move assignment take an rvalue reference and steal the source's internals (for example, take its pointer and null the source), leaving it valid but empty. `std::move` casts an lvalue to an rvalue so it can be moved from. Moving a unique_ptr or a large vector avoids a deep copy.",
+    explanation:
+      "A move leaves the source in a valid but unspecified (usually empty) state. Use std::move to hand off ownership when you no longer need the source.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 147,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.move.mc_source",
+    type: "multiple_choice",
+    title: "State of a moved-from object",
+    prompt: "What does a correct move constructor do with the source object?",
+    explanation:
+      "It transfers (steals) the source's resources and leaves the source valid but empty, so destroying it later is safe.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 148,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.rule_of_zero_five.lesson",
+    type: "lesson",
+    title: "Rule of Zero and Rule of Five",
+    prompt:
+      "Rule of Zero: design classes so their members manage their own resources (use `std::vector`, `std::string`, `std::unique_ptr`), so you need no custom destructor, copy, or move — the compiler-generated ones are correct. Rule of Five: if you must write any one of the five special members (destructor, copy constructor, copy assignment, move constructor, move assignment), you almost always need to consider all five, because the defaults will then be wrong.",
+    explanation:
+      "Prefer Rule of Zero. Only reach for the Rule of Five when a class directly manages a raw resource, which is rare in modern C++.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 149,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.rule_of_zero_five.mc_zero",
+    type: "multiple_choice",
+    title: "What the Rule of Zero recommends",
+    prompt: "What does the Rule of Zero recommend?",
+    explanation:
+      "Design classes from members that manage their own resources, so the class needs no custom copy/move/destructor and the compiler defaults are correct.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 150,
+    is_active: true
+  },
+  {
     id: "cpp.raii.resource_lifetime.lesson",
     type: "lesson",
     title: "RAII: tie a resource to an object",
@@ -1271,6 +1346,13 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.constructors.member_initializer_list.bug_const_member", skill_id: "cpp.constructors.default_constructor", is_primary: false },
   { learning_item_id: "cpp.constructors.destructor_intro.lesson", skill_id: "cpp.constructors.destructor_intro", is_primary: true },
   { learning_item_id: "cpp.constructors.destructor_intro.mc_destruction_order", skill_id: "cpp.constructors.destructor_intro", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.copy.lesson", skill_id: "cpp.value_semantics.copy", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.copy.mc_shallow", skill_id: "cpp.value_semantics.copy", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.move.lesson", skill_id: "cpp.value_semantics.move", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.move.mc_source", skill_id: "cpp.value_semantics.move", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.rule_of_zero_five.lesson", skill_id: "cpp.value_semantics.rule_of_zero_five", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", skill_id: "cpp.value_semantics.rule_of_zero_five", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.move.lesson", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: false },
   { learning_item_id: "cpp.raii.resource_lifetime.lesson", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
   { learning_item_id: "cpp.raii.resource_lifetime.mc_ties", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
   { learning_item_id: "cpp.raii.destructor_cleanup.code_reading", skill_id: "cpp.raii.destructor_cleanup", is_primary: true },
@@ -1427,6 +1509,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.constructors.destructor_intro.mc_destruction_order.b", learning_item_id: "cpp.constructors.destructor_intro.mc_destruction_order", content: "a is destroyed first, then b (same as construction)", is_correct: false, order_index: 20 },
   { id: "cpp.constructors.destructor_intro.mc_destruction_order.c", learning_item_id: "cpp.constructors.destructor_intro.mc_destruction_order", content: "Both are destroyed at the same time", is_correct: false, order_index: 30 },
   { id: "cpp.constructors.destructor_intro.mc_destruction_order.d", learning_item_id: "cpp.constructors.destructor_intro.mc_destruction_order", content: "The order is unspecified by the language", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.copy.mc_shallow.a", learning_item_id: "cpp.value_semantics.copy.mc_shallow", content: "Both objects point at the same T and each frees it (double free)", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.copy.mc_shallow.b", learning_item_id: "cpp.value_semantics.copy.mc_shallow", content: "The copy is automatically deep", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.copy.mc_shallow.c", learning_item_id: "cpp.value_semantics.copy.mc_shallow", content: "The program fails to compile", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.copy.mc_shallow.d", learning_item_id: "cpp.value_semantics.copy.mc_shallow", content: "The pointer becomes null in both", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.move.mc_source.a", learning_item_id: "cpp.value_semantics.move.mc_source", content: "Steals its resources, leaving it valid but empty", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.move.mc_source.b", learning_item_id: "cpp.value_semantics.move.mc_source", content: "Makes a full deep copy of it", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.move.mc_source.c", learning_item_id: "cpp.value_semantics.move.mc_source", content: "Immediately destroys it", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.move.mc_source.d", learning_item_id: "cpp.value_semantics.move.mc_source", content: "Leaves it unchanged", is_correct: false, order_index: 40 },
+
+  { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.a", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Use self-managing members so no custom copy/move/destructor is needed", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.b", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Always write all five special members", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.c", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Never use destructors", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.rule_of_zero_five.mc_zero.d", learning_item_id: "cpp.value_semantics.rule_of_zero_five.mc_zero", content: "Make every member public", is_correct: false, order_index: 40 },
 
   { id: "cpp.raii.resource_lifetime.mc_ties.a", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of an object (constructor acquires, destructor releases)", is_correct: true, order_index: 10 },
   { id: "cpp.raii.resource_lifetime.mc_ties.b", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of the whole program", is_correct: false, order_index: 20 },
