@@ -209,6 +209,30 @@ export const skillSeed: Skill[] = [
     item_types: ["bug_spotting", "code_reading"],
     order_index: 340,
     is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.ownership_choice",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "Choosing the right ownership",
+    description: "Decide between a stack object, a value member, a non-owning reference, and a smart pointer.",
+    learner_goal: "Pick the simplest ownership that works, and avoid reaching for a smart pointer when a value or reference is enough.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 350,
+    is_active: true
+  },
+  {
+    id: "cpp.smart_pointers.ownership_transfer",
+    domain: "cpp",
+    module_id: "cpp.smart_pointers",
+    title: "Ownership transfer with std::move",
+    description: "Transfer exclusive ownership of a unique_ptr with std::move and understand the moved-from state.",
+    learner_goal: "Move a unique_ptr to hand off ownership and explain why the source becomes empty.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 360,
+    is_active: true
   }
 ];
 
@@ -227,7 +251,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.smart_pointers.unique_ptr", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
   { skill_id: "cpp.smart_pointers.shared_ptr", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
   { skill_id: "cpp.smart_pointers.weak_ptr", prerequisite_skill_id: "cpp.smart_pointers.shared_ptr", relationship_type: "recommended" },
-  { skill_id: "cpp.smart_pointers.cyclic_reference", prerequisite_skill_id: "cpp.smart_pointers.weak_ptr", relationship_type: "recommended" }
+  { skill_id: "cpp.smart_pointers.cyclic_reference", prerequisite_skill_id: "cpp.smart_pointers.weak_ptr", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.ownership_choice", prerequisite_skill_id: "cpp.raii.ownership_boundary", relationship_type: "recommended" },
+  { skill_id: "cpp.smart_pointers.ownership_transfer", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {

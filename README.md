@@ -170,6 +170,8 @@ supabase/migrations/20260613120000_harden_learning_item_choices.sql
 supabase/migrations/20260613130000_seed_constructors_items.sql
 supabase/migrations/20260613140000_seed_raii_items.sql
 supabase/migrations/20260613160000_seed_smart_pointers_items.sql
+supabase/migrations/20260613170000_add_smart_pointer_ownership_skills.sql
+supabase/migrations/20260613180000_seed_smart_pointer_ownership_items.sql
 ```
 
 The `profiles` migration adds:
