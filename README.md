@@ -32,6 +32,7 @@ This scaffold now includes the first auth/profile-ready web app foundation:
 - Rule-based mastery scoring v1 and a dashboard skill-mastery preview
 - Rule-based recommendation engine and a dashboard daily plan
 - Curated external C++/DSA resource catalog at `/resources`
+- Guided project-lab catalog at `/labs`
 - Vitest unit test setup
 - Playwright end-to-end test setup
 - GitHub Actions CI
