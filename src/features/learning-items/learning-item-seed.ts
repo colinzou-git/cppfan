@@ -69,6 +69,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.program_basics.statements_comments.lesson",
+    type: "lesson",
+    title: "Statements, comments, and naming",
+    prompt:
+      "A C++ statement is a single instruction and ends with a semicolon `;` — forgetting it is one of the most common beginner compile errors. Comments document intent and are ignored by the compiler: `//` starts a line comment that runs to the end of the line, and `/* ... */` is a block comment that can span lines. Names should be descriptive and follow a consistent convention (e.g. `snake_case` or `camelCase` for variables and functions, `PascalCase` for types). Avoid names that start with an underscore followed by a capital, or that contain a double underscore — those are reserved for the implementation. Good names plus comments explaining *why* (not *what*) keep code readable.",
+    explanation:
+      "Statements end with `;`; `//` and `/* */` write comments; names should be descriptive and follow one consistent convention, avoiding reserved underscore patterns.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 2810,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.statements_comments.mc_terminate",
+    type: "multiple_choice",
+    title: "Ending a statement",
+    prompt: "What punctuation ends a normal C++ statement?",
+    explanation:
+      "A semicolon `;` terminates a statement. Leaving it off is a frequent compile error reported on or near the following line.",
+    difficulty: "beginner",
+    estimated_minutes: 1,
+    order_index: 2820,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.exit_status.lesson",
+    type: "lesson",
+    title: "main() return value and exit status",
+    prompt:
+      "`main()` returns an `int` that becomes the program's *exit status* — the value the operating system (and shells, scripts, and CI) use to tell whether the program succeeded. By convention `return 0;` means success and any non-zero value signals an error (you can use `EXIT_SUCCESS`/`EXIT_FAILURE` from `<cstdlib>`). `main` is special: if you omit the `return`, the compiler treats it as `return 0;`. So a program that finishes normally reports success even without an explicit return, while returning a non-zero code lets callers detect and react to failures.",
+    explanation:
+      "main() returns an int exit status: 0 (or EXIT_SUCCESS) means success, non-zero means failure. Omitting return in main implies return 0.",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 2830,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.exit_status.mc_success",
+    type: "multiple_choice",
+    title: "What return 0 means",
+    prompt: "What does `return 0;` at the end of `main()` communicate?",
+    explanation:
+      "Returning 0 from main reports successful completion to the operating system. A non-zero value signals that something went wrong.",
+    difficulty: "beginner",
+    estimated_minutes: 1,
+    order_index: 2840,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.error_kinds.lesson",
+    type: "lesson",
+    title: "Compile-time, link-time, and run-time errors",
+    prompt:
+      "Errors surface at three different stages. **Compile-time** errors are caught by the compiler while translating one source file — syntax mistakes, type errors, and undeclared names; the program never builds. **Link-time** errors happen after compiling, when the linker combines object files and can't resolve a symbol — typically a function that is declared and called but never defined, or defined twice. **Run-time** errors occur while the built program executes — crashes like dereferencing a null pointer or dividing by zero, and logic errors that produce wrong output. Knowing which stage failed tells you where to look: the compiler message, the linker message, or the program's behavior.",
+    explanation:
+      "Compile-time: the compiler rejects one file (syntax/type/undeclared). Link-time: the linker can't resolve/duplicate a symbol. Run-time: the built program misbehaves while running.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 2850,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.error_kinds.mc_classify",
+    type: "multiple_choice",
+    title: "Classify the error",
+    prompt: "A function is declared and called, the file compiles, but the function is never defined anywhere. When does this fail?",
+    explanation:
+      "Each file compiles fine because the declaration satisfies the compiler. The failure appears at link time, when the linker looks for the missing definition and reports an unresolved symbol.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 2860,
+    is_active: true
+  },
+  {
     id: "cpp.values_types.variables.lesson",
     type: "lesson",
     title: "Variables and fundamental types",
@@ -2285,6 +2360,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.program_basics.structure.mc_entry", skill_id: "cpp.program_basics.structure", is_primary: true },
   { learning_item_id: "cpp.program_basics.io.lesson", skill_id: "cpp.program_basics.io", is_primary: true },
   { learning_item_id: "cpp.program_basics.io.mc_read", skill_id: "cpp.program_basics.io", is_primary: true },
+  { learning_item_id: "cpp.program_basics.statements_comments.lesson", skill_id: "cpp.program_basics.statements_comments", is_primary: true },
+  { learning_item_id: "cpp.program_basics.statements_comments.mc_terminate", skill_id: "cpp.program_basics.statements_comments", is_primary: true },
+  { learning_item_id: "cpp.program_basics.exit_status.lesson", skill_id: "cpp.program_basics.exit_status", is_primary: true },
+  { learning_item_id: "cpp.program_basics.exit_status.mc_success", skill_id: "cpp.program_basics.exit_status", is_primary: true },
+  { learning_item_id: "cpp.program_basics.error_kinds.lesson", skill_id: "cpp.program_basics.error_kinds", is_primary: true },
+  { learning_item_id: "cpp.program_basics.error_kinds.mc_classify", skill_id: "cpp.program_basics.error_kinds", is_primary: true },
   { learning_item_id: "cpp.values_types.variables.lesson", skill_id: "cpp.values_types.variables", is_primary: true },
   { learning_item_id: "cpp.values_types.variables.mc_auto", skill_id: "cpp.values_types.variables", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.lesson", skill_id: "cpp.values_types.conversions", is_primary: true },
@@ -2487,6 +2568,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.program_basics.io.mc_read.b", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::cout << x;", is_correct: false, order_index: 20 },
   { id: "cpp.program_basics.io.mc_read.c", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::read(x);", is_correct: false, order_index: 30 },
   { id: "cpp.program_basics.io.mc_read.d", learning_item_id: "cpp.program_basics.io.mc_read", content: "std::cin << x;", is_correct: false, order_index: 40 },
+
+  { id: "cpp.program_basics.statements_comments.mc_terminate.a", learning_item_id: "cpp.program_basics.statements_comments.mc_terminate", content: "A semicolon ;", is_correct: true, order_index: 10 },
+  { id: "cpp.program_basics.statements_comments.mc_terminate.b", learning_item_id: "cpp.program_basics.statements_comments.mc_terminate", content: "A period .", is_correct: false, order_index: 20 },
+  { id: "cpp.program_basics.statements_comments.mc_terminate.c", learning_item_id: "cpp.program_basics.statements_comments.mc_terminate", content: "A newline", is_correct: false, order_index: 30 },
+  { id: "cpp.program_basics.statements_comments.mc_terminate.d", learning_item_id: "cpp.program_basics.statements_comments.mc_terminate", content: "A closing brace }", is_correct: false, order_index: 40 },
+
+  { id: "cpp.program_basics.exit_status.mc_success.a", learning_item_id: "cpp.program_basics.exit_status.mc_success", content: "The program finished successfully", is_correct: true, order_index: 10 },
+  { id: "cpp.program_basics.exit_status.mc_success.b", learning_item_id: "cpp.program_basics.exit_status.mc_success", content: "The program crashed", is_correct: false, order_index: 20 },
+  { id: "cpp.program_basics.exit_status.mc_success.c", learning_item_id: "cpp.program_basics.exit_status.mc_success", content: "main() printed zero", is_correct: false, order_index: 30 },
+  { id: "cpp.program_basics.exit_status.mc_success.d", learning_item_id: "cpp.program_basics.exit_status.mc_success", content: "The program will restart", is_correct: false, order_index: 40 },
+
+  { id: "cpp.program_basics.error_kinds.mc_classify.a", learning_item_id: "cpp.program_basics.error_kinds.mc_classify", content: "At link time (unresolved symbol)", is_correct: true, order_index: 10 },
+  { id: "cpp.program_basics.error_kinds.mc_classify.b", learning_item_id: "cpp.program_basics.error_kinds.mc_classify", content: "At compile time", is_correct: false, order_index: 20 },
+  { id: "cpp.program_basics.error_kinds.mc_classify.c", learning_item_id: "cpp.program_basics.error_kinds.mc_classify", content: "At run time", is_correct: false, order_index: 30 },
+  { id: "cpp.program_basics.error_kinds.mc_classify.d", learning_item_id: "cpp.program_basics.error_kinds.mc_classify", content: "It never fails", is_correct: false, order_index: 40 },
 
   { id: "cpp.values_types.variables.mc_auto.a", learning_item_id: "cpp.values_types.variables.mc_auto", content: "double", is_correct: true, order_index: 10 },
   { id: "cpp.values_types.variables.mc_auto.b", learning_item_id: "cpp.values_types.variables.mc_auto", content: "int", is_correct: false, order_index: 20 },

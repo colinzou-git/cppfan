@@ -67,6 +67,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.program_basics.statements_comments",
+    domain: "cpp",
+    module_id: "cpp.program_basics",
+    title: "Statements, comments, and naming",
+    description: "Terminate statements, write comments, and follow common naming conventions.",
+    learner_goal: "Write well-formed statements with clear comments and conventional names.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 3,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.exit_status",
+    domain: "cpp",
+    module_id: "cpp.program_basics",
+    title: "main() return value and exit status",
+    description: "Understand what main()'s return value means as the program's exit status.",
+    learner_goal: "Explain that returning 0 from main() signals success to the operating system.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 4,
+    is_active: true
+  },
+  {
+    id: "cpp.program_basics.error_kinds",
+    domain: "cpp",
+    module_id: "cpp.program_basics",
+    title: "Compile-time, link-time, and run-time errors",
+    description: "Tell apart errors caught by the compiler, the linker, and at run time.",
+    learner_goal: "Classify a failure as a compile-time, link-time, or run-time error.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 5,
+    is_active: true
+  },
+  {
     id: "cpp.values_types.variables",
     domain: "cpp",
     module_id: "cpp.values_types",
@@ -1126,6 +1162,9 @@ export const skillSeed: Skill[] = [
 
 export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.program_basics.io", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
+  { skill_id: "cpp.program_basics.statements_comments", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
+  { skill_id: "cpp.program_basics.exit_status", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
+  { skill_id: "cpp.program_basics.error_kinds", prerequisite_skill_id: "cpp.program_basics.statements_comments", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.variables", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.conversions", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.control_flow.conditionals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
