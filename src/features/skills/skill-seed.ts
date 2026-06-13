@@ -20,7 +20,8 @@ export const skillModules: SkillModule[] = [
   { id: "dsa.searching", title: "Searching", description: "Finding values efficiently.", order_index: 120 },
   { id: "dsa.sorting", title: "Sorting", description: "Ordering with comparators.", order_index: 130 },
   { id: "dsa.stacks", title: "Stacks and queues", description: "LIFO and FIFO problem patterns.", order_index: 140 },
-  { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 }
+  { id: "dsa.hashing", title: "Hashing", description: "Hash maps and sets for fast lookup.", order_index: 150 },
+  { id: "dsa.recursion", title: "Recursion", description: "Base cases and recursive structure.", order_index: 160 }
 ];
 
 export const skillSeed: Skill[] = [
@@ -361,6 +362,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.arrays.two_pointers",
+    domain: "dsa",
+    module_id: "dsa.arrays",
+    title: "Two pointers and sliding window",
+    description: "Use two indices to solve pair and window problems in linear time.",
+    learner_goal: "Replace an O(n^2) double loop with a linear two-pointer or sliding-window scan.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "code_reading"],
+    order_index: 1030,
+    is_active: true
+  },
+  {
     id: "dsa.searching.binary_search",
     domain: "dsa",
     module_id: "dsa.searching",
@@ -407,6 +420,18 @@ export const skillSeed: Skill[] = [
     item_types: ["lesson", "quiz", "code_reading"],
     order_index: 1410,
     is_active: true
+  },
+  {
+    id: "dsa.recursion.base_case",
+    domain: "dsa",
+    module_id: "dsa.recursion",
+    title: "Recursion and base cases",
+    description: "Write a recursive function with a base case and a step toward it.",
+    learner_goal: "Identify the base case and the recursive step, and avoid infinite recursion.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz", "bug_spotting"],
+    order_index: 1510,
+    is_active: true
   }
 ];
 
@@ -441,7 +466,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
   { skill_id: "dsa.searching.binary_search", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
   { skill_id: "dsa.stacks.basic_stack", prerequisite_skill_id: "cpp.stl.adapters", relationship_type: "recommended" },
-  { skill_id: "dsa.hashing.lookup", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" }
+  { skill_id: "dsa.hashing.lookup", prerequisite_skill_id: "cpp.stl.map", relationship_type: "recommended" },
+  { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
 
 export function getSeedSkillMapPreview(): SkillMapPreviewData {
