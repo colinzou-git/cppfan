@@ -176,7 +176,11 @@ describe("curriculum coverage", () => {
     "dsa.sorting.comparator",
     "dsa.stacks.basic_stack",
     "dsa.hashing.lookup",
-    "dsa.recursion.base_case"
+    "dsa.recursion.base_case",
+    // trees/heaps/DSU (#74)
+    "dsa.trees.traversal",
+    "dsa.trees.heap",
+    "dsa.trees.disjoint_set"
   ];
 
   it("has at least one learning item for every covered skill", () => {
