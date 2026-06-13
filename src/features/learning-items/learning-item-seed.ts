@@ -975,6 +975,56 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.big_o.lesson",
+    type: "lesson",
+    title: "Big-O notation",
+    prompt:
+      "Big-O describes how an algorithm's running time grows as the input size `n` grows, ignoring constant factors and lower-order terms. Common classes from fastest to slowest: O(1) constant, O(log n) (binary search), O(n) (one scan), O(n log n) (efficient sorts), O(n^2) (nested loops over the data). For large inputs, only the dominant term matters.",
+    explanation:
+      "Count how the number of basic operations scales with n, then keep the biggest term. Constants and small terms are dropped.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1710,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.big_o.mc_single_loop",
+    type: "multiple_choice",
+    title: "Complexity of one loop",
+    prompt: "A single loop that does constant work for each of `n` elements has what time complexity?",
+    explanation:
+      "One pass over n elements with O(1) work per element is O(n). A loop nested inside another over the same data would be O(n^2).",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1720,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.problem_solving.lesson",
+    type: "lesson",
+    title: "A systematic solving process",
+    prompt:
+      "A reliable approach to a new problem: (1) understand the problem and its constraints; (2) work a small example by hand; (3) write a correct brute-force solution; (4) look for a better approach (sorting, hashing, two pointers, dynamic programming); (5) test edge cases (empty input, one element, duplicates, the maximum size). Optimize only after you have something correct.",
+    explanation:
+      "Correct-then-fast: a working brute force plus good tests beats a clever solution you cannot verify.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 1730,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.problem_solving.mc_first_step",
+    type: "multiple_choice",
+    title: "Before optimizing",
+    prompt: "What is the best first step before trying to optimize a solution?",
+    explanation:
+      "Get a correct brute-force solution working and tested first. That gives a baseline and a reference to check any faster version against.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 1740,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -1262,6 +1312,10 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.lambdas", is_primary: true },
   { learning_item_id: "cpp.stl.lambdas.mc_capture", skill_id: "cpp.stl.lambdas", is_primary: true },
   { learning_item_id: "cpp.stl.lambdas.lesson", skill_id: "cpp.stl.algorithms", is_primary: false },
+  { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
+  { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
+  { learning_item_id: "dsa.complexity.problem_solving.lesson", skill_id: "dsa.complexity.problem_solving", is_primary: true },
+  { learning_item_id: "dsa.complexity.problem_solving.mc_first_step", skill_id: "dsa.complexity.problem_solving", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -1463,6 +1517,16 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.stl.lambdas.mc_capture.b", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The return type of the lambda", is_correct: false, order_index: 20 },
   { id: "cpp.stl.lambdas.mc_capture.c", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The parameters of the lambda", is_correct: false, order_index: 30 },
   { id: "cpp.stl.lambdas.mc_capture.d", learning_item_id: "cpp.stl.lambdas.mc_capture", content: "The name of the lambda", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.big_o.mc_single_loop.c", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n^2)", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.big_o.mc_single_loop.d", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(log n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.problem_solving.mc_first_step.a", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Write a correct brute-force solution and test it", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.problem_solving.mc_first_step.b", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Pick the fastest known algorithm immediately", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.problem_solving.mc_first_step.c", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Skip the examples and start coding", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.problem_solving.mc_first_step.d", learning_item_id: "dsa.complexity.problem_solving.mc_first_step", content: "Optimize memory usage first", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },

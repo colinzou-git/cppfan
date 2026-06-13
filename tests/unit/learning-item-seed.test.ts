@@ -152,7 +152,9 @@ describe("curriculum coverage", () => {
     "cpp.stl.iterators",
     "cpp.stl.adapters",
     "cpp.stl.lambdas",
-    // DSA (#48)
+    // DSA (#48, #68)
+    "dsa.complexity.big_o",
+    "dsa.complexity.problem_solving",
     "dsa.arrays.indexing",
     "dsa.arrays.traversal",
     "dsa.arrays.two_pointers",
