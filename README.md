@@ -194,6 +194,8 @@ supabase/migrations/20260613350000_add_foundation_basics_types_skills.sql
 supabase/migrations/20260613360000_seed_foundation_basics_types_items.sql
 supabase/migrations/20260613370000_add_foundation_control_functions_skills.sql
 supabase/migrations/20260613380000_seed_foundation_control_functions_items.sql
+supabase/migrations/20260613390000_add_references_skills.sql
+supabase/migrations/20260613400000_seed_references_items.sql
 ```
 
 The `profiles` migration adds:

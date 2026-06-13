@@ -220,6 +220,106 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.references.references.lesson",
+    type: "lesson",
+    title: "References as aliases",
+    prompt:
+      "A reference (`T&`) is another name for an existing object. It must be initialized when declared and cannot later be made to refer to a different object. Passing a parameter by reference lets a function read and modify the caller's variable without copying it: `void inc(int& n) { ++n; }` changes the argument in place.",
+    explanation:
+      "A reference is an alias, not a separate object. Because it cannot be null or reseated, it is often safer than a pointer when an object is guaranteed to exist.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 17,
+    is_active: true
+  },
+  {
+    id: "cpp.references.references.mc_init",
+    type: "multiple_choice",
+    title: "Declaring a reference",
+    prompt: "What is required when you declare a reference such as `int& r`?",
+    explanation:
+      "A reference must be bound to an existing object when it is declared (`int& r = x;`). It cannot be left unbound or reseated later.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 18,
+    is_active: true
+  },
+  {
+    id: "cpp.references.pointers.lesson",
+    type: "lesson",
+    title: "Pointers and nullptr",
+    prompt:
+      'A pointer (`T*`) stores the address of an object, or `nullptr` for "points to nothing". `&x` takes the address of `x`, and `*p` dereferences the pointer to reach the object. Unlike references, a pointer can be null and can be reassigned to point elsewhere. Dereferencing a `nullptr` (or a dangling pointer) is undefined behavior, so check before dereferencing.',
+    explanation:
+      "Use a pointer when \"no object\" is a valid state (nullptr) or when you need to repoint it. Always ensure it is non-null before dereferencing.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 19,
+    is_active: true
+  },
+  {
+    id: "cpp.references.pointers.mc_null",
+    type: "multiple_choice",
+    title: "Dereferencing nullptr",
+    prompt: "What happens if you dereference a `nullptr` with `*p`?",
+    explanation:
+      "Dereferencing a null pointer is undefined behavior — typically a crash. Guard with a null check before dereferencing.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 20,
+    is_active: true
+  },
+  {
+    id: "cpp.references.const_correctness.lesson",
+    type: "lesson",
+    title: "Const correctness",
+    prompt:
+      "`const` marks something that will not be modified. A `const T&` parameter lets a function read a value without copying it and promises not to change it. Marking a member function `const` (`int size() const;`) says it does not modify the object, so it can be called on const objects. Const-correctness documents intent and lets the compiler catch accidental mutation.",
+    explanation:
+      "Add const wherever you do not intend to modify: parameters, member functions, and local references. It is a compile-time safety net, not a runtime cost.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 21,
+    is_active: true
+  },
+  {
+    id: "cpp.references.const_correctness.mc_constref",
+    type: "multiple_choice",
+    title: "What a const reference parameter allows",
+    prompt: "What does a `const std::string& s` parameter allow a function to do?",
+    explanation:
+      "A const reference binds without copying and forbids modification, so the function can read `s` efficiently but cannot change the caller's string.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 22,
+    is_active: true
+  },
+  {
+    id: "cpp.references.parameter_passing.lesson",
+    type: "lesson",
+    title: "Choosing how to pass parameters",
+    prompt:
+      "Pass small, cheap-to-copy types (like `int` or `double`) by value. Pass large objects you only read by `const T&` to avoid an expensive copy. Pass by non-const `T&` when the function must modify the caller's object (an output parameter). Returning by value is fine — the compiler elides or moves the result.",
+    explanation:
+      "Default to const& for big read-only inputs, value for small inputs, and non-const reference only when you truly need to write back.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 23,
+    is_active: true
+  },
+  {
+    id: "cpp.references.parameter_passing.mc_large",
+    type: "multiple_choice",
+    title: "Passing a large read-only object",
+    prompt: "How should you pass a large `std::vector<int>` that a function only reads?",
+    explanation:
+      "By const reference (`const std::vector<int>&`): it avoids copying the whole vector and signals that the function will not modify it.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 24,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -1094,6 +1194,14 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.functions.basics.mc_scope", skill_id: "cpp.functions.basics", is_primary: true },
   { learning_item_id: "cpp.functions.decomposition.lesson", skill_id: "cpp.functions.decomposition", is_primary: true },
   { learning_item_id: "cpp.functions.decomposition.mc_why", skill_id: "cpp.functions.decomposition", is_primary: true },
+  { learning_item_id: "cpp.references.references.lesson", skill_id: "cpp.references.references", is_primary: true },
+  { learning_item_id: "cpp.references.references.mc_init", skill_id: "cpp.references.references", is_primary: true },
+  { learning_item_id: "cpp.references.pointers.lesson", skill_id: "cpp.references.pointers", is_primary: true },
+  { learning_item_id: "cpp.references.pointers.mc_null", skill_id: "cpp.references.pointers", is_primary: true },
+  { learning_item_id: "cpp.references.const_correctness.lesson", skill_id: "cpp.references.const_correctness", is_primary: true },
+  { learning_item_id: "cpp.references.const_correctness.mc_constref", skill_id: "cpp.references.const_correctness", is_primary: true },
+  { learning_item_id: "cpp.references.parameter_passing.lesson", skill_id: "cpp.references.parameter_passing", is_primary: true },
+  { learning_item_id: "cpp.references.parameter_passing.mc_large", skill_id: "cpp.references.parameter_passing", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -1215,6 +1323,26 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.functions.decomposition.mc_why.b", learning_item_id: "cpp.functions.decomposition.mc_why", content: "It always makes the program run faster", is_correct: false, order_index: 20 },
   { id: "cpp.functions.decomposition.mc_why.c", learning_item_id: "cpp.functions.decomposition.mc_why", content: "C++ requires functions under 10 lines", is_correct: false, order_index: 30 },
   { id: "cpp.functions.decomposition.mc_why.d", learning_item_id: "cpp.functions.decomposition.mc_why", content: "It uses more memory", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.references.mc_init.a", learning_item_id: "cpp.references.references.mc_init", content: "It must be initialized with an existing object", is_correct: true, order_index: 10 },
+  { id: "cpp.references.references.mc_init.b", learning_item_id: "cpp.references.references.mc_init", content: "It must be left null until assigned", is_correct: false, order_index: 20 },
+  { id: "cpp.references.references.mc_init.c", learning_item_id: "cpp.references.references.mc_init", content: "It must be created with new", is_correct: false, order_index: 30 },
+  { id: "cpp.references.references.mc_init.d", learning_item_id: "cpp.references.references.mc_init", content: "Nothing; references default to 0", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.pointers.mc_null.a", learning_item_id: "cpp.references.pointers.mc_null", content: "Undefined behavior (typically a crash)", is_correct: true, order_index: 10 },
+  { id: "cpp.references.pointers.mc_null.b", learning_item_id: "cpp.references.pointers.mc_null", content: "It safely returns 0", is_correct: false, order_index: 20 },
+  { id: "cpp.references.pointers.mc_null.c", learning_item_id: "cpp.references.pointers.mc_null", content: "It returns nullptr", is_correct: false, order_index: 30 },
+  { id: "cpp.references.pointers.mc_null.d", learning_item_id: "cpp.references.pointers.mc_null", content: "It is always a compile error", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.const_correctness.mc_constref.a", learning_item_id: "cpp.references.const_correctness.mc_constref", content: "Read s without copying, and not modify it", is_correct: true, order_index: 10 },
+  { id: "cpp.references.const_correctness.mc_constref.b", learning_item_id: "cpp.references.const_correctness.mc_constref", content: "Modify the caller's string in place", is_correct: false, order_index: 20 },
+  { id: "cpp.references.const_correctness.mc_constref.c", learning_item_id: "cpp.references.const_correctness.mc_constref", content: "Make a private copy of s", is_correct: false, order_index: 30 },
+  { id: "cpp.references.const_correctness.mc_constref.d", learning_item_id: "cpp.references.const_correctness.mc_constref", content: "Reseat s to another string", is_correct: false, order_index: 40 },
+
+  { id: "cpp.references.parameter_passing.mc_large.a", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By const reference (const std::vector<int>&)", is_correct: true, order_index: 10 },
+  { id: "cpp.references.parameter_passing.mc_large.b", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By value (std::vector<int>)", is_correct: false, order_index: 20 },
+  { id: "cpp.references.parameter_passing.mc_large.c", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By non-const reference (std::vector<int>&)", is_correct: false, order_index: 30 },
+  { id: "cpp.references.parameter_passing.mc_large.d", learning_item_id: "cpp.references.parameter_passing.mc_large", content: "By raw pointer to non-const", is_correct: false, order_index: 40 },
 
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },

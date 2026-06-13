@@ -116,6 +116,11 @@ describe("curriculum coverage", () => {
     "cpp.control_flow.loops",
     "cpp.functions.basics",
     "cpp.functions.decomposition",
+    // references/pointers/const (#67)
+    "cpp.references.references",
+    "cpp.references.pointers",
+    "cpp.references.const_correctness",
+    "cpp.references.parameter_passing",
     // structs/classes module
     "cpp.structs_classes.syntax",
     "cpp.structs_classes.public_private",
@@ -172,6 +177,7 @@ describe("curriculum coverage", () => {
         id.startsWith("cpp.values_types.") ||
         id.startsWith("cpp.control_flow.") ||
         id.startsWith("cpp.functions.") ||
+        id.startsWith("cpp.references.") ||
         id.startsWith("cpp.constructors.") ||
         id.startsWith("cpp.raii.") ||
         id.startsWith("cpp.smart_pointers.") ||
