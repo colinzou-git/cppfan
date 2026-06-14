@@ -2047,6 +2047,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.math.vectors_dot_cross",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Vectors: dot and cross products",
+    description: "Use the dot product for angle/projection and the 2D cross product for orientation.",
+    learner_goal: "Interpret the dot product (angle sign) and the 2D cross product (signed area, turn direction).",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2110,
+    is_active: true
+  },
+  {
+    id: "dsa.math.segment_intersection",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Segment intersection",
+    description: "Decide whether two segments cross using orientation (turn) tests.",
+    learner_goal: "Use orientation tests to detect proper segment crossing and collinear-overlap cases.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2120,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_precision",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Geometry precision",
+    description: "Avoid floating-point error with integer math, squared distances, and epsilon comparisons.",
+    learner_goal: "Prefer exact integer geometry; when using doubles, compare with an epsilon, not ==.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2130,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -2226,6 +2262,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.math.pascal_binomial", prerequisite_skill_id: "dsa.math.combinatorics", relationship_type: "recommended" },
   { skill_id: "dsa.math.inclusion_exclusion", prerequisite_skill_id: "dsa.math.combinatorics", relationship_type: "recommended" },
   { skill_id: "dsa.math.geometry_area", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
+  { skill_id: "dsa.math.vectors_dot_cross", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
+  { skill_id: "dsa.math.segment_intersection", prerequisite_skill_id: "dsa.math.vectors_dot_cross", relationship_type: "recommended" },
+  { skill_id: "dsa.math.geometry_precision", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
