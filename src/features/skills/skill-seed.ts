@@ -1855,6 +1855,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.z_function",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Z-function",
+    description: "Compute the Z-array of longest prefix matches and use it for pattern matching.",
+    learner_goal: "Read a Z-array and use the pattern+separator+text trick to find all matches.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1980,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome_substrings",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Palindromic substrings",
+    description: "Find and count palindromic substrings by expanding around centers.",
+    learner_goal: "Use expand-around-center to find the longest/all palindromic substrings in O(n^2).",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1990,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing_edge_cases",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Parsing edge cases",
+    description: "Handle empty fields, trailing delimiters, whitespace, and CRLF when tokenizing.",
+    learner_goal: "Parse delimited input robustly: preserve empty fields and strip CR/whitespace.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 2000,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation",
     domain: "dsa",
     module_id: "dsa.math",
@@ -2102,6 +2138,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.strings.prefix_function", prerequisite_skill_id: "dsa.strings.searching", relationship_type: "recommended" },
   { skill_id: "dsa.strings.trie", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.strings.hashing", prerequisite_skill_id: "dsa.strings.searching", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.z_function", prerequisite_skill_id: "dsa.strings.prefix_function", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.palindrome_substrings", prerequisite_skill_id: "dsa.strings.palindrome", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.parsing_edge_cases", prerequisite_skill_id: "dsa.strings.parsing", relationship_type: "recommended" },
   { skill_id: "dsa.math.bit_manipulation", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "dsa.math.number_theory", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.math.combinatorics", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
