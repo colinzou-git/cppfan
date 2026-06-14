@@ -3252,6 +3252,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.oop.slicing.lesson",
+    type: "lesson",
+    title: "Object slicing and upcasting",
+    prompt:
+      "When you copy a derived object into a base-class *value*, C++ keeps only the base part and discards everything the derived class added — this is object slicing. `Base b = derived;` (or passing `Base b` by value, or `std::vector<Base>`) slices: the derived overrides and extra members are gone, and virtual dispatch reverts to the base version. The fix is to handle polymorphic objects through references or pointers: `Base& r = derived;` or `Base* p = &derived;` keep the full object and dispatch virtually. Upcasting — treating a `Derived` as a `Base&`/`Base*` — is safe and implicit, because every Derived *is* a Base. So the rule is: pass and store polymorphic objects by reference or pointer (`Base&`, `Base*`, smart pointers), never by base value.",
+    explanation:
+      "Copying a derived object into a base value slices off the derived part and loses virtual dispatch. Use Base&/Base* (upcasting is safe) to keep the whole object and polymorphic behavior.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2490,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.slicing.mc_slice",
+    type: "multiple_choice",
+    title: "What object slicing does",
+    prompt: "You have `Derived d;` and write `Base b = d;`. What happens to the derived-specific parts of `d`?",
+    explanation:
+      "Assigning a derived object to a base *value* copies only the base sub-object — the derived members and overrides are sliced off, so b behaves as a plain Base. Use a Base& or Base* to preserve the full object.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2500,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.override_final.lesson",
+    type: "lesson",
+    title: "override and final",
+    prompt:
+      "Writing `override` on a derived function — `void draw() override;` — tells the compiler you intend to override a base virtual function. If the signature does not exactly match a base virtual (a typo, a wrong parameter type, a missing `const`), the compiler errors instead of silently creating a brand-new, unrelated function that never gets called. Without `override`, such mistakes compile and fail mysteriously at runtime, so mark every override. `final` does the opposite: `void draw() final;` stops any further class from overriding this function, and `class Widget final { ... };` stops any class from deriving from Widget. Use `final` to seal a hierarchy where further specialization would be wrong, and to let the compiler devirtualize calls.",
+    explanation:
+      "override makes the compiler verify the function really overrides a base virtual (catching signature typos); final seals a virtual function or class against further overriding/derivation.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 2510,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.override_final.mc_override",
+    type: "multiple_choice",
+    title: "What override catches",
+    prompt: "What does adding `override` to a derived class member function let the compiler do?",
+    explanation:
+      "override makes the compiler check that the function actually overrides a base virtual with a matching signature; if it does not (e.g. a typo or wrong const), it errors instead of silently creating a new function that is never called.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2520,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.polymorphic_ownership.lesson",
+    type: "lesson",
+    title: "Owning polymorphic objects",
+    prompt:
+      "To own a polymorphic object whose concrete type is chosen at runtime, store it in a `std::unique_ptr<Base>`: `std::unique_ptr<Shape> s = std::make_unique<Circle>(r);`. This keeps the full derived object on the heap, dispatches virtually through the base pointer, and frees it automatically — but only correctly if `Base` has a `virtual` destructor, otherwise `delete` through the base pointer skips the derived destructor and leaks. Use `std::vector<std::unique_ptr<Base>>` for heterogeneous collections, and `std::unique_ptr<Base>` as a factory return type. Code that merely *uses* a polymorphic object should not own it: take a non-owning `Base&` (or `Base*` if it can be null) parameter, e.g. `void render(const Shape& s)`. Reserve `shared_ptr<Base>` for genuinely shared ownership.",
+    explanation:
+      "Own polymorphic objects via unique_ptr<Base> (requires a virtual destructor) — good for factories and heterogeneous vectors. Functions that only use the object should take a non-owning Base&/Base*.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 2530,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.polymorphic_ownership.mc_unique",
+    type: "multiple_choice",
+    title: "Owning a runtime-chosen type",
+    prompt: "A factory returns an object whose concrete derived type is decided at runtime, and the caller should own it. What return type fits best?",
+    explanation:
+      "std::unique_ptr<Base> transfers sole ownership of the heap-allocated derived object, dispatches virtually, and frees it automatically (with a virtual destructor on Base). Returning Base by value would slice it.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2540,
+    is_active: true
+  },
+  {
     id: "cpp.concurrency.threads.lesson",
     type: "lesson",
     title: "Threads",
@@ -3828,6 +3903,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.oop.virtual_polymorphism.mc_destructor", skill_id: "cpp.oop.virtual_polymorphism", is_primary: true },
   { learning_item_id: "cpp.oop.abstract_interfaces.lesson", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
   { learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", skill_id: "cpp.oop.abstract_interfaces", is_primary: true },
+  { learning_item_id: "cpp.oop.slicing.lesson", skill_id: "cpp.oop.slicing", is_primary: true },
+  { learning_item_id: "cpp.oop.slicing.mc_slice", skill_id: "cpp.oop.slicing", is_primary: true },
+  { learning_item_id: "cpp.oop.override_final.lesson", skill_id: "cpp.oop.override_final", is_primary: true },
+  { learning_item_id: "cpp.oop.override_final.mc_override", skill_id: "cpp.oop.override_final", is_primary: true },
+  { learning_item_id: "cpp.oop.polymorphic_ownership.lesson", skill_id: "cpp.oop.polymorphic_ownership", is_primary: true },
+  { learning_item_id: "cpp.oop.polymorphic_ownership.mc_unique", skill_id: "cpp.oop.polymorphic_ownership", is_primary: true },
   { learning_item_id: "cpp.concurrency.threads.lesson", skill_id: "cpp.concurrency.threads", is_primary: true },
   { learning_item_id: "cpp.concurrency.threads.mc_join", skill_id: "cpp.concurrency.threads", is_primary: true },
   { learning_item_id: "cpp.concurrency.data_races.lesson", skill_id: "cpp.concurrency.data_races", is_primary: true },
@@ -4485,6 +4566,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.b", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It gives draw a default empty body", is_correct: false, order_index: 20 },
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.c", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It deletes the draw function", is_correct: false, order_index: 30 },
   { id: "cpp.oop.abstract_interfaces.mc_pure_virtual.d", learning_item_id: "cpp.oop.abstract_interfaces.mc_pure_virtual", content: "It makes draw a static function", is_correct: false, order_index: 40 },
+  { id: "cpp.oop.slicing.mc_slice.a", learning_item_id: "cpp.oop.slicing.mc_slice", content: "They are sliced off; b holds only the base part and uses base behavior", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.slicing.mc_slice.b", learning_item_id: "cpp.oop.slicing.mc_slice", content: "They are preserved, and b dispatches to the derived overrides", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.slicing.mc_slice.c", learning_item_id: "cpp.oop.slicing.mc_slice", content: "The assignment fails to compile", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.slicing.mc_slice.d", learning_item_id: "cpp.oop.slicing.mc_slice", content: "b becomes a reference to d", is_correct: false, order_index: 40 },
+  { id: "cpp.oop.override_final.mc_override.a", learning_item_id: "cpp.oop.override_final.mc_override", content: "Verify the function actually overrides a base virtual, erroring on a signature mismatch", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.override_final.mc_override.b", learning_item_id: "cpp.oop.override_final.mc_override", content: "Make the function virtual even if the base function is not", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.override_final.mc_override.c", learning_item_id: "cpp.oop.override_final.mc_override", content: "Prevent any further class from overriding it", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.override_final.mc_override.d", learning_item_id: "cpp.oop.override_final.mc_override", content: "Generate a default implementation automatically", is_correct: false, order_index: 40 },
+  { id: "cpp.oop.polymorphic_ownership.mc_unique.a", learning_item_id: "cpp.oop.polymorphic_ownership.mc_unique", content: "std::unique_ptr<Base>", is_correct: true, order_index: 10 },
+  { id: "cpp.oop.polymorphic_ownership.mc_unique.b", learning_item_id: "cpp.oop.polymorphic_ownership.mc_unique", content: "Base (returned by value)", is_correct: false, order_index: 20 },
+  { id: "cpp.oop.polymorphic_ownership.mc_unique.c", learning_item_id: "cpp.oop.polymorphic_ownership.mc_unique", content: "Base& (a reference)", is_correct: false, order_index: 30 },
+  { id: "cpp.oop.polymorphic_ownership.mc_unique.d", learning_item_id: "cpp.oop.polymorphic_ownership.mc_unique", content: "A raw Base* the caller must remember to delete", is_correct: false, order_index: 40 },
 
   { id: "cpp.concurrency.threads.mc_join.a", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The program calls std::terminate and aborts", is_correct: true, order_index: 10 },
   { id: "cpp.concurrency.threads.mc_join.b", learning_item_id: "cpp.concurrency.threads.mc_join", content: "The thread is silently joined for you", is_correct: false, order_index: 20 },
