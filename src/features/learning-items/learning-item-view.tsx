@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
 import { RevealExplanation } from "./reveal-explanation";
+import { AddToReviewButton } from "@/features/review/add-to-review-button";
+import { isReviewEligibleType } from "./learning-item-seed";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
@@ -58,6 +60,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         {item.explanation && !isLesson && !hasChoices ? (
           <RevealExplanation explanation={item.explanation} />
         ) : null}
+
+        {isReviewEligibleType(item.type) ? <AddToReviewButton itemId={item.id} /> : null}
       </CardContent>
     </Card>
   );

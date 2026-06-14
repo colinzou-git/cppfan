@@ -4,9 +4,36 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyRating, type ReviewRating } from "@/lib/fsrs/scheduler";
 import { getReviewCardForUser } from "./review-queries";
+import { enrollReviewForUser } from "./enroll-review";
+import { isReviewEligibleItem } from "@/features/learning-items/learning-item-seed";
 import { recordSkillEvent } from "@/features/events/event-service";
 
 export type RateReviewResult = { status: "error" } | { status: "ok"; state: string; dueAt: string };
+
+export type AddToReviewResult = { status: "ok" } | { status: "ineligible" } | { status: "error" };
+
+/**
+ * Deliberate learner enrollment (#142, rule C): add a single eligible item to
+ * the learner's review queue on demand. Idempotent — adding an already-enrolled
+ * item succeeds without creating a duplicate.
+ */
+export async function addToReview(input: { itemId: string }): Promise<AddToReviewResult> {
+  const itemId = typeof input?.itemId === "string" ? input.itemId : "";
+  if (!itemId) {
+    return { status: "error" };
+  }
+  if (!isReviewEligibleItem(itemId)) {
+    return { status: "ineligible" };
+  }
+
+  const enrolled = await enrollReviewForUser(itemId);
+  if (!enrolled) {
+    return { status: "error" };
+  }
+
+  revalidatePath("/review");
+  return { status: "ok" };
+}
 
 const VALID_RATINGS: ReviewRating[] = ["again", "hard", "good", "easy"];
 

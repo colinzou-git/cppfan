@@ -4,6 +4,7 @@ import { gradeChoiceAttempt } from "./grading";
 import { getGradingChoices, gradeViaRpc, recordAttempt } from "./attempt-service";
 import { getPrimarySkillId } from "./learning-item-seed";
 import { recordSkillEvents } from "@/features/events/event-service";
+import { enrollReviewForUser } from "@/features/review/enroll-review";
 
 export type SubmitAnswerResult =
   | { status: "invalid" }
@@ -45,6 +46,12 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
   }
 
   const persisted = await recordAttempt({ itemId, choiceId });
+
+  // #142: a graded practice attempt is real learning evidence, so enroll the
+  // item for spaced review here (the evidence boundary) rather than when the
+  // learner visits /review. Idempotent and best-effort (no-op when signed out or
+  // for non-eligible items).
+  await enrollReviewForUser(itemId);
 
   // Append skill-mastery evidence (best effort; no-op when signed out).
   const skillId = getPrimarySkillId(itemId);
