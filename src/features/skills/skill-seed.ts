@@ -619,6 +619,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.oop.slicing",
+    domain: "cpp",
+    module_id: "cpp.oop",
+    title: "Object slicing and upcasting",
+    description: "Avoid slicing by handling polymorphic objects through references or pointers.",
+    learner_goal: "Recognize that copying a derived object into a base value slices it; use base&/base*.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 264,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.override_final",
+    domain: "cpp",
+    module_id: "cpp.oop",
+    title: "override and final",
+    description: "Use override to catch signature mistakes and final to stop further overriding.",
+    learner_goal: "Mark overrides with override and use final to seal a class or virtual function.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 265,
+    is_active: true
+  },
+  {
+    id: "cpp.oop.polymorphic_ownership",
+    domain: "cpp",
+    module_id: "cpp.oop",
+    title: "Owning polymorphic objects",
+    description: "Own polymorphic objects with unique_ptr<Base> and observe via base reference/pointer.",
+    learner_goal: "Store polymorphic objects in unique_ptr<Base> (with a virtual destructor); pass non-owning base refs.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 266,
+    is_active: true
+  },
+  {
     id: "cpp.raii.resource_lifetime",
     domain: "cpp",
     module_id: "cpp.raii",
@@ -1784,6 +1820,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.oop.inheritance", prerequisite_skill_id: "cpp.structs_classes.public_private", relationship_type: "recommended" },
   { skill_id: "cpp.oop.virtual_polymorphism", prerequisite_skill_id: "cpp.oop.inheritance", relationship_type: "recommended" },
   { skill_id: "cpp.oop.abstract_interfaces", prerequisite_skill_id: "cpp.oop.virtual_polymorphism", relationship_type: "recommended" },
+  { skill_id: "cpp.oop.slicing", prerequisite_skill_id: "cpp.oop.inheritance", relationship_type: "recommended" },
+  { skill_id: "cpp.oop.override_final", prerequisite_skill_id: "cpp.oop.virtual_polymorphism", relationship_type: "recommended" },
+  { skill_id: "cpp.oop.polymorphic_ownership", prerequisite_skill_id: "cpp.smart_pointers.unique_ptr", relationship_type: "recommended" },
   { skill_id: "cpp.raii.resource_lifetime", prerequisite_skill_id: "cpp.constructors.destructor_intro", relationship_type: "recommended" },
   { skill_id: "cpp.raii.destructor_cleanup", prerequisite_skill_id: "cpp.raii.resource_lifetime", relationship_type: "recommended" },
   { skill_id: "cpp.raii.exception_safety_intro", prerequisite_skill_id: "cpp.raii.destructor_cleanup", relationship_type: "recommended" },
