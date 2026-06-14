@@ -12,7 +12,8 @@ const TYPE_LABELS: Record<LearningItemType, string> = {
   concept_check: "Concept check",
   multiple_choice: "Multiple choice",
   code_reading: "Code reading",
-  bug_spotting: "Bug spotting"
+  bug_spotting: "Bug spotting",
+  parsons: "Parsons puzzle"
 };
 
 /*
