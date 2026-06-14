@@ -3677,6 +3677,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.stream_validation.lesson",
+    type: "lesson",
+    title: "Robust stream input",
+    prompt:
+      "Reading input with `>>` can fail, and ignoring that is a common source of bugs. When `std::cin >> n` cannot parse an int (the user typed `abc`), the stream enters a failed state: `n` is left unchanged, the bad characters stay in the buffer, and every later extraction silently fails too. So always test the stream — `if (std::cin >> n) { ... }` or check `std::cin.fail()` — before trusting the value. To recover, call `std::cin.clear()` to reset the error flags, then `std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n')` to discard the rest of the bad line, and prompt again. Mixing `>>` with `std::getline` needs the same care: `>>` leaves the trailing newline in the buffer, so a following `getline` reads an empty line unless you `ignore()` that newline first. The rule: extraction is not validation — check the stream state, recover deliberately, and loop until the input is valid.",
+    explanation:
+      "Extraction can fail and leave the stream in an error state; check the stream (`if (cin >> n)`) before trusting input. Recover with clear() then ignore() to discard the bad line. After >>, ignore the leftover newline before getline.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3990,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.stream_validation.mc_recover",
+    type: "multiple_choice",
+    title: "Recovering from bad input",
+    prompt: "`std::cin >> n` failed because the user typed letters. What must you do before reading again?",
+    explanation:
+      "After a failed extraction you must cin.clear() to reset the error flags and cin.ignore(...) to discard the leftover bad characters; otherwise every subsequent read fails too.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4000,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.tuples.lesson",
+    type: "lesson",
+    title: "Pairs, tuples, and structured bindings",
+    prompt:
+      "`std::pair<A, B>` groups two related values and `std::tuple<A, B, C, ...>` groups any fixed number — handy for returning several results from one function without defining a struct. You build them with `std::make_pair`/`std::make_tuple` (or brace init) and historically read them with `.first`/`.second` or `std::get<0>(t)`, which is clumsy. Structured bindings (C++17) fix that: `auto [quotient, remainder] = divmod(a, b);` unpacks the returned pair/tuple into named variables, and the same syntax destructures structs and elements when iterating a map (`for (auto& [key, value] : m)`). Prefer a small named struct when the group is a meaningful entity you pass around a lot (its fields document themselves); reach for pair/tuple for quick, local, ad-hoc grouping like multiple return values.",
+    explanation:
+      "std::pair/std::tuple group a fixed number of values (e.g. multiple return values); structured bindings (auto [a, b] = ...) unpack them into named variables. Prefer a named struct when the group is a meaningful, reused entity.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4010,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.tuples.mc_bind",
+    type: "multiple_choice",
+    title: "Unpacking a returned pair",
+    prompt: "A function returns `std::pair<int, int>`. What is the idiomatic C++17 way to read both values into named variables?",
+    explanation:
+      "Structured bindings — `auto [lo, hi] = f();` — unpack the pair into named variables in one line, far clearer than calling .first/.second or std::get separately.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4020,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.enums.lesson",
+    type: "lesson",
+    title: "Scoped enums for finite states",
+    prompt:
+      "When a value can only be one of a small, fixed set of named states — `Pending`, `Active`, `Closed` — model it with a scoped enum: `enum class Status { Pending, Active, Closed };`. Scoped enums (`enum class`) are safer than old plain enums: their names are scoped (`Status::Active`, no clashes), they do not implicitly convert to int, and you can give them an explicit underlying type. The compiler can warn when a `switch` over the enum misses a case, so adding a new state surfaces every place that must handle it. Choose the right tool by what varies: an `enum class` when the alternatives are just *labels* with no data; a `std::variant` when each alternative carries a *different type of data*; and runtime polymorphism (virtual functions) when the set of alternatives is *open* and extended by new classes. Enum for a closed set of plain states, variant for a closed set of typed payloads, polymorphism for an open set.",
+    explanation:
+      "Use enum class for a closed set of named states (scoped, no implicit int conversion, switch-exhaustiveness warnings). Pick enum for plain labels, variant for typed payloads, polymorphism for an open/extensible set.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4030,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.enums.mc_choose",
+    type: "multiple_choice",
+    title: "enum class vs variant",
+    prompt: "You have a closed set of states that are just names with no associated data of their own. Which type models this best?",
+    explanation:
+      "An enum class fits a closed set of plain named states: scoped, type-safe, and switch-exhaustiveness-checkable. std::variant is for alternatives that each carry a different data type; polymorphism is for an open, extensible set.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4040,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation.lesson",
     type: "lesson",
     title: "Bit manipulation",
@@ -4087,6 +4162,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.random.mc_bias", skill_id: "cpp.utilities.random", is_primary: true },
   { learning_item_id: "cpp.utilities.variant.lesson", skill_id: "cpp.utilities.variant", is_primary: true },
   { learning_item_id: "cpp.utilities.variant.mc_optional", skill_id: "cpp.utilities.variant", is_primary: true },
+  { learning_item_id: "cpp.utilities.stream_validation.lesson", skill_id: "cpp.utilities.stream_validation", is_primary: true },
+  { learning_item_id: "cpp.utilities.stream_validation.mc_recover", skill_id: "cpp.utilities.stream_validation", is_primary: true },
+  { learning_item_id: "cpp.utilities.tuples.lesson", skill_id: "cpp.utilities.tuples", is_primary: true },
+  { learning_item_id: "cpp.utilities.tuples.mc_bind", skill_id: "cpp.utilities.tuples", is_primary: true },
+  { learning_item_id: "cpp.utilities.enums.lesson", skill_id: "cpp.utilities.enums", is_primary: true },
+  { learning_item_id: "cpp.utilities.enums.mc_choose", skill_id: "cpp.utilities.enums", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
@@ -4810,6 +4891,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.utilities.variant.mc_optional.b", learning_item_id: "cpp.utilities.variant.mc_optional", content: "A list of many ints", is_correct: false, order_index: 20 },
   { id: "cpp.utilities.variant.mc_optional.c", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int shared safely between threads", is_correct: false, order_index: 30 },
   { id: "cpp.utilities.variant.mc_optional.d", learning_item_id: "cpp.utilities.variant.mc_optional", content: "An int guaranteed to be prime", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.stream_validation.mc_recover.a", learning_item_id: "cpp.utilities.stream_validation.mc_recover", content: "Call cin.clear() to reset error flags, then cin.ignore(...) to discard the bad input", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.stream_validation.mc_recover.b", learning_item_id: "cpp.utilities.stream_validation.mc_recover", content: "Nothing; the next >> automatically retries cleanly", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.stream_validation.mc_recover.c", learning_item_id: "cpp.utilities.stream_validation.mc_recover", content: "Re-declare the variable n", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.stream_validation.mc_recover.d", learning_item_id: "cpp.utilities.stream_validation.mc_recover", content: "Close and reopen std::cin", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.tuples.mc_bind.a", learning_item_id: "cpp.utilities.tuples.mc_bind", content: "auto [lo, hi] = f(); (structured bindings)", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.tuples.mc_bind.b", learning_item_id: "cpp.utilities.tuples.mc_bind", content: "Read p.first and p.second on separate lines", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.tuples.mc_bind.c", learning_item_id: "cpp.utilities.tuples.mc_bind", content: "Cast the pair to an array and index it", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.tuples.mc_bind.d", learning_item_id: "cpp.utilities.tuples.mc_bind", content: "Call std::get on the pair without a template index", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.enums.mc_choose.a", learning_item_id: "cpp.utilities.enums.mc_choose", content: "enum class", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.enums.mc_choose.b", learning_item_id: "cpp.utilities.enums.mc_choose", content: "std::variant, one alternative per state", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.enums.mc_choose.c", learning_item_id: "cpp.utilities.enums.mc_choose", content: "A base class with a virtual function per state", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.enums.mc_choose.d", learning_item_id: "cpp.utilities.enums.mc_choose", content: "A plain int with documented magic values", is_correct: false, order_index: 40 },
 
   { id: "dsa.math.bit_manipulation.mc_test_bit.a", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "(x >> i) & 1", is_correct: true, order_index: 10 },
   { id: "dsa.math.bit_manipulation.mc_test_bit.b", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x % i", is_correct: false, order_index: 20 },

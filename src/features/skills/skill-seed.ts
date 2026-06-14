@@ -1243,6 +1243,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.stream_validation",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Robust stream input",
+    description: "Check stream state and recover from invalid input instead of trusting extraction.",
+    learner_goal: "Detect a failed extraction, then clear() and ignore() to recover and revalidate input.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 764,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.tuples",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Pairs, tuples, and structured bindings",
+    description: "Group a few related values with std::pair/std::tuple and unpack them by name.",
+    learner_goal: "Return a std::pair/std::tuple and destructure it with structured bindings.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 765,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.enums",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Scoped enums for finite states",
+    description: "Model a fixed set of states with enum class and know when to reach for variant instead.",
+    learner_goal: "Use enum class for a closed set of named states and pick enum vs variant appropriately.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 766,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o",
     domain: "dsa",
     module_id: "dsa.complexity",
@@ -1944,6 +1980,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.utilities.chrono", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.random", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.variant", prerequisite_skill_id: "cpp.templates.class_templates", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.stream_validation", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.tuples", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.enums", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
