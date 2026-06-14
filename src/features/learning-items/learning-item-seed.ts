@@ -5784,6 +5784,17 @@ export function getParsonsBlocksForItem(itemId: string): ParsonsBlock[] {
 }
 
 /**
+ * Learner-facing Parsons blocks for an item: answer-key-free and presented in a
+ * stable, non-solution order (sorted by content) so the learner must do the
+ * ordering. Includes distractors — the learner has to leave them out.
+ */
+export function getPublicParsonsBlocksForItem(itemId: string): PublicParsonsBlock[] {
+  return getParsonsBlocksForItem(itemId)
+    .map(toPublicParsonsBlock)
+    .sort((a, b) => a.content.localeCompare(b.content));
+}
+
+/**
  * The correct solution: non-distractor block ids in solution order. Server-side
  * only (used by the seed grading fallback); never sent to the learner.
  */

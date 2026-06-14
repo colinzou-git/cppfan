@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
 import { RevealExplanation } from "./reveal-explanation";
+import { ParsonsExercise } from "./parsons-exercise";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
-import { isReviewEligibleType } from "./learning-item-seed";
+import { getPublicParsonsBlocksForItem, isReviewEligibleType } from "./learning-item-seed";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
@@ -27,6 +28,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   // types the explanation often reveals the answer, so it is gated until after a
   // submission (in AnswerForm) or an explicit reveal (RevealExplanation) — #145.
   const isLesson = item.type === "lesson";
+  const isParsons = item.type === "parsons";
+  const parsonsBlocks = isParsons ? getPublicParsonsBlocksForItem(item.id) : [];
 
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
@@ -54,6 +57,10 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
           <div data-testid="learning-item-choices">
             <AnswerForm itemId={item.id} choices={choices} explanation={item.explanation ?? null} />
           </div>
+        ) : null}
+
+        {isParsons && parsonsBlocks.length > 0 ? (
+          <ParsonsExercise itemId={item.id} blocks={parsonsBlocks} />
         ) : null}
 
         {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
