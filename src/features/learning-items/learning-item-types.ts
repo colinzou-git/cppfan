@@ -3,7 +3,8 @@ export type LearningItemType =
   | "concept_check"
   | "multiple_choice"
   | "code_reading"
-  | "bug_spotting";
+  | "bug_spotting"
+  | "parsons";
 
 export type LearningItemDifficulty = "beginner" | "intermediate" | "advanced";
 
@@ -43,6 +44,24 @@ export type LearningItemChoice = {
 
 /** Choice as shown to the learner — never carries the answer key. */
 export type PublicLearningItemChoice = Omit<LearningItemChoice, "is_correct">;
+
+/**
+ * One draggable line of a Parsons problem. `correct_order` (the solution
+ * position) and `is_distractor` are answer-bearing: present in seed/server data
+ * for grading but never sent to the learner before submission (#123).
+ */
+export type ParsonsBlock = {
+  id: string;
+  learning_item_id: string;
+  content: string;
+  /** 1-based position in the correct solution; 0 for distractors. */
+  correct_order: number;
+  /** A line that does not belong in the solution. */
+  is_distractor: boolean;
+};
+
+/** Parsons block as shown to the learner — no solution position, no distractor flag. */
+export type PublicParsonsBlock = Pick<ParsonsBlock, "id" | "learning_item_id" | "content">;
 
 export type LearningItemWithDetails = {
   item: LearningItem;

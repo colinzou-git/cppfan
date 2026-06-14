@@ -121,3 +121,58 @@ begin
 
   raise notice 'skill-events lockdown smoke OK (no direct client INSERT)';
 end $$;
+
+-- 7) #123: Parsons grading runs server-side and the answer key is hidden.
+do $$
+declare
+  r record;
+begin
+  -- Correct order grades true.
+  select * into r from public.grade_parsons_attempt(
+    'cpp.control_flow.loops.parsons_sum',
+    array[
+      'cpp.control_flow.loops.parsons_sum.b1',
+      'cpp.control_flow.loops.parsons_sum.b2',
+      'cpp.control_flow.loops.parsons_sum.b3',
+      'cpp.control_flow.loops.parsons_sum.b4',
+      'cpp.control_flow.loops.parsons_sum.b5'
+    ]
+  );
+  if r.is_correct is distinct from true or r.total is distinct from 5 or r.correct_count is distinct from 5 then
+    raise exception 'parsons grade smoke failed (correct order): %', r;
+  end if;
+
+  -- A wrong order grades false.
+  select * into r from public.grade_parsons_attempt(
+    'cpp.control_flow.loops.parsons_sum',
+    array[
+      'cpp.control_flow.loops.parsons_sum.b2',
+      'cpp.control_flow.loops.parsons_sum.b1',
+      'cpp.control_flow.loops.parsons_sum.b3',
+      'cpp.control_flow.loops.parsons_sum.b4',
+      'cpp.control_flow.loops.parsons_sum.b5'
+    ]
+  );
+  if r.is_correct is distinct from false then
+    raise exception 'parsons grade smoke failed (wrong order graded correct): %', r;
+  end if;
+
+  raise notice 'parsons grading smoke OK';
+end $$;
+
+do $$
+begin
+  -- The answer key columns must not be readable by anon/authenticated.
+  if exists (
+    select 1
+      from information_schema.column_privileges
+      where grantee in ('anon', 'authenticated')
+        and table_schema = 'public'
+        and table_name = 'learning_item_parsons_blocks'
+        and column_name in ('correct_order', 'is_distractor')
+  ) then
+    raise exception 'anon/authenticated must not read parsons answer-key columns (#123)';
+  end if;
+
+  raise notice 'parsons answer-key lockdown smoke OK';
+end $$;

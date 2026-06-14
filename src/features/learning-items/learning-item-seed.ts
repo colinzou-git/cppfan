@@ -3,7 +3,9 @@ import type {
   LearningItemChoice,
   LearningItemSkill,
   LearningItemWithDetails,
-  PublicLearningItemChoice
+  ParsonsBlock,
+  PublicLearningItemChoice,
+  PublicParsonsBlock
 } from "./learning-item-types";
 
 /*
@@ -4450,6 +4452,19 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 4400,
     is_active: true
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum",
+    type: "parsons",
+    title: "Arrange a loop that sums 1..n",
+    prompt:
+      "Drag the lines into the correct order to build a function that returns the sum 1 + 2 + ... + n with a for loop. One line does not belong — leave it out.",
+    explanation:
+      "Initialize an accumulator before the loop, iterate i from 1 through n adding i each time, then return the accumulator. Subtracting i would compute the wrong total, so that line is a distractor.",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 4410,
+    is_active: true
   }
 ];
 
@@ -4824,7 +4839,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.segment_intersection.mc_test", skill_id: "dsa.math.segment_intersection", is_primary: true },
   { learning_item_id: "dsa.math.geometry_precision.lesson", skill_id: "dsa.math.geometry_precision", is_primary: true },
   { learning_item_id: "dsa.math.geometry_precision.mc_compare", skill_id: "dsa.math.geometry_precision", is_primary: true },
-  { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
+  { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false },
+  { learning_item_id: "cpp.control_flow.loops.parsons_sum", skill_id: "cpp.control_flow.loops", is_primary: true }
 ];
 
 export const learningItemChoices: LearningItemChoice[] = [
@@ -5705,6 +5721,77 @@ export function getChoicesForItem(itemId: string): LearningItemChoice[] {
   return learningItemChoices
     .filter((choice) => choice.learning_item_id === itemId)
     .sort((a, b) => a.order_index - b.order_index);
+}
+
+/**
+ * Parsons block bank (answer-bearing). Mirrors the SQL seed and is the server-
+ * side fallback for grading when the database is unconfigured/unmigrated. Never
+ * expose correct_order / is_distractor to the learner — use the public accessor.
+ */
+export const parsonsBlocks: ParsonsBlock[] = [
+  {
+    id: "cpp.control_flow.loops.parsons_sum.b1",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "int sum = 0;",
+    correct_order: 1,
+    is_distractor: false
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum.b2",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "for (int i = 1; i <= n; ++i) {",
+    correct_order: 2,
+    is_distractor: false
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum.b3",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "  sum += i;",
+    correct_order: 3,
+    is_distractor: false
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum.b4",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "}",
+    correct_order: 4,
+    is_distractor: false
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum.b5",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "return sum;",
+    correct_order: 5,
+    is_distractor: false
+  },
+  {
+    id: "cpp.control_flow.loops.parsons_sum.d1",
+    learning_item_id: "cpp.control_flow.loops.parsons_sum",
+    content: "  sum -= i;",
+    correct_order: 0,
+    is_distractor: true
+  }
+];
+
+/** Strip answer-bearing fields: the learner only ever sees id + content. */
+export function toPublicParsonsBlock(block: ParsonsBlock): PublicParsonsBlock {
+  return { id: block.id, learning_item_id: block.learning_item_id, content: block.content };
+}
+
+/** Full blocks (with answer key) for an item — server-side grading fallback only. */
+export function getParsonsBlocksForItem(itemId: string): ParsonsBlock[] {
+  return parsonsBlocks.filter((block) => block.learning_item_id === itemId);
+}
+
+/**
+ * The correct solution: non-distractor block ids in solution order. Server-side
+ * only (used by the seed grading fallback); never sent to the learner.
+ */
+export function getParsonsSolution(itemId: string): string[] {
+  return getParsonsBlocksForItem(itemId)
+    .filter((block) => !block.is_distractor)
+    .sort((a, b) => a.correct_order - b.correct_order)
+    .map((block) => block.id);
 }
 
 export function getLearningItemById(itemId: string): LearningItemWithDetails | null {

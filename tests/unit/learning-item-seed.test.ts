@@ -7,7 +7,14 @@ import {
 } from "@/features/learning-items/learning-item-seed";
 import { skillSeed } from "@/features/skills/skill-seed";
 
-const VALID_TYPES = new Set(["lesson", "concept_check", "multiple_choice", "code_reading", "bug_spotting"]);
+const VALID_TYPES = new Set([
+  "lesson",
+  "concept_check",
+  "multiple_choice",
+  "code_reading",
+  "bug_spotting",
+  "parsons"
+]);
 
 describe("learning item seed integrity", () => {
   it("has unique, stable item ids", () => {
