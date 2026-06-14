@@ -1351,6 +1351,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.chrono_depth",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Clocks, durations, and time points",
+    description: "Measure elapsed time with the right clock and convert durations explicitly.",
+    learner_goal: "Time code with steady_clock and convert durations with duration_cast.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 770,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.random_quality",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Quality random numbers",
+    description: "Separate engine from distribution and avoid rand()%n modulo bias.",
+    learner_goal: "Seed an engine once and draw from a distribution instead of using rand()%n.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 771,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.getline_input",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Whole-line input with getline",
+    description: "Read complete lines with std::getline and mix it safely with >> extraction.",
+    learner_goal: "Read full lines with std::getline and clear the leftover newline after >>.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 772,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o",
     domain: "dsa",
     module_id: "dsa.complexity",
@@ -2205,6 +2241,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.utilities.filesystem", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.binary_io", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.variant_visit", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.chrono_depth", prerequisite_skill_id: "cpp.utilities.chrono", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.random_quality", prerequisite_skill_id: "cpp.utilities.random", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.getline_input", prerequisite_skill_id: "cpp.utilities.stream_validation", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
