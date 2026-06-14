@@ -189,3 +189,31 @@ export function getCapstoneProject(id: string): CapstoneProject | null {
 export function getCapstoneMilestones(): CapstoneMilestone[] {
   return capstoneProjects.flatMap((project) => project.milestones);
 }
+
+/** Look up a single milestone by id, or null. */
+export function getCapstoneMilestone(milestoneId: string): CapstoneMilestone | null {
+  return getCapstoneMilestones().find((milestone) => milestone.id === milestoneId) ?? null;
+}
+
+/** The project id that owns a milestone, or null for an unknown milestone. */
+export function getCapstoneProjectIdForMilestone(milestoneId: string): string | null {
+  return capstoneProjects.find((project) => project.milestones.some((m) => m.id === milestoneId))?.id ?? null;
+}
+
+/**
+ * Practiced-skill evidence from completed milestones: the distinct union of the
+ * practicedSkillIds of the given completed milestones (#130). This is bounded
+ * transfer evidence only — it never declares mastery and is separate from FSRS.
+ */
+export function practicedSkillsForMilestones(completedMilestoneIds: string[]): string[] {
+  const wanted = new Set(completedMilestoneIds);
+  const skills = new Set<string>();
+  for (const milestone of getCapstoneMilestones()) {
+    if (wanted.has(milestone.id)) {
+      for (const skillId of milestone.practicedSkillIds) {
+        skills.add(skillId);
+      }
+    }
+  }
+  return [...skills];
+}
