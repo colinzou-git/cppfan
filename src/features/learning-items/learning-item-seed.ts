@@ -4150,6 +4150,81 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 4100,
     is_active: true
+  },
+  {
+    id: "dsa.math.pascal_binomial.lesson",
+    type: "lesson",
+    title: "Binomial coefficients and Pascal's triangle",
+    prompt:
+      "The binomial coefficient C(n, k) (\"n choose k\") counts how many ways you can choose k items from n without regard to order. Two ways to compute it. Pascal's recurrence builds a table: C(n, k) = C(n-1, k-1) + C(n-1, k), with base cases C(n, 0) = C(n, n) = 1 — each entry is the sum of the two above it, which is Pascal's triangle. Filling an n-by-k table is O(n*k) time and avoids any division or overflow of intermediate factorials, so it is ideal when you need many coefficients or are working modulo a prime. The direct formula C(n, k) = n! / (k! * (n-k)!) is O(n) with precomputed factorials, but n! overflows fast, so under a modulus you multiply by modular inverses of the factorials rather than dividing. Useful identities: C(n, k) = C(n, n-k) (symmetry), the row of C(n, *) sums to 2^n, and C(n, 1) = n. Choose Pascal's triangle for small n or many queries, factorials-with-inverses for large n under a modulus.",
+    explanation:
+      "C(n,k) counts unordered choices. Pascal's recurrence C(n,k)=C(n-1,k-1)+C(n-1,k) fills a table in O(n*k) with no division/overflow; the factorial formula n!/(k!(n-k)!) is O(n) but needs modular inverses under a modulus. Use symmetry C(n,k)=C(n,n-k).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4290,
+    is_active: true
+  },
+  {
+    id: "dsa.math.pascal_binomial.mc_recurrence",
+    type: "multiple_choice",
+    title: "Pascal's recurrence",
+    prompt: "Which recurrence builds binomial coefficients (Pascal's triangle)?",
+    explanation:
+      "C(n, k) = C(n-1, k-1) + C(n-1, k): each entry is the sum of the two directly above it, with C(n, 0) = C(n, n) = 1. This avoids factorial overflow and division.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4300,
+    is_active: true
+  },
+  {
+    id: "dsa.math.inclusion_exclusion.lesson",
+    type: "lesson",
+    title: "Inclusion-exclusion",
+    prompt:
+      "Inclusion-exclusion counts the size of a union of overlapping sets without double-counting. For two sets, |A ∪ B| = |A| + |B| - |A ∩ B|: add the parts, then subtract the overlap you counted twice. For three, |A ∪ B ∪ C| = |A| + |B| + |C| - |A ∩ B| - |A ∩ C| - |B ∩ C| + |A ∩ B ∩ C|: add singles, subtract pairs, add the triple. The general rule alternates sign by the number of sets intersected: add odd-sized intersections, subtract even-sized ones. A classic application is counting integers up to N divisible by at least one of several primes: add the counts for each prime (N/p), subtract for each pair (N/(p*q)), and so on. With k sets there are 2^k - 1 non-empty subsets to combine, so inclusion-exclusion is practical when k is small (often paired with bitmask enumeration over the subsets). It also underlies counting derangements and Euler's totient via prime factors.",
+    explanation:
+      "|A ∪ B| = |A| + |B| - |A ∩ B|; in general add odd-sized intersections and subtract even-sized ones to avoid double-counting. Classic use: count numbers up to N divisible by some prime (add N/p, subtract N/(p*q), ...). 2^k - 1 terms, so best for small k (often via bitmasks).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4310,
+    is_active: true
+  },
+  {
+    id: "dsa.math.inclusion_exclusion.mc_two_sets",
+    type: "multiple_choice",
+    title: "Size of a union",
+    prompt: "For two overlapping sets A and B, what is |A ∪ B|?",
+    explanation:
+      "|A ∪ B| = |A| + |B| - |A ∩ B|. Adding the two sizes counts the overlap twice, so you subtract |A ∩ B| once to correct it.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4320,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_area.lesson",
+    type: "lesson",
+    title: "Polygon area (shoelace)",
+    prompt:
+      "The shoelace formula gives the area of any simple polygon (one whose edges do not cross) from its ordered vertices (x0, y0), (x1, y1), ..., (x(n-1), y(n-1)). Sum the cross products of consecutive vertices and halve the absolute value: area = |sum over i of (x_i * y_(i+1) - x_(i+1) * y_i)| / 2, where the index wraps so the last vertex connects back to the first. The name comes from the criss-cross multiplication pattern, like lacing a shoe. Two cautions: the vertices must be given in order around the polygon (all clockwise or all counter-clockwise) or the result is wrong; and the signed value (before taking the absolute value) tells you orientation — positive for counter-clockwise, negative for clockwise — which is useful on its own. It runs in O(n). For integer coordinates the doubled area (skip the /2) is an exact integer, handy with Pick's theorem, which relates a lattice polygon's area to its interior and boundary lattice points.",
+    explanation:
+      "Shoelace: area = |sum of (x_i*y_(i+1) - x_(i+1)*y_i)| / 2 over the ordered vertices (indices wrap). Vertices must be in order around the polygon; the signed sum also gives orientation (CCW positive). O(n); doubled area is an exact integer for integer coordinates.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4330,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_area.mc_order",
+    type: "multiple_choice",
+    title: "A requirement of the shoelace formula",
+    prompt: "What must be true of a polygon's vertices for the shoelace formula to give the correct area?",
+    explanation:
+      "The vertices must be listed in order around the polygon's boundary (consistently clockwise or counter-clockwise). Out-of-order vertices describe a different (self-crossing) shape and give a wrong area.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4340,
+    is_active: true
   }
 ];
 
@@ -4500,6 +4575,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.sieve.mc_trial", skill_id: "dsa.math.sieve", is_primary: true },
   { learning_item_id: "dsa.math.modular_arithmetic.lesson", skill_id: "dsa.math.modular_arithmetic", is_primary: true },
   { learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", skill_id: "dsa.math.modular_arithmetic", is_primary: true },
+  { learning_item_id: "dsa.math.pascal_binomial.lesson", skill_id: "dsa.math.pascal_binomial", is_primary: true },
+  { learning_item_id: "dsa.math.pascal_binomial.mc_recurrence", skill_id: "dsa.math.pascal_binomial", is_primary: true },
+  { learning_item_id: "dsa.math.inclusion_exclusion.lesson", skill_id: "dsa.math.inclusion_exclusion", is_primary: true },
+  { learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", skill_id: "dsa.math.inclusion_exclusion", is_primary: true },
+  { learning_item_id: "dsa.math.geometry_area.lesson", skill_id: "dsa.math.geometry_area", is_primary: true },
+  { learning_item_id: "dsa.math.geometry_area.mc_order", skill_id: "dsa.math.geometry_area", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -5309,7 +5390,22 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.math.modular_arithmetic.mc_fastpow.a", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Binary exponentiation (square the base, halve the exponent): O(log b)", is_correct: true, order_index: 10 },
   { id: "dsa.math.modular_arithmetic.mc_fastpow.b", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Multiply a by itself in a loop b times: O(b)", is_correct: false, order_index: 20 },
   { id: "dsa.math.modular_arithmetic.mc_fastpow.c", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Use std::pow(a, b) and take the result mod m", is_correct: false, order_index: 30 },
-  { id: "dsa.math.modular_arithmetic.mc_fastpow.d", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Factor b into primes first", is_correct: false, order_index: 40 }
+  { id: "dsa.math.modular_arithmetic.mc_fastpow.d", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Factor b into primes first", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.pascal_binomial.mc_recurrence.a", learning_item_id: "dsa.math.pascal_binomial.mc_recurrence", content: "C(n, k) = C(n-1, k-1) + C(n-1, k)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.pascal_binomial.mc_recurrence.b", learning_item_id: "dsa.math.pascal_binomial.mc_recurrence", content: "C(n, k) = C(n-1, k) * C(n-1, k-1)", is_correct: false, order_index: 20 },
+  { id: "dsa.math.pascal_binomial.mc_recurrence.c", learning_item_id: "dsa.math.pascal_binomial.mc_recurrence", content: "C(n, k) = C(n, k-1) + 1", is_correct: false, order_index: 30 },
+  { id: "dsa.math.pascal_binomial.mc_recurrence.d", learning_item_id: "dsa.math.pascal_binomial.mc_recurrence", content: "C(n, k) = n * k", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.inclusion_exclusion.mc_two_sets.a", learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", content: "|A| + |B| - |A ∩ B|", is_correct: true, order_index: 10 },
+  { id: "dsa.math.inclusion_exclusion.mc_two_sets.b", learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", content: "|A| + |B|", is_correct: false, order_index: 20 },
+  { id: "dsa.math.inclusion_exclusion.mc_two_sets.c", learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", content: "|A| + |B| + |A ∩ B|", is_correct: false, order_index: 30 },
+  { id: "dsa.math.inclusion_exclusion.mc_two_sets.d", learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", content: "|A| * |B| - |A ∩ B|", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.geometry_area.mc_order.a", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The vertices must be given in order around the polygon (consistently CW or CCW)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.geometry_area.mc_order.b", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The vertices must be sorted by x-coordinate", is_correct: false, order_index: 20 },
+  { id: "dsa.math.geometry_area.mc_order.c", learning_item_id: "dsa.math.geometry_area.mc_order", content: "All coordinates must be positive", is_correct: false, order_index: 30 },
+  { id: "dsa.math.geometry_area.mc_order.d", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The polygon must be a triangle or rectangle", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
