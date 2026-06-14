@@ -92,3 +92,32 @@ begin
 
   raise notice 'attempts record-function smoke OK';
 end $$;
+
+-- 6) #141: skill events are server-authoritative. Direct client INSERT is revoked
+-- so a browser cannot forge mastery-bearing events; only the trusted function may
+-- append.
+do $$
+begin
+  if exists (
+    select 1
+      from information_schema.role_table_grants
+      where grantee in ('anon', 'authenticated')
+        and table_schema = 'public'
+        and table_name = 'skill_events'
+        and privilege_type = 'INSERT'
+  ) then
+    raise exception 'anon/authenticated must not have direct INSERT on skill_events (#141)';
+  end if;
+
+  if not exists (
+    select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname = 'record_skill_events'
+  ) then
+    raise exception 'record_skill_events function is missing (#141)';
+  end if;
+
+  raise notice 'skill-events lockdown smoke OK (no direct client INSERT)';
+end $$;
