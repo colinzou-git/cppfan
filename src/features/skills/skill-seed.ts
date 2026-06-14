@@ -1999,6 +1999,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.char_frequency",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Character traversal and frequency counting",
+    description: "Walk a string character by character and tally counts with a fixed array or a hash map.",
+    learner_goal: "Build a character frequency table and pick a fixed array vs a hash map for the alphabet.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 1902,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.substring_subsequence",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Substring vs subsequence",
+    description: "Distinguish a contiguous substring from an order-preserving subsequence and their counts.",
+    learner_goal: "Tell a substring (contiguous) from a subsequence (order-preserving, possibly gapped) and count each.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 1904,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.case_handling",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Character classes and case handling",
+    description: "Classify characters and change case safely with <cctype>, avoiding the negative-char trap.",
+    learner_goal: "Use <cctype> functions correctly (cast to unsigned char) for classification and case folding.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 1906,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation",
     domain: "dsa",
     module_id: "dsa.math",
@@ -2330,6 +2366,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.strings.z_function", prerequisite_skill_id: "dsa.strings.prefix_function", relationship_type: "recommended" },
   { skill_id: "dsa.strings.palindrome_substrings", prerequisite_skill_id: "dsa.strings.palindrome", relationship_type: "recommended" },
   { skill_id: "dsa.strings.parsing_edge_cases", prerequisite_skill_id: "dsa.strings.parsing", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.char_frequency", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.substring_subsequence", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.case_handling", prerequisite_skill_id: "dsa.strings.char_frequency", relationship_type: "recommended" },
   { skill_id: "dsa.math.bit_manipulation", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "dsa.math.number_theory", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.math.combinatorics", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
