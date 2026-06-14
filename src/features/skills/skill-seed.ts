@@ -1231,6 +1231,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.memory_ordering",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Memory ordering and happens-before",
+    description: "Understand acquire-release pairing and when relaxed ordering is safe.",
+    learner_goal: "Explain release-acquire happens-before and pick an ordering weaker than seq_cst safely.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 760,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.lock_granularity",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Lock granularity",
+    description: "Trade off coarse vs fine-grained locking and use shared_mutex for read-heavy data.",
+    learner_goal: "Hold locks briefly, choose lock granularity, and use shared_mutex for many readers.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 761,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.shared_state_design",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Minimizing shared mutable state",
+    description: "Avoid races by design: confine state, pass messages, and share immutable data.",
+    learner_goal: "Reduce shared writable state via confinement, message passing, and immutability.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 762,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io",
     domain: "cpp",
     module_id: "cpp.utilities",
@@ -2231,6 +2267,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.concurrency.jthread", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.promise_future", prerequisite_skill_id: "cpp.concurrency.async", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.task_selection", prerequisite_skill_id: "cpp.concurrency.async", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.memory_ordering", prerequisite_skill_id: "cpp.concurrency.atomics", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.lock_granularity", prerequisite_skill_id: "cpp.concurrency.mutexes", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.shared_state_design", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.file_io", prerequisite_skill_id: "cpp.program_basics.io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.chrono", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.random", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
