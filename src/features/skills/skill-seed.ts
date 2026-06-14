@@ -1315,6 +1315,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.filesystem",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Filesystem paths and directories",
+    description: "Compose portable paths and iterate directories with std::filesystem.",
+    learner_goal: "Build paths with operator/, check existence/type, and iterate a directory portably.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 767,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.binary_io",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Text vs binary I/O",
+    description: "Choose text or binary streams and read/write raw bytes without newline translation.",
+    learner_goal: "Open a stream with std::ios::binary and use read/write for exact byte-for-byte I/O.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 768,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.variant_visit",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "Visiting a variant",
+    description: "Handle every alternative of a std::variant exhaustively with std::visit.",
+    learner_goal: "Use std::visit with an overload set to handle each type a variant can hold.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 769,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o",
     domain: "dsa",
     module_id: "dsa.complexity",
@@ -2094,6 +2130,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.utilities.stream_validation", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.tuples", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.enums", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.filesystem", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.binary_io", prerequisite_skill_id: "cpp.utilities.file_io", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.variant_visit", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
