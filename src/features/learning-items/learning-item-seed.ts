@@ -3727,6 +3727,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.memory_ordering.lesson",
+    type: "lesson",
+    title: "Memory ordering and happens-before",
+    prompt:
+      "Atomic operations take a memory_order argument that controls how surrounding non-atomic reads and writes may be reordered around them. The default, memory_order_seq_cst, gives a single global order everyone agrees on — easiest to reason about, slightly slower. The key weaker pairing is release/acquire: a store with memory_order_release publishes everything the thread wrote before it, and a load with memory_order_acquire on the same variable that reads that stored value sees all of those writes. This establishes a happens-before relationship — the classic pattern is writing data then doing `flag.store(true, release)`, while the consumer spins on `flag.load(acquire)` and, once it sees true, is guaranteed to see the data. memory_order_relaxed gives atomicity with no ordering guarantees at all; it is correct only for things like an independent counter where you never use the value to gate access to other memory. The rule of thumb: start with seq_cst (the default) for correctness; drop to release/acquire only on a proven hot path where you can name the exact happens-before pair; reserve relaxed for standalone counters. Getting this wrong produces races that appear only on weakly-ordered hardware (ARM) and never on x86, so prefer the stronger default unless you can prove the weaker one.",
+    explanation:
+      "memory_order controls reordering around atomics. seq_cst (default) = one global order, easiest. release store + acquire load on the same variable establish happens-before (publish data, then flag.store(release); consumer flag.load(acquire) then sees the data). relaxed = atomic but no ordering, only for standalone counters. Default to seq_cst.",
+    difficulty: "advanced",
+    estimated_minutes: 7,
+    order_index: 4470,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.memory_ordering.mc_release_acquire",
+    type: "multiple_choice",
+    title: "Release-acquire publishing",
+    prompt: "One thread writes data then does `ready.store(true, std::memory_order_release)`. What must the consumer do to be guaranteed to see that data?",
+    explanation:
+      "The consumer must load the same atomic with acquire — `ready.load(std::memory_order_acquire)` — and proceed once it reads true. A release store paired with an acquire load on the same variable establishes happens-before, making the prior writes visible.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4480,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.lock_granularity.lesson",
+    type: "lesson",
+    title: "Lock granularity",
+    prompt:
+      "Lock granularity is how much data one lock protects. A coarse lock (one mutex for an entire structure) is simple and correct but serializes every operation, so threads queue up and throughput collapses under contention. Fine-grained locking (a lock per bucket, per node, or per shard) lets independent operations proceed in parallel, but adds complexity and the risk of deadlock when several locks are taken together (acquire them in a consistent order). The practical guidance: hold a lock for as little code as possible — do expensive or blocking work (I/O, allocation, computing a value) outside the critical section, and only lock around the actual shared-state access. For read-heavy data, std::shared_mutex lets many readers hold a shared lock concurrently (std::shared_lock) while writers take an exclusive lock (std::unique_lock), which beats a plain mutex when reads vastly outnumber writes. Always measure: fine-grained locking only pays off under real contention, and its overhead and bug surface can make it slower than a coarse lock for low-contention data. Start coarse and correct, then refine the hot spots.",
+    explanation:
+      "Granularity = how much data one lock guards. Coarse = simple but serializes; fine-grained = more parallelism but complexity/deadlock risk (consistent lock order). Hold locks briefly (do I/O/compute outside the critical section). Use std::shared_mutex for read-heavy data (many shared readers, exclusive writers). Measure before refining.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4490,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.lock_granularity.mc_shared_mutex",
+    type: "multiple_choice",
+    title: "A lock for read-heavy data",
+    prompt: "A data structure is read by many threads but written rarely. Which locking choice maximizes concurrency while staying safe?",
+    explanation:
+      "std::shared_mutex lets many readers hold a shared lock at once (std::shared_lock) while a writer takes an exclusive lock (std::unique_lock). For read-mostly data this allows concurrent reads, unlike a plain std::mutex that serializes every access.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4500,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.shared_state_design.lesson",
+    type: "lesson",
+    title: "Minimizing shared mutable state",
+    prompt:
+      "The most reliable way to avoid data races is to have less shared mutable state, not more locks. Three design tactics. Thread confinement: keep data owned by a single thread and never share it — for example, give each worker its own accumulator and combine the results at the end, instead of all threads incrementing one shared total under a lock. Immutability: data that is never modified after construction can be shared freely with no synchronization, because concurrent reads of unchanging data are always safe (share by const reference or std::shared_ptr<const T>). Message passing: rather than letting threads reach into each other's memory, have them communicate by sending values through a thread-safe queue (a producer-consumer channel), so ownership transfers with the message and only the queue needs locking. These approaches turn a synchronization problem into a structure problem and scale better than fine-grained locking because there is simply less contention. When you must share writable state, keep it small and well-encapsulated behind one clear owner. Rule: prefer confinement and immutability first, message passing second, shared-memory-plus-locks last.",
+    explanation:
+      "Fewer shared writable cells beats more locks. Confine state to one thread (per-thread accumulators, combine at the end); share immutable data freely (no sync needed for read-only); pass messages through a thread-safe queue so ownership transfers. Prefer confinement/immutability/messages over shared-memory-plus-locks.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4510,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.shared_state_design.mc_immutable",
+    type: "multiple_choice",
+    title: "Sharing data without locks",
+    prompt: "Why can immutable data (never modified after construction) be shared across threads without synchronization?",
+    explanation:
+      "A data race requires concurrent access where at least one thread writes. If the data is never modified after construction, all accesses are reads, so there is no race and no lock is needed.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4520,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io.lesson",
     type: "lesson",
     title: "File I/O and filesystem",
@@ -4691,6 +4766,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.concurrency.promise_future.mc_promise", skill_id: "cpp.concurrency.promise_future", is_primary: true },
   { learning_item_id: "cpp.concurrency.task_selection.lesson", skill_id: "cpp.concurrency.task_selection", is_primary: true },
   { learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", skill_id: "cpp.concurrency.task_selection", is_primary: true },
+  { learning_item_id: "cpp.concurrency.memory_ordering.lesson", skill_id: "cpp.concurrency.memory_ordering", is_primary: true },
+  { learning_item_id: "cpp.concurrency.memory_ordering.mc_release_acquire", skill_id: "cpp.concurrency.memory_ordering", is_primary: true },
+  { learning_item_id: "cpp.concurrency.lock_granularity.lesson", skill_id: "cpp.concurrency.lock_granularity", is_primary: true },
+  { learning_item_id: "cpp.concurrency.lock_granularity.mc_shared_mutex", skill_id: "cpp.concurrency.lock_granularity", is_primary: true },
+  { learning_item_id: "cpp.concurrency.shared_state_design.lesson", skill_id: "cpp.concurrency.shared_state_design", is_primary: true },
+  { learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", skill_id: "cpp.concurrency.shared_state_design", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.lesson", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.mc_exists", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.chrono.lesson", skill_id: "cpp.utilities.chrono", is_primary: true },
@@ -5468,6 +5549,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.concurrency.task_selection.mc_concurrency.b", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Parallelism: run the work simultaneously on many cores", is_correct: false, order_index: 20 },
   { id: "cpp.concurrency.task_selection.mc_concurrency.c", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Adding more CPU cores", is_correct: false, order_index: 30 },
   { id: "cpp.concurrency.task_selection.mc_concurrency.d", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Vectorizing the inner compute loop", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.memory_ordering.mc_release_acquire.a", learning_item_id: "cpp.concurrency.memory_ordering.mc_release_acquire", content: "Load the same atomic with acquire and proceed once it reads true", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.memory_ordering.mc_release_acquire.b", learning_item_id: "cpp.concurrency.memory_ordering.mc_release_acquire", content: "Load the flag with relaxed ordering", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.memory_ordering.mc_release_acquire.c", learning_item_id: "cpp.concurrency.memory_ordering.mc_release_acquire", content: "Read the data directly without touching the flag", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.memory_ordering.mc_release_acquire.d", learning_item_id: "cpp.concurrency.memory_ordering.mc_release_acquire", content: "Sleep briefly before reading the data", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.lock_granularity.mc_shared_mutex.a", learning_item_id: "cpp.concurrency.lock_granularity.mc_shared_mutex", content: "std::shared_mutex: many readers share a lock, writers take it exclusively", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.lock_granularity.mc_shared_mutex.b", learning_item_id: "cpp.concurrency.lock_granularity.mc_shared_mutex", content: "A single std::mutex around every access", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.lock_granularity.mc_shared_mutex.c", learning_item_id: "cpp.concurrency.lock_granularity.mc_shared_mutex", content: "No lock at all, since reads are safe", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.lock_granularity.mc_shared_mutex.d", learning_item_id: "cpp.concurrency.lock_granularity.mc_shared_mutex", content: "A recursive_mutex so readers can re-enter", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.shared_state_design.mc_immutable.a", learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", content: "All accesses are reads, so there is no race and no lock is needed", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.shared_state_design.mc_immutable.b", learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", content: "The compiler automatically locks immutable data", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.shared_state_design.mc_immutable.c", learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", content: "Immutable data is copied per thread behind the scenes", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.shared_state_design.mc_immutable.d", learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", content: "Reads are always atomic regardless of the data", is_correct: false, order_index: 40 },
 
   { id: "cpp.utilities.file_io.mc_exists.a", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::filesystem::exists(path)", is_correct: true, order_index: 10 },
   { id: "cpp.utilities.file_io.mc_exists.b", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::cout << path", is_correct: false, order_index: 20 },
