@@ -176,3 +176,30 @@ begin
 
   raise notice 'parsons answer-key lockdown smoke OK';
 end $$;
+
+-- 8) #125: placement definitions are seeded and reference real learning items.
+do $$
+declare
+  v_modules integer;
+  v_items integer;
+begin
+  select count(*) into v_modules from public.placement_modules;
+  select count(*) into v_items from public.placement_module_items;
+
+  if v_modules < 5 or v_items < 5 then
+    raise exception 'placement definitions not seeded (#125): modules=% items=%', v_modules, v_items;
+  end if;
+
+  -- Every placement item must resolve to an existing learning item (FK already
+  -- enforces this, but assert the join is non-lossy as a guard).
+  if exists (
+    select 1
+      from public.placement_module_items pmi
+      left join public.learning_items li on li.id = pmi.learning_item_id
+      where li.id is null
+  ) then
+    raise exception 'placement references a missing learning item (#125)';
+  end if;
+
+  raise notice 'placement definitions smoke OK (% modules, % items)', v_modules, v_items;
+end $$;
