@@ -34,12 +34,15 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
     }
     setError(null);
     const cardId = current.cardId;
+    // A stable id per click so an in-flight retry / double-tap cannot rate twice.
+    const submissionId = crypto.randomUUID();
     startTransition(async () => {
-      const result = await rateReview({ cardId, rating });
+      const result = await rateReview({ cardId, rating, submissionId });
       if (result.status === "error") {
         setError("That review could not be saved. Please try again.");
         return;
       }
+      // `ok` and `stale` (already rated elsewhere) both advance past this card.
       setRemaining((queue) => queue.filter((entry) => entry.cardId !== cardId));
       // Next card starts hidden so the learner attempts recall first.
       setRevealed(false);
