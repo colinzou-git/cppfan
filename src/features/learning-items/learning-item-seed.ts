@@ -3427,6 +3427,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.deadlock.lesson",
+    type: "lesson",
+    title: "Deadlock and lock ordering",
+    prompt:
+      "Deadlock happens when two threads each hold one lock and wait forever for the other's: thread A locks `m1` then wants `m2`, while thread B locks `m2` then wants `m1`. Neither can proceed. The classic cure is a consistent lock order — every thread always acquires `m1` before `m2` — so the cycle of waiting can never form. C++ gives you tools so you do not have to hand-order locks: `std::scoped_lock lk(m1, m2);` (C++17) locks several mutexes at once using a deadlock-avoidance algorithm, and `std::lock(m1, m2)` does the same for pre-existing lock objects. Holding only one lock at a time, keeping critical sections short, and never calling unknown code while holding a lock also reduce the risk. Deadlock is one of the four Coffman conditions (mutual exclusion, hold-and-wait, no preemption, circular wait); breaking any one — usually circular wait via ordering — prevents it.",
+    explanation:
+      "Deadlock is a circular wait for locks held in different orders. Prevent it with a consistent global lock order, or acquire multiple locks atomically with std::scoped_lock / std::lock.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3870,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.deadlock.mc_order",
+    type: "multiple_choice",
+    title: "Preventing deadlock",
+    prompt: "Two threads each need to hold mutexes m1 and m2 at the same time. What reliably prevents deadlock between them?",
+    explanation:
+      "Always acquiring the mutexes in the same order (or taking both atomically with std::scoped_lock/std::lock) makes a circular wait impossible. Adding sleeps or retries does not remove the race.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3880,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.condition_variables.lesson",
+    type: "lesson",
+    title: "Condition variables",
+    prompt:
+      "A condition variable lets a thread sleep until another thread signals that some shared state changed — without busy-waiting. The waiter holds a `std::unique_lock` on the mutex guarding the state and calls `cv.wait(lock, [&]{ return ready; });`; `wait` atomically releases the lock and sleeps, then re-acquires the lock and re-checks the predicate when woken. Always pass a predicate (or loop on `while (!ready) cv.wait(lock);`) because a thread can wake spuriously or after the condition was already consumed. The signalling side modifies the state under the same mutex, then calls `cv.notify_one()` (wake one waiter) or `cv.notify_all()`. This is the backbone of a producer-consumer queue: producers push an item under the lock and notify; consumers wait for the queue to be non-empty, then pop. Condition variables replace timing-based polling with deterministic hand-off.",
+    explanation:
+      "A condition variable blocks a thread until shared state changes, avoiding busy-waiting. Wait with a predicate (guards against spurious wakeups), modify state under the mutex, then notify_one/notify_all.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3890,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.condition_variables.mc_predicate",
+    type: "multiple_choice",
+    title: "Why wait takes a predicate",
+    prompt: "Why should condition_variable::wait be given a predicate (or be called inside a while loop checking the condition)?",
+    explanation:
+      "A waiting thread can wake spuriously or after the condition has already been handled by another thread. Re-checking a predicate ensures it only proceeds when the state is actually ready.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3900,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.atomics.lesson",
+    type: "lesson",
+    title: "Atomics and the memory model",
+    prompt:
+      "`std::atomic<T>` makes individual operations on a shared value indivisible, so a `std::atomic<int>` counter incremented from many threads with `counter.fetch_add(1)` (or `++counter`) never loses updates — no mutex needed. Atomics are ideal for simple shared counters and flags (e.g. a `std::atomic<bool> stop`). But atomicity is per-operation, not per-transaction: `if (counter > 0) counter--;` is still a race because the check and the decrement are two separate atomic steps — higher-level invariants spanning multiple variables still need a mutex. Crucially, `volatile` is NOT a synchronization tool: it prevents some compiler optimizations for memory-mapped I/O but provides no atomicity and no cross-thread ordering guarantees — use `std::atomic` instead. By default atomic operations use sequentially-consistent ordering (`memory_order_seq_cst`), the easiest to reason about; relaxed/acquire-release orderings trade guarantees for speed and should be left until you truly need them.",
+    explanation:
+      "std::atomic gives indivisible per-operation access for counters/flags without a mutex; multi-step invariants still need a lock. volatile is not synchronization. Default seq_cst ordering is the safe choice.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 3910,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.atomics.mc_volatile",
+    type: "multiple_choice",
+    title: "volatile vs atomic",
+    prompt: "A shared flag is read and written by multiple threads. Why is declaring it `volatile` not enough for correct synchronization?",
+    explanation:
+      "volatile only stops certain compiler optimizations (for memory-mapped I/O); it gives no atomicity and no cross-thread ordering guarantees. Use std::atomic for thread-safe shared access.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3920,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io.lesson",
     type: "lesson",
     title: "File I/O and filesystem",
@@ -3917,6 +3992,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.concurrency.mutexes.mc_lock_guard", skill_id: "cpp.concurrency.mutexes", is_primary: true },
   { learning_item_id: "cpp.concurrency.async.lesson", skill_id: "cpp.concurrency.async", is_primary: true },
   { learning_item_id: "cpp.concurrency.async.mc_get", skill_id: "cpp.concurrency.async", is_primary: true },
+  { learning_item_id: "cpp.concurrency.deadlock.lesson", skill_id: "cpp.concurrency.deadlock", is_primary: true },
+  { learning_item_id: "cpp.concurrency.deadlock.mc_order", skill_id: "cpp.concurrency.deadlock", is_primary: true },
+  { learning_item_id: "cpp.concurrency.condition_variables.lesson", skill_id: "cpp.concurrency.condition_variables", is_primary: true },
+  { learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", skill_id: "cpp.concurrency.condition_variables", is_primary: true },
+  { learning_item_id: "cpp.concurrency.atomics.lesson", skill_id: "cpp.concurrency.atomics", is_primary: true },
+  { learning_item_id: "cpp.concurrency.atomics.mc_volatile", skill_id: "cpp.concurrency.atomics", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.lesson", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.mc_exists", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.chrono.lesson", skill_id: "cpp.utilities.chrono", is_primary: true },
@@ -4598,6 +4679,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.concurrency.async.mc_get.b", learning_item_id: "cpp.concurrency.async.mc_get", content: "Cancels the task immediately", is_correct: false, order_index: 20 },
   { id: "cpp.concurrency.async.mc_get.c", learning_item_id: "cpp.concurrency.async.mc_get", content: "Returns a default value without waiting", is_correct: false, order_index: 30 },
   { id: "cpp.concurrency.async.mc_get.d", learning_item_id: "cpp.concurrency.async.mc_get", content: "Starts a brand-new thread each time it is called", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.deadlock.mc_order.a", learning_item_id: "cpp.concurrency.deadlock.mc_order", content: "Always acquire the mutexes in the same order (or take both with std::scoped_lock)", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.deadlock.mc_order.b", learning_item_id: "cpp.concurrency.deadlock.mc_order", content: "Have each thread lock them in the opposite order", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.deadlock.mc_order.c", learning_item_id: "cpp.concurrency.deadlock.mc_order", content: "Add a short sleep before the second lock", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.deadlock.mc_order.d", learning_item_id: "cpp.concurrency.deadlock.mc_order", content: "Use a recursive_mutex for both", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.condition_variables.mc_predicate.a", learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", content: "A thread can wake spuriously or after the condition was already handled, so it must re-check", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.condition_variables.mc_predicate.b", learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", content: "The predicate makes wait() return faster", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.condition_variables.mc_predicate.c", learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", content: "wait() cannot compile without a predicate", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.condition_variables.mc_predicate.d", learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", content: "It avoids having to hold the mutex while waiting", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.atomics.mc_volatile.a", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile gives no atomicity and no cross-thread ordering guarantees; use std::atomic", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.atomics.mc_volatile.b", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile is fully equivalent to std::atomic for threads", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.atomics.mc_volatile.c", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile makes all reads and writes use a mutex", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.atomics.mc_volatile.d", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile only works on integer types", is_correct: false, order_index: 40 },
 
   { id: "cpp.utilities.file_io.mc_exists.a", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::filesystem::exists(path)", is_correct: true, order_index: 10 },
   { id: "cpp.utilities.file_io.mc_exists.b", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::cout << path", is_correct: false, order_index: 20 },

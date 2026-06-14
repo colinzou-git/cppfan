@@ -1159,6 +1159,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.deadlock",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Deadlock and lock ordering",
+    description: "Avoid deadlock by acquiring multiple locks in a consistent order.",
+    learner_goal: "Prevent deadlock by taking locks in a fixed order or with std::scoped_lock.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 754,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.condition_variables",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Condition variables",
+    description: "Wait for and signal state changes with std::condition_variable and a predicate.",
+    learner_goal: "Use condition_variable::wait with a predicate to block until shared state is ready.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 755,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.atomics",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Atomics and the memory model",
+    description: "Use std::atomic for lock-free counters and flags; know volatile is not synchronization.",
+    learner_goal: "Use std::atomic for simple shared counters/flags and recognize its limits.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 756,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io",
     domain: "cpp",
     module_id: "cpp.utilities",
@@ -1865,6 +1901,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.concurrency.data_races", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.mutexes", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.async", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.deadlock", prerequisite_skill_id: "cpp.concurrency.mutexes", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.condition_variables", prerequisite_skill_id: "cpp.concurrency.mutexes", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.atomics", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.file_io", prerequisite_skill_id: "cpp.program_basics.io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.chrono", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.random", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
