@@ -12,13 +12,15 @@ create table if not exists auth.users (
   email text
 );
 
--- Stub: returns NULL in CI (no real session). Enough for policies that reference
--- auth.uid() to compile and apply.
+-- Stub: in CI there is no real session, so auth.uid() reads a settable GUC
+-- (app.test_uid). It defaults to NULL when unset, matching the previous stub, so
+-- existing smokes are unaffected; the RLS-isolation smoke (#96) sets it to
+-- impersonate a user. missing_ok = true so an unset GUC returns NULL, not error.
 create or replace function auth.uid()
 returns uuid
 language sql
 stable
-as $$ select null::uuid $$;
+as $$ select nullif(current_setting('app.test_uid', true), '')::uuid $$;
 
 do $$
 begin
@@ -34,3 +36,9 @@ begin
 end $$;
 
 grant usage on schema public to anon, authenticated, service_role;
+
+-- Supabase grants the authenticated role usage on the auth schema and execute on
+-- auth.uid(); replicate that so RLS policies (which call auth.uid()) can be
+-- evaluated when we impersonate a user in the RLS-isolation smoke (#96).
+grant usage on schema auth to anon, authenticated;
+grant execute on function auth.uid() to anon, authenticated;
