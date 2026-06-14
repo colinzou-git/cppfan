@@ -290,3 +290,35 @@ begin
 
   raise notice 'atomic review-rating lockdown smoke OK';
 end $$;
+
+-- 12) #96 (RLS isolation, DB layer): a learner reads only their OWN per-user
+-- rows. Impersonate a user via the app.test_uid GUC (auth.uid() reads it in CI)
+-- and assert the select-own policy filters to that user. Self-validating: if the
+-- impersonation/RLS plumbing were broken, the count would be 0 or 2, not 1, and
+-- this fails. All wrapped in a rolled-back transaction so nothing persists.
+begin;
+grant select on public.learning_item_attempts to authenticated;
+do $$
+declare
+  v_a uuid := gen_random_uuid();
+  v_b uuid := gen_random_uuid();
+  v_seen integer;
+begin
+  insert into auth.users (id) values (v_a), (v_b);
+  insert into public.learning_item_attempts (user_id, learning_item_id, selected_choice_id, is_correct)
+  values
+    (v_a, 'cpp.structs_classes.syntax.mc_default_access', 'cpp.structs_classes.syntax.mc_default_access.a', true),
+    (v_b, 'cpp.structs_classes.syntax.mc_default_access', 'cpp.structs_classes.syntax.mc_default_access.b', false);
+
+  perform set_config('app.test_uid', v_a::text, true);
+  set local role authenticated;
+  select count(*) into v_seen from public.learning_item_attempts;
+  reset role;
+
+  if v_seen <> 1 then
+    raise exception 'RLS isolation smoke failed (#96): impersonated user saw % attempt rows, expected exactly its own 1', v_seen;
+  end if;
+
+  raise notice 'RLS isolation smoke OK (user reads only its own attempts)';
+end $$;
+rollback;
