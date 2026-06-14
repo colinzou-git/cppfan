@@ -3227,6 +3227,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.z_function.lesson",
+    type: "lesson",
+    title: "Z-function",
+    prompt:
+      "The Z-function of a string s gives, for each index i, z[i] = the length of the longest substring starting at i that is also a prefix of s. By definition z[0] is usually left as 0 (or the whole length). For s = \"aabxaab\" the Z-array is [0, 1, 0, 0, 3, 1, 0]: at index 4 the substring \"aab\" matches the prefix \"aab\", so z[4] = 3. It is computed in O(n) by maintaining the rightmost [l, r] segment that matches a prefix (the \"Z-box\") and reusing earlier values inside it instead of recomparing. The Z-function solves pattern matching cleanly: to find pattern p in text t, build the string p + separator + t (the separator is a character in neither), compute its Z-array, and any position where z equals |p| marks a full occurrence of p. It is an O(n+m) alternative to KMP — often easier to reason about because z[i] has a direct meaning (prefix match length) rather than the failure-link indirection of the prefix function. It also powers tasks like counting distinct substrings and finding string periods.",
+    explanation:
+      "z[i] = length of the longest substring starting at i that matches a prefix of s, computed in O(n) via the rightmost Z-box. For matching, run the Z-function on p + sep + t and look for z == |p|. An O(n+m) alternative to KMP with a more direct meaning.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4170,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.z_function.mc_meaning",
+    type: "multiple_choice",
+    title: "What a Z-value means",
+    prompt: "In the Z-function of a string s, what does z[i] represent?",
+    explanation:
+      "z[i] is the length of the longest substring starting at position i that is also a prefix of s. Scanning for z[i] == |pattern| in pattern+separator+text finds all matches.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4180,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome_substrings.lesson",
+    type: "lesson",
+    title: "Palindromic substrings",
+    prompt:
+      "To find palindromic substrings, the expand-around-center technique is the simplest strong method. Every palindrome has a center, and there are 2n-1 possible centers in a string of length n: n single characters (for odd-length palindromes) and n-1 gaps between adjacent characters (for even-length palindromes). For each center, expand outward while the two mirrored characters match; the widest successful expansion is the longest palindrome centered there. Doing this for every center finds the longest palindromic substring and counts all palindromic substrings in O(n^2) time and O(1) extra space — efficient enough for most inputs and easy to get right. A dynamic-programming table dp[i][j] = \"is s[i..j] a palindrome\" also runs in O(n^2) but uses O(n^2) space, so prefer center expansion unless you need the table for another sub-result. For the rare case that demands linear time, Manacher's algorithm computes all palindromic radii in O(n), but it is intricate and worth reaching for only when O(n^2) is genuinely too slow.",
+    explanation:
+      "Expand-around-center checks all 2n-1 centers (odd + even), expanding while mirrored chars match: O(n^2) time, O(1) space, finds longest/counts all palindromic substrings. DP is also O(n^2) but O(n^2) space; Manacher is O(n) but intricate (enrichment).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4190,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.palindrome_substrings.mc_centers",
+    type: "multiple_choice",
+    title: "Why 2n-1 centers",
+    prompt: "When finding palindromic substrings by expanding around centers, why are there 2n-1 centers to check in a string of length n?",
+    explanation:
+      "Odd-length palindromes are centered on one of the n characters; even-length palindromes are centered on one of the n-1 gaps between adjacent characters. Together that is 2n-1 centers.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4200,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing_edge_cases.lesson",
+    type: "lesson",
+    title: "Parsing edge cases",
+    prompt:
+      "Real-world delimited input breaks naive splitters. The classic bug is using formatted extraction (`>>`) to read fields: it skips all whitespace and silently merges or drops empty fields, so a CSV line like `a,,c` loses the empty middle field. Use `std::getline(stream, field, ',')` instead — it preserves empty fields, including a trailing empty field after a final delimiter (`a,b,` yields three fields, the last empty). Watch for line endings: a file written on Windows uses CRLF, so reading lines with `getline` on `\\n` leaves a trailing carriage return `\\r` on each field; strip it before comparing or converting. Leading/trailing spaces around a field (`a, b , c`) are usually unwanted — trim them explicitly, since `getline` keeps them. Other traps: a delimiter inside a quoted field (true CSV needs a real parser, not a split), and a final line with no trailing newline. The rule: decide deliberately whether empty fields are significant, normalize line endings and whitespace, and never assume `>>` gives you the field structure you expect.",
+    explanation:
+      "Use getline(.., delim) not >> so empty fields (a,,c) and trailing empties (a,b,) survive. Strip CR from CRLF files, trim stray whitespace, and remember quoted delimiters need a real CSV parser. Decide explicitly whether empty fields matter.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4210,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.parsing_edge_cases.mc_empty",
+    type: "multiple_choice",
+    title: "Preserving empty fields",
+    prompt: "You must parse the CSV line `a,,c` and keep the empty middle field. Which approach reliably preserves it?",
+    explanation:
+      "std::getline(stream, field, ',') returns each field between commas, including the empty one, so a,,c yields three fields. Reading with >> skips whitespace and merges fields, losing the empty entry.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4220,
+    is_active: true
+  },
+  {
     id: "cpp.oop.composition.lesson",
     type: "lesson",
     title: "Composition",
@@ -4276,6 +4351,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.strings.trie.mc_usecase", skill_id: "dsa.strings.trie", is_primary: true },
   { learning_item_id: "dsa.strings.hashing.lesson", skill_id: "dsa.strings.hashing", is_primary: true },
   { learning_item_id: "dsa.strings.hashing.mc_collision", skill_id: "dsa.strings.hashing", is_primary: true },
+  { learning_item_id: "dsa.strings.z_function.lesson", skill_id: "dsa.strings.z_function", is_primary: true },
+  { learning_item_id: "dsa.strings.z_function.mc_meaning", skill_id: "dsa.strings.z_function", is_primary: true },
+  { learning_item_id: "dsa.strings.palindrome_substrings.lesson", skill_id: "dsa.strings.palindrome_substrings", is_primary: true },
+  { learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", skill_id: "dsa.strings.palindrome_substrings", is_primary: true },
+  { learning_item_id: "dsa.strings.parsing_edge_cases.lesson", skill_id: "dsa.strings.parsing_edge_cases", is_primary: true },
+  { learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", skill_id: "dsa.strings.parsing_edge_cases", is_primary: true },
   { learning_item_id: "cpp.oop.composition.lesson", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.composition.mc_relationship", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.inheritance.lesson", skill_id: "cpp.oop.inheritance", is_primary: true },
@@ -4966,6 +5047,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.hashing.mc_collision.b", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be identical", is_correct: false, order_index: 20 },
   { id: "dsa.strings.hashing.mc_collision.c", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be different", is_correct: false, order_index: 30 },
   { id: "dsa.strings.hashing.mc_collision.d", learning_item_id: "dsa.strings.hashing.mc_collision", content: "Nothing, because hashes are random", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.z_function.mc_meaning.a", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The length of the longest substring starting at i that is also a prefix of s", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.z_function.mc_meaning.b", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The length of the longest proper suffix of s[0..i] that is also a prefix", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.z_function.mc_meaning.c", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The number of times s[i] occurs in s", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.z_function.mc_meaning.d", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The index of the next occurrence of s[i]", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.palindrome_substrings.mc_centers.a", learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", content: "n single-character centers (odd) plus n-1 between-character centers (even)", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.palindrome_substrings.mc_centers.b", learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", content: "Each character can pair with every other character", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.palindrome_substrings.mc_centers.c", learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", content: "There are 2n prefixes and suffixes to compare", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.palindrome_substrings.mc_centers.d", learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", content: "Each substring has two distinct centers", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.parsing_edge_cases.mc_empty.a", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "std::getline(stream, field, ',') for each field", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.parsing_edge_cases.mc_empty.b", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Reading fields with stream >> field", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.parsing_edge_cases.mc_empty.c", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Skipping any field that comes back empty", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.parsing_edge_cases.mc_empty.d", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Splitting only on whitespace", is_correct: false, order_index: 40 },
 
   { id: "cpp.oop.composition.mc_relationship.a", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Car has-an Engine", is_correct: true, order_index: 10 },
   { id: "cpp.oop.composition.mc_relationship.b", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Dog is-an Animal", is_correct: false, order_index: 20 },
