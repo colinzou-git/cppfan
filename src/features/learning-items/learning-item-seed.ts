@@ -3850,6 +3850,81 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 2780,
     is_active: true
+  },
+  {
+    id: "dsa.math.bitmask_techniques.lesson",
+    type: "lesson",
+    title: "Bitmask techniques",
+    prompt:
+      "An integer can act as a set of up to ~64 boolean flags, one per bit, which is both compact and fast. The core operations on bit i are: test `(mask >> i) & 1`, set `mask |= (1 << i)`, clear `mask &= ~(1 << i)`, and toggle `mask ^= (1 << i)`. Two everyday tricks: `n & (n - 1)` clears the lowest set bit (so `n && !(n & (n - 1))` tests for a power of two), and `__builtin_popcount(mask)` (or `std::popcount` in C++20) counts the set bits. The big payoff is subset enumeration: to iterate every subset of a mask, run `for (int s = mask; s; s = (s - 1) & mask)`, which visits each submask exactly once — the engine behind bitmask DP over subsets. Use `1 << i` carefully: for masks wider than 31 bits use `1LL << i` to avoid int overflow. Bitmasks shine when the universe is small (n ≤ ~20-22 for 2^n subset DP) and you need set operations as single CPU instructions.",
+    explanation:
+      "Treat an int as flags: test/set/clear/toggle bit i with >>/|/&~/^. n & (n-1) clears the lowest set bit (power-of-two test); popcount counts bits; iterate submasks with for (s = mask; s; s = (s-1) & mask). Use 1LL << i past 31 bits.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4050,
+    is_active: true
+  },
+  {
+    id: "dsa.math.bitmask_techniques.mc_submask",
+    type: "multiple_choice",
+    title: "Enumerating submasks",
+    prompt: "Which loop visits every subset (submask) of the bits set in `mask` exactly once?",
+    explanation:
+      "`for (int s = mask; s; s = (s - 1) & mask)` walks all non-empty submasks of mask exactly once (add s = 0 separately for the empty set). The (s - 1) & mask step skips bits not in mask.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4060,
+    is_active: true
+  },
+  {
+    id: "dsa.math.sieve.lesson",
+    type: "lesson",
+    title: "Primes: sieve and factorization",
+    prompt:
+      "To test one number n for primality, trial division up to sqrt(n) is enough — if n has a factor larger than sqrt(n) it must also have one smaller, so you never look past the square root; this is O(sqrt(n)). To get all primes up to N, the sieve of Eratosthenes is far better: mark multiples of each prime starting from p*p as composite, leaving the primes, in O(N log log N) time and O(N) space. Prime factorization combines the ideas: divide out each prime factor (2, then odd numbers up to sqrt(n)) repeatedly, and whatever remains above 1 at the end is a final prime factor — O(sqrt(n)) per number, or much faster if you precompute a smallest-prime-factor table with a sieve. Pick by workload: sqrt(n) trial division for a few queries, a sieve when you need many primality checks or factorizations over a range. Watch the bound — multiplying near the limit can overflow, so use a 64-bit type when squaring.",
+    explanation:
+      "Trial division to sqrt(n) tests one number (O(sqrt n)); the sieve of Eratosthenes lists all primes up to N in O(N log log N). Factor by dividing out primes up to sqrt(n); a smallest-prime-factor sieve makes repeated factorization fast.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4070,
+    is_active: true
+  },
+  {
+    id: "dsa.math.sieve.mc_trial",
+    type: "multiple_choice",
+    title: "How far to trial divide",
+    prompt: "When testing whether a single number n is prime by trial division, up to what value must you check for divisors?",
+    explanation:
+      "You only need to test divisors up to sqrt(n): any factor larger than sqrt(n) is paired with one smaller than sqrt(n), so if none exist up to the square root, n is prime. This makes the check O(sqrt(n)).",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4080,
+    is_active: true
+  },
+  {
+    id: "dsa.math.modular_arithmetic.lesson",
+    type: "lesson",
+    title: "Modular arithmetic and fast power",
+    prompt:
+      "Modular arithmetic keeps numbers small by working with remainders mod m, which is essential when answers would overflow (problems often ask for a result mod 1e9+7). Addition and multiplication distribute over the modulus: `(a + b) % m` and `(a * b) % m` give the right answer, but reduce after every operation, and use a 64-bit type for the product because `a * b` can overflow `int` even when a and b are reduced. Subtraction needs care: `(a - b) % m` can be negative in C++, so write `((a - b) % m + m) % m` to get a value in [0, m). To compute a^b mod m efficiently, use binary exponentiation (exponentiation by squaring): square the base and halve the exponent, multiplying the result in when the current bit is set — O(log b) multiplications instead of O(b). When m is prime, the modular inverse of a is a^(m-2) mod m by Fermat's little theorem, which lets you 'divide' under a modulus. Always state the modulus and use 64-bit intermediates to stay overflow-safe.",
+    explanation:
+      "Reduce mod m after each + and *, using 64-bit products to avoid overflow; fix negative subtraction with ((a-b)%m+m)%m. Compute a^b mod m in O(log b) by binary exponentiation; for prime m the inverse is a^(m-2) mod m (Fermat).",
+    difficulty: "advanced",
+    estimated_minutes: 7,
+    order_index: 4090,
+    is_active: true
+  },
+  {
+    id: "dsa.math.modular_arithmetic.mc_fastpow",
+    type: "multiple_choice",
+    title: "Computing a^b mod m efficiently",
+    prompt: "What is the standard way to compute a^b mod m quickly for a large exponent b?",
+    explanation:
+      "Binary exponentiation (exponentiation by squaring) computes a^b mod m in O(log b) multiplications by squaring the base and halving the exponent, reducing mod m at each step. A plain loop multiplying b times is O(b) and far too slow for large b.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4100,
+    is_active: true
   }
 ];
 
@@ -4176,6 +4251,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.combinatorics.mc_committee", skill_id: "dsa.math.combinatorics", is_primary: true },
   { learning_item_id: "dsa.math.geometry.lesson", skill_id: "dsa.math.geometry", is_primary: true },
   { learning_item_id: "dsa.math.geometry.mc_cross", skill_id: "dsa.math.geometry", is_primary: true },
+  { learning_item_id: "dsa.math.bitmask_techniques.lesson", skill_id: "dsa.math.bitmask_techniques", is_primary: true },
+  { learning_item_id: "dsa.math.bitmask_techniques.mc_submask", skill_id: "dsa.math.bitmask_techniques", is_primary: true },
+  { learning_item_id: "dsa.math.sieve.lesson", skill_id: "dsa.math.sieve", is_primary: true },
+  { learning_item_id: "dsa.math.sieve.mc_trial", skill_id: "dsa.math.sieve", is_primary: true },
+  { learning_item_id: "dsa.math.modular_arithmetic.lesson", skill_id: "dsa.math.modular_arithmetic", is_primary: true },
+  { learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", skill_id: "dsa.math.modular_arithmetic", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -4925,7 +5006,22 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.math.geometry.mc_cross.a", learning_item_id: "dsa.math.geometry.mc_cross", content: "The orientation: left turn, right turn, or collinear", is_correct: true, order_index: 10 },
   { id: "dsa.math.geometry.mc_cross.b", learning_item_id: "dsa.math.geometry.mc_cross", content: "The exact distance between the points", is_correct: false, order_index: 20 },
   { id: "dsa.math.geometry.mc_cross.c", learning_item_id: "dsa.math.geometry.mc_cross", content: "Whether the points are integers", is_correct: false, order_index: 30 },
-  { id: "dsa.math.geometry.mc_cross.d", learning_item_id: "dsa.math.geometry.mc_cross", content: "The number of points on the line", is_correct: false, order_index: 40 }
+  { id: "dsa.math.geometry.mc_cross.d", learning_item_id: "dsa.math.geometry.mc_cross", content: "The number of points on the line", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.bitmask_techniques.mc_submask.a", learning_item_id: "dsa.math.bitmask_techniques.mc_submask", content: "for (int s = mask; s; s = (s - 1) & mask)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.bitmask_techniques.mc_submask.b", learning_item_id: "dsa.math.bitmask_techniques.mc_submask", content: "for (int s = 0; s < mask; ++s)", is_correct: false, order_index: 20 },
+  { id: "dsa.math.bitmask_techniques.mc_submask.c", learning_item_id: "dsa.math.bitmask_techniques.mc_submask", content: "for (int s = mask; s; s >>= 1)", is_correct: false, order_index: 30 },
+  { id: "dsa.math.bitmask_techniques.mc_submask.d", learning_item_id: "dsa.math.bitmask_techniques.mc_submask", content: "for (int s = mask; s; s = s & (s + 1))", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.sieve.mc_trial.a", learning_item_id: "dsa.math.sieve.mc_trial", content: "Up to sqrt(n)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.sieve.mc_trial.b", learning_item_id: "dsa.math.sieve.mc_trial", content: "Up to n - 1", is_correct: false, order_index: 20 },
+  { id: "dsa.math.sieve.mc_trial.c", learning_item_id: "dsa.math.sieve.mc_trial", content: "Up to n / 2 only", is_correct: false, order_index: 30 },
+  { id: "dsa.math.sieve.mc_trial.d", learning_item_id: "dsa.math.sieve.mc_trial", content: "Up to log(n)", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.modular_arithmetic.mc_fastpow.a", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Binary exponentiation (square the base, halve the exponent): O(log b)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.modular_arithmetic.mc_fastpow.b", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Multiply a by itself in a loop b times: O(b)", is_correct: false, order_index: 20 },
+  { id: "dsa.math.modular_arithmetic.mc_fastpow.c", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Use std::pow(a, b) and take the result mod m", is_correct: false, order_index: 30 },
+  { id: "dsa.math.modular_arithmetic.mc_fastpow.d", learning_item_id: "dsa.math.modular_arithmetic.mc_fastpow", content: "Factor b into primes first", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
