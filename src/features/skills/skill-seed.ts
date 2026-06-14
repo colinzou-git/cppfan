@@ -1747,6 +1747,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.prefix_function",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Prefix function and KMP table",
+    description: "Build and read the prefix-function (failure) table that powers KMP.",
+    learner_goal: "Compute the prefix function for a pattern and explain how KMP uses it to skip work.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1950,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.trie",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "Tries (prefix trees)",
+    description: "Store a set of strings in a trie for fast prefix and dictionary queries.",
+    learner_goal: "Use a trie for prefix/autocomplete lookups and weigh its memory cost against a hash map.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1960,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.hashing",
+    domain: "dsa",
+    module_id: "dsa.strings",
+    title: "String hashing and rolling hash",
+    description: "Compare substrings in O(1) with a rolling hash, mindful of collisions.",
+    learner_goal: "Use a rolling hash (Rabin-Karp) for substring equality and guard against collisions.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1970,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation",
     domain: "dsa",
     module_id: "dsa.math",
@@ -1949,6 +1985,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.strings.searching", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.strings.palindrome", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.strings.parsing", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.prefix_function", prerequisite_skill_id: "dsa.strings.searching", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.trie", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.strings.hashing", prerequisite_skill_id: "dsa.strings.searching", relationship_type: "recommended" },
   { skill_id: "dsa.math.bit_manipulation", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "dsa.math.number_theory", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.math.combinatorics", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
