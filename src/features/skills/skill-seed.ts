@@ -1195,6 +1195,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.jthread",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "jthread and cooperative cancellation",
+    description: "Use std::jthread for auto-joining threads that stop cooperatively via a stop_token.",
+    learner_goal: "Start a std::jthread that checks its stop_token and request_stop() to end it cleanly.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 757,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.promise_future",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Promises and packaged tasks",
+    description: "Hand a result from one thread to another with std::promise and std::packaged_task.",
+    learner_goal: "Set a value through a std::promise and read it from the paired future on another thread.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 758,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.task_selection",
+    domain: "cpp",
+    module_id: "cpp.concurrency",
+    title: "Choosing threads vs tasks",
+    description: "Distinguish concurrency from parallelism and pick raw threads vs higher-level tasks.",
+    learner_goal: "Decompose work into tasks and choose std::async/futures over manual threads when it fits.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 759,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io",
     domain: "cpp",
     module_id: "cpp.utilities",
@@ -2012,6 +2048,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.concurrency.deadlock", prerequisite_skill_id: "cpp.concurrency.mutexes", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.condition_variables", prerequisite_skill_id: "cpp.concurrency.mutexes", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.atomics", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.jthread", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.promise_future", prerequisite_skill_id: "cpp.concurrency.async", relationship_type: "recommended" },
+  { skill_id: "cpp.concurrency.task_selection", prerequisite_skill_id: "cpp.concurrency.async", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.file_io", prerequisite_skill_id: "cpp.program_basics.io", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.chrono", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.random", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
