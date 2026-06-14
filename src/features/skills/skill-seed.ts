@@ -1867,6 +1867,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.math.bitmask_techniques",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Bitmask techniques",
+    description: "Use an integer as a set of flags: test/set/clear bits, popcount, and enumerate subsets.",
+    learner_goal: "Treat an int as a bitset for membership and iterate over all subsets of a mask.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2050,
+    is_active: true
+  },
+  {
+    id: "dsa.math.sieve",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Primes: sieve and factorization",
+    description: "Find primes with the sieve of Eratosthenes and factor numbers by trial division.",
+    learner_goal: "Precompute primes with a sieve and factor an integer, choosing the right method by size.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2060,
+    is_active: true
+  },
+  {
+    id: "dsa.math.modular_arithmetic",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Modular arithmetic and fast power",
+    description: "Compute under a modulus without overflow, using binary exponentiation and modular inverse.",
+    learner_goal: "Apply modular add/multiply safely and compute a^b mod m with binary exponentiation.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2070,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -2031,6 +2067,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.math.number_theory", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.math.combinatorics", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
   { skill_id: "dsa.math.geometry", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
+  { skill_id: "dsa.math.bitmask_techniques", prerequisite_skill_id: "dsa.math.bit_manipulation", relationship_type: "recommended" },
+  { skill_id: "dsa.math.sieve", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
+  { skill_id: "dsa.math.modular_arithmetic", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
