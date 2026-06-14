@@ -3902,6 +3902,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.filesystem.lesson",
+    type: "lesson",
+    title: "Filesystem paths and directories",
+    prompt:
+      "`std::filesystem` (C++17, namespace alias `namespace fs = std::filesystem;`) gives portable file and path handling so you never hand-build path strings. Compose paths with `operator/`: `fs::path p = dir / \"data\" / \"log.txt\";` inserts the correct separator on every OS. Query the filesystem with `fs::exists(p)`, `fs::is_directory(p)`, `fs::is_regular_file(p)`, and `fs::file_size(p)`; build structure with `fs::create_directories(p)`. Walk a folder with `for (const auto& entry : fs::directory_iterator(dir))` (one level) or `fs::recursive_directory_iterator` (the whole tree), reading `entry.path()`. Decompose a path with `.filename()`, `.stem()`, `.extension()`, and `.parent_path()`. Error handling comes in two flavors: the throwing form (`fs::create_directory(p)` raises `fs::filesystem_error` on failure) and the non-throwing form that takes a `std::error_code&` out-parameter (`fs::create_directory(p, ec)`), which sets `ec` instead of throwing — use the error_code overload when a failure is expected and recoverable, and let exceptions propagate truly unexpected errors.",
+    explanation:
+      "std::filesystem builds portable paths with operator/ and offers exists/is_directory/file_size, create_directories, and directory_iterator/recursive_directory_iterator. Each operation has a throwing form and a non-throwing std::error_code overload — use error_code for expected failures.",
+    difficulty: "intermediate",
+    estimated_minutes: 6,
+    order_index: 4230,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.filesystem.mc_join",
+    type: "multiple_choice",
+    title: "Composing a portable path",
+    prompt: "What is the portable way to join a directory path and a filename with std::filesystem?",
+    explanation:
+      "fs::path supports operator/, e.g. dir / \"log.txt\", which inserts the correct platform separator. Manually concatenating with \"/\" or \"\\\\\" is not portable.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4240,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.binary_io.lesson",
+    type: "lesson",
+    title: "Text vs binary I/O",
+    prompt:
+      "Streams default to *text* mode, which is convenient for human-readable data but transforms bytes: formatted `<<`/`>>` parse and stringify values, and on Windows a `\\n` written in text mode becomes the two bytes `\\r\\n` on disk (and is translated back on read). For data that must round-trip exactly — images, serialized structs, compressed blobs — open the stream with `std::ios::binary` (`std::ofstream out(path, std::ios::binary);`) and move raw bytes with the unformatted `out.write(reinterpret_cast<const char*>(&value), sizeof value);` and `in.read(...)`, which copy `sizeof` bytes verbatim with no newline translation or parsing. Binary I/O is exact and compact but not portable across machines with different endianness, struct padding, or type sizes, so define an explicit on-disk format (fixed-width integers, documented byte order) when files cross systems. Rule of thumb: text mode and `<<`/`>>` for logs, config, and CSV; binary mode and read/write for exact byte-level serialization where size and fidelity matter.",
+    explanation:
+      "Text mode parses values and (on Windows) translates \\n to \\r\\n; binary mode (std::ios::binary) with read/write copies exact bytes, no translation. Use text for human-readable data, binary for exact serialization — but binary is not portable across endianness/padding.",
+    difficulty: "intermediate",
+    estimated_minutes: 6,
+    order_index: 4250,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.binary_io.mc_mode",
+    type: "multiple_choice",
+    title: "When to use binary mode",
+    prompt: "Why open a file with std::ios::binary and use read/write instead of << / >> for serialized data?",
+    explanation:
+      "Binary mode copies bytes verbatim with no formatting or newline translation (e.g. no \\n to \\r\\n on Windows), so the data round-trips exactly. Formatted << / >> would reinterpret and alter the bytes.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4260,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.variant_visit.lesson",
+    type: "lesson",
+    title: "Visiting a variant",
+    prompt:
+      "Once a value is a `std::variant<A, B, C>`, you need to act on whichever alternative it currently holds. `std::get_if` works for a single check, but `std::visit` is the idiomatic way to handle *every* alternative: `std::visit(visitor, v)` calls `visitor` with the active value, and the compiler requires the visitor to handle all alternatives — so adding a new type to the variant turns an unhandled case into a compile error rather than a runtime surprise. The common visitor is an overload set built from lambdas, often with the \"overloaded\" helper: `std::visit(overloaded{ [](A a){...}, [](B b){...}, [](C c){...} }, v);`. A single generic lambda `[](auto&& x){...}` can handle all alternatives uniformly when the same code works for each. visit can also return a value (all branches must share a common return type) and can visit multiple variants at once. Reach for std::visit whenever you would otherwise write a chain of `get_if`/`holds_alternative` checks — it is exhaustive, extensible, and avoids forgotten cases.",
+    explanation:
+      "std::visit applies a visitor to the active alternative of a variant and forces every alternative to be handled (a new type becomes a compile error). Build the visitor from an overload set of lambdas (the overloaded helper) or a generic lambda; it can return a value and visit multiple variants.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4270,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.variant_visit.mc_exhaustive",
+    type: "multiple_choice",
+    title: "Why visit over get_if chains",
+    prompt: "What advantage does std::visit give over a chain of std::get_if / holds_alternative checks on a variant?",
+    explanation:
+      "std::visit requires the visitor to handle every alternative, so adding a new type to the variant becomes a compile error instead of a silently missed case. Manual get_if chains can forget a case and fail at runtime.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4280,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation.lesson",
     type: "lesson",
     title: "Bit manipulation",
@@ -4405,6 +4480,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.tuples.mc_bind", skill_id: "cpp.utilities.tuples", is_primary: true },
   { learning_item_id: "cpp.utilities.enums.lesson", skill_id: "cpp.utilities.enums", is_primary: true },
   { learning_item_id: "cpp.utilities.enums.mc_choose", skill_id: "cpp.utilities.enums", is_primary: true },
+  { learning_item_id: "cpp.utilities.filesystem.lesson", skill_id: "cpp.utilities.filesystem", is_primary: true },
+  { learning_item_id: "cpp.utilities.filesystem.mc_join", skill_id: "cpp.utilities.filesystem", is_primary: true },
+  { learning_item_id: "cpp.utilities.binary_io.lesson", skill_id: "cpp.utilities.binary_io", is_primary: true },
+  { learning_item_id: "cpp.utilities.binary_io.mc_mode", skill_id: "cpp.utilities.binary_io", is_primary: true },
+  { learning_item_id: "cpp.utilities.variant_visit.lesson", skill_id: "cpp.utilities.variant_visit", is_primary: true },
+  { learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", skill_id: "cpp.utilities.variant_visit", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
@@ -5179,6 +5260,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.utilities.enums.mc_choose.b", learning_item_id: "cpp.utilities.enums.mc_choose", content: "std::variant, one alternative per state", is_correct: false, order_index: 20 },
   { id: "cpp.utilities.enums.mc_choose.c", learning_item_id: "cpp.utilities.enums.mc_choose", content: "A base class with a virtual function per state", is_correct: false, order_index: 30 },
   { id: "cpp.utilities.enums.mc_choose.d", learning_item_id: "cpp.utilities.enums.mc_choose", content: "A plain int with documented magic values", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.filesystem.mc_join.a", learning_item_id: "cpp.utilities.filesystem.mc_join", content: "dir / \"log.txt\" using fs::path operator/", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.filesystem.mc_join.b", learning_item_id: "cpp.utilities.filesystem.mc_join", content: "dir + \"/\" + \"log.txt\" as std::string", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.filesystem.mc_join.c", learning_item_id: "cpp.utilities.filesystem.mc_join", content: "dir + \"\\\\log.txt\" with a backslash", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.filesystem.mc_join.d", learning_item_id: "cpp.utilities.filesystem.mc_join", content: "std::strcat(dir, \"log.txt\")", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.binary_io.mc_mode.a", learning_item_id: "cpp.utilities.binary_io.mc_mode", content: "It copies bytes verbatim with no formatting or newline translation, so data round-trips exactly", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.binary_io.mc_mode.b", learning_item_id: "cpp.utilities.binary_io.mc_mode", content: "Binary mode is always faster for every kind of file", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.binary_io.mc_mode.c", learning_item_id: "cpp.utilities.binary_io.mc_mode", content: "It makes the file portable across all machines automatically", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.binary_io.mc_mode.d", learning_item_id: "cpp.utilities.binary_io.mc_mode", content: "It compresses the data as it writes", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.variant_visit.mc_exhaustive.a", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It forces every alternative to be handled, so a new variant type becomes a compile error", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.variant_visit.mc_exhaustive.b", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It runs the variant's branches in parallel", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.variant_visit.mc_exhaustive.c", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It lets the variant hold more than one type at once", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.variant_visit.mc_exhaustive.d", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It removes the need to declare the variant's types", is_correct: false, order_index: 40 },
 
   { id: "dsa.math.bit_manipulation.mc_test_bit.a", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "(x >> i) & 1", is_correct: true, order_index: 10 },
   { id: "dsa.math.bit_manipulation.mc_test_bit.b", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x % i", is_correct: false, order_index: 20 },
