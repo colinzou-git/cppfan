@@ -44,7 +44,7 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
     return { status: "invalid" };
   }
 
-  const persisted = await recordAttempt({ itemId, choiceId, isCorrect: outcome.isCorrect });
+  const persisted = await recordAttempt({ itemId, choiceId });
 
   // Append skill-mastery evidence (best effort; no-op when signed out).
   const skillId = getPrimarySkillId(itemId);
