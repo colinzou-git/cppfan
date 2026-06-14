@@ -236,3 +236,26 @@ begin
 
   raise notice 'error-tag lockdown smoke OK';
 end $$;
+
+-- 10) #130: per-learner capstone milestone progress table exists with per-user
+-- isolation enabled.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = 'capstone_milestone_progress'
+  ) then
+    raise exception 'capstone_milestone_progress table is missing (#130)';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+      where schemaname = 'public'
+        and tablename = 'capstone_milestone_progress'
+        and policyname = 'capstone_progress_select_own'
+  ) then
+    raise exception 'capstone_milestone_progress is missing its per-user RLS policy (#130)';
+  end if;
+
+  raise notice 'capstone progress smoke OK';
+end $$;
