@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppProviders } from "./providers";
+import { BuildInfoFooter } from "@/components/build-info-footer";
 
 export const metadata: Metadata = {
   title: "cppFan",
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppProviders>{children}</AppProviders>
+        <BuildInfoFooter />
       </body>
     </html>
   );

@@ -1,4 +1,45 @@
+import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
+
+/*
+ * Build metadata (#191), captured exactly once when `next build` evaluates this
+ * config — not per request/render. Injected via `env` so the values are inlined
+ * into the bundle and stay immutable for a given build. Parsing/formatting lives
+ * in src/lib/build-info; here we only collect the raw values with safe fallbacks.
+ */
+function readPackageVersion(): string {
+  try {
+    const pkg = JSON.parse(readFileSync(`${process.cwd()}/package.json`, "utf8")) as { version?: string };
+    return typeof pkg.version === "string" && pkg.version.length > 0 ? pkg.version : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+function resolveCommitSha(): string {
+  const fromEnv = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA;
+  if (fromEnv && fromEnv.length > 0) {
+    return fromEnv;
+  }
+  try {
+    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || "local";
+  } catch {
+    return "local";
+  }
+}
+
+function resolveEnvironment(): string {
+  // Vercel reports production/preview/development; otherwise fall back to NODE_ENV.
+  return process.env.VERCEL_ENV || process.env.NODE_ENV || "development";
+}
+
+const buildInfoEnv = {
+  NEXT_PUBLIC_BUILD_VERSION: readPackageVersion(),
+  NEXT_PUBLIC_BUILD_SHA: resolveCommitSha(),
+  NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
+  NEXT_PUBLIC_BUILD_ENV: resolveEnvironment()
+};
 
 /*
  * Content-Security-Policy. `script-src`/`style-src` keep `'unsafe-inline'`
@@ -35,6 +76,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1"],
+  env: buildInfoEnv,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   }
