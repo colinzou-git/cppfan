@@ -1591,6 +1591,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.range_structures",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Range query structures",
+    description: "Choose prefix sums, a Fenwick tree, or a segment tree by update/query needs.",
+    learner_goal: "Pick a static prefix sum vs a Fenwick/segment tree based on whether values update.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1850,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.greedy_proof",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Greedy proofs and counterexamples",
+    description: "Justify a greedy choice with an exchange argument and find where greedy fails.",
+    learner_goal: "Argue a greedy choice is safe (exchange argument) or disprove it with a counterexample.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1860,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_design",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Designing a DP",
+    description: "Define state, transition, base case, and evaluation order; memoize or tabulate.",
+    learner_goal: "Specify a DP's state/transition/base/order and choose memoization vs tabulation.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1870,
+    is_active: true
+  },
+  {
     id: "dsa.strings.manipulation",
     domain: "dsa",
     module_id: "dsa.strings",
@@ -1828,6 +1864,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.dynamic_programming", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.range_structures", prerequisite_skill_id: "dsa.techniques.prefix_sums", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.greedy_proof", prerequisite_skill_id: "dsa.techniques.greedy", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.dp_design", prerequisite_skill_id: "dsa.techniques.dynamic_programming", relationship_type: "recommended" },
   { skill_id: "dsa.strings.manipulation", prerequisite_skill_id: "cpp.stl.string", relationship_type: "recommended" },
   { skill_id: "dsa.strings.searching", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.strings.palindrome", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
