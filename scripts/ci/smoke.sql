@@ -203,3 +203,36 @@ begin
 
   raise notice 'placement definitions smoke OK (% modules, % items)', v_modules, v_items;
 end $$;
+
+-- 9) #126: wrong-answer tags are server-only and returned via the function only.
+do $$
+begin
+  if public.get_choice_error_tag('cpp.references.references.mc_init.b')
+       is distinct from 'cpp.references.copy_vs_alias' then
+    raise exception 'error-tag RPC smoke failed: distractor tag not returned (#126)';
+  end if;
+
+  -- The correct choice is unmapped: no tag.
+  if public.get_choice_error_tag('cpp.references.references.mc_init.a') is not null then
+    raise exception 'error-tag RPC smoke failed: correct choice should have no tag (#126)';
+  end if;
+
+  raise notice 'error-tag RPC smoke OK';
+end $$;
+
+do $$
+begin
+  -- The mapping table must not be directly readable by clients.
+  if exists (
+    select 1
+      from information_schema.role_table_grants
+      where grantee in ('anon', 'authenticated')
+        and table_schema = 'public'
+        and table_name = 'choice_error_tags'
+        and privilege_type = 'SELECT'
+  ) then
+    raise exception 'anon/authenticated must not read choice_error_tags directly (#126)';
+  end if;
+
+  raise notice 'error-tag lockdown smoke OK';
+end $$;
