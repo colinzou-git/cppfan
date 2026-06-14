@@ -5747,12 +5747,42 @@ export function getPrimarySkillId(itemId: string): string | null {
 }
 
 /**
- * Active learning items that can seed a review card, each paired with its
- * primary skill. Used to create review cards from eligible items.
+ * Item types suitable for spaced retrieval practice. Lessons are explanatory
+ * content, not retrieval, so they are never enrolled as review cards (#142).
+ */
+const REVIEW_ELIGIBLE_TYPES: ReadonlySet<LearningItem["type"]> = new Set([
+  "multiple_choice",
+  "concept_check",
+  "code_reading",
+  "bug_spotting"
+]);
+
+/** Whether an item type can be scheduled for review (excludes lessons). */
+export function isReviewEligibleType(type: LearningItem["type"]): boolean {
+  return REVIEW_ELIGIBLE_TYPES.has(type);
+}
+
+/**
+ * Whether a specific learning item can seed a review card: it must be active, a
+ * retrieval-practice type (not a lesson), and have a primary skill. Used at the
+ * evidence-writing boundary so only meaningful practice creates a card (#142).
+ */
+export function isReviewEligibleItem(itemId: string): boolean {
+  const details = getLearningItemById(itemId);
+  if (!details || !details.item.is_active || !isReviewEligibleType(details.item.type)) {
+    return false;
+  }
+  return getPrimarySkillId(itemId) !== null;
+}
+
+/**
+ * Active, retrieval-practice learning items that can seed a review card, each
+ * paired with its primary skill. Lessons are excluded (#142). Used for the
+ * review preview list and to validate enrollment.
  */
 export function getEligibleReviewItems(): { item: LearningItem; skillId: string }[] {
   return learningItems
-    .filter((item) => item.is_active)
+    .filter((item) => item.is_active && isReviewEligibleType(item.type))
     .map((item) => ({ item, skillId: getPrimarySkillId(item.id) }))
     .filter((entry): entry is { item: LearningItem; skillId: string } => entry.skillId !== null)
     .sort((a, b) => a.item.order_index - b.item.order_index);

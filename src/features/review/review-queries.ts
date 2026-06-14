@@ -1,7 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createInitialSchedule } from "@/lib/fsrs/scheduler";
-import { getEligibleReviewItems, getLearningItemById } from "@/features/learning-items/learning-item-seed";
+import {
+  getEligibleReviewItems,
+  getLearningItemById,
+  getPrimarySkillId,
+  isReviewEligibleItem
+} from "@/features/learning-items/learning-item-seed";
 import type { DueReviewEntry, ReviewCard, ReviewPreviewEntry, ReviewQueueView } from "./review-types";
 
 const CARD_COLUMNS =
@@ -17,29 +22,35 @@ function seedPreview(): ReviewPreviewEntry[] {
 }
 
 /**
- * Create a review card for each eligible learning item the signed-in learner
- * does not already have one for. Best effort: silently no-ops if the tables are
- * not migrated yet.
+ * Enroll a single learning item as a review card for the signed-in learner, from
+ * real learning evidence (a graded practice attempt or a deliberate add) — NOT
+ * from visiting `/review` (#142). Idempotent: the unique (user_id,
+ * learning_item_id) constraint plus ignoreDuplicates means retries and
+ * concurrent submissions never create a second card. No-ops for items that are
+ * not retrieval-practice eligible (e.g. lessons) or when the table is not
+ * migrated yet. Best effort; returns whether a card now exists for the item.
  */
-async function ensureReviewCardsForUser(
+export async function enrollReviewCard(
   supabase: SupabaseClient,
   userId: string,
-  now: Date
-): Promise<void> {
-  const existing = await supabase.from("review_cards").select("learning_item_id").eq("user_id", userId);
-
-  if (existing.error) {
-    return;
+  itemId: string,
+  now: Date = new Date()
+): Promise<boolean> {
+  if (!isReviewEligibleItem(itemId)) {
+    return false;
   }
 
-  const owned = new Set((existing.data ?? []).map((row) => row.learning_item_id as string));
+  const skillId = getPrimarySkillId(itemId);
+  if (!skillId) {
+    return false;
+  }
+
   const initial = createInitialSchedule(now);
 
-  const missing = getEligibleReviewItems()
-    .filter(({ item }) => !owned.has(item.id))
-    .map(({ item, skillId }) => ({
+  const { error } = await supabase.from("review_cards").upsert(
+    {
       user_id: userId,
-      learning_item_id: item.id,
+      learning_item_id: itemId,
       skill_id: skillId,
       state: initial.state,
       due_at: initial.due_at,
@@ -51,11 +62,11 @@ async function ensureReviewCardsForUser(
       reps: initial.reps,
       lapses: initial.lapses,
       last_reviewed_at: initial.last_reviewed_at
-    }));
+    },
+    { onConflict: "user_id,learning_item_id", ignoreDuplicates: true }
+  );
 
-  if (missing.length > 0) {
-    await supabase.from("review_cards").insert(missing);
-  }
+  return !error;
 }
 
 function toDueEntry(card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id">): DueReviewEntry | null {
@@ -96,8 +107,9 @@ export async function getReviewQueue(now: Date = new Date()): Promise<ReviewQueu
     return { authenticated: false, due: [], preview };
   }
 
-  await ensureReviewCardsForUser(supabase, user.id, now);
-
+  // #142: reading the queue must never enroll content. Cards are created only
+  // from learning evidence (see enrollReviewCard), so a new learner has zero due
+  // reviews until they actually practice.
   const dueResult = await supabase
     .from("review_cards")
     .select(CARD_COLUMNS)
