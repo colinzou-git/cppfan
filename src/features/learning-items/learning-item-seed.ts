@@ -4225,6 +4225,81 @@ export const learningItems: LearningItem[] = [
     estimated_minutes: 2,
     order_index: 4340,
     is_active: true
+  },
+  {
+    id: "dsa.math.vectors_dot_cross.lesson",
+    type: "lesson",
+    title: "Vectors: dot and cross products",
+    prompt:
+      "Represent a vector as a pair (x, y) — usually the difference of two points, B - A. Two products do most of the work in 2D geometry. The dot product a·b = ax*bx + ay*by measures alignment: it equals |a||b|cos(theta), so it is positive when the vectors point within 90 degrees of each other, zero when they are perpendicular, and negative when they point more than 90 degrees apart. It also gives projections and squared length (a·a = |a|^2). The 2D cross product a×b = ax*by - ay*bx is a scalar (the z-component of the 3D cross product); its magnitude is the area of the parallelogram spanned by a and b (twice the triangle area), and its sign is orientation: for vectors AB and AC, positive means C is a left/counter-clockwise turn from AB, negative means right/clockwise, and zero means the three points are collinear. This single orientation test underlies polygon area, convex hull, and segment intersection. Prefer the cross product over comparing slopes — slopes divide (and blow up on vertical lines), while the cross product is a multiplication that stays exact on integer coordinates.",
+    explanation:
+      "Dot product a·b = ax*bx+ay*by = |a||b|cos(theta): sign tells acute/perpendicular/obtuse, and gives projection/squared length. 2D cross a×b = ax*by-ay*bx: magnitude = parallelogram area (2x triangle), sign = orientation (CCW positive / CW negative / 0 collinear). Prefer cross over slopes (no division).",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4350,
+    is_active: true
+  },
+  {
+    id: "dsa.math.vectors_dot_cross.mc_cross",
+    type: "multiple_choice",
+    title: "What the cross product sign tells you",
+    prompt: "For 2D vectors AB and AC, the cross product (AB × AC) is positive. What does that mean about point C relative to line AB?",
+    explanation:
+      "A positive 2D cross product means C is a counter-clockwise (left) turn from AB. Negative means clockwise (right), and zero means A, B, C are collinear. The magnitude is twice the triangle area.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4360,
+    is_active: true
+  },
+  {
+    id: "dsa.math.segment_intersection.lesson",
+    type: "lesson",
+    title: "Segment intersection",
+    prompt:
+      "To decide whether two segments AB and CD cross, use the orientation test built from the cross product. Define orient(P, Q, R) as the sign of (Q - P) × (R - P): positive for a counter-clockwise turn, negative for clockwise, zero for collinear. The general (proper) case: AB and CD intersect when A and B are on opposite sides of line CD and C and D are on opposite sides of line AB — that is, orient(C, D, A) and orient(C, D, B) have opposite signs, and orient(A, B, C) and orient(A, B, D) have opposite signs. This catches crossings without computing the actual intersection point, using only multiplication and comparison (exact on integer coordinates). The collinear edge cases need separate handling: when an orientation is zero the points are collinear, so check whether the colinear point lies within the other segment's bounding box (an on-segment test). Watch shared endpoints and overlapping collinear segments — decide explicitly whether touching counts as intersecting. Only compute the intersection coordinates if you actually need them; the orientation test alone answers the yes/no question.",
+    explanation:
+      "Use orient(P,Q,R) = sign((Q-P)×(R-P)). Segments AB, CD properly cross when orient(C,D,A) and orient(C,D,B) differ AND orient(A,B,C) and orient(A,B,D) differ. Zero orientations mean collinear — add an on-segment/bounding-box check. No division needed; exact on integers.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4370,
+    is_active: true
+  },
+  {
+    id: "dsa.math.segment_intersection.mc_test",
+    type: "multiple_choice",
+    title: "Detecting a proper crossing",
+    prompt: "Which condition detects that segments AB and CD properly cross (excluding collinear/endpoint cases)?",
+    explanation:
+      "A and B must lie on opposite sides of line CD, and C and D on opposite sides of line AB — i.e. orient(C,D,A) vs orient(C,D,B) differ in sign and orient(A,B,C) vs orient(A,B,D) differ in sign. Equal-distance or slope equality does not determine crossing.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4380,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_precision.lesson",
+    type: "lesson",
+    title: "Geometry precision",
+    prompt:
+      "Floating-point is the main source of wrong-answer bugs in geometry. doubles cannot represent most decimals exactly, so errors accumulate and an exact equality test like `if (area == 0)` almost never behaves as intended. Two defenses. First, stay in integers when you can: if coordinates are integers, the cross product, dot product, doubled polygon area, and orientation tests are all exact integer arithmetic — never convert to double for these, and use a 64-bit type because products of coordinates can overflow 32 bits. Compare squared distances instead of distances to avoid sqrt entirely (sqrt both costs time and introduces error). Second, when doubles are unavoidable (angles, true lengths, intersection points), never compare with == or <; compare against a small epsilon: treat |a - b| < 1e-9 as equal, and a > eps / a < -eps for sign. Choose epsilon relative to the coordinate magnitude. Also avoid catastrophic cancellation (subtracting nearly equal large numbers) and prefer formulas that keep intermediate values small. Rule of thumb: integer-exact geometry first; epsilon comparisons only where real numbers are truly required.",
+    explanation:
+      "Prefer exact integer arithmetic (cross/dot/doubled-area/orientation are exact on integer coords; use 64-bit to avoid overflow); compare squared distances to skip sqrt. With doubles, never use == or raw <; compare with an epsilon (|a-b| < 1e-9) and watch catastrophic cancellation.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4390,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_precision.mc_compare",
+    type: "multiple_choice",
+    title: "Comparing floating-point geometry values",
+    prompt: "You must compare two computed double areas for equality in a geometry routine. What is the safe approach?",
+    explanation:
+      "Compare with a tolerance: treat the values as equal when |a - b| < epsilon (e.g. 1e-9). A direct == almost always fails on doubles due to rounding; better still, use exact integer arithmetic when the coordinates are integers.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4400,
+    is_active: true
   }
 ];
 
@@ -4581,6 +4656,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.inclusion_exclusion.mc_two_sets", skill_id: "dsa.math.inclusion_exclusion", is_primary: true },
   { learning_item_id: "dsa.math.geometry_area.lesson", skill_id: "dsa.math.geometry_area", is_primary: true },
   { learning_item_id: "dsa.math.geometry_area.mc_order", skill_id: "dsa.math.geometry_area", is_primary: true },
+  { learning_item_id: "dsa.math.vectors_dot_cross.lesson", skill_id: "dsa.math.vectors_dot_cross", is_primary: true },
+  { learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", skill_id: "dsa.math.vectors_dot_cross", is_primary: true },
+  { learning_item_id: "dsa.math.segment_intersection.lesson", skill_id: "dsa.math.segment_intersection", is_primary: true },
+  { learning_item_id: "dsa.math.segment_intersection.mc_test", skill_id: "dsa.math.segment_intersection", is_primary: true },
+  { learning_item_id: "dsa.math.geometry_precision.lesson", skill_id: "dsa.math.geometry_precision", is_primary: true },
+  { learning_item_id: "dsa.math.geometry_precision.mc_compare", skill_id: "dsa.math.geometry_precision", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false }
 ];
 
@@ -5405,7 +5486,22 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.math.geometry_area.mc_order.a", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The vertices must be given in order around the polygon (consistently CW or CCW)", is_correct: true, order_index: 10 },
   { id: "dsa.math.geometry_area.mc_order.b", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The vertices must be sorted by x-coordinate", is_correct: false, order_index: 20 },
   { id: "dsa.math.geometry_area.mc_order.c", learning_item_id: "dsa.math.geometry_area.mc_order", content: "All coordinates must be positive", is_correct: false, order_index: 30 },
-  { id: "dsa.math.geometry_area.mc_order.d", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The polygon must be a triangle or rectangle", is_correct: false, order_index: 40 }
+  { id: "dsa.math.geometry_area.mc_order.d", learning_item_id: "dsa.math.geometry_area.mc_order", content: "The polygon must be a triangle or rectangle", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.vectors_dot_cross.mc_cross.a", learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", content: "C is a counter-clockwise (left) turn from AB", is_correct: true, order_index: 10 },
+  { id: "dsa.math.vectors_dot_cross.mc_cross.b", learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", content: "C is a clockwise (right) turn from AB", is_correct: false, order_index: 20 },
+  { id: "dsa.math.vectors_dot_cross.mc_cross.c", learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", content: "A, B, and C are collinear", is_correct: false, order_index: 30 },
+  { id: "dsa.math.vectors_dot_cross.mc_cross.d", learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", content: "C lies exactly on segment AB", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.segment_intersection.mc_test.a", learning_item_id: "dsa.math.segment_intersection.mc_test", content: "A and B are on opposite sides of CD, and C and D are on opposite sides of AB (orientations differ)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.segment_intersection.mc_test.b", learning_item_id: "dsa.math.segment_intersection.mc_test", content: "The two segments have equal length", is_correct: false, order_index: 20 },
+  { id: "dsa.math.segment_intersection.mc_test.c", learning_item_id: "dsa.math.segment_intersection.mc_test", content: "The two segments have the same slope", is_correct: false, order_index: 30 },
+  { id: "dsa.math.segment_intersection.mc_test.d", learning_item_id: "dsa.math.segment_intersection.mc_test", content: "Their midpoints coincide", is_correct: false, order_index: 40 },
+
+  { id: "dsa.math.geometry_precision.mc_compare.a", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Treat them as equal when |a - b| < a small epsilon (e.g. 1e-9)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.geometry_precision.mc_compare.b", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Compare them directly with ==", is_correct: false, order_index: 20 },
+  { id: "dsa.math.geometry_precision.mc_compare.c", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Round both to the nearest integer first", is_correct: false, order_index: 30 },
+  { id: "dsa.math.geometry_precision.mc_compare.d", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Convert them to strings and compare text", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
