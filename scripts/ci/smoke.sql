@@ -57,3 +57,38 @@ begin
 
   raise notice 'answer-key lockdown smoke OK (anon cannot see is_correct)';
 end $$;
+
+-- 4) #141: attempts are server-authoritative. Direct client INSERT is revoked so
+-- a browser cannot forge is_correct; only the trusted function may record.
+do $$
+begin
+  if exists (
+    select 1
+      from information_schema.role_table_grants
+      where grantee in ('anon', 'authenticated')
+        and table_schema = 'public'
+        and table_name = 'learning_item_attempts'
+        and privilege_type = 'INSERT'
+  ) then
+    raise exception 'anon/authenticated must not have direct INSERT on learning_item_attempts (#141)';
+  end if;
+
+  raise notice 'attempts lockdown smoke OK (no direct client INSERT)';
+end $$;
+
+-- 5) #141: the server-authoritative record function exists with the expected
+-- signature so the app can route attempts through it.
+do $$
+begin
+  if not exists (
+    select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname = 'record_learning_item_attempt'
+  ) then
+    raise exception 'record_learning_item_attempt function is missing (#141)';
+  end if;
+
+  raise notice 'attempts record-function smoke OK';
+end $$;

@@ -100,15 +100,18 @@ export async function gradeViaRpc(itemId: string, choiceId: string): Promise<Rpc
 }
 
 /**
- * Record an attempt for the signed-in learner. Best effort: returns false when
- * Supabase is unconfigured, the user is not signed in, or the attempts table is
- * not yet migrated, so grading still works offline / pre-migration.
+ * Record an attempt for the signed-in learner through the server-authoritative
+ * `record_learning_item_attempt` function (#141), which re-derives correctness
+ * from the protected answer key and stamps user_id from auth.uid(). The client
+ * never supplies `is_correct`, and direct INSERT on learning_item_attempts is
+ * revoked, so correctness cannot be forged from the browser.
+ *
+ * Best effort: returns false when Supabase is unconfigured, the user is not
+ * signed in, or the function is not yet migrated, so grading still works
+ * offline / pre-migration. The selected choice id is enough — the function
+ * grades it server-side.
  */
-export async function recordAttempt(input: {
-  itemId: string;
-  choiceId: string;
-  isCorrect: boolean;
-}): Promise<boolean> {
+export async function recordAttempt(input: { itemId: string; choiceId: string }): Promise<boolean> {
   const supabase = await createClient();
 
   if (!supabase) {
@@ -123,12 +126,17 @@ export async function recordAttempt(input: {
     return false;
   }
 
-  const { error } = await supabase.from("learning_item_attempts").insert({
-    user_id: user.id,
-    learning_item_id: input.itemId,
-    selected_choice_id: input.choiceId,
-    is_correct: input.isCorrect
+  const { data, error } = await supabase.rpc("record_learning_item_attempt", {
+    p_item_id: input.itemId,
+    p_choice_id: input.choiceId
   });
 
-  return !error;
+  if (error) {
+    return false;
+  }
+
+  // The function returns one row on a recorded attempt, no rows when the
+  // submission was ungradeable (and therefore not recorded).
+  const row = Array.isArray(data) ? data[0] : data;
+  return Boolean(row);
 }
