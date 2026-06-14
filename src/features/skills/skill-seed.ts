@@ -2011,6 +2011,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.math.pascal_binomial",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Binomial coefficients and Pascal's triangle",
+    description: "Compute n-choose-k with Pascal's recurrence and factorials.",
+    learner_goal: "Build C(n,k) from Pascal's recurrence or factorials and know when each fits.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2080,
+    is_active: true
+  },
+  {
+    id: "dsa.math.inclusion_exclusion",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Inclusion-exclusion",
+    description: "Count unions of overlapping sets by adding and subtracting intersections.",
+    learner_goal: "Apply inclusion-exclusion to count elements in a union without double-counting.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2090,
+    is_active: true
+  },
+  {
+    id: "dsa.math.geometry_area",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Polygon area (shoelace)",
+    description: "Compute the area of a simple polygon with the shoelace formula.",
+    learner_goal: "Use the shoelace formula to get a polygon's area from its ordered vertices.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2100,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -2187,6 +2223,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.math.bitmask_techniques", prerequisite_skill_id: "dsa.math.bit_manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.math.sieve", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
   { skill_id: "dsa.math.modular_arithmetic", prerequisite_skill_id: "dsa.math.number_theory", relationship_type: "recommended" },
+  { skill_id: "dsa.math.pascal_binomial", prerequisite_skill_id: "dsa.math.combinatorics", relationship_type: "recommended" },
+  { skill_id: "dsa.math.inclusion_exclusion", prerequisite_skill_id: "dsa.math.combinatorics", relationship_type: "recommended" },
+  { skill_id: "dsa.math.geometry_area", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
