@@ -93,3 +93,18 @@ jobs:
 
       - name: Smoke-test migrated schema
         run: psql -v ON_ERROR_STOP=1 -f scripts/ci/smoke.sql
+
+  cpp:
+    name: C++ exercises
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # #98: compile-check the write-code exercise packages from a clean Linux
+      # toolchain — every reference solution builds and passes its tests and every
+      # starter builds, with AddressSanitizer/UBSan enabled (verify-all.sh).
+      - name: Verify C++ exercise packages
+        run: bash scripts/exercises/verify-all.sh
+
