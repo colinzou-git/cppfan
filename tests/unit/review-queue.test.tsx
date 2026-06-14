@@ -57,7 +57,11 @@ describe("ReviewQueue reveal-then-rate flow", () => {
 
     fireEvent.click(screen.getByTestId("review-rate-good"));
 
-    await waitFor(() => expect(rateReview).toHaveBeenCalledWith({ cardId: "card-1", rating: "good" }));
+    await waitFor(() =>
+      expect(rateReview).toHaveBeenCalledWith(
+        expect.objectContaining({ cardId: "card-1", rating: "good", submissionId: expect.any(String) })
+      )
+    );
     expect(await screen.findByTestId("review-empty")).toBeInTheDocument();
   });
 

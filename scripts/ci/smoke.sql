@@ -259,3 +259,34 @@ begin
 
   raise notice 'capstone progress smoke OK';
 end $$;
+
+-- 11) #143: review ratings are atomic + server-authoritative. Direct UPDATE on
+-- review_cards and INSERT on review_logs are revoked; the function is the only
+-- write path.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.role_table_grants
+      where grantee in ('anon', 'authenticated') and table_schema = 'public'
+        and table_name = 'review_cards' and privilege_type = 'UPDATE'
+  ) then
+    raise exception 'anon/authenticated must not directly UPDATE review_cards (#143)';
+  end if;
+
+  if exists (
+    select 1 from information_schema.role_table_grants
+      where grantee in ('anon', 'authenticated') and table_schema = 'public'
+        and table_name = 'review_logs' and privilege_type = 'INSERT'
+  ) then
+    raise exception 'anon/authenticated must not directly INSERT review_logs (#143)';
+  end if;
+
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'apply_review_rating'
+  ) then
+    raise exception 'apply_review_rating function is missing (#143)';
+  end if;
+
+  raise notice 'atomic review-rating lockdown smoke OK';
+end $$;

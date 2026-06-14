@@ -1,14 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { applyRating, type ReviewRating } from "@/lib/fsrs/scheduler";
 import { getReviewCardForUser } from "./review-queries";
 import { enrollReviewForUser } from "./enroll-review";
 import { isReviewEligibleItem } from "@/features/learning-items/learning-item-seed";
-import { recordSkillEvent } from "@/features/events/event-service";
-
-export type RateReviewResult = { status: "error" } | { status: "ok"; state: string; dueAt: string };
+import { classifyRateRpc, type RateReviewResult } from "./rate-review-result";
 
 export type AddToReviewResult = { status: "ok" } | { status: "ineligible" } | { status: "error" };
 
@@ -38,12 +37,25 @@ export async function addToReview(input: { itemId: string }): Promise<AddToRevie
 const VALID_RATINGS: ReviewRating[] = ["again", "hard", "good", "easy"];
 
 /**
- * Apply an FSRS rating to one of the signed-in learner's review cards: update
- * the card schedule and append an immutable review log.
+ * Apply an FSRS rating to one of the signed-in learner's review cards. The FSRS
+ * transition is computed here (ts-fsrs), then the apply_review_rating database
+ * function performs the card update, the immutable review-log append, and the
+ * review_completed evidence ATOMICALLY (#143) — with ownership, optimistic
+ * concurrency (expected reps), and idempotency (submission id) checks. Partial
+ * writes and lost updates are therefore impossible, and a retry/double-tap with
+ * the same submissionId is idempotent.
+ *
+ * The caller should pass a stable submissionId per rating action so an
+ * in-flight retry does not rate twice; one is generated if omitted.
  */
-export async function rateReview(input: { cardId: string; rating: ReviewRating }): Promise<RateReviewResult> {
+export async function rateReview(input: {
+  cardId: string;
+  rating: ReviewRating;
+  submissionId?: string;
+}): Promise<RateReviewResult> {
   const cardId = typeof input?.cardId === "string" ? input.cardId : "";
   const rating = input?.rating;
+  const submissionId = typeof input?.submissionId === "string" && input.submissionId ? input.submissionId : randomUUID();
 
   if (!cardId || !VALID_RATINGS.includes(rating)) {
     return { status: "error" };
@@ -66,7 +78,6 @@ export async function rateReview(input: { cardId: string; rating: ReviewRating }
     return { status: "error" };
   }
 
-  const now = new Date();
   const { schedule, log } = applyRating(
     {
       state: card.state,
@@ -81,53 +92,23 @@ export async function rateReview(input: { cardId: string; rating: ReviewRating }
       last_reviewed_at: card.last_reviewed_at
     },
     rating,
-    now
+    new Date()
   );
 
-  const update = await supabase
-    .from("review_cards")
-    .update({
-      state: schedule.state,
-      due_at: schedule.due_at,
-      stability: schedule.stability,
-      difficulty: schedule.difficulty,
-      elapsed_days: schedule.elapsed_days,
-      scheduled_days: schedule.scheduled_days,
-      learning_steps: schedule.learning_steps,
-      reps: schedule.reps,
-      lapses: schedule.lapses,
-      last_reviewed_at: schedule.last_reviewed_at
+  const result = classifyRateRpc(
+    await supabase.rpc("apply_review_rating", {
+      p_card_id: cardId,
+      p_rating: rating,
+      p_expected_reps: card.reps,
+      p_submission_id: submissionId,
+      p_schedule: schedule,
+      p_log: log
     })
-    .eq("id", cardId)
-    .eq("user_id", user.id);
+  );
 
-  if (update.error) {
-    return { status: "error" };
+  if (result.status !== "error") {
+    revalidatePath("/review");
   }
 
-  await supabase.from("review_logs").insert({
-    user_id: user.id,
-    review_card_id: cardId,
-    rating: log.rating,
-    state: log.state,
-    due_at: log.due_at,
-    stability: log.stability,
-    difficulty: log.difficulty,
-    elapsed_days: log.elapsed_days,
-    last_elapsed_days: log.last_elapsed_days,
-    scheduled_days: log.scheduled_days,
-    reviewed_at: log.reviewed_at
-  });
-
-  // Append skill-mastery evidence (best effort; separate from FSRS card state).
-  await recordSkillEvent({
-    eventType: "review_completed",
-    skillId: card.skill_id,
-    learningItemId: card.learning_item_id,
-    reviewCardId: cardId
-  });
-
-  revalidatePath("/review");
-
-  return { status: "ok", state: schedule.state, dueAt: schedule.due_at };
+  return result;
 }
