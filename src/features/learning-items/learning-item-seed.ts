@@ -3977,6 +3977,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.chrono_depth.lesson",
+    type: "lesson",
+    title: "Clocks, durations, and time points",
+    prompt:
+      "std::chrono separates three ideas. A duration is a span of time with a unit, written as types like `std::chrono::milliseconds` or `std::chrono::duration<double>`; a time_point is a moment, returned by a clock's `now()`; and subtracting two time_points yields a duration. Pick the right clock: `std::chrono::steady_clock` never jumps backward and is the only correct choice for measuring elapsed time (a benchmark or timeout), while `system_clock` tracks wall-clock calendar time but can be adjusted by NTP or the user — never time intervals with it. The pattern is `auto t0 = steady_clock::now(); /* work */ auto t1 = steady_clock::now();` then convert the difference: `auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();`. Conversions to coarser units (e.g. nanoseconds to milliseconds) truncate, so they require an explicit `duration_cast`; conversions to finer or exact units are implicit. C++14 literals like `using namespace std::chrono_literals; auto d = 250ms;` make durations readable. Rule: steady_clock for elapsed time, system_clock for dates, and always state units via the duration type rather than passing bare integers.",
+    explanation:
+      "chrono separates duration (span+unit), time_point (a moment from clock::now()), and clocks. Use steady_clock for elapsed time (monotonic), system_clock for calendar time. Subtract time_points to get a duration; duration_cast for lossy/coarser conversions (it truncates).",
+    difficulty: "intermediate",
+    estimated_minutes: 6,
+    order_index: 4410,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.chrono_depth.mc_clock",
+    type: "multiple_choice",
+    title: "Choosing a clock for elapsed time",
+    prompt: "Which clock should you use to measure how long a section of code takes to run?",
+    explanation:
+      "std::chrono::steady_clock is monotonic — it never jumps backward — so it is the correct clock for measuring elapsed time. system_clock can be adjusted (NTP, manual changes) and may even go backward, corrupting interval measurements.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4420,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.random_quality.lesson",
+    type: "lesson",
+    title: "Quality random numbers",
+    prompt:
+      "The `<random>` library separates two roles that the old `rand()` conflated: an *engine* produces raw random bits (e.g. `std::mt19937`, a fast Mersenne Twister, or `std::mt19937_64`), and a *distribution* maps those bits onto the shape you want (e.g. `std::uniform_int_distribution<int> dist(1, 6);` for a fair die, or `std::uniform_real_distribution<double>` for a range of reals). You seed the engine once — `std::mt19937 gen(std::random_device{}());` — and then call `dist(gen)` repeatedly; do not reseed per draw, and do not create a new engine inside a loop. The classic bug is `rand() % n`, which is biased: unless n divides RAND_MAX+1 evenly, the low remainders occur slightly more often (modulo bias), and `rand()`'s low bits are often poor quality besides. `uniform_int_distribution` handles the range correctly with no bias. For reproducible tests, seed with a fixed constant instead of random_device. Rule: one engine, seeded once; a distribution for the range; never rand()%n.",
+    explanation:
+      "<random> splits the engine (raw bits, e.g. mt19937) from the distribution (shape, e.g. uniform_int_distribution). Seed the engine once, then call dist(gen). Avoid rand()%n: it has modulo bias and poor low bits. Use a fixed seed for reproducible tests.",
+    difficulty: "intermediate",
+    estimated_minutes: 6,
+    order_index: 4430,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.random_quality.mc_bias",
+    type: "multiple_choice",
+    title: "Why avoid rand() % n",
+    prompt: "Why is `rand() % n` a poor way to get a uniform random integer in [0, n)?",
+    explanation:
+      "Unless n divides RAND_MAX+1 evenly, the modulo wraps unevenly so smaller remainders appear more often — modulo bias. std::uniform_int_distribution over a seeded engine produces an unbiased value in the range.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4440,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.getline_input.lesson",
+    type: "lesson",
+    title: "Whole-line input with getline",
+    prompt:
+      "`std::getline(stream, line)` reads everything up to (and discarding) the next newline into `line`, so it is the way to read input that contains spaces — a full name, a sentence, or a whole line of a file. Loop with `while (std::getline(in, line)) { ... }` to process a file line by line; the loop ends cleanly at end-of-file. The classic pitfall is mixing `>>` with `getline`: formatted extraction like `std::cin >> n;` reads the number but leaves the trailing newline in the buffer, so the very next `std::getline` returns an empty string (it stops immediately at that leftover newline). The fix is to discard the rest of the line after the `>>`: `std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n');` before calling getline. `getline` also takes an optional delimiter (`std::getline(in, field, ',')`) to split on something other than newline. Rule: use getline for lines/spaces, `>>` for individual tokens, and clear the newline when you switch from `>>` to getline.",
+    explanation:
+      "std::getline reads a whole line (including spaces) up to the newline; loop while (getline(in, line)) to read a file line by line. After >> leaves a trailing newline, call cin.ignore(max, '\\n') before getline or it reads an empty line. getline takes an optional delimiter.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4450,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.getline_input.mc_mix",
+    type: "multiple_choice",
+    title: "Mixing >> and getline",
+    prompt: "After `std::cin >> n;`, the next `std::getline(std::cin, line)` returns an empty string. Why, and how do you fix it?",
+    explanation:
+      "The >> left the trailing newline in the buffer, so getline stops immediately at it. Call std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n') after the >> to discard the rest of the line before getline.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4460,
+    is_active: true
+  },
+  {
     id: "dsa.math.bit_manipulation.lesson",
     type: "lesson",
     title: "Bit manipulation",
@@ -4636,6 +4711,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.binary_io.mc_mode", skill_id: "cpp.utilities.binary_io", is_primary: true },
   { learning_item_id: "cpp.utilities.variant_visit.lesson", skill_id: "cpp.utilities.variant_visit", is_primary: true },
   { learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", skill_id: "cpp.utilities.variant_visit", is_primary: true },
+  { learning_item_id: "cpp.utilities.chrono_depth.lesson", skill_id: "cpp.utilities.chrono_depth", is_primary: true },
+  { learning_item_id: "cpp.utilities.chrono_depth.mc_clock", skill_id: "cpp.utilities.chrono_depth", is_primary: true },
+  { learning_item_id: "cpp.utilities.random_quality.lesson", skill_id: "cpp.utilities.random_quality", is_primary: true },
+  { learning_item_id: "cpp.utilities.random_quality.mc_bias", skill_id: "cpp.utilities.random_quality", is_primary: true },
+  { learning_item_id: "cpp.utilities.getline_input.lesson", skill_id: "cpp.utilities.getline_input", is_primary: true },
+  { learning_item_id: "cpp.utilities.getline_input.mc_mix", skill_id: "cpp.utilities.getline_input", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
@@ -5437,6 +5518,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.utilities.variant_visit.mc_exhaustive.b", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It runs the variant's branches in parallel", is_correct: false, order_index: 20 },
   { id: "cpp.utilities.variant_visit.mc_exhaustive.c", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It lets the variant hold more than one type at once", is_correct: false, order_index: 30 },
   { id: "cpp.utilities.variant_visit.mc_exhaustive.d", learning_item_id: "cpp.utilities.variant_visit.mc_exhaustive", content: "It removes the need to declare the variant's types", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.chrono_depth.mc_clock.a", learning_item_id: "cpp.utilities.chrono_depth.mc_clock", content: "std::chrono::steady_clock (monotonic, never goes backward)", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.chrono_depth.mc_clock.b", learning_item_id: "cpp.utilities.chrono_depth.mc_clock", content: "std::chrono::system_clock (wall-clock calendar time)", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.chrono_depth.mc_clock.c", learning_item_id: "cpp.utilities.chrono_depth.mc_clock", content: "Whichever clock has the smallest period", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.chrono_depth.mc_clock.d", learning_item_id: "cpp.utilities.chrono_depth.mc_clock", content: "std::time(nullptr) in seconds", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.random_quality.mc_bias.a", learning_item_id: "cpp.utilities.random_quality.mc_bias", content: "Unless n divides the range evenly, smaller remainders occur more often (modulo bias)", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.random_quality.mc_bias.b", learning_item_id: "cpp.utilities.random_quality.mc_bias", content: "rand() always returns even numbers", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.random_quality.mc_bias.c", learning_item_id: "cpp.utilities.random_quality.mc_bias", content: "The modulo operator is too slow", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.random_quality.mc_bias.d", learning_item_id: "cpp.utilities.random_quality.mc_bias", content: "rand() cannot return zero", is_correct: false, order_index: 40 },
+
+  { id: "cpp.utilities.getline_input.mc_mix.a", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "The >> left a trailing newline; call cin.ignore(max, '\\n') before getline", is_correct: true, order_index: 10 },
+  { id: "cpp.utilities.getline_input.mc_mix.b", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "getline is broken after >>; never combine them", is_correct: false, order_index: 20 },
+  { id: "cpp.utilities.getline_input.mc_mix.c", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "You must call cin.clear() to reset an error state", is_correct: false, order_index: 30 },
+  { id: "cpp.utilities.getline_input.mc_mix.d", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "n was read incorrectly, so line is skipped", is_correct: false, order_index: 40 },
 
   { id: "dsa.math.bit_manipulation.mc_test_bit.a", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "(x >> i) & 1", is_correct: true, order_index: 10 },
   { id: "dsa.math.bit_manipulation.mc_test_bit.b", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x % i", is_correct: false, order_index: 20 },
