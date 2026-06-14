@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logConfiguredFailure } from "@/lib/supabase/errors";
 import { getProfileForUser } from "@/features/profile/profile-queries";
 import { getMasterySummary } from "@/features/mastery/mastery-queries";
 import { getEligibleReviewItems, getFirstLearningItemIdForSkill } from "@/features/learning-items/learning-item-seed";
@@ -68,7 +69,11 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .lte("due_at", now.toISOString());
-      if (!due.error) {
+      if (due.error) {
+        // A configured backend failure must be observable, not a silent zero
+        // due-review count that masquerades as an up-to-date plan (#146).
+        logConfiguredFailure("recommendations", due.error);
+      } else {
         dueReviewCount = due.count ?? 0;
       }
       const profile = await getProfileForUser(user.id);
