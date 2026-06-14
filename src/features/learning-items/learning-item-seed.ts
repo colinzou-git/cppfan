@@ -3577,6 +3577,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.concurrency.jthread.lesson",
+    type: "lesson",
+    title: "jthread and cooperative cancellation",
+    prompt:
+      "`std::jthread` (C++20) fixes two sharp edges of `std::thread`. First, it joins automatically in its destructor, so you can no longer forget to join and crash the program — it is RAII for threads. Second, it has built-in cooperative cancellation: a `jthread` carries a `std::stop_source`, and if your thread function takes a `std::stop_token` as its first parameter, the runtime passes it in. Your loop checks `while (!token.stop_requested()) { ... }`, and another thread calls `jt.request_stop()` (or the destructor calls it for you) to ask it to finish. Cancellation is *cooperative*: there is no way to forcibly kill a running thread in C++, so the worker must poll the token (or use `std::condition_variable_any::wait` overloads that take a stop_token to wake on a stop request). The pattern: long-running workers take a stop_token, check it at safe points, and exit their loop when a stop is requested — clean shutdown with no detached-thread leaks or abrupt termination.",
+    explanation:
+      "std::jthread auto-joins in its destructor (RAII) and supports cooperative cancellation: the worker takes a std::stop_token and polls stop_requested(); another thread calls request_stop(). C++ cannot forcibly kill a thread, so the worker must check the token.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4110,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.jthread.mc_stop",
+    type: "multiple_choice",
+    title: "How jthread cancellation works",
+    prompt: "How does a std::jthread worker get cancelled when another thread calls request_stop()?",
+    explanation:
+      "Cancellation is cooperative: request_stop() sets the shared stop state, and the worker must poll its std::stop_token (stop_requested()) and exit on its own. C++ cannot forcibly terminate a running thread.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4120,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.promise_future.lesson",
+    type: "lesson",
+    title: "Promises and packaged tasks",
+    prompt:
+      "`std::async` is the easy button, but sometimes you need to hand a result across threads more explicitly. A `std::promise<T>` is the producing end of a one-shot channel and its paired `std::future<T>` (from `promise.get_future()`) is the consuming end: one thread calls `promise.set_value(x)` (or `set_exception(...)`), and whatever thread holds the future blocks on `future.get()` until the value arrives. This decouples *who computes* from *who started the work* — useful when the producer is an existing thread, a callback, or an event handler rather than a function you launch. `std::packaged_task<R(Args...)>` wraps a callable so that invoking it stores its return value into an associated future; you hand the task to a thread or a thread pool and keep the future. Rule of thumb: reach for `std::async` for fire-and-forget compute, `packaged_task` to schedule callables on your own threads/pool, and a bare `promise` when the result is produced by code you do not call directly. Each future result can be retrieved only once.",
+    explanation:
+      "std::promise/std::future form a one-shot cross-thread channel: producer calls set_value/set_exception, consumer blocks on future.get(). std::packaged_task wraps a callable to feed a future. Use async for fire-and-forget, packaged_task for your own threads/pool, promise when another agent produces the value.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4130,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.promise_future.mc_promise",
+    type: "multiple_choice",
+    title: "Delivering a value through a promise",
+    prompt: "One thread holds a std::promise<int> and another holds the paired std::future<int>. How does the value get from producer to consumer?",
+    explanation:
+      "The producer calls promise.set_value(x); the consumer's future.get() blocks until then and returns x. The promise and future are the two ends of a single one-shot channel created by promise.get_future().",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4140,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.task_selection.lesson",
+    type: "lesson",
+    title: "Choosing threads vs tasks",
+    prompt:
+      "Concurrency and parallelism are different goals. Concurrency is structuring a program as independent tasks that can make progress in overlapping time windows (e.g. handling many connections), and it helps even on one core — especially for I/O-bound work that spends time waiting. Parallelism is actually running computations at the same instant on multiple cores to go faster, which only helps CPU-bound work and only up to the core count. Pick your tool accordingly. Higher-level *tasks* — `std::async`, futures, `packaged_task`, or a thread pool — let you express \"compute this, give me the result later\" without owning thread lifetimes, handle exceptions through the future, and avoid oversubscription; prefer them for request/response compute and divide-and-conquer work. Drop to a raw `std::thread`/`std::jthread` when you need a long-lived dedicated thread (an event loop, a background poller) or fine control over the thread itself. And remember Amdahl's law: the serial fraction caps your speedup, so more threads is not automatically faster — measure, and watch for contention and the cost of synchronization.",
+    explanation:
+      "Concurrency = overlapping independent tasks (helps I/O-bound work, even on one core); parallelism = simultaneous execution on multiple cores (helps CPU-bound work). Prefer high-level tasks (async/futures/pool) for compute-and-return work; use raw threads for long-lived dedicated work. Amdahl's law caps speedup.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4150,
+    is_active: true
+  },
+  {
+    id: "cpp.concurrency.task_selection.mc_concurrency",
+    type: "multiple_choice",
+    title: "Concurrency vs parallelism",
+    prompt: "A program is I/O-bound (it mostly waits on network responses) and runs on a single core. Which idea most directly helps it?",
+    explanation:
+      "Concurrency — overlapping independent tasks so one can progress while another waits — helps I/O-bound work even on a single core. Parallelism (simultaneous execution on multiple cores) only speeds up CPU-bound work and needs more than one core.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4160,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.file_io.lesson",
     type: "lesson",
     title: "File I/O and filesystem",
@@ -4229,6 +4304,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.concurrency.condition_variables.mc_predicate", skill_id: "cpp.concurrency.condition_variables", is_primary: true },
   { learning_item_id: "cpp.concurrency.atomics.lesson", skill_id: "cpp.concurrency.atomics", is_primary: true },
   { learning_item_id: "cpp.concurrency.atomics.mc_volatile", skill_id: "cpp.concurrency.atomics", is_primary: true },
+  { learning_item_id: "cpp.concurrency.jthread.lesson", skill_id: "cpp.concurrency.jthread", is_primary: true },
+  { learning_item_id: "cpp.concurrency.jthread.mc_stop", skill_id: "cpp.concurrency.jthread", is_primary: true },
+  { learning_item_id: "cpp.concurrency.promise_future.lesson", skill_id: "cpp.concurrency.promise_future", is_primary: true },
+  { learning_item_id: "cpp.concurrency.promise_future.mc_promise", skill_id: "cpp.concurrency.promise_future", is_primary: true },
+  { learning_item_id: "cpp.concurrency.task_selection.lesson", skill_id: "cpp.concurrency.task_selection", is_primary: true },
+  { learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", skill_id: "cpp.concurrency.task_selection", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.lesson", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.mc_exists", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.chrono.lesson", skill_id: "cpp.utilities.chrono", is_primary: true },
@@ -4952,6 +5033,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.concurrency.atomics.mc_volatile.b", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile is fully equivalent to std::atomic for threads", is_correct: false, order_index: 20 },
   { id: "cpp.concurrency.atomics.mc_volatile.c", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile makes all reads and writes use a mutex", is_correct: false, order_index: 30 },
   { id: "cpp.concurrency.atomics.mc_volatile.d", learning_item_id: "cpp.concurrency.atomics.mc_volatile", content: "volatile only works on integer types", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.jthread.mc_stop.a", learning_item_id: "cpp.concurrency.jthread.mc_stop", content: "The worker polls its stop_token (stop_requested()) and exits on its own; cancellation is cooperative", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.jthread.mc_stop.b", learning_item_id: "cpp.concurrency.jthread.mc_stop", content: "request_stop() forcibly terminates the running thread immediately", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.jthread.mc_stop.c", learning_item_id: "cpp.concurrency.jthread.mc_stop", content: "The operating system kills the thread and reclaims its stack", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.jthread.mc_stop.d", learning_item_id: "cpp.concurrency.jthread.mc_stop", content: "It throws an exception inside the worker to unwind it", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.promise_future.mc_promise.a", learning_item_id: "cpp.concurrency.promise_future.mc_promise", content: "The producer calls promise.set_value(x); the consumer's future.get() blocks until then and returns x", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.promise_future.mc_promise.b", learning_item_id: "cpp.concurrency.promise_future.mc_promise", content: "The consumer reads the value directly out of the promise object", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.promise_future.mc_promise.c", learning_item_id: "cpp.concurrency.promise_future.mc_promise", content: "The value is copied automatically when the producer thread joins", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.promise_future.mc_promise.d", learning_item_id: "cpp.concurrency.promise_future.mc_promise", content: "A shared global variable must be used; promise/future cannot pass values", is_correct: false, order_index: 40 },
+
+  { id: "cpp.concurrency.task_selection.mc_concurrency.a", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Concurrency: overlap independent tasks so one progresses while another waits", is_correct: true, order_index: 10 },
+  { id: "cpp.concurrency.task_selection.mc_concurrency.b", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Parallelism: run the work simultaneously on many cores", is_correct: false, order_index: 20 },
+  { id: "cpp.concurrency.task_selection.mc_concurrency.c", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Adding more CPU cores", is_correct: false, order_index: 30 },
+  { id: "cpp.concurrency.task_selection.mc_concurrency.d", learning_item_id: "cpp.concurrency.task_selection.mc_concurrency", content: "Vectorizing the inner compute loop", is_correct: false, order_index: 40 },
 
   { id: "cpp.utilities.file_io.mc_exists.a", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::filesystem::exists(path)", is_correct: true, order_index: 10 },
   { id: "cpp.utilities.file_io.mc_exists.b", learning_item_id: "cpp.utilities.file_io.mc_exists", content: "std::cout << path", is_correct: false, order_index: 20 },
