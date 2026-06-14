@@ -1,0 +1,68 @@
+name: Promote main to production release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_release:
+        description: "Deploy the current main commit to production"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-production-release
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Fast-forward release to main
+    if: ${{ inputs.confirm_release }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate release history
+        id: release_state
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin release:refs/remotes/origin/release || true
+
+          if git show-ref --verify --quiet refs/remotes/origin/release; then
+            if ! git merge-base --is-ancestor origin/release HEAD; then
+              echo "The release branch is not an ancestor of main. Refusing to rewrite production history."
+              echo "Reconcile release with main manually, then run this workflow again."
+              exit 1
+            fi
+
+            if [ "$(git rev-parse origin/release)" = "$(git rev-parse HEAD)" ]; then
+              echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+              echo "release already points to the current main commit."
+              exit 0
+            fi
+          fi
+
+          echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+
+      - name: Promote main to release
+        if: steps.release_state.outputs.up_to_date != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:refs/heads/release
+          echo "Promoted $(git rev-parse --short=7 HEAD) from main to release." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report no-op promotion
+        if: steps.release_state.outputs.up_to_date == 'true'
+        shell: bash
+        run: echo "release is already up to date; no Vercel deployment was triggered." >> "$GITHUB_STEP_SUMMARY"
