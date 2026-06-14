@@ -3152,6 +3152,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.prefix_function.lesson",
+    type: "lesson",
+    title: "Prefix function and the KMP table",
+    prompt:
+      "The prefix function of a string is the engine behind KMP. For each position i, pi[i] is the length of the longest proper prefix of the substring s[0..i] that is also a suffix of it — \"proper\" meaning it is not the whole substring. For the pattern \"ABABC\" the table is [0, 0, 1, 2, 0]: at \"ABAB\" the prefix \"AB\" reappears as the suffix, so pi = 2; the final C breaks the match, resetting to 0. You build it in O(m) by extending the previous longest match and, on a mismatch, falling back to pi[k-1] instead of starting over. KMP then scans the text once: when a character mismatches after matching k pattern characters, it jumps the pattern forward using pi[k-1] rather than rewinding the text pointer, giving O(n + m) total. The intuition to remember: the prefix function tells you how much of the pattern you have already effectively matched, so you never re-examine text you have already cleared.",
+    explanation:
+      "pi[i] = length of the longest proper prefix of s[0..i] that is also a suffix. KMP uses it to skip back to pi[k-1] on a mismatch instead of rescanning the text, giving O(n + m) search.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 3930,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.prefix_function.mc_value",
+    type: "multiple_choice",
+    title: "Reading a prefix-function value",
+    prompt: "In the prefix function (KMP failure table), what does the value pi[i] represent for the substring s[0..i]?",
+    explanation:
+      "pi[i] is the length of the longest proper prefix of s[0..i] that is also a suffix of it. KMP uses this length to decide how far to shift the pattern after a mismatch.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3940,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.trie.lesson",
+    type: "lesson",
+    title: "Tries (prefix trees)",
+    prompt:
+      "A trie stores a set of strings as a tree of characters: the root is empty, each edge is one character, and each path from the root spells a prefix shared by every word below it. A node flagged as end-of-word marks a complete string. Insert and lookup of a word of length L take O(L), independent of how many words the trie holds, and — unlike a hash set — a trie answers prefix questions directly: \"how many words start with 'pre'?\" or \"give me all completions of this prefix\" just walk to the prefix node and explore its subtree. That makes tries the natural structure for autocomplete, dictionary/spell-check, and longest-prefix routing. The tradeoff is memory: every node carries child pointers (up to the alphabet size), so for sparse or few keys a hash map is lighter; choose a trie when prefix queries or ordered traversal matter, a hash map when you only need exact-key membership.",
+    explanation:
+      "A trie stores strings by shared character prefixes; insert/lookup is O(L) and prefix/autocomplete queries are direct. It costs more memory than a hash map, so prefer it when prefix queries (not just exact membership) matter.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 3950,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.trie.mc_usecase",
+    type: "multiple_choice",
+    title: "When a trie beats a hash map",
+    prompt: "For which task does a trie have a clear advantage over a hash set of the same strings?",
+    explanation:
+      "A trie answers prefix queries (autocomplete: all words starting with a given prefix) by walking to the prefix node and exploring its subtree. A hash set only supports exact-key membership, not prefix enumeration.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3960,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.hashing.lesson",
+    type: "lesson",
+    title: "String hashing and rolling hash",
+    prompt:
+      "A polynomial string hash maps a string to a number: treat the characters as digits in base b and compute the value modulo a large prime m, e.g. hash = (s[0]*b^(k-1) + s[1]*b^(k-2) + ... + s[k-1]) mod m. The payoff is a rolling hash: once you have the hash of one window of length k, you get the next window in O(1) by removing the leading character's contribution, multiplying by b, and adding the new trailing character. This powers Rabin-Karp substring search and lets you compare two substrings for equality in O(1) after O(n) preprocessing. The catch is collisions: two different strings can share a hash, so a hash match is only probable equality, not proof. Safeguards are essential — verify a candidate match character-by-character, or use double hashing (two independent moduli) to make a false positive astronomically unlikely. Treat single-hash equality as a fast filter, never as the final answer when correctness matters.",
+    explanation:
+      "A polynomial rolling hash compares substrings in O(1) after O(n) setup (Rabin-Karp). Hashes can collide, so a match is only probable equality — verify directly or use double hashing.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 3970,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.hashing.mc_collision",
+    type: "multiple_choice",
+    title: "Trusting a hash match",
+    prompt: "Two substrings have the same rolling-hash value. What can you correctly conclude?",
+    explanation:
+      "Equal hashes mean the substrings are *probably* equal, not certainly — different strings can collide to the same hash. Confirm by comparing characters directly, or reduce the risk with double hashing.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3980,
+    is_active: true
+  },
+  {
     id: "cpp.oop.composition.lesson",
     type: "lesson",
     title: "Composition",
@@ -3970,6 +4045,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.strings.palindrome.mc_anagram", skill_id: "dsa.strings.palindrome", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.lesson", skill_id: "dsa.strings.parsing", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.mc_delim", skill_id: "dsa.strings.parsing", is_primary: true },
+  { learning_item_id: "dsa.strings.prefix_function.lesson", skill_id: "dsa.strings.prefix_function", is_primary: true },
+  { learning_item_id: "dsa.strings.prefix_function.mc_value", skill_id: "dsa.strings.prefix_function", is_primary: true },
+  { learning_item_id: "dsa.strings.trie.lesson", skill_id: "dsa.strings.trie", is_primary: true },
+  { learning_item_id: "dsa.strings.trie.mc_usecase", skill_id: "dsa.strings.trie", is_primary: true },
+  { learning_item_id: "dsa.strings.hashing.lesson", skill_id: "dsa.strings.hashing", is_primary: true },
+  { learning_item_id: "dsa.strings.hashing.mc_collision", skill_id: "dsa.strings.hashing", is_primary: true },
   { learning_item_id: "cpp.oop.composition.lesson", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.composition.mc_relationship", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.inheritance.lesson", skill_id: "cpp.oop.inheritance", is_primary: true },
@@ -4627,6 +4708,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.parsing.mc_delim.b", learning_item_id: "dsa.strings.parsing.mc_delim", content: "stream >> token", is_correct: false, order_index: 20 },
   { id: "dsa.strings.parsing.mc_delim.c", learning_item_id: "dsa.strings.parsing.mc_delim", content: "std::sort(token.begin(), token.end())", is_correct: false, order_index: 30 },
   { id: "dsa.strings.parsing.mc_delim.d", learning_item_id: "dsa.strings.parsing.mc_delim", content: "token.push_back(',')", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.prefix_function.mc_value.a", learning_item_id: "dsa.strings.prefix_function.mc_value", content: "The length of the longest proper prefix of s[0..i] that is also a suffix", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.prefix_function.mc_value.b", learning_item_id: "dsa.strings.prefix_function.mc_value", content: "The index in the text where the pattern was found", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.prefix_function.mc_value.c", learning_item_id: "dsa.strings.prefix_function.mc_value", content: "The number of times s[i] appears in the string", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.prefix_function.mc_value.d", learning_item_id: "dsa.strings.prefix_function.mc_value", content: "The ASCII code of the character s[i]", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.trie.mc_usecase.a", learning_item_id: "dsa.strings.trie.mc_usecase", content: "Autocomplete: listing all words that start with a given prefix", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.trie.mc_usecase.b", learning_item_id: "dsa.strings.trie.mc_usecase", content: "Checking exact membership of a single key", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.trie.mc_usecase.c", learning_item_id: "dsa.strings.trie.mc_usecase", content: "Using the least possible memory for a few keys", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.trie.mc_usecase.d", learning_item_id: "dsa.strings.trie.mc_usecase", content: "Hashing a string to a single integer", is_correct: false, order_index: 40 },
+
+  { id: "dsa.strings.hashing.mc_collision.a", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are probably equal, but you must verify (collisions are possible)", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.hashing.mc_collision.b", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be identical", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.hashing.mc_collision.c", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be different", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.hashing.mc_collision.d", learning_item_id: "dsa.strings.hashing.mc_collision", content: "Nothing, because hashes are random", is_correct: false, order_index: 40 },
 
   { id: "cpp.oop.composition.mc_relationship.a", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Car has-an Engine", is_correct: true, order_index: 10 },
   { id: "cpp.oop.composition.mc_relationship.b", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Dog is-an Animal", is_correct: false, order_index: 20 },
