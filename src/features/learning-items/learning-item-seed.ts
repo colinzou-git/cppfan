@@ -2802,6 +2802,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.connected_components.lesson",
+    type: "lesson",
+    title: "Connected components",
+    prompt:
+      "A connected component is a maximal set of vertices reachable from one another. To label all components, keep a `visited` array and loop over every vertex: each time you find an unvisited one, run a BFS or DFS from it, marking everything it reaches as the next component id. That is O(V + E) total because each vertex and edge is touched once. A grid is an *implicit* graph — treat each cell as a vertex with edges to its 4 (or 8) neighbors — so counting islands, flood fill, and region problems are just connected-components in disguise; you don't build an explicit adjacency list, you compute neighbors from `(row, col)`. The count of BFS/DFS launches is the number of components.",
+    explanation:
+      "Components = maximal mutually-reachable vertex sets. Loop all vertices; from each unvisited one run BFS/DFS marking its component — O(V + E). A grid is an implicit graph (cells = vertices, neighbors = edges), so island/flood-fill is connected-components.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3750,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.connected_components.mc_count",
+    type: "multiple_choice",
+    title: "Counting components",
+    prompt: "How do you count the connected components of a graph with BFS/DFS?",
+    explanation:
+      "Loop over all vertices; each time you start a BFS/DFS from an unvisited vertex you have found a new component, so the number of launches equals the component count.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3760,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.cycle_detection.lesson",
+    type: "lesson",
+    title: "Cycle detection",
+    prompt:
+      "Detecting a cycle depends on whether the graph is directed. In a **directed** graph, run DFS with three colors: white (unvisited), gray (on the current recursion stack), black (finished). If DFS reaches a gray node, you found a back edge — a cycle. (A directed graph with no cycle is a DAG, which is exactly what makes topological sort possible.) In an **undirected** graph, a cycle shows up during DFS as an edge to an already-visited vertex that is not the immediate parent; equivalently, process edges with **union-find** and a cycle exists the moment an edge connects two vertices already in the same set. Watch the undirected subtlety: the edge back to your parent is not a cycle, so track and skip the parent.",
+    explanation:
+      "Directed: DFS 3-color — an edge to a gray (on-stack) node is a back edge = cycle (no cycle ⇒ DAG). Undirected: an edge to a visited non-parent vertex, or a union-find edge within one set, signals a cycle.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3770,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.cycle_detection.mc_directed",
+    type: "multiple_choice",
+    title: "Cycle in a directed graph",
+    prompt: "Using DFS with white/gray/black coloring on a directed graph, which edge indicates a cycle?",
+    explanation:
+      "An edge to a gray vertex — one still on the current recursion stack — is a back edge and proves a cycle. Edges to black (finished) vertices are cross/forward edges and do not.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3780,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.topological_sort.lesson",
+    type: "lesson",
+    title: "Topological sort and DAGs",
+    prompt:
+      "A topological sort linearly orders the vertices of a **directed acyclic graph (DAG)** so that for every edge u→v, u comes before v — exactly what you need to schedule tasks with dependencies, order build targets, or resolve prerequisites. Two standard methods: **Kahn's algorithm** repeatedly removes a vertex with in-degree 0 and decrements its neighbors' in-degrees (BFS-style), and **DFS** pushes each vertex onto a stack as it finishes, then reverses it. Both run in O(V + E). A topological order exists **iff** the graph is acyclic: if a cycle is present, no valid ordering exists — Kahn's leaves vertices with nonzero in-degree, and DFS finds a back edge. So topological sort and directed-cycle detection are two sides of the same coin.",
+    explanation:
+      "A topological sort orders a DAG so every edge points forward (Kahn's in-degree BFS, or reverse DFS-finish order), in O(V + E). It exists iff the graph is acyclic; a cycle makes it impossible.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 3790,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.topological_sort.mc_exists",
+    type: "multiple_choice",
+    title: "When a topological order exists",
+    prompt: "A directed graph has a valid topological ordering exactly when it is...?",
+    explanation:
+      "...acyclic (a DAG). If the graph contains a directed cycle, the mutual dependency makes any linear ordering impossible, so no topological sort exists.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3800,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_sums.lesson",
     type: "lesson",
     title: "Prefix sums",
@@ -3642,6 +3717,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.graphs.dfs.mc_structure", skill_id: "dsa.graphs.dfs", is_primary: true },
   { learning_item_id: "dsa.graphs.shortest_path.lesson", skill_id: "dsa.graphs.shortest_path", is_primary: true },
   { learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", skill_id: "dsa.graphs.shortest_path", is_primary: true },
+  { learning_item_id: "dsa.graphs.connected_components.lesson", skill_id: "dsa.graphs.connected_components", is_primary: true },
+  { learning_item_id: "dsa.graphs.connected_components.mc_count", skill_id: "dsa.graphs.connected_components", is_primary: true },
+  { learning_item_id: "dsa.graphs.cycle_detection.lesson", skill_id: "dsa.graphs.cycle_detection", is_primary: true },
+  { learning_item_id: "dsa.graphs.cycle_detection.mc_directed", skill_id: "dsa.graphs.cycle_detection", is_primary: true },
+  { learning_item_id: "dsa.graphs.topological_sort.lesson", skill_id: "dsa.graphs.topological_sort", is_primary: true },
+  { learning_item_id: "dsa.graphs.topological_sort.mc_exists", skill_id: "dsa.graphs.topological_sort", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.lesson", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.mc_query", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.sliding_window.lesson", skill_id: "dsa.techniques.sliding_window", is_primary: true },
@@ -4233,6 +4314,21 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.graphs.shortest_path.mc_dijkstra.b", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It cannot use a priority queue", is_correct: false, order_index: 20 },
   { id: "dsa.graphs.shortest_path.mc_dijkstra.c", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It only works on trees", is_correct: false, order_index: 30 },
   { id: "dsa.graphs.shortest_path.mc_dijkstra.d", learning_item_id: "dsa.graphs.shortest_path.mc_dijkstra", content: "It requires the graph to be undirected", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.connected_components.mc_count.a", learning_item_id: "dsa.graphs.connected_components.mc_count", content: "Count how many times you start a BFS/DFS from an unvisited vertex", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.connected_components.mc_count.b", learning_item_id: "dsa.graphs.connected_components.mc_count", content: "Count the total number of edges", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.connected_components.mc_count.c", learning_item_id: "dsa.graphs.connected_components.mc_count", content: "Count the vertices with degree 0", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.connected_components.mc_count.d", learning_item_id: "dsa.graphs.connected_components.mc_count", content: "Run Dijkstra from vertex 0", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.cycle_detection.mc_directed.a", learning_item_id: "dsa.graphs.cycle_detection.mc_directed", content: "An edge to a gray vertex (still on the recursion stack)", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.cycle_detection.mc_directed.b", learning_item_id: "dsa.graphs.cycle_detection.mc_directed", content: "An edge to a black (finished) vertex", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.cycle_detection.mc_directed.c", learning_item_id: "dsa.graphs.cycle_detection.mc_directed", content: "An edge to a white (unvisited) vertex", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.cycle_detection.mc_directed.d", learning_item_id: "dsa.graphs.cycle_detection.mc_directed", content: "Any edge at all", is_correct: false, order_index: 40 },
+
+  { id: "dsa.graphs.topological_sort.mc_exists.a", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Acyclic (a DAG)", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.topological_sort.mc_exists.b", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Connected", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.topological_sort.mc_exists.c", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Undirected", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.topological_sort.mc_exists.d", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Weighted with nonnegative edges", is_correct: false, order_index: 40 },
 
   { id: "dsa.techniques.prefix_sums.mc_query.a", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(1)", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.prefix_sums.mc_query.b", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(log n)", is_correct: false, order_index: 20 },

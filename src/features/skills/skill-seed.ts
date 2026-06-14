@@ -1507,6 +1507,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.connected_components",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Connected components",
+    description: "Count and label connected components, including grid-as-graph problems.",
+    learner_goal: "Find connected components with BFS/DFS and model a grid as an implicit graph.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1750,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.cycle_detection",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Cycle detection",
+    description: "Detect cycles in directed and undirected graphs.",
+    learner_goal: "Detect a cycle with DFS colors (directed) or union-find/parent checks (undirected).",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1760,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.topological_sort",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Topological sort and DAGs",
+    description: "Order a DAG so every edge points forward; recognize when it exists.",
+    learner_goal: "Produce a topological order of a DAG and know a cycle makes one impossible.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1770,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_sums",
     domain: "dsa",
     module_id: "dsa.techniques",
@@ -1785,6 +1821,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.graphs.bfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.dfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.shortest_path", prerequisite_skill_id: "dsa.graphs.bfs", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.connected_components", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.cycle_detection", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.topological_sort", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.prefix_sums", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
