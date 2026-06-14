@@ -3304,6 +3304,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.char_frequency.lesson",
+    type: "lesson",
+    title: "Character traversal and frequency counting",
+    prompt:
+      "Many string problems reduce to counting characters. Traverse the string once with a loop (a range-based `for (char c : s)` or an index loop) and increment a counter per character — an O(n) pass. The counter can be a fixed-size array when the alphabet is small and known: for lowercase English letters use `int count[26]` indexed by `c - 'a'`; for arbitrary bytes use `int count[256]` indexed by `static_cast<unsigned char>(c)`. A fixed array is the fastest option and uses constant space. When the alphabet is large, sparse, or Unicode, use a hash map such as `std::unordered_map<char, int>` so you only store characters that actually appear. Frequency tables power anagram checks (two strings are anagrams exactly when their counts match), first-unique-character, most-frequent-character, and counting-sort over characters. Build the table in one pass, then answer queries from it instead of re-scanning the string.",
+    explanation:
+      "Count characters in one O(n) pass. Use a fixed array (count[26] indexed by c - 'a', or count[256] by unsigned char) for a small known alphabet — constant space and fastest; use a hash map for large/sparse/Unicode alphabets. Frequency tables drive anagram, first-unique, and most-frequent queries.",
+    difficulty: "beginner",
+    estimated_minutes: 5,
+    order_index: 4530,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.char_frequency.mc_structure",
+    type: "multiple_choice",
+    title: "Counting lowercase letters",
+    prompt: "You need to count occurrences of each lowercase English letter in a string as fast as possible. Which data structure is the most appropriate?",
+    explanation:
+      "A fixed int[26] indexed by c - 'a' gives O(1) updates in constant space — the alphabet is small and known. A hash map works but adds overhead; sorting is O(n log n) and unnecessary; a set only tracks presence, not counts.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 4540,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.substring_subsequence.lesson",
+    type: "lesson",
+    title: "Substring vs subsequence",
+    prompt:
+      "A substring is a contiguous block of a string: choose a start and end index and take everything between them, so the characters stay adjacent and in order. A subsequence keeps the original left-to-right order but may skip characters, so its elements need not be adjacent. Every substring is a subsequence, but not the reverse. For \"abcde\": \"bcd\" is a substring (and a subsequence); \"ace\" is a subsequence but not a substring, because its characters are not contiguous; \"cab\" is neither, because it reorders characters. Counting differs sharply: a string of length n has n(n+1)/2 non-empty substrings (choose start <= end), but 2^n - 1 non-empty subsequences (each character is in or out). This is why substring problems (longest palindromic substring, substring search) are usually polynomial, while subsequence problems (longest common subsequence, longest increasing subsequence) often need dynamic programming over an exponential space of candidates. When you read a problem, first decide which one it means — the word choice changes the algorithm.",
+    explanation:
+      "Substring = contiguous slice; subsequence = order-preserving but possibly gapped. Every substring is a subsequence, not the reverse. In abcde, ace is a subsequence but not a substring. Counts: n(n+1)/2 substrings vs 2^n - 1 subsequences — which is why subsequence problems usually need DP.",
+    difficulty: "beginner",
+    estimated_minutes: 5,
+    order_index: 4550,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.substring_subsequence.mc_identify",
+    type: "multiple_choice",
+    title: "Spot the subsequence",
+    prompt: "For the string \"abcde\", which of these is a subsequence but NOT a substring?",
+    explanation:
+      "ace keeps the original order (a, then c, then e) but skips b and d, so it is a subsequence; its characters are not contiguous in abcde, so it is not a substring. bcd is a contiguous substring; cab and edcba reorder characters, so they are neither.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 4560,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.case_handling.lesson",
+    type: "lesson",
+    title: "Character classes and case handling",
+    prompt:
+      "C++ classifies and converts characters with the <cctype> functions: `isalpha`, `isdigit`, `isalnum`, `isspace`, `ispunct`, plus `tolower` and `toupper`. There is a notorious trap: these functions take an `int` whose value must be representable as an `unsigned char` or equal EOF. If you pass a plain `char` that is negative (common for bytes >= 128 where `char` is signed), the behavior is undefined. Always cast first: `std::tolower(static_cast<unsigned char>(c))`. For case-insensitive comparison, fold both sides to the same case (lower or upper) before comparing, character by character or on transformed copies. These functions are locale-dependent and operate on single bytes, so they do not correctly handle multibyte/Unicode text — for that you need a Unicode library. For plain ASCII letters, digits, and case folding, <cctype> with the unsigned-char cast is the correct, portable tool.",
+    explanation:
+      "<cctype> gives isalpha/isdigit/isspace/tolower/toupper, but they are undefined behavior on a negative char — always pass static_cast<unsigned char>(c). Fold both sides to one case for case-insensitive compares. They are single-byte and locale-dependent, so they do not handle Unicode.",
+    difficulty: "beginner",
+    estimated_minutes: 5,
+    order_index: 4570,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.case_handling.mc_tolower",
+    type: "multiple_choice",
+    title: "Calling tolower safely",
+    prompt: "Why can `std::tolower(c)` be undefined behavior when `c` is a plain `char`, and how do you call it safely?",
+    explanation:
+      "tolower takes an int that must be representable as unsigned char (or EOF). A signed char holding a byte >= 128 is negative, so passing it directly is undefined behavior. Cast first: std::tolower(static_cast<unsigned char>(c)).",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 4580,
+    is_active: true
+  },
+  {
     id: "cpp.oop.composition.lesson",
     type: "lesson",
     title: "Composition",
@@ -4747,6 +4822,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", skill_id: "dsa.strings.palindrome_substrings", is_primary: true },
   { learning_item_id: "dsa.strings.parsing_edge_cases.lesson", skill_id: "dsa.strings.parsing_edge_cases", is_primary: true },
   { learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", skill_id: "dsa.strings.parsing_edge_cases", is_primary: true },
+  { learning_item_id: "dsa.strings.char_frequency.lesson", skill_id: "dsa.strings.char_frequency", is_primary: true },
+  { learning_item_id: "dsa.strings.char_frequency.mc_structure", skill_id: "dsa.strings.char_frequency", is_primary: true },
+  { learning_item_id: "dsa.strings.substring_subsequence.lesson", skill_id: "dsa.strings.substring_subsequence", is_primary: true },
+  { learning_item_id: "dsa.strings.substring_subsequence.mc_identify", skill_id: "dsa.strings.substring_subsequence", is_primary: true },
+  { learning_item_id: "dsa.strings.case_handling.lesson", skill_id: "dsa.strings.case_handling", is_primary: true },
+  { learning_item_id: "dsa.strings.case_handling.mc_tolower", skill_id: "dsa.strings.case_handling", is_primary: true },
   { learning_item_id: "cpp.oop.composition.lesson", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.composition.mc_relationship", skill_id: "cpp.oop.composition", is_primary: true },
   { learning_item_id: "cpp.oop.inheritance.lesson", skill_id: "cpp.oop.inheritance", is_primary: true },
@@ -5483,6 +5564,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.parsing_edge_cases.mc_empty.b", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Reading fields with stream >> field", is_correct: false, order_index: 20 },
   { id: "dsa.strings.parsing_edge_cases.mc_empty.c", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Skipping any field that comes back empty", is_correct: false, order_index: 30 },
   { id: "dsa.strings.parsing_edge_cases.mc_empty.d", learning_item_id: "dsa.strings.parsing_edge_cases.mc_empty", content: "Splitting only on whitespace", is_correct: false, order_index: 40 },
+  { id: "dsa.strings.char_frequency.mc_structure.a", learning_item_id: "dsa.strings.char_frequency.mc_structure", content: "A fixed array int[26] indexed by c - 'a'", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.char_frequency.mc_structure.b", learning_item_id: "dsa.strings.char_frequency.mc_structure", content: "A std::map<char, int> that grows as letters appear", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.char_frequency.mc_structure.c", learning_item_id: "dsa.strings.char_frequency.mc_structure", content: "Sort the string, then count runs of equal characters", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.char_frequency.mc_structure.d", learning_item_id: "dsa.strings.char_frequency.mc_structure", content: "A std::set<char> of the letters seen", is_correct: false, order_index: 40 },
+  { id: "dsa.strings.substring_subsequence.mc_identify.a", learning_item_id: "dsa.strings.substring_subsequence.mc_identify", content: "ace", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.substring_subsequence.mc_identify.b", learning_item_id: "dsa.strings.substring_subsequence.mc_identify", content: "bcd", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.substring_subsequence.mc_identify.c", learning_item_id: "dsa.strings.substring_subsequence.mc_identify", content: "cab", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.substring_subsequence.mc_identify.d", learning_item_id: "dsa.strings.substring_subsequence.mc_identify", content: "edcba", is_correct: false, order_index: 40 },
+  { id: "dsa.strings.case_handling.mc_tolower.a", learning_item_id: "dsa.strings.case_handling.mc_tolower", content: "char may be signed, so cast: std::tolower(static_cast<unsigned char>(c))", is_correct: true, order_index: 10 },
+  { id: "dsa.strings.case_handling.mc_tolower.b", learning_item_id: "dsa.strings.case_handling.mc_tolower", content: "It is always safe; std::tolower accepts any char directly", is_correct: false, order_index: 20 },
+  { id: "dsa.strings.case_handling.mc_tolower.c", learning_item_id: "dsa.strings.case_handling.mc_tolower", content: "Cast the result to char; the argument never matters", is_correct: false, order_index: 30 },
+  { id: "dsa.strings.case_handling.mc_tolower.d", learning_item_id: "dsa.strings.case_handling.mc_tolower", content: "Pass the char as a std::string of length one instead", is_correct: false, order_index: 40 },
 
   { id: "cpp.oop.composition.mc_relationship.a", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Car has-an Engine", is_correct: true, order_index: 10 },
   { id: "cpp.oop.composition.mc_relationship.b", learning_item_id: "cpp.oop.composition.mc_relationship", content: "A Dog is-an Animal", is_correct: false, order_index: 20 },
