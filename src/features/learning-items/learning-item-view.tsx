@@ -14,7 +14,9 @@ const TYPE_LABELS: Record<LearningItemType, string> = {
   multiple_choice: "Multiple choice",
   code_reading: "Code reading",
   bug_spotting: "Bug spotting",
-  parsons: "Parsons puzzle"
+  parsons: "Parsons puzzle",
+  worked_example: "Worked example",
+  completion: "Completion"
 };
 
 /*
@@ -27,7 +29,9 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   // Lessons show their explanation as lesson content. For graded/retrieval item
   // types the explanation often reveals the answer, so it is gated until after a
   // submission (in AnswerForm) or an explicit reveal (RevealExplanation) — #145.
-  const isLesson = item.type === "lesson";
+  // A lesson and a worked example are instructional content: show the explanation
+  // inline. Other (graded/retrieval) types gate it behind a reveal.
+  const isLesson = item.type === "lesson" || item.type === "worked_example";
   const isParsons = item.type === "parsons";
   const parsonsBlocks = isParsons ? getPublicParsonsBlocksForItem(item.id) : [];
 
