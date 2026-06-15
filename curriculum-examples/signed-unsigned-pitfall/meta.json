@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.values_types.signed_unsigned.lesson",
+  "kind": "bug_spotting",
+  "standard": "c++20",
+  "defect": "Comparing a negative int (i) against an unsigned value (v.size()) converts i to a huge unsigned, so the loop condition is wrong and the intended check fails. Surfaces under -Wsign-compare.",
+  "correctedBy": "signed-unsigned-fixed"
+}

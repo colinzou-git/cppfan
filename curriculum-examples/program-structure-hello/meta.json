@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.program_basics.structure.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "cppFan ready\n",
+  "note": "Minimal well-formed program: includes the header it uses and returns from main."
+}

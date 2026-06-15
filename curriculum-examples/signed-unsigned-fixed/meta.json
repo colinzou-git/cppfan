@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.values_types.signed_unsigned.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "30\n20\n10\n",
+  "note": "Corrected companion to signed-unsigned-pitfall: keep the index signed and compare against a signed bound, so the backward walk terminates correctly."
+}

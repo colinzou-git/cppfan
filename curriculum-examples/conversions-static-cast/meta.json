@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.values_types.conversions.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "7 / 2 as double = 3.5\n",
+  "note": "static_cast one operand to double so the division is not integer division."
+}
