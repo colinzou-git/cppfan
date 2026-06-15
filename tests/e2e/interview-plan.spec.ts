@@ -17,6 +17,10 @@ test("with no evidence the plan shows not-enough-evidence and a first task", asy
   await expect(page.getByTestId("plan-risk")).toHaveAttribute("data-risk", "not_enough_evidence");
   await expect(page.getByTestId("plan-next-task")).toHaveAttribute("data-session-type", "independent_timed");
   await expect(page.getByTestId("plan-week")).toHaveCount(6); // default horizon
+
+  // The next task routes to concrete content with an actionable link.
+  await expect(page.getByTestId("plan-route")).toHaveAttribute("data-route-kind", "timed_problem");
+  await expect(page.getByTestId("plan-route-link")).toBeVisible();
 });
 
 test("switching the horizon recomputes the week-by-week focus", async ({ page }) => {

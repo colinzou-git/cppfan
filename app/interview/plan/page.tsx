@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarClock } from "lucide-react";
 import { getStudyPlan } from "@/features/interview/interview-plan-store";
 import { PLAN_HORIZONS, type PlanHorizonWeeks, type PlanRisk, type SessionType } from "@/features/interview/interview-plan";
+import { routePlanTask } from "@/features/interview/interview-routing";
 
 export const metadata = {
   title: "Interview study plan — cppFan"
@@ -50,6 +51,7 @@ export default async function InterviewPlanPage({ searchParams }: { searchParams
   const weeks = parseWeeks(params.weeks);
   const dailyMinutes = parseMinutes(params.minutes);
   const plan = await getStudyPlan(weeks, dailyMinutes);
+  const route = routePlanTask(plan.nextTask);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -131,6 +133,27 @@ export default async function InterviewPlanPage({ searchParams }: { searchParams
         </p>
         <p className="mt-1 text-sm text-slate-700">{plan.nextTask.reason}</p>
         <p className="mt-1 text-sm text-slate-600">{plan.nextTask.guidance}</p>
+
+        <div className="mt-3 rounded-xl border border-blue-300 bg-white/70 p-3" data-testid="plan-route" data-route-kind={route.kind}>
+          <p className="font-bold text-slate-900">{route.title}</p>
+          <p className="mt-1 text-sm text-slate-600">{route.detail}</p>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm font-bold">
+            <Link href={route.href} className="text-blue-700" data-testid="plan-route-link">
+              Go →
+            </Link>
+            {route.externalUrl ? (
+              <a
+                href={route.externalUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-700 underline"
+                data-testid="plan-route-external"
+              >
+                Worked example ↗
+              </a>
+            ) : null}
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-2" data-testid="plan-weeks">
