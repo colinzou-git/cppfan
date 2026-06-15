@@ -4,7 +4,9 @@ export type LearningItemType =
   | "multiple_choice"
   | "code_reading"
   | "bug_spotting"
-  | "parsons";
+  | "parsons"
+  | "worked_example"
+  | "completion";
 
 export type LearningItemDifficulty = "beginner" | "intermediate" | "advanced";
 
@@ -62,6 +64,21 @@ export type ParsonsBlock = {
 
 /** Parsons block as shown to the learner — no solution position, no distractor flag. */
 export type PublicParsonsBlock = Pick<ParsonsBlock, "id" | "learning_item_id" | "content">;
+
+/**
+ * One fill-in blank of a `completion` item. `answer` is the expected text and is
+ * answer-bearing: present in seed/server data for grading but never sent to the
+ * learner before submission (#123). `position` is the 1-based blank order.
+ */
+export type CompletionBlank = {
+  id: string;
+  learning_item_id: string;
+  position: number;
+  answer: string;
+};
+
+/** Completion blank as shown to the learner — position only, never the answer. */
+export type PublicCompletionBlank = Pick<CompletionBlank, "id" | "learning_item_id" | "position">;
 
 export type LearningItemWithDetails = {
   item: LearningItem;

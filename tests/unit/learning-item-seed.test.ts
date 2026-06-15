@@ -13,7 +13,9 @@ const VALID_TYPES = new Set([
   "multiple_choice",
   "code_reading",
   "bug_spotting",
-  "parsons"
+  "parsons",
+  "worked_example",
+  "completion"
 ]);
 
 describe("learning item seed integrity", () => {

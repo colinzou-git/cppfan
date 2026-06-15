@@ -409,3 +409,40 @@ begin
 
   raise notice 'exercise progress smoke OK';
 end $$;
+
+-- 16) #123 (completion item type): the grading function exists, the answer column
+-- is locked, and grading returns structural feedback.
+do $$
+declare
+  v_ok boolean;
+begin
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'grade_completion_attempt'
+  ) then
+    raise exception 'grade_completion_attempt function is missing (#123)';
+  end if;
+
+  -- The answer column must not be client-readable.
+  if has_column_privilege('authenticated', 'public.learning_item_completion_blanks', 'answer', 'SELECT') then
+    raise exception 'authenticated must not read completion_blanks.answer (#123)';
+  end if;
+  if not has_column_privilege('authenticated', 'public.learning_item_completion_blanks', 'position', 'SELECT') then
+    raise exception 'authenticated should read completion_blanks.position (#123)';
+  end if;
+
+  -- Correct answers grade as correct; a wrong one does not.
+  select is_correct into v_ok
+    from public.grade_completion_attempt('cpp.control_flow.loops.completion_sum', array['0', '+=', 'sum']);
+  if v_ok is distinct from true then
+    raise exception 'grade_completion_attempt should accept the correct answers (#123)';
+  end if;
+
+  select is_correct into v_ok
+    from public.grade_completion_attempt('cpp.control_flow.loops.completion_sum', array['1', '-=', 'i']);
+  if v_ok is distinct from false then
+    raise exception 'grade_completion_attempt should reject wrong answers (#123)';
+  end if;
+
+  raise notice 'completion grading smoke OK';
+end $$;
