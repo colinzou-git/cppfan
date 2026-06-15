@@ -2407,6 +2407,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.math.counting_principle",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "The fundamental counting principle",
+    description: "Multiply independent sequential choices; add disjoint mutually-exclusive cases.",
+    learner_goal: "Apply the rule of product and rule of sum, and tell independent choices from disjoint cases.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 2140,
+    is_active: true
+  },
+  {
+    id: "dsa.math.generate_combinations",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Generating combinations and subsets",
+    description: "Enumerate combinations/subsets with start-index backtracking, distinct from counting them.",
+    learner_goal: "Generate all k-combinations or subsets with choose/recurse/undo and explain why each appears once.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2150,
+    is_active: true
+  },
+  {
+    id: "dsa.math.convex_hull",
+    domain: "dsa",
+    module_id: "dsa.math",
+    title: "Convex hull (monotone chain)",
+    description: "Build the smallest enclosing convex polygon in O(n log n) using the cross-product turn test.",
+    learner_goal: "Construct a convex hull with the monotone chain method and the cross-product orientation test.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 2160,
+    is_active: true
+  },
+  {
     id: "dsa.recursion.base_case",
     domain: "dsa",
     module_id: "dsa.recursion",
@@ -2616,6 +2652,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.math.vectors_dot_cross", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
   { skill_id: "dsa.math.segment_intersection", prerequisite_skill_id: "dsa.math.vectors_dot_cross", relationship_type: "recommended" },
   { skill_id: "dsa.math.geometry_precision", prerequisite_skill_id: "dsa.math.geometry", relationship_type: "recommended" },
+  { skill_id: "dsa.math.counting_principle", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
+  { skill_id: "dsa.math.generate_combinations", prerequisite_skill_id: "dsa.math.combinatorics", relationship_type: "recommended" },
+  { skill_id: "dsa.math.convex_hull", prerequisite_skill_id: "dsa.math.vectors_dot_cross", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.two_pointers", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.recursion.base_case", prerequisite_skill_id: "cpp.structs_classes.syntax", relationship_type: "recommended" }
 ];
