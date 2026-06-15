@@ -15,6 +15,7 @@ export default defineConfig({
       "**/out/**",
       "**/coverage/**",
       "tests/e2e/**",
+      "tests/integration/**",
       "playwright-report/**",
       "test-results/**"
     ]

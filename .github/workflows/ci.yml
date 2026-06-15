@@ -108,3 +108,49 @@ jobs:
       - name: Verify C++ exercise packages
         run: bash scripts/exercises/verify-all.sh
 
+  auth-integration:
+    name: Authenticated integration
+    runs-on: ubuntu-latest
+
+    # #96: authenticated full-loop + RLS isolation against a DISPOSABLE LOCAL
+    # Supabase stack. The local stack ships well-known dev anon/service keys (not
+    # secrets); no production credential is used.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable pnpm through Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase stack (applies all migrations)
+        run: supabase start
+
+      - name: Run authenticated integration tests
+        run: |
+          eval "$(supabase status -o env \
+            --override-name api.url=SUPABASE_URL \
+            --override-name auth.anon_key=SUPABASE_ANON_KEY \
+            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY)"
+          export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+          echo "Supabase URL: ${SUPABASE_URL}"
+          pnpm test:integration
+
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop --no-backup || true
+
