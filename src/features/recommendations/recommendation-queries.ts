@@ -4,10 +4,41 @@ import { getProfileForUser } from "@/features/profile/profile-queries";
 import { getMasterySummary } from "@/features/mastery/mastery-queries";
 import { getEligibleReviewItems, getFirstLearningItemIdForSkill } from "@/features/learning-items/learning-item-seed";
 import { skillPrerequisitesSeed, skillSeed } from "@/features/skills/skill-seed";
+import { getPlacementResults } from "@/features/placement/placement-queries";
+import { getPlacementModules } from "@/features/placement/placement-seed";
 import { buildRecommendations } from "./recommendation-rules";
-import type { DailyPlan, SkillRef } from "./recommendation-types";
+import type { DailyPlan, PlacementStartRef, SkillRef } from "./recommendation-types";
 
 const MAX_PER_CATEGORY = 2;
+const PLACEMENT_LEVEL_RANK: Record<"start_here" | "review_soon", number> = { start_here: 0, review_soon: 1 };
+
+/**
+ * Turn stored placement results into ranked starting suggestions (#125):
+ * start_here before review_soon, then by module display order, capped. Each links
+ * to the module's first placement item. Pure; empty when there is no placement.
+ */
+function placementStartsFromResults(
+  results: { module_id: string; level: string }[]
+): PlacementStartRef[] {
+  const modules = getPlacementModules();
+  const moduleById = new Map(modules.map((m) => [m.module_id, m]));
+  const orderById = new Map(modules.map((m, index) => [m.module_id, index]));
+
+  return results
+    .filter((r): r is { module_id: string; level: "start_here" | "review_soon" } =>
+      (r.level === "start_here" || r.level === "review_soon") && moduleById.has(r.module_id)
+    )
+    .sort(
+      (a, b) =>
+        PLACEMENT_LEVEL_RANK[a.level] - PLACEMENT_LEVEL_RANK[b.level] ||
+        (orderById.get(a.module_id) ?? 0) - (orderById.get(b.module_id) ?? 0)
+    )
+    .slice(0, MAX_PER_CATEGORY)
+    .map((r) => {
+      const module = moduleById.get(r.module_id)!;
+      return { moduleId: r.module_id, title: module.title, itemId: module.item_ids[0] ?? null, level: r.level };
+    });
+}
 
 /**
  * Assemble a daily plan from due reviews, mastery (weak/regressed skills), the
@@ -58,6 +89,7 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
 
   let dueReviewCount = 0;
   let dailyReviewMinutes: number | null = null;
+  let placementStarts: PlacementStartRef[] = [];
   const supabase = await createClient();
   if (supabase) {
     const {
@@ -78,6 +110,9 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
       }
       const profile = await getProfileForUser(user.id);
       dailyReviewMinutes = profile?.daily_review_minutes ?? null;
+
+      // #125: feed persisted placement evidence into the ranking with a reason.
+      placementStarts = placementStartsFromResults(await getPlacementResults());
     }
   }
 
@@ -88,6 +123,7 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
       dailyReviewMinutes,
       regressedSkills,
       weakSkills,
+      placementStarts,
       nextLesson,
       prerequisite
     })
