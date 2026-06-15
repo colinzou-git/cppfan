@@ -1,0 +1,24 @@
+import { expect, test } from "@playwright/test";
+
+// #180: the readiness report surfaces the pure dimension-level model. Signed-out
+// (no persisted evidence) it honestly shows the explicit not-enough-evidence
+// state and the per-dimension breakdown — never a single opaque pass/fail.
+
+test("the interview catalog links to the readiness report", async ({ page }) => {
+  await page.goto("/interview");
+  await page.getByTestId("readiness-link").click();
+  await expect(page).toHaveURL(/\/interview\/readiness$/);
+  await expect(page.getByTestId("readiness-status")).toBeVisible();
+});
+
+test("with no evidence the report shows the explicit not-enough-evidence state", async ({ page }) => {
+  await page.goto("/interview/readiness");
+
+  const status = page.getByTestId("readiness-status");
+  await expect(status).toHaveAttribute("data-verdict", "not_enough_evidence");
+  await expect(page.getByTestId("readiness-not-enough")).toBeVisible();
+
+  // Dimension-level breakdown is shown (not one opaque number), plus the disclaimer.
+  await expect(page.getByTestId("readiness-dimension").first()).toBeVisible();
+  await expect(page.getByTestId("readiness-disclaimer")).toBeVisible();
+});

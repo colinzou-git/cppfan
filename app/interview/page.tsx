@@ -42,6 +42,9 @@ export default function InterviewPage() {
           <Link href="/interview/rubric" className="text-sm font-bold text-blue-700" data-testid="rubric-link">
             Rubric self-review →
           </Link>
+          <Link href="/interview/readiness" className="text-sm font-bold text-blue-700" data-testid="readiness-link">
+            Readiness report →
+          </Link>
         </div>
       </header>
 
