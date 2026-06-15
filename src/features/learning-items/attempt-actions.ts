@@ -3,8 +3,6 @@
 import { randomUUID } from "node:crypto";
 import { submitGradedAnswer, type SubmitAnswerResult } from "./submit-service";
 
-export type { SubmitAnswerResult };
-
 /**
  * Grade a submitted choice and, when the learner is signed in, atomically record
  * the attempt, enroll an eligible review card, and append skill events through one

@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { submitAnswer, type SubmitAnswerResult } from "./attempt-actions";
+import { submitAnswer } from "./attempt-actions";
+import type { SubmitAnswerResult } from "./submit-service";
 import { ExplanationPanel } from "./explanation-panel";
 import type { PublicLearningItemChoice } from "./learning-item-types";
 
