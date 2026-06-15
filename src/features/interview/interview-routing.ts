@@ -4,9 +4,11 @@
 // drill for the C++ implementation pattern, an independent timed problem for a
 // timing/transfer gap, a mock pack for a mock gap, or a concise resource for a
 // quality gap. Reads only the static catalogs; never touches FSRS or user data.
-import { getInterviewProblemsByGroup } from "./problem-catalog";
+import { getInterviewProblem } from "./problem-catalog";
 import { getPracticeMockPacks } from "./mock-packs";
+import { selectTransferProblem } from "./interview-transfer";
 import type { PlanTask } from "./interview-plan";
+import type { InterviewEvidence } from "./readiness";
 
 export type RouteTargetKind =
   | "worked_example"
@@ -28,11 +30,12 @@ export type RouteTarget = {
 
 /**
  * Route a plan task to concrete content. Deterministic for identical inputs.
- * Mocks and quality gaps have no pattern; pattern gaps resolve to a representative
- * catalog problem (or, for the C++ implementation pattern, to implementation
- * drills) so the learner always has a specific next action.
+ * Mocks and quality gaps have no pattern; pattern gaps resolve to a SIMILAR but
+ * NOT IDENTICAL, preferably-unseen transfer problem (via the learner's evidence)
+ * — or, for the C++ implementation pattern, to implementation drills — so the
+ * learner always has a specific, non-repeated next action.
  */
-export function routePlanTask(task: PlanTask): RouteTarget {
+export function routePlanTask(task: PlanTask, evidence: InterviewEvidence[] = []): RouteTarget {
   if (task.sessionType === "mock_interview") {
     const pack = getPracticeMockPacks()[0] ?? null;
     return {
@@ -64,26 +67,26 @@ export function routePlanTask(task: PlanTask): RouteTarget {
   }
 
   if (pattern && task.sessionType === "remediation") {
-    const problem = getInterviewProblemsByGroup(pattern)[0] ?? null;
-    const link = problem?.externalLinks[0];
+    const pick = selectTransferProblem(pattern, evidence);
+    const link = pick ? getInterviewProblem(pick.problemId)?.externalLinks[0] : undefined;
     return {
       kind: "worked_example",
-      title: problem ? `Review the pattern with: ${problem.title}` : "Review the pattern with a worked example",
-      detail: "Re-derive the core idea from a worked example before drilling a guided problem.",
+      title: pick ? `Review the pattern with: ${pick.title}` : "Review the pattern with a worked example",
+      detail: "Re-derive the core idea from a worked example before drilling a different problem.",
       href: "/interview",
       ...(link ? { externalUrl: link.url } : {})
     };
   }
 
   if (pattern) {
-    const problem = getInterviewProblemsByGroup(pattern)[0] ?? null;
+    const pick = selectTransferProblem(pattern, evidence);
+    const transferDetail = pick?.unseen
+      ? "An independent, unhinted solve on a fresh problem is the strongest readiness signal."
+      : "A different problem in this pattern — not the one you just worked — to prove transfer.";
     return {
       kind: "timed_problem",
-      title: problem ? `Solve under time: ${problem.title}` : "Solve a fresh problem under time",
-      detail:
-        task.sessionType === "maintenance"
-          ? "A short, timed rep keeps this strong pattern warm."
-          : "An independent, unhinted solve on this pattern is the strongest readiness signal.",
+      title: pick ? `Solve under time: ${pick.title}` : "Solve a fresh problem under time",
+      detail: task.sessionType === "maintenance" ? "A short, timed rep keeps this strong pattern warm." : transferDetail,
       href: "/interview/session"
     };
   }

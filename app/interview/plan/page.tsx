@@ -2,7 +2,6 @@ import Link from "next/link";
 import { CalendarClock } from "lucide-react";
 import { getStudyPlan } from "@/features/interview/interview-plan-store";
 import { PLAN_HORIZONS, type PlanHorizonWeeks, type PlanRisk, type SessionType } from "@/features/interview/interview-plan";
-import { routePlanTask } from "@/features/interview/interview-routing";
 
 export const metadata = {
   title: "Interview study plan — cppFan"
@@ -50,8 +49,7 @@ export default async function InterviewPlanPage({ searchParams }: { searchParams
   const params = await searchParams;
   const weeks = parseWeeks(params.weeks);
   const dailyMinutes = parseMinutes(params.minutes);
-  const plan = await getStudyPlan(weeks, dailyMinutes);
-  const route = routePlanTask(plan.nextTask);
+  const { plan, route } = await getStudyPlan(weeks, dailyMinutes);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
