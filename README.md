@@ -44,7 +44,7 @@ The curriculum spans the full roadmap (#65), each module mirrored in Supabase mi
 
 ### CI and tests
 
-GitHub Actions runs two jobs on every PR:
+GitHub Actions runs these jobs on every PR:
 
 - **App checks** — `pnpm verify` (lint + typecheck + Vitest unit tests + build) plus
   Playwright e2e. Unit tests validate the **TypeScript seed** (the signed-out/offline
@@ -52,11 +52,29 @@ GitHub Actions runs two jobs on every PR:
 - **DB migrations** — spins up Postgres, applies **every** migration in
   `supabase/migrations/` in order, and smoke-tests the grading RPC and answer-key column
   permissions (`scripts/ci/`).
+- **Authenticated integration** (#96) — starts a **disposable local Supabase stack**
+  (`supabase start`), creates two real authenticated learners, and runs the full
+  learn → grade → attempt → review → rate → event loop, proving cross-user and anonymous
+  RLS denial, that answer keys are not client-readable, and that grading is
+  database-authoritative. Uses the local stack's well-known dev keys — **no production
+  credential**.
 
-Authenticated, per-user, full-loop + RLS-isolation testing against migrated infrastructure
-is tracked separately by issue #96 and is not yet part of CI; until then those paths are
-verified manually (`pnpm db:verify` checks the live answer-key hardening over the anon REST
-API).
+To run the authenticated integration suite locally or in a Codespace (needs Docker and
+the [Supabase CLI](https://supabase.com/docs/guides/cli)):
+
+```bash
+supabase start
+eval "$(supabase status -o env \
+  --override-name api.url=SUPABASE_URL \
+  --override-name auth.anon_key=SUPABASE_ANON_KEY \
+  --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY)"
+export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+pnpm test:integration
+supabase stop
+```
+
+The suite self-skips when the `SUPABASE_*` variables are unset, so `pnpm test` and
+`pnpm verify:codespace` remain green without a running stack.
 
 ## Requirements
 

@@ -1,0 +1,29 @@
+# Supabase local stack config for disposable authenticated integration tests (#96).
+# Used by `supabase start` in CI and Codespaces. The local stack ships well-known
+# development anon/service keys (NOT secrets); no production credential is needed.
+
+project_id = "cppfan"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = true
+# Disposable test users are created via the admin API with email_confirm; no inbox.
+enable_confirmations = false
