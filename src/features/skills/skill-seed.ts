@@ -1879,6 +1879,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.prefix_2d",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "2-D prefix sums and difference arrays",
+    description: "Answer submatrix-sum queries in O(1) and apply range updates with difference arrays.",
+    learner_goal: "Build a 2-D prefix-sum table for O(1) rectangle sums and use a difference array for range updates.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1880,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.interval_scheduling",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Interval scheduling and sorting as preprocessing",
+    description: "Select the most non-overlapping intervals by sorting on the right endpoint.",
+    learner_goal: "Solve interval scheduling greedily (sort by end, take compatible) and use sorting to set up problems.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1890,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_forms",
+    domain: "dsa",
+    module_id: "dsa.techniques",
+    title: "Common DP forms and reconstruction",
+    description: "Recognize 1-D, grid, knapsack, and subsequence DP, and reconstruct the chosen solution.",
+    learner_goal: "Map a problem to a common DP form and rebuild the answer by tracing the table back.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1900,
+    is_active: true
+  },
+  {
     id: "dsa.strings.manipulation",
     domain: "dsa",
     module_id: "dsa.strings",
@@ -2356,6 +2392,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.techniques.range_structures", prerequisite_skill_id: "dsa.techniques.prefix_sums", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy_proof", prerequisite_skill_id: "dsa.techniques.greedy", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.dp_design", prerequisite_skill_id: "dsa.techniques.dynamic_programming", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.prefix_2d", prerequisite_skill_id: "dsa.techniques.prefix_sums", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.interval_scheduling", prerequisite_skill_id: "dsa.techniques.greedy", relationship_type: "recommended" },
+  { skill_id: "dsa.techniques.dp_forms", prerequisite_skill_id: "dsa.techniques.dp_design", relationship_type: "recommended" },
   { skill_id: "dsa.strings.manipulation", prerequisite_skill_id: "cpp.stl.string", relationship_type: "recommended" },
   { skill_id: "dsa.strings.searching", prerequisite_skill_id: "dsa.strings.manipulation", relationship_type: "recommended" },
   { skill_id: "dsa.strings.palindrome", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },

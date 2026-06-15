@@ -3054,6 +3054,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.prefix_2d.lesson",
+    type: "lesson",
+    title: "2-D prefix sums and difference arrays",
+    prompt:
+      "A 2-D prefix sum extends the 1-D idea to matrices. Build a table P where P[i][j] is the sum of the rectangle from (0,0) to (i-1,j-1); then the sum of any submatrix is found in O(1) by inclusion-exclusion: sum = P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]. Building P is O(rows*cols), after which each of many queries is O(1) — the win when you answer lots of rectangle-sum queries on a static grid. The mirror tool for many range UPDATES (add a value to every cell in a rectangle) is a difference array: record the change at the corners (+v at the top-left, -v just past the right and bottom edges, +v at the far corner), then take a 2-D prefix sum at the end to materialize the final grid in O(rows*cols) total instead of O(area) per update. Both rely on the same inclusion-exclusion arithmetic; the prefix table answers queries on a fixed array, the difference array batches updates before reading. For a static array with O(log n) point updates AND range queries you would instead reach for a Fenwick/segment tree (see range structures).",
+    explanation:
+      "2-D prefix sums give O(1) submatrix sums via inclusion-exclusion (P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]) after O(rows*cols) build — best for many queries on a static grid. A difference array batches rectangle range-updates by marking corners, then one prefix pass materializes the grid.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4590,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.prefix_2d.mc_query",
+    type: "multiple_choice",
+    title: "Submatrix sum from a 2-D prefix table",
+    prompt: "With a 2-D prefix table P (P[i][j] = sum of the rectangle above-left of cell (i,j)), how do you get the sum of an arbitrary submatrix in O(1)?",
+    explanation:
+      "Inclusion-exclusion: take the big rectangle, subtract the two overhanging rectangles, then add back the top-left corner that was subtracted twice — P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1].",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4600,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.interval_scheduling.lesson",
+    type: "lesson",
+    title: "Interval scheduling and sorting as preprocessing",
+    prompt:
+      "The classic interval scheduling problem asks for the maximum number of mutually non-overlapping intervals you can choose. The greedy that works: sort the intervals by their RIGHT endpoint (finish time), then scan left to right, taking an interval whenever it starts at or after the last taken interval's finish. Taking the earliest-finishing compatible interval leaves the most room for the rest, which an exchange argument proves optimal. A common wrong greedy is sorting by start time or by shortest length — both have simple counterexamples. This is one instance of a broader habit: sorting is preprocessing. Many problems become easy once the data is in the right order — sort by a key so a single linear scan, two pointers, or a greedy choice becomes correct (activity selection, merging intervals, minimizing waiting time, pairing elements). Decide what order makes the decision local, sort on that key (O(n log n)), then do the cheap pass. Watch the tie-breaking and whether endpoints are inclusive.",
+    explanation:
+      "Maximum non-overlapping intervals: sort by finish time, then greedily take each interval that starts at/after the last taken finish — earliest finish leaves the most room (exchange-argument optimal). Sorting by start or by length is wrong. More broadly, sort as preprocessing so a linear scan / two pointers / greedy becomes correct.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4610,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.interval_scheduling.mc_key",
+    type: "multiple_choice",
+    title: "Greedy key for interval scheduling",
+    prompt: "To select the maximum number of mutually non-overlapping intervals, which sort key makes the greedy choice optimal?",
+    explanation:
+      "Sort by the right endpoint (earliest finish time). Taking the earliest-finishing compatible interval leaves the most room for later ones. Sorting by start time or by shortest duration has easy counterexamples.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4620,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_forms.lesson",
+    type: "lesson",
+    title: "Common DP forms and reconstruction",
+    prompt:
+      "Most DPs you meet fit a small set of shapes; recognizing the shape tells you the state. 1-D / linear (e.g. house robber, climbing stairs): dp[i] from a few earlier indices. Grid (unique paths, min path sum, edit distance): dp[i][j] from neighboring cells. Knapsack / subset (0/1 knapsack, coin change, subset sum): dp indexed by item and remaining capacity. Subsequence (longest increasing subsequence, longest common subsequence): dp over prefixes/positions. After computing the optimum VALUE, you often need the actual choice — reconstruction. Two ways: keep a parent/choice pointer for each state and walk it back from the answer state, or re-derive the decision by checking which predecessor produced dp at each step, tracing from the end to the base case and reversing. Reconstruction usually costs no more than the DP itself and only a little extra memory for the back-pointers. Pick the form, write state/transition/base, then add the trace-back only once the value DP is correct.",
+    explanation:
+      "Common DP forms: 1-D/linear, grid, knapsack/subset (item x capacity), and subsequence (LIS/LCS over prefixes). Recognizing the form gives the state. To recover the chosen solution, store back-pointers (or re-derive the winning predecessor) and trace from the answer back to the base case, then reverse.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4630,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_forms.mc_reconstruct",
+    type: "multiple_choice",
+    title: "Reconstructing a DP solution",
+    prompt: "After a DP fills the table with optimal VALUES, how do you recover the actual choices that achieve the optimum?",
+    explanation:
+      "Trace back from the answer state to the base case, at each step following a stored parent/choice pointer (or re-deriving which predecessor produced the value), then reverse the collected choices. It costs about the same as the DP plus a little memory for back-pointers.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4640,
+    is_active: true
+  },
+  {
     id: "dsa.strings.manipulation.lesson",
     type: "lesson",
     title: "String manipulation",
@@ -4802,6 +4877,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", skill_id: "dsa.techniques.greedy_proof", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_design.lesson", skill_id: "dsa.techniques.dp_design", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_design.mc_order", skill_id: "dsa.techniques.dp_design", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_2d.lesson", skill_id: "dsa.techniques.prefix_2d", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_2d.mc_query", skill_id: "dsa.techniques.prefix_2d", is_primary: true },
+  { learning_item_id: "dsa.techniques.interval_scheduling.lesson", skill_id: "dsa.techniques.interval_scheduling", is_primary: true },
+  { learning_item_id: "dsa.techniques.interval_scheduling.mc_key", skill_id: "dsa.techniques.interval_scheduling", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_forms.lesson", skill_id: "dsa.techniques.dp_forms", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", skill_id: "dsa.techniques.dp_forms", is_primary: true },
   { learning_item_id: "dsa.strings.manipulation.lesson", skill_id: "dsa.strings.manipulation", is_primary: true },
   { learning_item_id: "dsa.strings.manipulation.mc_concat", skill_id: "dsa.strings.manipulation", is_primary: true },
   { learning_item_id: "dsa.strings.searching.lesson", skill_id: "dsa.strings.searching", is_primary: true },
@@ -5514,6 +5595,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.techniques.dp_design.mc_order.b", learning_item_id: "dsa.techniques.dp_design.mc_order", content: "First, before writing the transition", is_correct: false, order_index: 20 },
   { id: "dsa.techniques.dp_design.mc_order.c", learning_item_id: "dsa.techniques.dp_design.mc_order", content: "Never; DP cannot be space-optimized", is_correct: false, order_index: 30 },
   { id: "dsa.techniques.dp_design.mc_order.d", learning_item_id: "dsa.techniques.dp_design.mc_order", content: "Only when using recursion", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.prefix_2d.mc_query.a", learning_item_id: "dsa.techniques.prefix_2d.mc_query", content: "P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.prefix_2d.mc_query.b", learning_item_id: "dsa.techniques.prefix_2d.mc_query", content: "P[r2][c2] - P[r1][c1]", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.prefix_2d.mc_query.c", learning_item_id: "dsa.techniques.prefix_2d.mc_query", content: "P[r2][c2] - P[r1][c2] - P[r2][c1]", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.prefix_2d.mc_query.d", learning_item_id: "dsa.techniques.prefix_2d.mc_query", content: "P[r2][c2] + P[r1][c1]", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.interval_scheduling.mc_key.a", learning_item_id: "dsa.techniques.interval_scheduling.mc_key", content: "The right endpoint (earliest finish time)", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.interval_scheduling.mc_key.b", learning_item_id: "dsa.techniques.interval_scheduling.mc_key", content: "The left endpoint (earliest start time)", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.interval_scheduling.mc_key.c", learning_item_id: "dsa.techniques.interval_scheduling.mc_key", content: "Shortest duration first", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.interval_scheduling.mc_key.d", learning_item_id: "dsa.techniques.interval_scheduling.mc_key", content: "Fewest overlaps first", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.dp_forms.mc_reconstruct.a", learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", content: "Trace back from the answer via stored choice/parent pointers to the base case, then reverse", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.dp_forms.mc_reconstruct.b", learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", content: "Re-run the DP with every possible answer until one matches", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.dp_forms.mc_reconstruct.c", learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", content: "The optimal value already is the sequence of choices", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.dp_forms.mc_reconstruct.d", learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", content: "Sort the table and read off the largest entries", is_correct: false, order_index: 40 },
 
   { id: "dsa.strings.manipulation.mc_concat.a", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "Each concatenation copies all characters accumulated so far", is_correct: true, order_index: 10 },
   { id: "dsa.strings.manipulation.mc_concat.b", learning_item_id: "dsa.strings.manipulation.mc_concat", content: "Strings are immutable, so it cannot be done at all", is_correct: false, order_index: 20 },
