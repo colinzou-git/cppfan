@@ -41,31 +41,35 @@ export async function getMilestoneProgressForUser(): Promise<MilestoneProgress[]
   return data as MilestoneProgress[];
 }
 
+/** Typed outcome so the UI can distinguish "sign in to save" from a real error. */
+export type MilestoneWriteOutcome = "ok" | "signed_out" | "invalid" | "error";
+
 /**
  * Upsert the learner's progress for one milestone. Idempotent on
- * (user_id, milestone_id); completing stamps completed_at. Returns whether the
- * write succeeded. No-ops for an unknown milestone id.
+ * (user_id, milestone_id); completing stamps completed_at. `signed_out` covers
+ * both unconfigured (demo) and signed-out so the UI can prompt to sign in;
+ * `invalid` is an unknown milestone id.
  */
 export async function setMilestoneProgress(input: {
   milestoneId: string;
   status: MilestoneStatus;
   reflection?: string | null;
-}): Promise<boolean> {
+}): Promise<MilestoneWriteOutcome> {
   const milestone = getCapstoneMilestone(input.milestoneId);
   if (!milestone) {
-    return false;
+    return "invalid";
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    return false;
+    return "signed_out";
   }
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
   if (!user) {
-    return false;
+    return "signed_out";
   }
 
   const projectId = getCapstoneProjectIdForMilestone(input.milestoneId) ?? milestone.id;
@@ -84,5 +88,5 @@ export async function setMilestoneProgress(input: {
     { onConflict: "user_id,milestone_id" }
   );
 
-  return !error;
+  return error ? "error" : "ok";
 }
