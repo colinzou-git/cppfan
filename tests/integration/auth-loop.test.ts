@@ -429,6 +429,86 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("denies forged cross-user and anonymous writes across every learner-writable table (#96)", async () => {
+    // A row legitimately owned by A for each learner-writable per-user table, plus a
+    // benign patch. Forging A's user_id from B (or anon) must be denied by RLS
+    // WITH CHECK on INSERT, and B/anon must be unable to UPDATE or DELETE A's rows.
+    const cases: { table: string; row: Record<string, unknown>; patch: Record<string, unknown> }[] = [
+      {
+        table: "placement_results",
+        row: { user_id: aId, module_id: "cpp.values_types", level: "start_here", correct: 0, total: 1 },
+        patch: { total: 2 }
+      },
+      {
+        table: "capstone_milestone_progress",
+        row: {
+          user_id: aId,
+          milestone_id: "note-manager.m1",
+          project_id: "note-manager",
+          status: "completed",
+          verification: "manual_checklist"
+        },
+        patch: { status: "in_progress" }
+      },
+      {
+        table: "exercise_progress",
+        row: { user_id: aId, exercise_id: "raii-scoped-array", status: "completed" },
+        patch: { status: "in_progress" }
+      },
+      {
+        table: "interview_sessions",
+        row: {
+          user_id: aId,
+          problem_id: "iv.prefix.balance-returns-to-zero",
+          mode: "practice",
+          duration_minutes: 45,
+          phase_index: 0,
+          elapsed_seconds: 0,
+          status: "in_progress"
+        },
+        patch: { phase_index: 1 }
+      },
+      {
+        table: "rubric_scores",
+        row: { user_id: aId, criterion: "correctness", source: "self", score: 3 },
+        patch: { score: 1 }
+      },
+      {
+        table: "interview_evidence",
+        row: {
+          user_id: aId,
+          pattern: "arrays_hashing_prefix",
+          problem_id: "iv.prefix.balance-returns-to-zero",
+          mode: "interview",
+          correct: true,
+          hints_used: 0,
+          context: "mock"
+        },
+        patch: { hints_used: 1 }
+      }
+    ];
+
+    for (const { table, row, patch } of cases) {
+      // Forged INSERT stamping A's id is rejected for both B and anon.
+      const forgedByB = await clientB.from(table).insert(row);
+      expect(forgedByB.error, `B forged INSERT into ${table}`).not.toBeNull();
+      const forgedByAnon = await anon.from(table).insert(row);
+      expect(forgedByAnon.error, `anon forged INSERT into ${table}`).not.toBeNull();
+
+      // B and anon cannot UPDATE A's rows (RLS USING hides them -> zero affected).
+      const updByB = await clientB.from(table).update(patch).eq("user_id", aId).select();
+      expect((updByB.data ?? []).length, `B forged UPDATE of ${table}`).toBe(0);
+      const updByAnon = await anon.from(table).update(patch).eq("user_id", aId).select();
+      expect((updByAnon.data ?? []).length, `anon forged UPDATE of ${table}`).toBe(0);
+
+      // B and anon cannot DELETE A's rows.
+      const delByB = await clientB.from(table).delete().eq("user_id", aId).select();
+      expect((delByB.data ?? []).length, `B forged DELETE of ${table}`).toBe(0);
+      const delByAnon = await anon.from(table).delete().eq("user_id", aId).select();
+      expect((delByAnon.data ?? []).length, `anon forged DELETE of ${table}`).toBe(0);
+    }
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");
