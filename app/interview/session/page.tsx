@@ -4,6 +4,7 @@ import { getInterviewProblem, getInterviewProblems } from "@/features/interview/
 import { getCurrentSession } from "@/features/interview/interview-session-store";
 import { createSession, type SessionState } from "@/features/interview/session-machine";
 import { SessionRunner } from "@/features/interview/session-runner";
+import { FollowUpDrill } from "@/features/interview/follow-up-drill";
 
 export const metadata = {
   title: "Interview session — cppFan"
@@ -44,12 +45,15 @@ export default async function InterviewSessionPage() {
       </header>
 
       {problem ? (
-        <SessionRunner
-          initialState={state}
-          problemTitle={problem.title}
-          problemPrompt={problem.prompt}
-          authenticated={authenticated}
-        />
+        <>
+          <SessionRunner
+            initialState={state}
+            problemTitle={problem.title}
+            problemPrompt={problem.prompt}
+            authenticated={authenticated}
+          />
+          <FollowUpDrill problemId={state.problemId} durationMinutes={state.durationMinutes} />
+        </>
       ) : (
         <p className="text-sm text-slate-600">No interview problems are available.</p>
       )}
