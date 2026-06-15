@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.control_flow.logical_operators.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "calls=0\n",
+  "note": "Mirrors the lesson: && short-circuits, so when the left operand is false the right operand never runs (its side effect does not happen)."
+}
