@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { submitAnswer } from "./attempt-actions";
 import type { SubmitAnswerResult } from "./submit-service";
+import { ERROR_TAGS, isInstructionalTag } from "@/features/remediation/error-tags";
 import { ExplanationPanel } from "./explanation-panel";
 import type { PublicLearningItemChoice } from "./learning-item-types";
 
@@ -126,6 +127,18 @@ export function AnswerForm({
               Sign in to save your progress. This attempt was not recorded.
             </span>
           ) : null}
+        </div>
+      ) : null}
+
+      {graded && !graded.isCorrect && graded.errorTag && isInstructionalTag(graded.errorTag) ? (
+        <div
+          data-testid="answer-misconception"
+          role="note"
+          aria-live="polite"
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        >
+          <p className="font-bold">Common misconception: {ERROR_TAGS[graded.errorTag].label}</p>
+          <p className="mt-1">{ERROR_TAGS[graded.errorTag].explanation}</p>
         </div>
       ) : null}
 

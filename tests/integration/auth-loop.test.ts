@@ -184,6 +184,18 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((attempts.data ?? []).length).toBe(1);
   });
 
+  it("returns the instructional error tag for a wrong answer (#126)", async () => {
+    const wrong = await clientA.rpc("submit_learning_item_answer", {
+      p_item_id: ITEM_ID,
+      p_choice_id: wrongChoice,
+      p_submission_id: crypto.randomUUID()
+    });
+    expect(wrong.error).toBeNull();
+    expect(wrong.data?.[0]?.is_correct).toBe(false);
+    // The distractors of this item are mapped to the struct-default-access tag.
+    expect(wrong.data?.[0]?.error_tag).toBe("cpp.structs_classes.struct_default_access");
+  });
+
   it("denies direct client INSERT into attempts and review cards (server-authoritative)", async () => {
     const forgedAttempt = await clientA.from("learning_item_attempts").insert({
       user_id: aId,

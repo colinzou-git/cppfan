@@ -7,13 +7,21 @@
 // rather than silently grading against the seed (#146).
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
+import { getErrorTagForChoice } from "@/features/remediation/error-tags";
 import { getGradingChoices } from "./attempt-service";
 import { gradeChoiceAttempt } from "./grading";
 
 export type SubmitAnswerResult =
   | { status: "invalid" }
   | { status: "error" }
-  | { status: "graded"; isCorrect: boolean; correctChoiceId: string; persisted: boolean };
+  | {
+      status: "graded";
+      isCorrect: boolean;
+      correctChoiceId: string;
+      persisted: boolean;
+      /** Instructional misconception tag for a wrong choice, for remediation (#126). */
+      errorTag: string | null;
+    };
 
 /**
  * Outcome of the atomic submit RPC. `unavailable` (function/table not migrated)
@@ -21,7 +29,7 @@ export type SubmitAnswerResult =
  * must NOT fall back to the seed.
  */
 export type SubmitRpcOutcome =
-  | { status: "graded"; isCorrect: boolean; correctChoiceId: string }
+  | { status: "graded"; isCorrect: boolean; correctChoiceId: string; errorTag: string | null }
   | { status: "invalid" }
   | { status: "unavailable" }
   | { status: "error" };
@@ -53,11 +61,16 @@ export function classifySubmitRpc(result: RpcResult): SubmitRpcOutcome {
     return { status: "invalid" };
   }
   if (status === "ok" || status === "already_processed") {
-    const typed = row as { is_correct?: unknown; correct_choice_id?: unknown };
+    const typed = row as { is_correct?: unknown; correct_choice_id?: unknown; error_tag?: unknown };
     if (typeof typed.is_correct !== "boolean" || typeof typed.correct_choice_id !== "string") {
       return { status: "error" };
     }
-    return { status: "graded", isCorrect: typed.is_correct, correctChoiceId: typed.correct_choice_id };
+    return {
+      status: "graded",
+      isCorrect: typed.is_correct,
+      correctChoiceId: typed.correct_choice_id,
+      errorTag: typeof typed.error_tag === "string" ? typed.error_tag : null
+    };
   }
   return { status: "error" };
 }
@@ -67,7 +80,13 @@ async function seedGrade(itemId: string, choiceId: string): Promise<SubmitAnswer
   if (outcome.status === "invalid") {
     return { status: "invalid" };
   }
-  return { status: "graded", isCorrect: outcome.isCorrect, correctChoiceId: outcome.correctChoiceId, persisted: false };
+  return {
+    status: "graded",
+    isCorrect: outcome.isCorrect,
+    correctChoiceId: outcome.correctChoiceId,
+    persisted: false,
+    errorTag: outcome.isCorrect ? null : getErrorTagForChoice(choiceId)
+  };
 }
 
 /**
@@ -111,5 +130,11 @@ export async function submitGradedAnswer(
   if (outcome.status === "invalid") {
     return { status: "invalid" };
   }
-  return { status: "graded", isCorrect: outcome.isCorrect, correctChoiceId: outcome.correctChoiceId, persisted: true };
+  return {
+    status: "graded",
+    isCorrect: outcome.isCorrect,
+    correctChoiceId: outcome.correctChoiceId,
+    persisted: true,
+    errorTag: outcome.errorTag
+  };
 }

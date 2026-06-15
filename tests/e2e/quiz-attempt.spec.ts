@@ -28,6 +28,11 @@ test("a wrong answer is graded incorrect and can be retried", async ({ page }) =
   await expect(result).toBeVisible();
   await expect(result).toContainText(/not quite/i);
 
+  // #126: a wrong answer surfaces the named misconception for immediate remediation.
+  const misconception = page.getByTestId("answer-misconception");
+  await expect(misconception).toBeVisible();
+  await expect(misconception).toContainText(/public by default/i);
+
   // Retry resets the form so the learner can answer again.
   await page.getByTestId("answer-retry").click();
   await expect(page.getByTestId("answer-result")).toHaveCount(0);
