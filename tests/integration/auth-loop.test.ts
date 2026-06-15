@@ -161,17 +161,16 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
   });
 
   it("enrolls a review card the owner can read", async () => {
+    // Fresh test user: a plain INSERT enrolls. Direct UPDATE is revoked (#143),
+    // so we do not use ON CONFLICT DO UPDATE here.
     const initial = createInitialSchedule(new Date());
-    const upsert = await clientA
+    const inserted = await clientA
       .from("review_cards")
-      .upsert(
-        { user_id: aId, learning_item_id: ITEM_ID, skill_id: skillId, ...initial },
-        { onConflict: "user_id,learning_item_id" }
-      )
+      .insert({ user_id: aId, learning_item_id: ITEM_ID, skill_id: skillId, ...initial })
       .select("id")
       .single();
-    expect(upsert.error).toBeNull();
-    cardId = upsert.data!.id as string;
+    expect(inserted.error).toBeNull();
+    cardId = inserted.data!.id as string;
     expect(cardId).toBeTruthy();
   });
 

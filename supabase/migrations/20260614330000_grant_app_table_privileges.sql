@@ -21,9 +21,9 @@ grant select on public.learning_item_attempts to authenticated;
 grant select on public.skill_events to authenticated;
 grant select on public.review_logs to authenticated;
 
--- Review cards: the client enrolls (upsert) and reads its own cards; ratings go
--- through the apply_review_rating RPC.
-grant select, insert, update, delete on public.review_cards to authenticated;
+-- Review cards: the client enrolls (insert) and reads its own cards. Direct
+-- UPDATE/DELETE stay REVOKED (#143) — ratings go through apply_review_rating.
+grant select, insert on public.review_cards to authenticated;
 
 -- Profile and capstone progress are client-managed per-user rows under RLS.
 grant select, insert, update, delete on public.profiles to authenticated;
