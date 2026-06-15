@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.if_constexpr.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\n42\n",
+  "note": "Mirrors the lesson: if constexpr discards the untaken branch, so *v compiles only for the pointer instantiation."
+}

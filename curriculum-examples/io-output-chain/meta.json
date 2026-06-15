@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.program_basics.io.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "x = 5\n",
+  "note": "Mirrors the lesson's claim that << chains: std::cout << \"x = \" << x << \"\\n\"."
+}
