@@ -4979,6 +4979,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.math.counting_principle.lesson",
+    type: "lesson",
+    title: "The fundamental counting principle",
+    prompt:
+      "The fundamental counting principle decomposes a count into independent stages. RULE OF PRODUCT: if a process is a sequence of independent choices with a ways for the first, b for the second, and so on, the total number of outcomes is a * b * ... — multiply. For example, a 4-character code of one letter then three digits has 26 * 10 * 10 * 10 outcomes. RULE OF SUM: if the outcomes split into disjoint (mutually exclusive) cases with a in the first and b in the second, the total is a + b — add. For example, a meal that is EITHER one of 3 soups OR one of 5 salads has 3 + 5 choices. The trap is mixing them: multiply only when the choices are made together and are independent; add only when the cases cannot both happen. Many counting questions reduce to drawing the decision as stages (multiply along a stage) and branches (add across disjoint branches). Watch for overcounting when choices are not truly independent — when order does not matter or items repeat — which is exactly where permutations, combinations, and inclusion-exclusion refine the raw product.",
+    explanation:
+      "Rule of product: independent sequential choices multiply (a * b * ...). Rule of sum: disjoint mutually-exclusive cases add (a + b). Multiply choices made together and independently; add cases that cannot co-occur. Overcounting (order, repeats, overlap) is where permutations/combinations/inclusion-exclusion refine the raw product.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4950,
+    is_active: true
+  },
+  {
+    id: "dsa.math.counting_principle.mc_meal",
+    type: "multiple_choice",
+    title: "Product rule vs sum rule",
+    prompt: "You pick one appetizer from 4 AND one main from 6 to form a two-course meal. How many distinct meals, and which rule applies?",
+    explanation:
+      "24, by the rule of product (4 * 6): the two choices are made together and independently, so multiply. The rule of sum (adding) applies only to disjoint either/or cases.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4960,
+    is_active: true
+  },
+  {
+    id: "dsa.math.generate_combinations.lesson",
+    type: "lesson",
+    title: "Generating combinations and subsets",
+    prompt:
+      "Counting how many combinations exist is different from GENERATING them. To list every k-element combination (or every subset) of a set, use recursion/backtracking with a start index so you never reuse earlier elements or produce the same set in two orders. The shape: a recursive function takes the current start index and a partial selection; if the selection has the target size, record it; otherwise loop i from start to n-1, choose element i (append it), recurse with start = i + 1, then UNDO the choice (pop it) before trying the next i. Advancing start, rather than starting from 0 each time, is what makes each combination appear once in increasing order — the source of uniqueness. For ALL subsets (the power set) the same idea works with either a choose/skip recursion at each index, or by iterating bitmasks 0..2^n - 1 where bit j means include element j. Complexity is output-bound: there are C(n,k) combinations and 2^n subsets, so generation is inherently exponential in the worst case — only enumerate when n is small. The choose/recurse/undo skeleton here is exactly backtracking; permutations use the same skeleton but mark used elements instead of advancing a start index.",
+    explanation:
+      "Generating combinations (vs counting them) is backtracking: recurse with a start index, choose element i, recurse from i+1, then undo — advancing start makes each combination unique and ordered. All subsets = choose/skip recursion or bitmask 0..2^n-1. Output-bound and exponential (C(n,k) / 2^n), so only for small n. Same choose/recurse/undo skeleton as backtracking.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4970,
+    is_active: true
+  },
+  {
+    id: "dsa.math.generate_combinations.mc_unique",
+    type: "multiple_choice",
+    title: "Why combinations appear once",
+    prompt: "When generating all k-combinations of a set by recursion, what makes each combination appear exactly once (no duplicates or reorderings)?",
+    explanation:
+      "Recursing from an advancing start index (each deeper call begins at i + 1) means earlier elements are never revisited, so each combination is produced once in increasing order. Without it you would generate permutations and duplicate sets.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4980,
+    is_active: true
+  },
+  {
+    id: "dsa.math.convex_hull.lesson",
+    type: "lesson",
+    title: "Convex hull (monotone chain)",
+    prompt:
+      "The convex hull of a set of points is the smallest convex polygon containing them all — picture a rubber band snapping around the outermost points. A clean O(n log n) construction is the monotone chain method: sort the points by x (then y), then sweep left to right building the LOWER hull and right to left building the UPPER hull. While adding a point to a hull, pop the previous point as long as the last three points do not make the required turn — tested with the cross product of the two edge vectors (the orientation/turn test from vectors and cross products). A cross product of zero means the points are collinear; decide up front whether to keep or drop collinear boundary points. Concatenate the two chains (dropping the duplicated endpoints) to get the hull in order. The sort dominates at O(n log n); the two sweeps are linear because each point is pushed and popped at most once. Convex hull underlies problems like the farthest pair of points, smallest enclosing shapes, and as a preprocessing step that discards interior points. The cross-product turn test is the same primitive used for segment intersection and polygon orientation.",
+    explanation:
+      "Convex hull = smallest convex polygon enclosing all points. Monotone chain: sort by x then build lower and upper chains, popping while the last three points do not turn the required way (cross-product orientation test); collinear (cross = 0) handled by policy. O(n log n) from the sort; linear sweeps (each point pushed/popped once). Reuses the cross-product turn test from segment intersection.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4990,
+    is_active: true
+  },
+  {
+    id: "dsa.math.convex_hull.mc_primitive",
+    type: "multiple_choice",
+    title: "The turn test in a convex hull",
+    prompt: "In the monotone-chain convex hull, what primitive decides whether to pop the previous point while extending a chain?",
+    explanation:
+      "The cross product of the last two edge vectors — the orientation/turn test. If the three points do not make the required turn (the cross product has the wrong sign), the middle point is inside the hull and is popped. Distance and dot product do not determine turn direction.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 5000,
+    is_active: true
+  },
+  {
     id: "cpp.control_flow.loops.parsons_sum",
     type: "parsons",
     title: "Arrange a loop that sums 1..n",
@@ -5406,6 +5481,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.segment_intersection.mc_test", skill_id: "dsa.math.segment_intersection", is_primary: true },
   { learning_item_id: "dsa.math.geometry_precision.lesson", skill_id: "dsa.math.geometry_precision", is_primary: true },
   { learning_item_id: "dsa.math.geometry_precision.mc_compare", skill_id: "dsa.math.geometry_precision", is_primary: true },
+  { learning_item_id: "dsa.math.counting_principle.lesson", skill_id: "dsa.math.counting_principle", is_primary: true },
+  { learning_item_id: "dsa.math.counting_principle.mc_meal", skill_id: "dsa.math.counting_principle", is_primary: true },
+  { learning_item_id: "dsa.math.generate_combinations.lesson", skill_id: "dsa.math.generate_combinations", is_primary: true },
+  { learning_item_id: "dsa.math.generate_combinations.mc_unique", skill_id: "dsa.math.generate_combinations", is_primary: true },
+  { learning_item_id: "dsa.math.convex_hull.lesson", skill_id: "dsa.math.convex_hull", is_primary: true },
+  { learning_item_id: "dsa.math.convex_hull.mc_primitive", skill_id: "dsa.math.convex_hull", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false },
   { learning_item_id: "cpp.control_flow.loops.parsons_sum", skill_id: "cpp.control_flow.loops", is_primary: true }
 ];
@@ -6360,7 +6441,19 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.math.geometry_precision.mc_compare.a", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Treat them as equal when |a - b| < a small epsilon (e.g. 1e-9)", is_correct: true, order_index: 10 },
   { id: "dsa.math.geometry_precision.mc_compare.b", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Compare them directly with ==", is_correct: false, order_index: 20 },
   { id: "dsa.math.geometry_precision.mc_compare.c", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Round both to the nearest integer first", is_correct: false, order_index: 30 },
-  { id: "dsa.math.geometry_precision.mc_compare.d", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Convert them to strings and compare text", is_correct: false, order_index: 40 }
+  { id: "dsa.math.geometry_precision.mc_compare.d", learning_item_id: "dsa.math.geometry_precision.mc_compare", content: "Convert them to strings and compare text", is_correct: false, order_index: 40 },
+  { id: "dsa.math.counting_principle.mc_meal.a", learning_item_id: "dsa.math.counting_principle.mc_meal", content: "24 — the rule of product (multiply independent choices)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.counting_principle.mc_meal.b", learning_item_id: "dsa.math.counting_principle.mc_meal", content: "10 — the rule of sum (add the options)", is_correct: false, order_index: 20 },
+  { id: "dsa.math.counting_principle.mc_meal.c", learning_item_id: "dsa.math.counting_principle.mc_meal", content: "24 — the rule of sum", is_correct: false, order_index: 30 },
+  { id: "dsa.math.counting_principle.mc_meal.d", learning_item_id: "dsa.math.counting_principle.mc_meal", content: "10 — the rule of product", is_correct: false, order_index: 40 },
+  { id: "dsa.math.generate_combinations.mc_unique.a", learning_item_id: "dsa.math.generate_combinations.mc_unique", content: "Recursing from an advancing start index (i + 1), so earlier elements are not revisited", is_correct: true, order_index: 10 },
+  { id: "dsa.math.generate_combinations.mc_unique.b", learning_item_id: "dsa.math.generate_combinations.mc_unique", content: "Sorting the output and removing duplicates at the end", is_correct: false, order_index: 20 },
+  { id: "dsa.math.generate_combinations.mc_unique.c", learning_item_id: "dsa.math.generate_combinations.mc_unique", content: "Shuffling the set before recursing", is_correct: false, order_index: 30 },
+  { id: "dsa.math.generate_combinations.mc_unique.d", learning_item_id: "dsa.math.generate_combinations.mc_unique", content: "Using a global visited set of values", is_correct: false, order_index: 40 },
+  { id: "dsa.math.convex_hull.mc_primitive.a", learning_item_id: "dsa.math.convex_hull.mc_primitive", content: "The cross product of the last two edge vectors (the turn/orientation test)", is_correct: true, order_index: 10 },
+  { id: "dsa.math.convex_hull.mc_primitive.b", learning_item_id: "dsa.math.convex_hull.mc_primitive", content: "The Euclidean distance between the points", is_correct: false, order_index: 20 },
+  { id: "dsa.math.convex_hull.mc_primitive.c", learning_item_id: "dsa.math.convex_hull.mc_primitive", content: "The dot product of the two edge vectors", is_correct: false, order_index: 30 },
+  { id: "dsa.math.convex_hull.mc_primitive.d", learning_item_id: "dsa.math.convex_hull.mc_primitive", content: "Comparing the x-coordinates only", is_correct: false, order_index: 40 }
 ];
 
 export function toPublicChoice(choice: LearningItemChoice): PublicLearningItemChoice {
