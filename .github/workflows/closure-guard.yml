@@ -1,0 +1,52 @@
+name: Closure guard
+
+# Enforces issue-closure discipline (#147, parent #132):
+#  - reopens a completion-tracked issue closed before its full scope is verified
+#  - fails a PR that declares `partial` but uses a closing keyword
+#
+# Uses the `pull_request` trigger (NOT pull_request_target) and only reads
+# PR/issue TEXT — it never checks out or runs PR code, so untrusted PR code is
+# never executed. Permissions are the minimum each job needs.
+
+on:
+  issues:
+    types: [closed]
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  reopen-guard:
+    # Reopen wrongly-closed completion-tracked issues. Needs issues: write.
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Evaluate issue closure
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ci/closure-guard-action.mjs
+
+  pr-declaration-check:
+    # Advisory: a partial PR must not use a closing keyword. Read-only token.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check PR closure declaration
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ci/closure-guard-action.mjs

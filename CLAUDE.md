@@ -115,6 +115,32 @@ issue/spec -> plan -> allowed edit zones -> implementation -> tests -> CI feedba
 
 Use GitHub issues and pull requests as the source of truth. Each feature should include acceptance criteria and test expectations.
 
+## Issue and PR closure discipline
+
+Closing an issue is a claim that its **entire** original scope is done — treat it
+that way. Premature closure of parent/roadmap/completion issues after a single
+slice is a recurring defect (see #132/#147); these rules prevent it.
+
+- Never close a parent, roadmap, completion ("Complete … from #N"), or
+  multi-slice issue unless **every** original requirement and acceptance
+  criterion has been verified against current `main`. "Foundation landed",
+  "first slice", "functionally done", and "model complete" never mean the
+  original issue is complete.
+- For partial work, reference the issue with `Part of #N` (or a plain mention).
+  Never use `Closes`, `Fixes`, `Resolves`, or any issue-closing keyword/command
+  for a PR that implements only one slice.
+- After a PR merges, re-read the issue body, its checklist, and its comments
+  before taking any close action — do not close from memory.
+- Before closing, post a **final closure-evidence audit** comment that maps every
+  acceptance criterion to the code, test, doc, or an explicitly justified
+  removal that satisfies it. Use the heading `## Final closure audit`.
+- A focused, genuinely single-PR bug/chore issue may close normally via an
+  explicit complete declaration once its one fix and test land.
+- The closure guard (`scripts/ci/closure-guard.mjs` + `.github/workflows/closure-guard.yml`)
+  enforces this: a completion-tracked issue closed with unchecked boxes, a
+  "still open"/"not closing" comment, a linked partial PR, or no final audit is
+  automatically reopened with the reasons.
+
 ## Quality bar
 
 A change is ready only when:
