@@ -266,6 +266,28 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((capstone.data ?? []).length).toBe(0);
   });
 
+  it("persists placement results per-user, isolates them, and resets (#125)", async () => {
+    const row = { user_id: aId, module_id: "cpp.values_types", level: "start_here", correct: 0, total: 1 };
+    const ins = await clientA.from("placement_results").upsert(row, { onConflict: "user_id,module_id" });
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA.from("placement_results").select("module_id,level").eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).some((r) => r.module_id === "cpp.values_types")).toBe(true);
+
+    // Learner B and anon cannot read learner A's placement results.
+    const asB = await clientB.from("placement_results").select("module_id").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("placement_results").select("module_id");
+    expect((asAnon.data ?? []).length).toBe(0);
+
+    // Reset deletes the learner's own rows.
+    const del = await clientA.from("placement_results").delete().eq("user_id", aId);
+    expect(del.error).toBeNull();
+    const after = await clientA.from("placement_results").select("id").eq("user_id", aId);
+    expect((after.data ?? []).length).toBe(0);
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");

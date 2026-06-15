@@ -360,3 +360,28 @@ begin
 
   raise notice 'atomic submission-boundary smoke OK';
 end $$;
+
+-- 14) #125 (placement results): the per-learner table exists with RLS enabled and
+-- the authenticated base grants, so persisted placement suggestions are isolated.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = 'placement_results'
+  ) then
+    raise exception 'placement_results table is missing (#125)';
+  end if;
+
+  if not exists (
+    select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relname = 'placement_results' and c.relrowsecurity
+  ) then
+    raise exception 'placement_results must have row level security enabled (#125)';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.placement_results', 'SELECT') then
+    raise exception 'authenticated should SELECT its own placement_results (#125)';
+  end if;
+
+  raise notice 'placement results smoke OK';
+end $$;
