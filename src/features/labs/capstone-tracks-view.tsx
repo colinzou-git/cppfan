@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { setMilestone } from "./capstone-actions";
 import type { CapstoneTrackView } from "./capstone-view";
@@ -17,11 +18,14 @@ const STATUS_LABEL: Record<MilestoneStatus | "none", string> = {
 export function CapstoneTracksView({
   tracks,
   initialProgress,
-  authenticated
+  authenticated,
+  linkToTrack = true
 }: {
   tracks: CapstoneTrackView[];
   initialProgress: MilestoneProgress[];
   authenticated: boolean;
+  /** Show a per-track link to its overview page (off on the track page itself). */
+  linkToTrack?: boolean;
 }) {
   const [progress, setProgress] = useState<Record<string, ProgressEntry>>(() =>
     Object.fromEntries(
@@ -81,6 +85,15 @@ export function CapstoneTracksView({
           <div>
             <h3 className="text-base font-bold text-slate-800">{track.title}</h3>
             <p className="text-sm text-slate-600">{track.summary}</p>
+            {linkToTrack ? (
+              <Link
+                href={`/labs/tracks/${encodeURIComponent(track.id)}`}
+                className="text-sm font-bold text-blue-700"
+                data-testid="capstone-track-link"
+              >
+                View track →
+              </Link>
+            ) : null}
           </div>
 
           {track.projects.map((project) => (
