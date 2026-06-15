@@ -44,7 +44,7 @@ export default function MockPacksPage() {
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                 {CATEGORY_LABEL[pack.category] ?? pack.category}
               </span>
-              <span className="text-xs font-medium text-slate-400">{pack.durationMinutes} min</span>
+              <span className="text-xs font-medium text-slate-600">{pack.durationMinutes} min</span>
             </div>
 
             <ul className="grid gap-1">

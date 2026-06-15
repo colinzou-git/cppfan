@@ -100,7 +100,7 @@ export default function InterviewPage() {
                       {problem.visibleExamples.map((example, i) => (
                         <li key={i} className="rounded-lg bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700">
                           {example.input} → {example.output}
-                          {example.note ? <span className="text-slate-400"> ({example.note})</span> : null}
+                          {example.note ? <span className="text-slate-600"> ({example.note})</span> : null}
                         </li>
                       ))}
                     </ul>
