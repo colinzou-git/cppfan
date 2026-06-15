@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarClock, FlaskConical, Library, ListChecks, Settings, ShieldAlert, UserCircle } from "lucide-react";
+import { CalendarClock, Code2, FlaskConical, Library, ListChecks, Settings, ShieldAlert, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -98,6 +98,12 @@ export default async function DashboardPage() {
             <Link href="/placement">
               <ListChecks className="h-4 w-4" />
               Placement
+            </Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/exercises">
+              <Code2 className="h-4 w-4" />
+              Exercises
             </Link>
           </Button>
           <Button asChild variant="secondary">

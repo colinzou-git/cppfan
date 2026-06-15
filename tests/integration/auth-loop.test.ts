@@ -328,6 +328,27 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("persists write-code exercise progress per-user and isolates it (#128)", async () => {
+    const row = {
+      user_id: aId,
+      exercise_id: "raii-scoped-array",
+      status: "completed",
+      reflection: "passed",
+      completed_at: new Date().toISOString()
+    };
+    const ins = await clientA.from("exercise_progress").upsert(row, { onConflict: "user_id,exercise_id" });
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA.from("exercise_progress").select("exercise_id,status").eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).some((r) => r.exercise_id === "raii-scoped-array")).toBe(true);
+
+    const asB = await clientB.from("exercise_progress").select("exercise_id").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("exercise_progress").select("exercise_id");
+    expect((asAnon.data ?? []).length).toBe(0);
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");
