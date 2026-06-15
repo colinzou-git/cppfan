@@ -14,7 +14,9 @@ export const SKILL_EVENT_NAMES = [
   "code_attempted",
   "code_passed",
   "skill_mastered",
-  "skill_regressed"
+  "skill_regressed",
+  "error_pattern_observed",
+  "error_pattern_cleared"
 ] as const;
 
 export type SkillEventName = (typeof SKILL_EVENT_NAMES)[number];

@@ -470,3 +470,21 @@ begin
 
   raise notice 'interview sessions smoke OK';
 end $$;
+
+-- 18) #126 (error-pattern evidence events): the skill_events type CHECK accepts the
+-- new stable event names.
+do $$
+declare
+  v_def text;
+begin
+  select pg_get_constraintdef(c.oid) into v_def
+    from pg_constraint c
+    where c.conname = 'skill_events_event_type_check';
+  if v_def is null then
+    raise exception 'skill_events_event_type_check constraint is missing (#126)';
+  end if;
+  if position('error_pattern_observed' in v_def) = 0 or position('error_pattern_cleared' in v_def) = 0 then
+    raise exception 'skill_events must allow error_pattern_observed/cleared (#126)';
+  end if;
+  raise notice 'error-pattern event names smoke OK';
+end $$;
