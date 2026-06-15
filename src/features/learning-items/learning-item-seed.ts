@@ -1,9 +1,11 @@
 import type {
+  CompletionBlank,
   LearningItem,
   LearningItemChoice,
   LearningItemSkill,
   LearningItemWithDetails,
   ParsonsBlock,
+  PublicCompletionBlank,
   PublicLearningItemChoice,
   PublicParsonsBlock
 } from "./learning-item-types";
@@ -5054,6 +5056,32 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.control_flow.loops.worked_sum",
+    type: "worked_example",
+    title: "Worked example: sum 1..n with a loop",
+    prompt:
+      "Follow the reasoning to build a function that returns 1 + 2 + ... + n.\n\nStep 1 — decide what to accumulate. We need a running total, so declare an accumulator and start it at the identity for addition: int sum = 0;\n\nStep 2 — visit each value once. A for loop from 1 to n inclusive touches every term: for (int i = 1; i <= n; ++i) { ... }\n\nStep 3 — combine. Inside the loop, add the current value to the running total: sum += i;\n\nStep 4 — return the result after the loop finishes: return sum;\n\nPutting it together:\nint sumTo(int n) {\n  int sum = 0;\n  for (int i = 1; i <= n; ++i) {\n    sum += i;\n  }\n  return sum;\n}",
+    explanation:
+      "The shape is initialize-before, accumulate-inside, return-after — the standard accumulator loop. Initializing sum to 0 (the additive identity) and adding each i gives the total; for a product you would start at 1 and multiply.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 4406,
+    is_active: true
+  },
+  {
+    id: "cpp.control_flow.loops.completion_sum",
+    type: "completion",
+    title: "Complete the sum loop",
+    prompt:
+      "Fill in the three blanks to finish a function that returns 1 + 2 + ... + n:\n\nint sumTo(int n) {\n  int sum = ___(1)___;\n  for (int i = 1; i <= n; ++i) {\n    sum ___(2)___ i;\n  }\n  return ___(3)___;\n}\n\nBlank 1: the starting value of the accumulator. Blank 2: the compound operator that adds i to sum. Blank 3: the variable to return.",
+    explanation:
+      "Blank 1 is 0 (start the accumulator at the additive identity), blank 2 is += (add i into the running total), blank 3 is sum (return the accumulated total).",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 4408,
+    is_active: true
+  },
+  {
     id: "cpp.control_flow.loops.parsons_sum",
     type: "parsons",
     title: "Arrange a loop that sums 1..n",
@@ -5488,6 +5516,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.convex_hull.lesson", skill_id: "dsa.math.convex_hull", is_primary: true },
   { learning_item_id: "dsa.math.convex_hull.mc_primitive", skill_id: "dsa.math.convex_hull", is_primary: true },
   { learning_item_id: "dsa.arrays.two_pointers.mc_complexity", skill_id: "dsa.sorting.comparator", is_primary: false },
+  { learning_item_id: "cpp.control_flow.loops.worked_sum", skill_id: "cpp.control_flow.loops", is_primary: true },
+  { learning_item_id: "cpp.control_flow.loops.completion_sum", skill_id: "cpp.control_flow.loops", is_primary: true },
   { learning_item_id: "cpp.control_flow.loops.parsons_sum", skill_id: "cpp.control_flow.loops", is_primary: true }
 ];
 
@@ -6547,6 +6577,42 @@ export function getParsonsSolution(itemId: string): string[] {
     .filter((block) => !block.is_distractor)
     .sort((a, b) => a.correct_order - b.correct_order)
     .map((block) => block.id);
+}
+
+/**
+ * Fill-in blanks for `completion` items. `answer` is the answer key, mirrored in
+ * the migration; it is never sent to the learner before submission (#123).
+ */
+export const completionBlanks: CompletionBlank[] = [
+  { id: "cpp.control_flow.loops.completion_sum.k1", learning_item_id: "cpp.control_flow.loops.completion_sum", position: 1, answer: "0" },
+  { id: "cpp.control_flow.loops.completion_sum.k2", learning_item_id: "cpp.control_flow.loops.completion_sum", position: 2, answer: "+=" },
+  { id: "cpp.control_flow.loops.completion_sum.k3", learning_item_id: "cpp.control_flow.loops.completion_sum", position: 3, answer: "sum" }
+];
+
+/** Strip the answer: the learner only ever sees id + position. */
+export function toPublicCompletionBlank(blank: CompletionBlank): PublicCompletionBlank {
+  return { id: blank.id, learning_item_id: blank.learning_item_id, position: blank.position };
+}
+
+/** Full blanks (with answers) for an item — server-side grading fallback only. */
+export function getCompletionBlanksForItem(itemId: string): CompletionBlank[] {
+  return completionBlanks.filter((blank) => blank.learning_item_id === itemId);
+}
+
+/** Learner-facing blanks for an item, in position order — answers never included. */
+export function getPublicCompletionBlanksForItem(itemId: string): PublicCompletionBlank[] {
+  return getCompletionBlanksForItem(itemId)
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .map(toPublicCompletionBlank);
+}
+
+/** The expected answers in position order. Server-side only (seed fallback). */
+export function getCompletionSolution(itemId: string): string[] {
+  return getCompletionBlanksForItem(itemId)
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .map((blank) => blank.answer);
 }
 
 export function getLearningItemById(itemId: string): LearningItemWithDetails | null {
