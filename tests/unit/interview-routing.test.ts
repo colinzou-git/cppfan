@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { routePlanTask } from "@/features/interview/interview-routing";
+import { getInterviewProblemsByGroup } from "@/features/interview/problem-catalog";
 import type { PlanTask } from "@/features/interview/interview-plan";
+import type { InterviewEvidence } from "@/features/interview/readiness";
 
 function task(overrides: Partial<PlanTask>): PlanTask {
   return {
@@ -49,5 +51,27 @@ describe("routePlanTask (#180)", () => {
   it("is deterministic for identical inputs", () => {
     const t = task({ sessionType: "remediation", pattern: "dp_backtracking" });
     expect(routePlanTask(t)).toEqual(routePlanTask(t));
+  });
+
+  it("routes a timed task to a problem the learner has not just worked (transfer, not repeat)", () => {
+    const pattern = "arrays_hashing_prefix" as const;
+    const problems = getInterviewProblemsByGroup(pattern);
+    if (problems.length < 2) {
+      return; // only meaningful when the pattern has >= 2 problems
+    }
+    const seen: InterviewEvidence = {
+      pattern,
+      problemId: problems[0].id,
+      unseen: false,
+      mode: "interview",
+      correct: true,
+      hintsUsed: 0,
+      context: "independent",
+      completedAtMs: Date.now() - 60_000
+    };
+    const route = routePlanTask(task({ sessionType: "independent_timed", pattern }), [seen]);
+    expect(route.kind).toBe("timed_problem");
+    // It should name a different problem than the one just worked.
+    expect(route.title).not.toContain(problems[0].title);
   });
 });
