@@ -8,6 +8,7 @@ function input(overrides: Partial<RecommendationInput> = {}): RecommendationInpu
     dailyReviewMinutes: null,
     regressedSkills: [],
     weakSkills: [],
+    placementStarts: [],
     nextLesson: null,
     prerequisite: null,
     ...overrides
@@ -71,5 +72,32 @@ describe("buildRecommendations ordering", () => {
   it("singularizes a single due review", () => {
     const recs = buildRecommendations(input({ dueReviewCount: 1 }));
     expect(recs[0].title).toBe("Review 1 due card");
+  });
+
+  it("places placement suggestions after weak skills and before the next lesson (#125)", () => {
+    const recs = buildRecommendations(
+      input({
+        weakSkills: [skill("w", "Weak")],
+        placementStarts: [{ moduleId: "cpp.values_types", title: "C++ values and types", itemId: "x.item", level: "start_here" }],
+        nextLesson: skill("n", "Next lesson", "item.n")
+      })
+    );
+    const kinds = recs.map((r) => r.kind);
+    expect(kinds.indexOf("placement_start")).toBeGreaterThan(kinds.indexOf("weak_skill"));
+    expect(kinds.indexOf("placement_start")).toBeLessThan(kinds.indexOf("next_lesson"));
+
+    const placement = recs.find((r) => r.kind === "placement_start")!;
+    expect(placement.title).toBe("Start with C++ values and types");
+    expect(placement.reason).toMatch(/placement check/i);
+    expect(placement.href).toBe("/learn/x.item");
+  });
+
+  it("links a placement suggestion with no item to the placement page", () => {
+    const recs = buildRecommendations(
+      input({ placementStarts: [{ moduleId: "m", title: "Mod", itemId: null, level: "review_soon" }] })
+    );
+    const placement = recs.find((r) => r.kind === "placement_start")!;
+    expect(placement.href).toBe("/placement");
+    expect(placement.reason).toMatch(/review soon/i);
   });
 });

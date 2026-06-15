@@ -7,6 +7,7 @@ const KIND_STYLES: Record<RecommendationKind, string> = {
   due_reviews: "bg-sky-100 text-sky-900",
   regressed_skill: "bg-rose-100 text-rose-900",
   weak_skill: "bg-amber-100 text-amber-900",
+  placement_start: "bg-teal-100 text-teal-900",
   next_lesson: "bg-blue-100 text-blue-900",
   prerequisite: "bg-violet-100 text-violet-900",
   explore: "bg-slate-100 text-slate-700"
@@ -16,6 +17,7 @@ const KIND_LABELS: Record<RecommendationKind, string> = {
   due_reviews: "Reviews",
   regressed_skill: "Regressed",
   weak_skill: "Weak",
+  placement_start: "Placement",
   next_lesson: "Next lesson",
   prerequisite: "Prerequisite",
   explore: "Explore"

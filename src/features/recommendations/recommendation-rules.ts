@@ -6,9 +6,10 @@ import type { Recommendation, RecommendationInput, SkillRef } from "./recommenda
  *   1. Due reviews
  *   2. Regressed skills
  *   3. Weak skills
- *   4. Current learning path (next lesson)
- *   5. Recommended prerequisites
- *   6. Optional exploration (always offered as a fallback)
+ *   4. Placement-check starting suggestions (#125)
+ *   5. Current learning path (next lesson)
+ *   6. Recommended prerequisites
+ *   7. Optional exploration (always offered as a fallback)
  *
  * Pure and deterministic so the ordering can be unit tested directly.
  */
@@ -45,6 +46,18 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
       title: `Practice ${skill.title}`,
       reason: "Recent mistakes or repeated hints suggest this skill is still weak.",
       href: skillHref(skill)
+    });
+  }
+
+  for (const start of input.placementStarts) {
+    recommendations.push({
+      kind: "placement_start",
+      title: `Start with ${start.title}`,
+      reason:
+        start.level === "start_here"
+          ? "Your placement check suggests starting here — a suggestion, not a lock."
+          : `Your placement check flagged ${start.title} to review soon.`,
+      href: start.itemId ? `/learn/${encodeURIComponent(start.itemId)}` : "/placement"
     });
   }
 
