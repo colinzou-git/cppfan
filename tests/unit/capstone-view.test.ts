@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
+import { buildCapstoneTrackView, nextCapstoneMilestone } from "@/features/labs/capstone-view";
 import { capstoneProjects, getCapstoneTracks } from "@/features/labs/capstone-tracks";
 
 // Capstone track view model (#129/#130). Resolves structured projects to their
@@ -40,5 +40,28 @@ describe("buildCapstoneTrackView (#129/#130)", () => {
   it("preserves track display order", () => {
     const orders = view.map((t) => getCapstoneTracks().find((g) => g.id === t.id)!.order_index);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
+  });
+});
+
+describe("nextCapstoneMilestone (#130)", () => {
+  const view = buildCapstoneTrackView();
+
+  it("returns the first required milestone when none are completed", () => {
+    const next = nextCapstoneMilestone(view, new Set());
+    expect(next).not.toBeNull();
+    expect(next!.milestoneId).toBe("note-manager.m1");
+    expect(next!.projectTitle.length).toBeGreaterThan(0);
+  });
+
+  it("advances past completed required milestones", () => {
+    const next = nextCapstoneMilestone(view, new Set(["note-manager.m1", "note-manager.m2"]));
+    expect(next!.milestoneId).toBe("note-manager.m3");
+  });
+
+  it("skips optional milestones (only required are suggested)", () => {
+    // note-manager.m5 is optional; completing all required of note-manager moves on.
+    const requiredOfNoteManager = ["note-manager.m1", "note-manager.m2", "note-manager.m3", "note-manager.m4"];
+    const next = nextCapstoneMilestone(view, new Set(requiredOfNoteManager));
+    expect(next!.milestoneId).not.toBe("note-manager.m5");
   });
 });

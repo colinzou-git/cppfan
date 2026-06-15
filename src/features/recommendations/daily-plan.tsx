@@ -10,6 +10,7 @@ const KIND_STYLES: Record<RecommendationKind, string> = {
   placement_start: "bg-teal-100 text-teal-900",
   next_lesson: "bg-blue-100 text-blue-900",
   prerequisite: "bg-violet-100 text-violet-900",
+  capstone_milestone: "bg-indigo-100 text-indigo-900",
   explore: "bg-slate-100 text-slate-700"
 };
 
@@ -20,6 +21,7 @@ const KIND_LABELS: Record<RecommendationKind, string> = {
   placement_start: "Placement",
   next_lesson: "Next lesson",
   prerequisite: "Prerequisite",
+  capstone_milestone: "Capstone",
   explore: "Explore"
 };
 

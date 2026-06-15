@@ -9,7 +9,8 @@ import type { Recommendation, RecommendationInput, SkillRef } from "./recommenda
  *   4. Placement-check starting suggestions (#125)
  *   5. Current learning path (next lesson)
  *   6. Recommended prerequisites
- *   7. Optional exploration (always offered as a fallback)
+ *   7. Next capstone milestone to build (#130)
+ *   8. Optional exploration (always offered as a fallback)
  *
  * Pure and deterministic so the ordering can be unit tested directly.
  */
@@ -76,6 +77,15 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
       title: `Shore up ${input.prerequisite.title} first`,
       reason: "A recommended prerequisite for your next skill — a suggestion, not a hard lock.",
       href: skillHref(input.prerequisite)
+    });
+  }
+
+  if (input.nextMilestone) {
+    recommendations.push({
+      kind: "capstone_milestone",
+      title: `Build: ${input.nextMilestone.title}`,
+      reason: `Your next capstone milestone in ${input.nextMilestone.projectTitle} — apply skills you have practiced.`,
+      href: "/labs"
     });
   }
 

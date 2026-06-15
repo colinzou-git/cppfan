@@ -22,6 +22,27 @@ export type CapstoneTrackView = {
   projects: CapstoneProjectView[];
 };
 
+/**
+ * The learner's next incomplete REQUIRED milestone, in track/project/milestone
+ * order, or null when all required milestones are done. Used to suggest the next
+ * capstone milestone in the daily plan (#130). Pure.
+ */
+export function nextCapstoneMilestone(
+  view: CapstoneTrackView[],
+  completedMilestoneIds: Set<string>
+): { milestoneId: string; title: string; projectTitle: string } | null {
+  for (const track of view) {
+    for (const project of track.projects) {
+      for (const milestone of project.milestones) {
+        if (milestone.required && !completedMilestoneIds.has(milestone.id)) {
+          return { milestoneId: milestone.id, title: milestone.title, projectTitle: project.title };
+        }
+      }
+    }
+  }
+  return null;
+}
+
 /** Tracks with their structured (milestone-bearing) projects, in display order. */
 export function buildCapstoneTrackView(): CapstoneTrackView[] {
   const labById = new Map(projectLabs.map((lab) => [lab.id, lab]));
