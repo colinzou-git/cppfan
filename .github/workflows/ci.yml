@@ -108,6 +108,13 @@ jobs:
       - name: Verify C++ exercise packages
         run: bash scripts/exercises/verify-all.sh
 
+      # #98: compile-check the structured curriculum code examples — positive
+      # examples compile clean under their declared standard with -Wall -Wextra
+      # -Wpedantic -Werror and match their output contract; bug-spotting examples
+      # are validated structurally by the unit suite.
+      - name: Verify curriculum examples
+        run: node scripts/curriculum-examples/verify.mjs
+
   auth-integration:
     name: Authenticated integration
     runs-on: ubuntu-latest
