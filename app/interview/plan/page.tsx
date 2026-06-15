@@ -156,6 +156,38 @@ export default async function InterviewPlanPage({ searchParams }: { searchParams
         </div>
       </section>
 
+      <section
+        className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm"
+        data-testid="plan-today"
+        data-task-count={plan.todayTasks.length}
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-black text-slate-900">Today&rsquo;s plan</h2>
+          <span className="text-sm font-semibold text-slate-600" data-testid="plan-today-budget">
+            ~{plan.plannedMinutes} of {plan.dailyMinutes} min
+          </span>
+        </div>
+        <ol className="mt-2 grid gap-2">
+          {plan.todayTasks.map((task, index) => (
+            <li
+              key={`${task.sessionType}-${index}`}
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3"
+              data-testid="plan-today-task"
+            >
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-900">
+                {SESSION_LABEL[task.sessionType]}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">~{task.estimatedMinutes} min</span>
+              <span className="min-w-0 flex-1 text-sm text-slate-700">{task.reason}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2 text-xs font-medium text-slate-500">
+          Capped to your daily time — the plan never schedules more than your {plan.dailyMinutes}-minute
+          budget for one day.
+        </p>
+      </section>
+
       <section className="grid gap-2" data-testid="plan-weeks">
         <h2 className="text-lg font-black text-slate-900">Week-by-week focus</h2>
         <ol className="grid gap-2">

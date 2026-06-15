@@ -88,4 +88,26 @@ describe("buildStudyPlan (#180)", () => {
     const args = [report("not_ready", { unseen_problem_success: "unmet" }), someEvidence, PATTERNS, 6, 45, NOW] as const;
     expect(buildStudyPlan(...args)).toEqual(buildStudyPlan(...args));
   });
+
+  it("caps today's planned minutes at the daily budget and never exceeds it", () => {
+    const gaps = report("not_ready", { no_critical_weak_cluster: "unmet", core_pattern_coverage: "unmet" });
+    // Generous budget leaves room for a second task.
+    const big = buildStudyPlan(gaps, someEvidence, PATTERNS, 6, 120, NOW);
+    expect(big.todayTasks.length).toBeGreaterThan(1);
+    expect(big.todayTasks[0]).toEqual(big.nextTask);
+    expect(big.plannedMinutes).toBe(big.todayTasks.reduce((s, t) => s + t.estimatedMinutes, 0));
+    expect(big.plannedMinutes).toBeLessThanOrEqual(120);
+  });
+
+  it("fits a single task when the daily budget is too small for a second", () => {
+    const gaps = report("not_ready", { no_critical_weak_cluster: "unmet", core_pattern_coverage: "unmet" });
+    const small = buildStudyPlan(gaps, someEvidence, PATTERNS, 6, 25, NOW);
+    expect(small.todayTasks).toHaveLength(1);
+    expect(small.plannedMinutes).toBeLessThanOrEqual(25);
+  });
+
+  it("does not stack a second task when not enough evidence or fully ready", () => {
+    expect(buildStudyPlan(report("not_enough_evidence"), [], PATTERNS, 6, 120, NOW).todayTasks).toHaveLength(1);
+    expect(buildStudyPlan(report("ready"), someEvidence, PATTERNS, 6, 120, NOW).todayTasks).toHaveLength(1);
+  });
 });

@@ -32,10 +32,17 @@ export type StudyPlan = {
   risk: PlanRisk;
   riskReason: string;
   weakestDimensions: ReadinessDimension[];
-  /** The single highest-leverage task to do next. */
+  /** The single highest-leverage task to do next (== todayTasks[0]). */
   nextTask: PlanTask;
+  /** Today's tasks, capped so their minutes never exceed dailyMinutes. */
+  todayTasks: PlanTask[];
+  /** Sum of today's task minutes; always <= dailyMinutes. */
+  plannedMinutes: number;
   weeklyFocus: WeeklyFocus[];
 };
+
+// Don't tack on a token extra task — only fill remaining time with a meaningful chunk.
+const MIN_SECONDARY_MINUTES = 15;
 
 const SESSION_BUDGET: Record<SessionType, number> = {
   remediation: 30,
@@ -146,6 +153,46 @@ function buildWeeklyFocus(unmet: ReadinessDimension[], horizonWeeks: PlanHorizon
 }
 
 /**
+ * Fill the remaining daily budget with one complementary task, or null when there
+ * is not enough time left. Addresses the second-priority gap if there is one, else
+ * a light maintenance rep. Its minutes are bounded by the remaining budget, so the
+ * day's total never exceeds dailyMinutes.
+ */
+function buildSecondaryTask(
+  unmet: ReadinessDimension[],
+  next: { pattern: ProblemGroup } | null,
+  primary: PlanTask,
+  remainingMinutes: number
+): PlanTask | null {
+  if (remainingMinutes < MIN_SECONDARY_MINUTES) {
+    return null;
+  }
+  const secondGap = unmet.length >= 2 ? unmet[1] : null;
+  let sessionType: SessionType;
+  let pattern: ProblemGroup | null;
+  let reason: string;
+  if (secondGap) {
+    sessionType = SESSION_FOR_DIMENSION[secondGap];
+    pattern = sessionType === "mock_interview" ? null : next?.pattern ?? null;
+    reason = `You have time left today — also chip away at ${DIMENSION_LABEL[secondGap]}.`;
+  } else {
+    if (primary.sessionType === "maintenance") {
+      return null; // don't stack two maintenance reps
+    }
+    sessionType = "maintenance";
+    pattern = next?.pattern ?? null;
+    reason = "You have time left today — add a light maintenance rep to stay warm.";
+  }
+  return {
+    sessionType,
+    pattern,
+    estimatedMinutes: Math.max(10, Math.min(SESSION_BUDGET[sessionType], remainingMinutes)),
+    reason,
+    guidance: SESSION_GUIDANCE[sessionType]
+  };
+}
+
+/**
  * Build a deterministic target-date study plan. The next task targets the
  * highest-leverage readiness gap (routed to the right session type and pattern,
  * with a learner-friendly reason); the weekly focus sequences remediation ->
@@ -198,6 +245,15 @@ export function buildStudyPlan(
     };
   }
 
+  const todayTasks: PlanTask[] = [nextTask];
+  if (report.verdict === "not_ready" && unmet.length > 0) {
+    const secondary = buildSecondaryTask(unmet, next, nextTask, dailyMinutes - nextTask.estimatedMinutes);
+    if (secondary) {
+      todayTasks.push(secondary);
+    }
+  }
+  const plannedMinutes = todayTasks.reduce((sum, task) => sum + task.estimatedMinutes, 0);
+
   return {
     horizonWeeks,
     dailyMinutes,
@@ -205,6 +261,8 @@ export function buildStudyPlan(
     riskReason,
     weakestDimensions: unmet,
     nextTask,
+    todayTasks,
+    plannedMinutes,
     weeklyFocus: buildWeeklyFocus(unmet, horizonWeeks)
   };
 }

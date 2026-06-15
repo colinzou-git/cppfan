@@ -21,6 +21,10 @@ test("with no evidence the plan shows not-enough-evidence and a first task", asy
   // The next task routes to concrete content with an actionable link.
   await expect(page.getByTestId("plan-route")).toHaveAttribute("data-route-kind", "timed_problem");
   await expect(page.getByTestId("plan-route-link")).toBeVisible();
+
+  // Today's plan is capped to the daily budget (default 45 min).
+  await expect(page.getByTestId("plan-today")).toBeVisible();
+  await expect(page.getByTestId("plan-today-budget")).toContainText(/of 45 min/);
 });
 
 test("switching the horizon recomputes the week-by-week focus", async ({ page }) => {
