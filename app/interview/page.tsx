@@ -30,6 +30,9 @@ export default function InterviewPage() {
           material — work it in your own editor; cppFan does not run your code.
         </p>
         <div className="mt-2 flex flex-wrap gap-4">
+          <Link href="/interview/diagnostic" className="text-sm font-bold text-blue-700" data-testid="diagnostic-link">
+            Baseline diagnostic →
+          </Link>
           <Link href="/interview/session" className="text-sm font-bold text-blue-700" data-testid="session-link">
             Start a timed session →
           </Link>
