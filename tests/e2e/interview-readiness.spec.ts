@@ -21,4 +21,11 @@ test("with no evidence the report shows the explicit not-enough-evidence state",
   // Dimension-level breakdown is shown (not one opaque number), plus the disclaimer.
   await expect(page.getByTestId("readiness-dimension").first()).toBeVisible();
   await expect(page.getByTestId("readiness-disclaimer")).toBeVisible();
+
+  // The extra skill facets are reported (unrated when signed-out) without gating.
+  await expect(page.getByTestId("readiness-facets")).toBeVisible();
+  await expect(page.getByTestId("readiness-facet")).toHaveCount(7);
+  await expect(
+    page.locator('[data-testid="readiness-facet"][data-facet-id="time_management"]')
+  ).toHaveAttribute("data-facet-band", "unrated");
 });

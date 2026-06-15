@@ -7,6 +7,7 @@
 // mappers are exported for unit tests.
 import { getSelfRubricScores } from "./rubric-store";
 import { getRecentInterviewEvidence } from "./interview-evidence-store";
+import { readinessFacets, type ReadinessFacet } from "./readiness-facets";
 import type { RubricScore } from "./rubric";
 import type { InterviewEvidence, QualityAverages } from "./readiness";
 
@@ -65,4 +66,9 @@ export async function getReadinessInputs(now: number = Date.now()): Promise<Read
     mocksCompleted: mocksCompletedFromEvidence(evidence),
     quality: qualityFromSelfScores(rubric)
   };
+}
+
+/** The reported skill-level readiness facets from the learner's self-rubric (#180). */
+export async function getReadinessFacets(): Promise<ReadinessFacet[]> {
+  return readinessFacets(await getSelfRubricScores());
 }

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
-import { getReadinessInputs } from "@/features/interview/readiness-store";
+import { getReadinessFacets, getReadinessInputs } from "@/features/interview/readiness-store";
 import { buildReadinessReport, type ReadinessStatus } from "@/features/interview/readiness-report";
 import type { DimensionStatus, ReadinessDimension } from "@/features/interview/readiness";
+import type { ScoreBand } from "@/features/interview/rubric";
 
 export const metadata = {
   title: "Interview readiness — cppFan"
@@ -45,11 +46,26 @@ const DIMENSION_STATUS_LABEL: Record<DimensionStatus, string> = {
   not_enough_evidence: "Not enough evidence"
 };
 
+const BAND_STYLE: Record<ScoreBand, string> = {
+  strong: "bg-emerald-100 text-emerald-800",
+  solid: "bg-blue-100 text-blue-800",
+  developing: "bg-amber-100 text-amber-800",
+  needs_work: "bg-rose-100 text-rose-800"
+};
+
+const BAND_LABEL: Record<ScoreBand, string> = {
+  strong: "Strong",
+  solid: "Solid",
+  developing: "Developing",
+  needs_work: "Needs work"
+};
+
 export default async function InterviewReadinessPage() {
   const now = Date.now();
   const { evidence, mocksCompleted, quality } = await getReadinessInputs(now);
   const report = buildReadinessReport(evidence, mocksCompleted, quality, { now });
   const dimensions = Object.keys(report.dimensions) as ReadinessDimension[];
+  const facets = await getReadinessFacets();
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -111,6 +127,39 @@ export default async function InterviewReadinessPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="grid gap-2" data-testid="readiness-facets">
+        <h2 className="text-lg font-black text-slate-900">Skill facets</h2>
+        <p className="text-sm text-slate-600">
+          Self-rated detail from your{" "}
+          <Link href="/interview/rubric" className="font-bold text-blue-700">
+            rubric review
+          </Link>
+          . These inform — but do not gate — the verdict above.
+        </p>
+        <div className="grid gap-2">
+          {facets.map((facet) => (
+            <div
+              key={facet.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/85 p-3 shadow-sm"
+              data-testid="readiness-facet"
+              data-facet-id={facet.id}
+              data-facet-band={facet.band ?? "unrated"}
+            >
+              <span className="font-semibold text-slate-800">{facet.label}</span>
+              {facet.band ? (
+                <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${BAND_STYLE[facet.band]}`}>
+                  {BAND_LABEL[facet.band]}
+                </span>
+              ) : (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">
+                  Not rated
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
