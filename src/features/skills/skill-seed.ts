@@ -1147,6 +1147,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.debugging_method",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "A systematic debugging method",
+    description: "Classify the failure, build a minimal repro, and bisect the cause with breakpoints and watches.",
+    learner_goal: "Debug methodically: classify the failure, reduce to a minimal repro, and narrow the cause step by step.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 711,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.unit_testing",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Writing good unit tests",
+    description: "Structure tests as arrange/act/assert, one behavior each, fast and deterministic.",
+    learner_goal: "Write a focused arrange/act/assert unit test that checks one behavior and is deterministic.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 712,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.regression_testing",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Regression tests and determinism",
+    description: "Reproduce a bug with a failing test before fixing it, and keep tests deterministic.",
+    learner_goal: "Add a failing regression test that reproduces a bug, and avoid time/random/network nondeterminism.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 713,
+    is_active: true
+  },
+  {
     id: "cpp.concurrency.threads",
     domain: "cpp",
     module_id: "cpp.concurrency",
@@ -2476,6 +2512,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.tooling.preconditions", prerequisite_skill_id: "cpp.tooling.error_handling", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.optional_expected", prerequisite_skill_id: "cpp.utilities.variant", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.error_strategy", prerequisite_skill_id: "cpp.tooling.optional_expected", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.debugging_method", prerequisite_skill_id: "cpp.tooling.debugging", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.unit_testing", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.regression_testing", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.threads", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.data_races", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.mutexes", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },
