@@ -45,6 +45,9 @@ export default function InterviewPage() {
           <Link href="/interview/readiness" className="text-sm font-bold text-blue-700" data-testid="readiness-link">
             Readiness report →
           </Link>
+          <Link href="/interview/log" className="text-sm font-bold text-blue-700" data-testid="evidence-log-link">
+            Log a practice outcome →
+          </Link>
         </div>
       </header>
 

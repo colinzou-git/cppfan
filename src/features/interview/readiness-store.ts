@@ -1,11 +1,12 @@
 // Server-only inputs for the interview readiness report (#180). Surfaces the pure
 // readiness model (readiness.ts / readiness-report.ts) over the learner's REAL
-// persisted evidence. Today that is the #179 self-rubric quality (testing,
-// complexity, communication); per-user transfer/mock evidence capture is a
-// follow-up slice, so evidence is reported honestly as empty (which the model
-// renders as an explicit not-enough-evidence state — never fabricated). The pure
-// quality mapper is exported for unit tests.
+// persisted evidence: recent self-reported interview outcomes (interview_evidence)
+// plus the #179 self-rubric quality (testing, complexity, communication). Mock
+// sessions are counted as distinct days carrying mock-context evidence — a
+// conservative proxy that never over-counts a single session's problems. The pure
+// mappers are exported for unit tests.
 import { getSelfRubricScores } from "./rubric-store";
+import { getRecentInterviewEvidence } from "./interview-evidence-store";
 import type { RubricScore } from "./rubric";
 import type { InterviewEvidence, QualityAverages } from "./readiness";
 
@@ -31,6 +32,20 @@ export function qualityFromSelfScores(scores: RubricScore[]): QualityAverages {
   return quality;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Distinct days carrying mock-context evidence — a per-session proxy that never
+ * over-counts the several problems worked within one mock. Pure. */
+export function mocksCompletedFromEvidence(evidence: InterviewEvidence[]): number {
+  const days = new Set<number>();
+  for (const e of evidence) {
+    if (e.context === "mock") {
+      days.add(Math.floor(e.completedAtMs / DAY_MS));
+    }
+  }
+  return days.size;
+}
+
 export type ReadinessInputs = {
   evidence: InterviewEvidence[];
   mocksCompleted: number;
@@ -38,15 +53,16 @@ export type ReadinessInputs = {
 };
 
 /**
- * Gather the signed-in learner's readiness inputs from persisted data. Quality
- * comes from the #179 self-rubric. Transfer/mock evidence is not yet captured
- * per-user (follow-up slice), so it is reported as empty rather than invented.
+ * Gather the signed-in learner's readiness inputs from persisted data: recent
+ * interview evidence (bounded query), a conservative mock-session count, and the
+ * #179 self-rubric quality. Empty/zero when signed out or no evidence yet, which
+ * the model renders as an explicit not-enough-evidence state (never invented).
  */
-export async function getReadinessInputs(): Promise<ReadinessInputs> {
-  const rubric = await getSelfRubricScores();
+export async function getReadinessInputs(now: number = Date.now()): Promise<ReadinessInputs> {
+  const [rubric, evidence] = await Promise.all([getSelfRubricScores(), getRecentInterviewEvidence(now)]);
   return {
-    evidence: [],
-    mocksCompleted: 0,
+    evidence,
+    mocksCompleted: mocksCompletedFromEvidence(evidence),
     quality: qualityFromSelfScores(rubric)
   };
 }
