@@ -68,23 +68,31 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     clientB = await signIn(emailB);
     anon = anonClient();
 
-    // Discover the answer key with privileged (service) access, so the test never
-    // hard-codes which choice is correct.
-    const { data: choices, error } = await service
+    // Discover the answer key WITHOUT any privileged read of is_correct (it is
+    // locked even from service_role): read the public choice columns, then ask the
+    // grade RPC, which returns the correct_choice_id authoritatively.
+    const { data: choiceRows, error: choiceErr } = await clientA
       .from("learning_item_choices")
-      .select("id,is_correct")
+      .select("id")
       .eq("learning_item_id", ITEM_ID)
       .order("order_index");
-    if (error) throw error;
-    correctChoice = (choices ?? []).find((c) => c.is_correct)!.id as string;
-    wrongChoice = (choices ?? []).find((c) => !c.is_correct)!.id as string;
+    if (choiceErr) throw choiceErr;
+    const ids = (choiceRows ?? []).map((r) => r.id as string);
+    const graded = await clientA.rpc("grade_learning_item_choice", {
+      p_item_id: ITEM_ID,
+      p_choice_id: ids[0]
+    });
+    if (graded.error) throw graded.error;
+    correctChoice = graded.data![0].correct_choice_id as string;
+    wrongChoice = ids.find((id) => id !== correctChoice)!;
 
-    const { data: mapping } = await service
+    const { data: mapping, error: mapErr } = await clientA
       .from("learning_item_skills")
       .select("skill_id")
       .eq("learning_item_id", ITEM_ID)
       .eq("is_primary", true)
       .single();
+    if (mapErr) throw mapErr;
     skillId = mapping!.skill_id as string;
   });
 
