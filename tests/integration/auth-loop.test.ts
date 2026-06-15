@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { applyRating, createInitialSchedule } from "@/lib/fsrs/scheduler";
+import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
 
 // Authenticated full-loop + RLS integration tests (#96).
 //
@@ -86,14 +87,9 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     correctChoice = graded.data![0].correct_choice_id as string;
     wrongChoice = ids.find((id) => id !== correctChoice)!;
 
-    const { data: mapping, error: mapErr } = await clientA
-      .from("learning_item_skills")
-      .select("skill_id")
-      .eq("learning_item_id", ITEM_ID)
-      .eq("is_primary", true)
-      .single();
-    if (mapErr) throw mapErr;
-    skillId = mapping!.skill_id as string;
+    // The primary skill comes from the curriculum seed (mirrors the DB); the app
+    // uses the same mapping. review_cards.skill_id FKs to the migrated skills row.
+    skillId = getPrimarySkillId(ITEM_ID)!;
   });
 
   afterAll(async () => {
