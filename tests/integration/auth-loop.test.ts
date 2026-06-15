@@ -392,6 +392,31 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("persists interview practice evidence per-user and isolates it (#180)", async () => {
+    const row = {
+      user_id: aId,
+      pattern: "arrays_hashing_prefix",
+      problem_id: "iv.prefix.balance-returns-to-zero",
+      unseen: true,
+      mode: "interview",
+      correct: true,
+      hints_used: 0,
+      context: "mock",
+      completed_at: new Date().toISOString()
+    };
+    const ins = await clientA.from("interview_evidence").insert(row);
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA.from("interview_evidence").select("problem_id,context").eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).some((r) => r.problem_id === "iv.prefix.balance-returns-to-zero")).toBe(true);
+
+    const asB = await clientB.from("interview_evidence").select("problem_id").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("interview_evidence").select("problem_id");
+    expect((asAnon.data ?? []).length).toBe(0);
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");

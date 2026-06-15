@@ -46,8 +46,9 @@ const DIMENSION_STATUS_LABEL: Record<DimensionStatus, string> = {
 };
 
 export default async function InterviewReadinessPage() {
-  const { evidence, mocksCompleted, quality } = await getReadinessInputs();
-  const report = buildReadinessReport(evidence, mocksCompleted, quality, { now: Date.now() });
+  const now = Date.now();
+  const { evidence, mocksCompleted, quality } = await getReadinessInputs(now);
+  const report = buildReadinessReport(evidence, mocksCompleted, quality, { now });
   const dimensions = Object.keys(report.dimensions) as ReadinessDimension[];
 
   return (

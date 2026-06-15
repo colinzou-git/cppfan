@@ -512,3 +512,39 @@ begin
 
   raise notice 'rubric self-review smoke OK';
 end $$;
+
+-- 20) #180 (interview evidence): per-learner append-only log with RLS, a bounded
+-- (user_id, completed_at) index, and base grants. No UPDATE (append-only).
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = 'interview_evidence'
+  ) then
+    raise exception 'interview_evidence table is missing (#180)';
+  end if;
+
+  if not exists (
+    select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relname = 'interview_evidence' and c.relrowsecurity
+  ) then
+    raise exception 'interview_evidence must have row level security enabled (#180)';
+  end if;
+
+  if not exists (
+    select 1 from pg_indexes
+      where schemaname = 'public' and tablename = 'interview_evidence'
+        and indexname = 'interview_evidence_user_time_idx'
+  ) then
+    raise exception 'interview_evidence needs the bounded (user_id, completed_at) index (#180)';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.interview_evidence', 'SELECT') then
+    raise exception 'authenticated should SELECT its own interview_evidence (#180)';
+  end if;
+  if has_table_privilege('authenticated', 'public.interview_evidence', 'UPDATE') then
+    raise exception 'interview_evidence must be append-only (no UPDATE) (#180)';
+  end if;
+
+  raise notice 'interview evidence smoke OK';
+end $$;
