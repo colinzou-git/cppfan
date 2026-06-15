@@ -991,6 +991,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.concepts_depth",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "Concepts in depth",
+    description: "Constrain templates with standard concepts and requires, for clearer intent and errors.",
+    learner_goal: "Use std::integral and a requires clause (or an abbreviated template) to constrain a template and improve diagnostics.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 611,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges_depth",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "Ranges algorithms and lazy views",
+    description: "Call std::ranges algorithms on whole ranges and compose lazy filter/transform/take views.",
+    learner_goal: "Replace iterator-pair calls with std::ranges algorithms and build a lazy view pipeline.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 612,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.view_lifetime",
+    domain: "cpp",
+    module_id: "cpp.templates",
+    title: "View lifetime and dangling",
+    description: "Views do not own their elements; avoid returning a view over a temporary or destroyed container.",
+    learner_goal: "Explain why a view can dangle and materialize results when the source will not outlive the view.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 613,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling",
     domain: "cpp",
     module_id: "cpp.tooling",
@@ -2319,6 +2355,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.templates.multiple_params", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
   { skill_id: "cpp.templates.deduction", prerequisite_skill_id: "cpp.templates.function_templates", relationship_type: "recommended" },
   { skill_id: "cpp.templates.aliases_specialization", prerequisite_skill_id: "cpp.templates.class_templates", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.concepts_depth", prerequisite_skill_id: "cpp.templates.concepts", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.ranges_depth", prerequisite_skill_id: "cpp.templates.ranges", relationship_type: "recommended" },
+  { skill_id: "cpp.templates.view_lifetime", prerequisite_skill_id: "cpp.templates.ranges", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.error_handling", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.testing", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.debugging", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
