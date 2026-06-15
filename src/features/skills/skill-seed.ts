@@ -1831,6 +1831,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.shortest_path_algorithms",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Choosing a shortest-path algorithm",
+    description: "Pick BFS, Dijkstra, Bellman-Ford, or Floyd-Warshall by weights, signs, and pairs.",
+    learner_goal: "Select the right shortest-path algorithm from graph weights and the source/all-pairs need.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1780,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.mst",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Minimum spanning trees",
+    description: "Build an MST with Kruskal (union-find) or Prim, justified by the cut property.",
+    learner_goal: "Construct an MST with Kruskal or Prim and explain why the cut property makes the greedy safe.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1790,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bipartite_scc",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Bipartite coloring and strongly connected components",
+    description: "2-color a graph to test bipartiteness and find SCCs in directed graphs.",
+    learner_goal: "Test bipartiteness by 2-coloring and recognize what an SCC is and how it is found.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1800,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_sums",
     domain: "dsa",
     module_id: "dsa.techniques",
@@ -2424,6 +2460,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.graphs.connected_components", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.cycle_detection", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.topological_sort", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.shortest_path_algorithms", prerequisite_skill_id: "dsa.graphs.shortest_path", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.mst", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.bipartite_scc", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.prefix_sums", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },
