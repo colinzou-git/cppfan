@@ -8,6 +8,7 @@ function input(overrides: Partial<RecommendationInput> = {}): RecommendationInpu
     dailyReviewMinutes: null,
     regressedSkills: [],
     weakSkills: [],
+    misconceptions: [],
     placementStarts: [],
     nextLesson: null,
     prerequisite: null,
@@ -100,6 +101,32 @@ describe("buildRecommendations ordering", () => {
     const placement = recs.find((r) => r.kind === "placement_start")!;
     expect(placement.href).toBe("/placement");
     expect(placement.reason).toMatch(/review soon/i);
+  });
+
+  it("places observed-misconception remediation after weak skills and before next lesson (#126)", () => {
+    const recs = buildRecommendations(
+      input({
+        weakSkills: [skill("w", "Weak")],
+        misconceptions: [
+          { title: "references are aliases, not copies", reason: "You missed reference questions.", itemId: "cpp.x" }
+        ],
+        nextLesson: skill("n", "Next lesson", "item.n")
+      })
+    );
+    const kinds = recs.map((r) => r.kind);
+    expect(kinds.indexOf("remediation")).toBeGreaterThan(kinds.indexOf("weak_skill"));
+    expect(kinds.indexOf("remediation")).toBeLessThan(kinds.indexOf("next_lesson"));
+
+    const rem = recs.find((r) => r.kind === "remediation")!;
+    expect(rem.title).toBe("Clear up: references are aliases, not copies");
+    expect(rem.href).toBe("/learn/cpp.x");
+  });
+
+  it("links a misconception with no item to the dashboard (#126)", () => {
+    const recs = buildRecommendations(
+      input({ misconceptions: [{ title: "T", reason: "R", itemId: null }] })
+    );
+    expect(recs.find((r) => r.kind === "remediation")!.href).toBe("/dashboard");
   });
 
   it("places the next capstone milestone after prerequisites and before explore (#130)", () => {

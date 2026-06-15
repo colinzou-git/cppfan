@@ -8,10 +8,18 @@ import { getPlacementResults } from "@/features/placement/placement-queries";
 import { getPlacementModules } from "@/features/placement/placement-seed";
 import { buildCapstoneTrackView, nextCapstoneMilestone } from "@/features/labs/capstone-view";
 import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
+import { remediationRecsFromAttempts } from "@/features/remediation/remediation-recs";
 import { buildRecommendations } from "./recommendation-rules";
-import type { CapstoneMilestoneRef, DailyPlan, PlacementStartRef, SkillRef } from "./recommendation-types";
+import type {
+  CapstoneMilestoneRef,
+  DailyPlan,
+  MisconceptionRef,
+  PlacementStartRef,
+  SkillRef
+} from "./recommendation-types";
 
 const MAX_PER_CATEGORY = 2;
+const REMEDIATION_WINDOW_DAYS = 14;
 const PLACEMENT_LEVEL_RANK: Record<"start_here" | "review_soon", number> = { start_here: 0, review_soon: 1 };
 
 /**
@@ -93,6 +101,7 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
   let dailyReviewMinutes: number | null = null;
   let placementStarts: PlacementStartRef[] = [];
   let nextMilestone: CapstoneMilestoneRef | null = null;
+  let misconceptions: MisconceptionRef[] = [];
   const supabase = await createClient();
   if (supabase) {
     const {
@@ -123,6 +132,27 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
         milestoneProgress.filter((p) => p.status === "completed").map((p) => p.milestone_id)
       );
       nextMilestone = nextCapstoneMilestone(buildCapstoneTrackView(), completedMilestones);
+
+      // #126: name observed misconceptions from recent wrong answers.
+      const since = new Date(now.getTime() - REMEDIATION_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+      const wrong = await supabase
+        .from("learning_item_attempts")
+        .select("learning_item_id,selected_choice_id")
+        .eq("user_id", user.id)
+        .eq("is_correct", false)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (!wrong.error) {
+        misconceptions = remediationRecsFromAttempts(
+          (wrong.data ?? []).map((row) => ({
+            learning_item_id: row.learning_item_id as string,
+            selected_choice_id: (row.selected_choice_id as string | null) ?? null
+          }))
+        )
+          .slice(0, MAX_PER_CATEGORY)
+          .map((rec) => ({ title: rec.title, reason: rec.reason, itemId: rec.itemId }));
+      }
     }
   }
 
@@ -133,6 +163,7 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
       dailyReviewMinutes,
       regressedSkills,
       weakSkills,
+      misconceptions,
       placementStarts,
       nextLesson,
       prerequisite,
