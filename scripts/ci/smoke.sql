@@ -446,3 +446,27 @@ begin
 
   raise notice 'completion grading smoke OK';
 end $$;
+
+-- 17) #177 (interview sessions): per-learner table with RLS + base grant.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = 'interview_sessions'
+  ) then
+    raise exception 'interview_sessions table is missing (#177)';
+  end if;
+
+  if not exists (
+    select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relname = 'interview_sessions' and c.relrowsecurity
+  ) then
+    raise exception 'interview_sessions must have row level security enabled (#177)';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.interview_sessions', 'SELECT') then
+    raise exception 'authenticated should SELECT its own interview_sessions (#177)';
+  end if;
+
+  raise notice 'interview sessions smoke OK';
+end $$;
