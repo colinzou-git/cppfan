@@ -6,8 +6,10 @@ import { getEligibleReviewItems, getFirstLearningItemIdForSkill } from "@/featur
 import { skillPrerequisitesSeed, skillSeed } from "@/features/skills/skill-seed";
 import { getPlacementResults } from "@/features/placement/placement-queries";
 import { getPlacementModules } from "@/features/placement/placement-seed";
+import { buildCapstoneTrackView, nextCapstoneMilestone } from "@/features/labs/capstone-view";
+import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
 import { buildRecommendations } from "./recommendation-rules";
-import type { DailyPlan, PlacementStartRef, SkillRef } from "./recommendation-types";
+import type { CapstoneMilestoneRef, DailyPlan, PlacementStartRef, SkillRef } from "./recommendation-types";
 
 const MAX_PER_CATEGORY = 2;
 const PLACEMENT_LEVEL_RANK: Record<"start_here" | "review_soon", number> = { start_here: 0, review_soon: 1 };
@@ -90,6 +92,7 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
   let dueReviewCount = 0;
   let dailyReviewMinutes: number | null = null;
   let placementStarts: PlacementStartRef[] = [];
+  let nextMilestone: CapstoneMilestoneRef | null = null;
   const supabase = await createClient();
   if (supabase) {
     const {
@@ -113,6 +116,13 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
 
       // #125: feed persisted placement evidence into the ranking with a reason.
       placementStarts = placementStartsFromResults(await getPlacementResults());
+
+      // #130: suggest the next incomplete required capstone milestone.
+      const milestoneProgress = await getMilestoneProgressForUser();
+      const completedMilestones = new Set(
+        milestoneProgress.filter((p) => p.status === "completed").map((p) => p.milestone_id)
+      );
+      nextMilestone = nextCapstoneMilestone(buildCapstoneTrackView(), completedMilestones);
     }
   }
 
@@ -125,7 +135,8 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
       weakSkills,
       placementStarts,
       nextLesson,
-      prerequisite
+      prerequisite,
+      nextMilestone
     })
   };
 }

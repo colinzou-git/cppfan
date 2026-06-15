@@ -11,6 +11,7 @@ function input(overrides: Partial<RecommendationInput> = {}): RecommendationInpu
     placementStarts: [],
     nextLesson: null,
     prerequisite: null,
+    nextMilestone: null,
     ...overrides
   };
 }
@@ -99,5 +100,22 @@ describe("buildRecommendations ordering", () => {
     const placement = recs.find((r) => r.kind === "placement_start")!;
     expect(placement.href).toBe("/placement");
     expect(placement.reason).toMatch(/review soon/i);
+  });
+
+  it("places the next capstone milestone after prerequisites and before explore (#130)", () => {
+    const recs = buildRecommendations(
+      input({
+        nextLesson: skill("n", "Next", "item.n"),
+        nextMilestone: { milestoneId: "note-manager.m1", title: "Model a Note", projectTitle: "Note manager" }
+      })
+    );
+    const kinds = recs.map((r) => r.kind);
+    expect(kinds.indexOf("capstone_milestone")).toBeGreaterThan(kinds.indexOf("next_lesson"));
+    expect(kinds.indexOf("capstone_milestone")).toBeLessThan(kinds.indexOf("explore"));
+
+    const capstone = recs.find((r) => r.kind === "capstone_milestone")!;
+    expect(capstone.title).toBe("Build: Model a Note");
+    expect(capstone.reason).toMatch(/Note manager/);
+    expect(capstone.href).toBe("/labs");
   });
 });
