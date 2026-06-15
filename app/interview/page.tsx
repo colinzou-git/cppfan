@@ -51,6 +51,9 @@ export default function InterviewPage() {
           <Link href="/interview/plan" className="text-sm font-bold text-blue-700" data-testid="plan-link">
             Study plan →
           </Link>
+          <Link href="/interview/progress" className="text-sm font-bold text-blue-700" data-testid="progress-link">
+            Weekly progress →
+          </Link>
         </div>
       </header>
 
