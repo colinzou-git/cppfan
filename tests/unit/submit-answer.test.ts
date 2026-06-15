@@ -7,16 +7,29 @@ import { classifySubmitRpc } from "@/features/learning-items/submit-service";
 describe("classifySubmitRpc (#218)", () => {
   it("maps ok and already_processed to a graded success", () => {
     const ok = classifySubmitRpc({
-      data: [{ status: "ok", is_correct: true, correct_choice_id: "x.a", enrolled: true }],
+      data: [{ status: "ok", is_correct: true, correct_choice_id: "x.a", enrolled: true, error_tag: null }],
       error: null
     });
-    expect(ok).toEqual({ status: "graded", isCorrect: true, correctChoiceId: "x.a" });
+    expect(ok).toEqual({ status: "graded", isCorrect: true, correctChoiceId: "x.a", errorTag: null });
 
     const replay = classifySubmitRpc({
       data: [{ status: "already_processed", is_correct: false, correct_choice_id: "x.a", enrolled: false }],
       error: null
     });
-    expect(replay).toEqual({ status: "graded", isCorrect: false, correctChoiceId: "x.a" });
+    expect(replay).toEqual({ status: "graded", isCorrect: false, correctChoiceId: "x.a", errorTag: null });
+  });
+
+  it("carries the instructional error tag for a wrong answer (#126)", () => {
+    const wrong = classifySubmitRpc({
+      data: [{ status: "ok", is_correct: false, correct_choice_id: "x.a", error_tag: "cpp.references.copy_vs_alias" }],
+      error: null
+    });
+    expect(wrong).toEqual({
+      status: "graded",
+      isCorrect: false,
+      correctChoiceId: "x.a",
+      errorTag: "cpp.references.copy_vs_alias"
+    });
   });
 
   it("maps the invalid status to invalid", () => {
