@@ -4,8 +4,13 @@ import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
 import { RevealExplanation } from "./reveal-explanation";
 import { ParsonsExercise } from "./parsons-exercise";
+import { CompletionExercise } from "./completion-exercise";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
-import { getPublicParsonsBlocksForItem, isReviewEligibleType } from "./learning-item-seed";
+import {
+  getPublicCompletionBlanksForItem,
+  getPublicParsonsBlocksForItem,
+  isReviewEligibleType
+} from "./learning-item-seed";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
@@ -34,6 +39,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   const isLesson = item.type === "lesson" || item.type === "worked_example";
   const isParsons = item.type === "parsons";
   const parsonsBlocks = isParsons ? getPublicParsonsBlocksForItem(item.id) : [];
+  const isCompletion = item.type === "completion";
+  const completionBlanks = isCompletion ? getPublicCompletionBlanksForItem(item.id) : [];
 
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
@@ -65,6 +72,10 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
 
         {isParsons && parsonsBlocks.length > 0 ? (
           <ParsonsExercise itemId={item.id} blocks={parsonsBlocks} />
+        ) : null}
+
+        {isCompletion && completionBlanks.length > 0 ? (
+          <CompletionExercise itemId={item.id} blanks={completionBlanks} />
         ) : null}
 
         {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
