@@ -1555,6 +1555,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.problem_framing",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Framing a problem before coding",
+    description: "Restate inputs, outputs, constraints, and invariants before writing a solution.",
+    learner_goal: "Pin down inputs/outputs/constraints and state the invariant a solution maintains.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1013,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.test_examples",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Boundary and adversarial examples",
+    description: "Build edge-case and adversarial examples to expose missing cases and wrong shortcuts.",
+    learner_goal: "Construct boundary and adversarial examples and use a counterexample to discard a wrong approach.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1014,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.bruteforce_then_optimize",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Brute force first, then remove repeated work",
+    description: "Start from a correct brute force, then optimize by eliminating redundant recomputation.",
+    learner_goal: "Use a brute force as a correctness oracle and identify the repeated work to optimize away.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1015,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing",
     domain: "dsa",
     module_id: "dsa.arrays",
@@ -2474,6 +2510,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.complexity.pattern_recognition", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.container_selection", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.recursion_choice", prerequisite_skill_id: "dsa.recursion.base_case", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.problem_framing", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.test_examples", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.bruteforce_then_optimize", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },
