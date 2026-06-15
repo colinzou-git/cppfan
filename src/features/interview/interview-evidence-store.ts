@@ -143,6 +143,40 @@ export async function getRecentInterviewEvidence(
   return rowsToEvidence(data as EvidenceRow[]);
 }
 
+/** The signed-in learner's recent approach/implementation timing samples (#182). */
+export async function getRecentTimingSamples(
+  now: number = Date.now(),
+  windowDays: number = DEFAULT_WINDOW_DAYS
+): Promise<{ approachSeconds: number | null; implementationSeconds: number | null }[]> {
+  const supabase = await createClient();
+  if (!supabase) {
+    return [];
+  }
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return [];
+  }
+  const since = new Date(now - windowDays * DAY_MS).toISOString();
+  const { data, error } = await supabase
+    .from("interview_evidence")
+    .select("time_to_approach_seconds,time_to_implementation_seconds")
+    .eq("user_id", user.id)
+    .gte("completed_at", since)
+    .limit(DEFAULT_LIMIT);
+  if (error || !data) {
+    return [];
+  }
+  return (data as { time_to_approach_seconds: number | null; time_to_implementation_seconds: number | null }[]).map(
+    (row) => ({
+      approachSeconds: typeof row.time_to_approach_seconds === "number" ? row.time_to_approach_seconds : null,
+      implementationSeconds:
+        typeof row.time_to_implementation_seconds === "number" ? row.time_to_implementation_seconds : null
+    })
+  );
+}
+
 /** Append one self-reported interview outcome for the signed-in learner. */
 export async function recordInterviewEvidence(input: EvidenceInput): Promise<EvidenceWriteOutcome> {
   if (!VALID_PATTERNS.has(input.pattern) || typeof input.problemId !== "string" || !input.problemId) {

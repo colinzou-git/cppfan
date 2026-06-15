@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
-import { getReadinessFacets, getReadinessInputs } from "@/features/interview/readiness-store";
+import { getReadinessFacets, getReadinessInputs, getReadinessTiming } from "@/features/interview/readiness-store";
 import { buildReadinessReport, type ReadinessStatus } from "@/features/interview/readiness-report";
 import type { DimensionStatus, ReadinessDimension } from "@/features/interview/readiness";
 import type { ScoreBand } from "@/features/interview/rubric";
@@ -66,6 +66,7 @@ export default async function InterviewReadinessPage() {
   const report = buildReadinessReport(evidence, mocksCompleted, quality, { now });
   const dimensions = Object.keys(report.dimensions) as ReadinessDimension[];
   const facets = await getReadinessFacets();
+  const timing = await getReadinessTiming(now);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -161,6 +162,38 @@ export default async function InterviewReadinessPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="grid gap-2" data-testid="readiness-timing">
+        <h2 className="text-lg font-black text-slate-900">Timing breakdown</h2>
+        {timing.approachSamples === 0 && timing.implementationSamples === 0 ? (
+          <p className="text-sm text-slate-600" data-testid="readiness-timing-empty">
+            No session timings logged yet — add minutes-to-approach / minutes-to-working-code when you{" "}
+            <Link href="/interview/log" className="font-bold text-blue-700">
+              log an outcome
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <span
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700"
+              data-testid="readiness-timing-approach"
+            >
+              Median to approach:{" "}
+              {timing.approachMedianMinutes === null ? "—" : `${timing.approachMedianMinutes} min`}
+              {timing.approachSamples > 0 ? ` (${timing.approachSamples})` : ""}
+            </span>
+            <span
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700"
+              data-testid="readiness-timing-impl"
+            >
+              Median to working code:{" "}
+              {timing.implementationMedianMinutes === null ? "—" : `${timing.implementationMedianMinutes} min`}
+              {timing.implementationSamples > 0 ? ` (${timing.implementationSamples})` : ""}
+            </span>
+          </div>
+        )}
       </section>
 
       {report.reasons.length > 0 ? (

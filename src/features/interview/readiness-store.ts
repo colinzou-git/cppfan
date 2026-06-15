@@ -6,8 +6,9 @@
 // conservative proxy that never over-counts a single session's problems. The pure
 // mappers are exported for unit tests.
 import { getSelfRubricScores } from "./rubric-store";
-import { getRecentInterviewEvidence } from "./interview-evidence-store";
+import { getRecentInterviewEvidence, getRecentTimingSamples } from "./interview-evidence-store";
 import { readinessFacets, type ReadinessFacet } from "./readiness-facets";
+import { summarizeTiming, type TimingSummary } from "./interview-timing";
 import type { RubricScore } from "./rubric";
 import type { InterviewEvidence, QualityAverages } from "./readiness";
 
@@ -71,4 +72,9 @@ export async function getReadinessInputs(now: number = Date.now()): Promise<Read
 /** The reported skill-level readiness facets from the learner's self-rubric (#180). */
 export async function getReadinessFacets(): Promise<ReadinessFacet[]> {
   return readinessFacets(await getSelfRubricScores());
+}
+
+/** The learner's recent approach/implementation timing breakdown (#182). */
+export async function getReadinessTiming(now: number = Date.now()): Promise<TimingSummary> {
+  return summarizeTiming(await getRecentTimingSamples(now));
 }
