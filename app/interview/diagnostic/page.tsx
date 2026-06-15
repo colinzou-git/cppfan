@@ -53,7 +53,7 @@ export default function DiagnosticPage() {
               <h3 className="font-bold text-slate-900">
                 {index + 1}. {section.title}
               </h3>
-              <span className="text-xs font-medium text-slate-400">~{section.estimatedMinutes} min</span>
+              <span className="text-xs font-medium text-slate-600">~{section.estimatedMinutes} min</span>
             </div>
             <p className="text-sm text-slate-700">Problem: {section.sourceTitle}</p>
             <div className="flex flex-wrap gap-1">

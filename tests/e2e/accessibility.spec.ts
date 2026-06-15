@@ -7,7 +7,24 @@ import { expect, test } from "@playwright/test";
 // authenticated learn/review interaction flows belong with the auth e2e suite
 // (#96). Runs across whichever Playwright project executes (desktop + mobile).
 
-const ROUTES = ["/", "/login", "/resources", "/labs", "/review"] as const;
+const ROUTES = [
+  "/",
+  "/login",
+  "/resources",
+  "/labs",
+  "/review",
+  "/placement",
+  "/exercises",
+  "/interview",
+  "/interview/diagnostic",
+  "/interview/session",
+  "/interview/mocks",
+  "/interview/rubric",
+  "/interview/readiness",
+  "/interview/log",
+  "/interview/plan",
+  "/interview/progress"
+] as const;
 
 const SEVERE = new Set(["serious", "critical"]);
 
