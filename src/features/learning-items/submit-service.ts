@@ -8,6 +8,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
 import { getErrorTagForChoice } from "@/features/remediation/error-tags";
+import { recordErrorPatternTransitions } from "@/features/remediation/error-pattern-recorder";
 import { getGradingChoices } from "./attempt-service";
 import { gradeChoiceAttempt } from "./grading";
 
@@ -130,6 +131,11 @@ export async function submitGradedAnswer(
   if (outcome.status === "invalid") {
     return { status: "invalid" };
   }
+
+  // Best-effort: record observed/cleared misconception evidence from the
+  // learner's recent attempts (#126). Derived evidence — never blocks the result.
+  await recordErrorPatternTransitions(supabase, user.id).catch(() => undefined);
+
   return {
     status: "graded",
     isCorrect: outcome.isCorrect,

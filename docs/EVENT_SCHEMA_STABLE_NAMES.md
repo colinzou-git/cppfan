@@ -13,6 +13,8 @@ Use these event names in code:
 - code_passed
 - skill_mastered
 - skill_regressed
+- error_pattern_observed
+- error_pattern_cleared
 
 Common fields:
 
