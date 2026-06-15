@@ -1828,6 +1828,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.concepts_depth.lesson",
+    type: "lesson",
+    title: "Concepts in depth",
+    prompt:
+      "A concept is a named, compile-time predicate on types that you use to constrain a template. Instead of an unconstrained `template <typename T>`, you write `template <std::integral T>` or add a `requires` clause like `requires std::integral<T>`; the function then only participates in overload resolution for types that satisfy the concept. The standard library ships many concepts in <concepts> and <ranges> (`std::integral`, `std::floating_point`, `std::totally_ordered`, `std::same_as`, `std::convertible_to`). Three wins: intent — the signature documents what the type must support; diagnostics — a violation reports that the constraint was not satisfied at the call site instead of a deep, cryptic error from inside the template body; and correctness — you exclude types that would compile but misbehave. You can also write an abbreviated function template using a constrained auto parameter: `void f(std::integral auto x)`. Define your own with `template <class T> concept Addable = requires (T a, T b) { a + b; };`. Prefer constraining with an existing standard concept before inventing one.",
+    explanation:
+      "A concept is a named compile-time predicate constraining a template (`template <std::integral T>` or a `requires` clause). It documents intent, fails with a clear constraint message at the call site rather than deep template errors, and excludes types that would misbehave. `std::integral auto x` is an abbreviated constrained parameter.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4650,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.concepts_depth.mc_why",
+    type: "multiple_choice",
+    title: "Why constrain with a concept",
+    prompt: "Why constrain a template with a concept like `std::integral` instead of leaving it unconstrained?",
+    explanation:
+      "A concept makes the requirement explicit and produces a clear constraint-not-satisfied error at the call site, instead of a deep error from inside the template body; it also removes the function from overload resolution for unsupported types.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4660,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges_depth.lesson",
+    type: "lesson",
+    title: "Ranges algorithms and lazy views",
+    prompt:
+      "The ranges library (C++20) lets you call algorithms on a whole range and compose lazy views. Instead of `std::sort(v.begin(), v.end())` you write `std::ranges::sort(v)` — fewer iterator pairs to get wrong, and the std::ranges algorithms add projections and concept-checked constraints. Views are lazy, composable adaptors: `v | std::views::filter(pred) | std::views::transform(f) | std::views::take(3)` describes a pipeline that does no work until you iterate it, and touches each element at most once as results are pulled through. Because views are lazy they avoid building intermediate containers — filtering then transforming a million elements allocates nothing extra. Read the pipe left to right as a data flow. When you actually need a container, materialize the result (copy into a vector, or `std::ranges::to` in C++23). Use ranges algorithms for clarity and views to express transformations without temporary vectors.",
+    explanation:
+      "`std::ranges::sort(v)` and other ranges algorithms take a whole range (plus optional projection) instead of iterator pairs — fewer mistakes, concept-checked. Views (`views::filter`/`transform`/`take`) are lazy, composable, allocation-free pipelines evaluated only when iterated; materialize into a container when you need one.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4670,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges_depth.mc_lazy",
+    type: "multiple_choice",
+    title: "How a view pipeline evaluates",
+    prompt: "What is true of `nums | std::views::filter(even) | std::views::transform(square)`?",
+    explanation:
+      "Views are lazy: the pipeline does no work until iterated, then processes elements on demand without building intermediate containers. It is not evaluated eagerly into temporary vectors.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4680,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.view_lifetime.lesson",
+    type: "lesson",
+    title: "View lifetime and dangling",
+    prompt:
+      "A view does not own its elements — it is a lightweight handle referring to some underlying range. That makes views cheap to copy and compose, but a view is only valid while the range it refers to stays alive. The classic bug is returning a view over a local or temporary: a function that builds a local `std::vector<int> v` and returns `v | std::views::filter(p)` returns a view into v, which is destroyed when the function returns — the result dangles. The same trap appears when you build a view over a temporary container expression, or keep a view after the source vector reallocates or goes out of scope. Rules of thumb: do not return a view that refers to a local; do not store a view longer than its source lives; if you need an owning result, materialize it (copy into a vector, or `std::ranges::to<std::vector>()` in C++23). Some adaptors over rvalue ranges are constrained for this reason (owning_view and the borrowed-range concept make the safe cases explicit). Treat a view like a pointer into a container: valid only as long as the container is.",
+    explanation:
+      "A view is a non-owning handle into another range, valid only while that range lives. Returning a view over a local/temporary, or keeping one after the source is destroyed or reallocates, dangles. Materialize (copy into a vector, or std::ranges::to in C++23) when the result must outlive the source; treat a view like a pointer into a container.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4690,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.view_lifetime.mc_dangling",
+    type: "multiple_choice",
+    title: "Why a returned view can dangle",
+    prompt: "Why can returning `local_vector | std::views::filter(pred)` from a function be a bug?",
+    explanation:
+      "A view does not own its elements; it refers to local_vector. When the function returns, local_vector is destroyed, so the returned view dangles. Materialize into an owning container instead.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4700,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling.lesson",
     type: "lesson",
     title: "Error handling",
@@ -4775,6 +4850,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.templates.deduction.mc_headers", skill_id: "cpp.templates.deduction", is_primary: true },
   { learning_item_id: "cpp.templates.aliases_specialization.lesson", skill_id: "cpp.templates.aliases_specialization", is_primary: true },
   { learning_item_id: "cpp.templates.aliases_specialization.mc_alias", skill_id: "cpp.templates.aliases_specialization", is_primary: true },
+  { learning_item_id: "cpp.templates.concepts_depth.lesson", skill_id: "cpp.templates.concepts_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.concepts_depth.mc_why", skill_id: "cpp.templates.concepts_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.ranges_depth.lesson", skill_id: "cpp.templates.ranges_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.ranges_depth.mc_lazy", skill_id: "cpp.templates.ranges_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.view_lifetime.lesson", skill_id: "cpp.templates.view_lifetime", is_primary: true },
+  { learning_item_id: "cpp.templates.view_lifetime.mc_dangling", skill_id: "cpp.templates.view_lifetime", is_primary: true },
   { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.stl.vector", is_primary: false },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.tooling.error_handling", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.mc_unwind", skill_id: "cpp.tooling.error_handling", is_primary: true },
@@ -5350,6 +5431,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.templates.aliases_specialization.mc_alias.b", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A new container type distinct from std::vector", is_correct: false, order_index: 20 },
   { id: "cpp.templates.aliases_specialization.mc_alias.c", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A specialization of std::vector for int", is_correct: false, order_index: 30 },
   { id: "cpp.templates.aliases_specialization.mc_alias.d", learning_item_id: "cpp.templates.aliases_specialization.mc_alias", content: "A runtime copy of the vector", is_correct: false, order_index: 40 },
+  { id: "cpp.templates.concepts_depth.mc_why.a", learning_item_id: "cpp.templates.concepts_depth.mc_why", content: "It documents the requirement and gives a clear constraint error at the call site", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.concepts_depth.mc_why.b", learning_item_id: "cpp.templates.concepts_depth.mc_why", content: "It makes the template run faster at run time", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.concepts_depth.mc_why.c", learning_item_id: "cpp.templates.concepts_depth.mc_why", content: "It is required syntax; templates do not compile without concepts", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.concepts_depth.mc_why.d", learning_item_id: "cpp.templates.concepts_depth.mc_why", content: "It converts arguments to integers automatically", is_correct: false, order_index: 40 },
+  { id: "cpp.templates.ranges_depth.mc_lazy.a", learning_item_id: "cpp.templates.ranges_depth.mc_lazy", content: "It is lazy — no work happens until you iterate it, and no intermediate container is built", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.ranges_depth.mc_lazy.b", learning_item_id: "cpp.templates.ranges_depth.mc_lazy", content: "It eagerly builds a filtered vector, then a transformed vector", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.ranges_depth.mc_lazy.c", learning_item_id: "cpp.templates.ranges_depth.mc_lazy", content: "It sorts the elements as a side effect", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.ranges_depth.mc_lazy.d", learning_item_id: "cpp.templates.ranges_depth.mc_lazy", content: "It copies nums before filtering", is_correct: false, order_index: 40 },
+  { id: "cpp.templates.view_lifetime.mc_dangling.a", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "The view refers to the local vector, which is destroyed on return — the view dangles", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.view_lifetime.mc_dangling.b", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "Views cannot be returned from functions at all", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.view_lifetime.mc_dangling.c", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "filter copies the vector, doubling memory", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.view_lifetime.mc_dangling.d", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "The predicate runs too early", is_correct: false, order_index: 40 },
 
   { id: "cpp.tooling.error_handling.mc_unwind.a", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They are destroyed by stack unwinding (their destructors run)", is_correct: true, order_index: 10 },
   { id: "cpp.tooling.error_handling.mc_unwind.b", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They leak; destructors are skipped", is_correct: false, order_index: 20 },
