@@ -28,4 +28,8 @@ test("with no evidence the report shows the explicit not-enough-evidence state",
   await expect(
     page.locator('[data-testid="readiness-facet"][data-facet-id="time_management"]')
   ).toHaveAttribute("data-facet-band", "unrated");
+
+  // The timing breakdown is present with an honest empty state (no timings logged).
+  await expect(page.getByTestId("readiness-timing")).toBeVisible();
+  await expect(page.getByTestId("readiness-timing-empty")).toBeVisible();
 });
