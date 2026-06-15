@@ -6,11 +6,12 @@ import type { Recommendation, RecommendationInput, SkillRef } from "./recommenda
  *   1. Due reviews
  *   2. Regressed skills
  *   3. Weak skills
- *   4. Placement-check starting suggestions (#125)
- *   5. Current learning path (next lesson)
- *   6. Recommended prerequisites
- *   7. Next capstone milestone to build (#130)
- *   8. Optional exploration (always offered as a fallback)
+ *   4. Observed-misconception remediation (#126)
+ *   5. Placement-check starting suggestions (#125)
+ *   6. Current learning path (next lesson)
+ *   7. Recommended prerequisites
+ *   8. Next capstone milestone to build (#130)
+ *   9. Optional exploration (always offered as a fallback)
  *
  * Pure and deterministic so the ordering can be unit tested directly.
  */
@@ -47,6 +48,15 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
       title: `Practice ${skill.title}`,
       reason: "Recent mistakes or repeated hints suggest this skill is still weak.",
       href: skillHref(skill)
+    });
+  }
+
+  for (const misconception of input.misconceptions) {
+    recommendations.push({
+      kind: "remediation",
+      title: `Clear up: ${misconception.title}`,
+      reason: misconception.reason,
+      href: misconception.itemId ? `/learn/${encodeURIComponent(misconception.itemId)}` : "/dashboard"
     });
   }
 

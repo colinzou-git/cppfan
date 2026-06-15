@@ -2,6 +2,7 @@ export type RecommendationKind =
   | "due_reviews"
   | "regressed_skill"
   | "weak_skill"
+  | "remediation"
   | "placement_start"
   | "next_lesson"
   | "prerequisite"
@@ -19,6 +20,13 @@ export type Recommendation = {
 export type SkillRef = {
   skillId: string;
   title: string;
+  itemId: string | null;
+};
+
+/** An observed-misconception remediation suggestion (#126). */
+export type MisconceptionRef = {
+  title: string;
+  reason: string;
   itemId: string | null;
 };
 
@@ -42,6 +50,8 @@ export type RecommendationInput = {
   dailyReviewMinutes: number | null;
   regressedSkills: SkillRef[];
   weakSkills: SkillRef[];
+  /** Observed-misconception remediation suggestions (#126). */
+  misconceptions: MisconceptionRef[];
   /** Placement-check starting suggestions, ranked (start_here before review_soon). */
   placementStarts: PlacementStartRef[];
   nextLesson: SkillRef | null;
