@@ -1747,6 +1747,42 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.traversal_techniques",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Iterative and level-order traversal",
+    description: "Make DFS iterative with an explicit stack and traverse level by level with a queue.",
+    learner_goal: "Convert a recursive traversal to an explicit stack and do a level-order (BFS) traversal with a queue.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1640,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.traversal_reconstruction",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Reconstructing a tree from traversals",
+    description: "Rebuild a unique binary tree from inorder plus preorder or postorder.",
+    learner_goal: "Reconstruct a tree from inorder + preorder/postorder and explain why preorder + postorder is ambiguous.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1645,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_diameter",
+    domain: "dsa",
+    module_id: "dsa.trees",
+    title: "Tree diameter and height-tracking DFS",
+    description: "Find the longest path with one post-order DFS that returns height and tracks a global best.",
+    learner_goal: "Compute a tree diameter in O(n) by returning height upward while updating a global best.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1650,
+    is_active: true
+  },
+  {
     id: "dsa.graphs.representation",
     domain: "dsa",
     module_id: "dsa.graphs",
@@ -2453,6 +2489,9 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.trees.bst_search", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.trees.heap_applications", prerequisite_skill_id: "dsa.trees.heap", relationship_type: "recommended" },
   { skill_id: "dsa.trees.dsu_internals", prerequisite_skill_id: "dsa.trees.disjoint_set", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.traversal_techniques", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.traversal_reconstruction", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
+  { skill_id: "dsa.trees.tree_diameter", prerequisite_skill_id: "dsa.trees.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.representation", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.bfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.dfs", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },

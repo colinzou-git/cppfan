@@ -2779,6 +2779,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.trees.traversal_techniques.lesson",
+    type: "lesson",
+    title: "Iterative and level-order traversal",
+    prompt:
+      "The three depth-first orders — preorder (node, left, right), inorder (left, node, right), postorder (left, right, node) — are most naturally written with recursion, where the call stack tracks where to resume. An iterative version makes that stack explicit: push nodes onto a std::stack and pop to visit, which avoids deep recursion overflowing the call stack on a skewed tree of height near n. A useful fact: an inorder traversal of a binary SEARCH tree visits keys in sorted order. Breadth-first / level-order traversal is different: it visits nodes level by level using a QUEUE — enqueue the root, then repeatedly dequeue a node, visit it, and enqueue its children. Recording the queue size before draining a level lets you process one level at a time, which answers per-level questions like depth, level sums, or zig-zag order. Rule of thumb: DFS orders (recursive or explicit-stack) for structural and subtree work; level-order (queue) for shortest-by-edges and per-level work.",
+    explanation:
+      "Pre/in/post-order are DFS, naturally recursive; an explicit std::stack makes the iteration non-recursive and avoids stack overflow on skewed trees. Inorder of a BST yields sorted keys. Level-order is BFS with a QUEUE, processing one level at a time — use it for depth and per-level questions.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4770,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.traversal_techniques.mc_levelorder",
+    type: "multiple_choice",
+    title: "Driving a level-order traversal",
+    prompt: "Which data structure drives a level-order (breadth-first) traversal of a binary tree?",
+    explanation:
+      "A queue: enqueue the root, then repeatedly dequeue a node, visit it, and enqueue its children — visiting nodes level by level. A stack would give a depth-first order instead.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4780,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.traversal_reconstruction.lesson",
+    type: "lesson",
+    title: "Reconstructing a tree from traversals",
+    prompt:
+      "You can rebuild a unique binary tree from two traversals when one of them is INORDER. From preorder + inorder: the first element of preorder is the root; find that root in inorder — everything to its left is the left subtree, everything to its right is the right subtree; recurse on the two halves, using the left-subtree size to split the remaining preorder. Postorder + inorder works the same way, taking the root from the END of postorder. Inorder is required because it tells you where the split between left and right subtrees falls, which preorder or postorder alone cannot. In fact preorder + postorder do NOT determine a unique tree in general — a node with a single child is ambiguous, since you cannot tell whether that child is a left or right child. A BST gives more freedom: preorder (or postorder) alone reconstructs it, because the ordering property supplies the missing left/right split. When tracing by hand, keep a hash map from value to its inorder index so each root lookup is O(1).",
+    explanation:
+      'Inorder + (preorder or postorder) reconstructs a unique binary tree: take the root from the start of preorder (or end of postorder), split inorder at the root into left/right subtrees, recurse. Inorder supplies the left/right split. Preorder + postorder alone is NOT unique (single-child nodes are ambiguous). For a BST, preorder alone suffices.',
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4790,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.traversal_reconstruction.mc_pair",
+    type: "multiple_choice",
+    title: "Which traversals fix a unique tree",
+    prompt: "Which pair of traversals always reconstructs a UNIQUE binary tree?",
+    explanation:
+      "Preorder + inorder (equivalently postorder + inorder): inorder fixes where each root splits into left and right subtrees. Preorder + postorder alone is ambiguous for a node with a single child.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4800,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_diameter.lesson",
+    type: "lesson",
+    title: "Tree diameter and height-tracking DFS",
+    prompt:
+      "The diameter of a binary tree is the number of edges on the longest path between any two nodes; that path may or may not pass through the root. The efficient solution is a single post-order DFS that, for each node, returns its HEIGHT (edges down to the deepest leaf) while updating a running best diameter. At a node, the longest path that bends THROUGH it is leftHeight + rightHeight edges; compare that to the best seen so far, then return 1 + max(leftHeight, rightHeight) as this height to the parent. Because each node is visited once and does O(1) work, it is O(n) — far better than recomputing heights from every node (O(n^2)). The same pattern (return one value upward while separately updating a global answer that may combine both child results) solves related problems like maximum path sum and longest univalue path. Decide the edges-vs-nodes convention for the diameter up front, since some define it as a node count equal to edges + 1.",
+    explanation:
+      "Tree diameter = longest path (in edges) between two nodes, possibly not through the root. One post-order DFS returns each height and updates a global best = leftHeight + rightHeight at each node, returning 1 + max(left, right) upward. O(n), vs O(n^2) recomputing heights everywhere. Same return-one-value-track-a-global pattern as max path sum.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4810,
+    is_active: true
+  },
+  {
+    id: "dsa.trees.tree_diameter.mc_method",
+    type: "multiple_choice",
+    title: "Computing the diameter efficiently",
+    prompt: "What is the efficient way to compute the diameter (longest path) of a binary tree?",
+    explanation:
+      "One post-order DFS: each call returns the height and updates a global best with leftHeight + rightHeight at that node. O(n). Recomputing height from every node is O(n^2); BFS levels give depth, not the longest bending path.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4820,
+    is_active: true
+  },
+  {
     id: "dsa.graphs.representation.lesson",
     type: "lesson",
     title: "Graph representation",
@@ -5005,6 +5080,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.trees.heap_applications.mc_topk", skill_id: "dsa.trees.heap_applications", is_primary: true },
   { learning_item_id: "dsa.trees.dsu_internals.lesson", skill_id: "dsa.trees.dsu_internals", is_primary: true },
   { learning_item_id: "dsa.trees.dsu_internals.mc_compression", skill_id: "dsa.trees.dsu_internals", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal_techniques.lesson", skill_id: "dsa.trees.traversal_techniques", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal_techniques.mc_levelorder", skill_id: "dsa.trees.traversal_techniques", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal_reconstruction.lesson", skill_id: "dsa.trees.traversal_reconstruction", is_primary: true },
+  { learning_item_id: "dsa.trees.traversal_reconstruction.mc_pair", skill_id: "dsa.trees.traversal_reconstruction", is_primary: true },
+  { learning_item_id: "dsa.trees.tree_diameter.lesson", skill_id: "dsa.trees.tree_diameter", is_primary: true },
+  { learning_item_id: "dsa.trees.tree_diameter.mc_method", skill_id: "dsa.trees.tree_diameter", is_primary: true },
   { learning_item_id: "dsa.graphs.representation.lesson", skill_id: "dsa.graphs.representation", is_primary: true },
   { learning_item_id: "dsa.graphs.representation.mc_sparse", skill_id: "dsa.graphs.representation", is_primary: true },
   { learning_item_id: "dsa.graphs.bfs.lesson", skill_id: "dsa.graphs.bfs", is_primary: true },
@@ -5699,6 +5780,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.trees.dsu_internals.mc_compression.b", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Sorts the elements by rank", is_correct: false, order_index: 20 },
   { id: "dsa.trees.dsu_internals.mc_compression.c", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Deletes elements from the set", is_correct: false, order_index: 30 },
   { id: "dsa.trees.dsu_internals.mc_compression.d", learning_item_id: "dsa.trees.dsu_internals.mc_compression", content: "Balances the tree by rotating nodes", is_correct: false, order_index: 40 },
+  { id: "dsa.trees.traversal_techniques.mc_levelorder.a", learning_item_id: "dsa.trees.traversal_techniques.mc_levelorder", content: "A queue (FIFO)", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.traversal_techniques.mc_levelorder.b", learning_item_id: "dsa.trees.traversal_techniques.mc_levelorder", content: "A stack (LIFO)", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.traversal_techniques.mc_levelorder.c", learning_item_id: "dsa.trees.traversal_techniques.mc_levelorder", content: "A priority queue", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.traversal_techniques.mc_levelorder.d", learning_item_id: "dsa.trees.traversal_techniques.mc_levelorder", content: "A hash set", is_correct: false, order_index: 40 },
+  { id: "dsa.trees.traversal_reconstruction.mc_pair.a", learning_item_id: "dsa.trees.traversal_reconstruction.mc_pair", content: "Preorder and inorder", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.traversal_reconstruction.mc_pair.b", learning_item_id: "dsa.trees.traversal_reconstruction.mc_pair", content: "Preorder and postorder", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.traversal_reconstruction.mc_pair.c", learning_item_id: "dsa.trees.traversal_reconstruction.mc_pair", content: "Level-order alone", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.traversal_reconstruction.mc_pair.d", learning_item_id: "dsa.trees.traversal_reconstruction.mc_pair", content: "Postorder alone", is_correct: false, order_index: 40 },
+  { id: "dsa.trees.tree_diameter.mc_method.a", learning_item_id: "dsa.trees.tree_diameter.mc_method", content: "A single post-order DFS that returns height and tracks leftHeight + rightHeight at each node", is_correct: true, order_index: 10 },
+  { id: "dsa.trees.tree_diameter.mc_method.b", learning_item_id: "dsa.trees.tree_diameter.mc_method", content: "BFS level-order, taking the number of levels", is_correct: false, order_index: 20 },
+  { id: "dsa.trees.tree_diameter.mc_method.c", learning_item_id: "dsa.trees.tree_diameter.mc_method", content: "Recompute the height from every node and take the max", is_correct: false, order_index: 30 },
+  { id: "dsa.trees.tree_diameter.mc_method.d", learning_item_id: "dsa.trees.tree_diameter.mc_method", content: "Sort the node values and subtract", is_correct: false, order_index: 40 },
 
   { id: "dsa.graphs.representation.mc_sparse.a", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency list", is_correct: true, order_index: 10 },
   { id: "dsa.graphs.representation.mc_sparse.b", learning_item_id: "dsa.graphs.representation.mc_sparse", content: "An adjacency matrix", is_correct: false, order_index: 20 },
