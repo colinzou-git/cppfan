@@ -2954,6 +2954,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.shortest_path_algorithms.lesson",
+    type: "lesson",
+    title: "Choosing a shortest-path algorithm",
+    prompt:
+      "Picking the right shortest-path algorithm depends on the graph. Unweighted (or all edges equal): plain BFS finds shortest paths in O(V+E) — the first time BFS reaches a node is via a fewest-edges path. Non-negative weights: Dijkstra with a priority queue, O((V+E) log V); it greedily settles the closest unsettled node, which is only valid when no edge is negative. Negative edge weights: Bellman-Ford, O(V*E); it relaxes all edges V-1 times and can also DETECT a negative cycle (if an edge still relaxes on the V-th pass, a negative cycle is reachable). All-pairs shortest paths on a small dense graph: Floyd-Warshall, O(V^3), a three-loop DP over intermediate vertices. The decision: no weights then BFS; non-negative then Dijkstra; possible negatives or need cycle detection then Bellman-Ford; every pair on a small graph then Floyd-Warshall. A classic bug is running Dijkstra on a graph with negative edges — it can settle a node too early and report a wrong distance.",
+    explanation:
+      "BFS for unweighted (O(V+E)); Dijkstra for non-negative weights (O((V+E) log V), greedy — invalid with negative edges); Bellman-Ford for negative edges and negative-cycle detection (O(V*E)); Floyd-Warshall for all-pairs on small graphs (O(V^3)). Running Dijkstra with negative edges is a classic bug.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4710,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.shortest_path_algorithms.mc_negative",
+    type: "multiple_choice",
+    title: "Shortest paths with negative edges",
+    prompt: "A weighted directed graph has some NEGATIVE edge weights and you need single-source shortest paths plus detection of a negative cycle. Which algorithm fits?",
+    explanation:
+      "Bellman-Ford handles negative edge weights and detects a negative cycle (an edge that still relaxes after V-1 passes). Dijkstra assumes non-negative weights; BFS ignores weights.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4720,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.mst.lesson",
+    type: "lesson",
+    title: "Minimum spanning trees",
+    prompt:
+      "A minimum spanning tree (MST) connects all vertices of a weighted, connected, undirected graph with the smallest total edge weight and no cycles (V-1 edges). Two greedy algorithms build it. Kruskal: sort all edges by weight ascending, then add each edge whose endpoints are in different components, using a disjoint-set union (union-find) to test and merge components; skip an edge that would form a cycle. O(E log E), dominated by the sort. Prim: grow one tree from a start vertex, repeatedly adding the cheapest edge that leaves the current tree (a priority queue gives O((V+E) log V)), like Dijkstra but keyed on edge weight rather than path distance. Both are justified by the cut property: for any cut of the graph, the minimum-weight edge crossing it is safe to include in some MST. Kruskal suits sparse graphs and edge lists; Prim suits dense graphs and adjacency structures. The MST is not generally unique when weights tie.",
+    explanation:
+      "An MST connects all vertices with minimum total weight and no cycle (V-1 edges). Kruskal: sort edges, add the cheapest that joins two different components (union-find), O(E log E). Prim: grow from a vertex, add the cheapest crossing edge (priority queue). Both follow the cut property: the minimum edge across any cut is safe.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4730,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.mst.mc_cycle",
+    type: "multiple_choice",
+    title: "Cycle test in Kruskal",
+    prompt: "In Kruskal MST construction, what decides whether adding the next-cheapest edge would form a cycle?",
+    explanation:
+      "A disjoint-set union (union-find): if the edge joins two vertices already in the same set it would create a cycle, so it is skipped; otherwise the two sets are merged. Sorting only orders the edges.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4740,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bipartite_scc.lesson",
+    type: "lesson",
+    title: "Bipartite coloring and strongly connected components",
+    prompt:
+      "Two connectivity properties come up often. Bipartite check: a graph is bipartite if you can 2-color it so every edge joins different colors — equivalently, it has no odd-length cycle. Test it with BFS or DFS: color the start, give each neighbor the opposite color, and if you ever find an edge between same-colored nodes the graph is not bipartite. O(V+E). Bipartite graphs model matching and scheduling (two disjoint sides). Strongly connected components (SCC) apply to DIRECTED graphs: an SCC is a maximal set of vertices where every vertex can reach every other. Condensing each SCC to a single node turns any directed graph into a DAG, useful for ordering. Linear-time SCC algorithms — Kosaraju (two DFS passes, the second on the reversed graph) and Tarjan (one DFS tracking discovery and low-link values) — both run in O(V+E). Use bipartite coloring for two-sided or odd-cycle questions on undirected graphs, and SCCs to find mutually-reachable groups and build the DAG of components in a directed graph.",
+    explanation:
+      "A graph is bipartite iff it 2-colors with no same-color edge (no odd cycle); check by BFS/DFS coloring in O(V+E). An SCC (directed graphs) is a maximal mutually-reachable vertex set; Kosaraju (two DFS, one on the reversed graph) and Tarjan (one DFS with low-link) find all SCCs in O(V+E), and condensing SCCs yields a DAG.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4750,
+    is_active: true
+  },
+  {
+    id: "dsa.graphs.bipartite_scc.mc_test",
+    type: "multiple_choice",
+    title: "Testing bipartiteness",
+    prompt: "How can you test whether an undirected graph is bipartite?",
+    explanation:
+      "Try a 2-coloring with BFS/DFS: color each node opposite its parent; if any edge connects two same-colored nodes it is not bipartite (equivalently, it has an odd cycle). O(V+E).",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4760,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_sums.lesson",
     type: "lesson",
     title: "Prefix sums",
@@ -4944,6 +5019,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.graphs.cycle_detection.mc_directed", skill_id: "dsa.graphs.cycle_detection", is_primary: true },
   { learning_item_id: "dsa.graphs.topological_sort.lesson", skill_id: "dsa.graphs.topological_sort", is_primary: true },
   { learning_item_id: "dsa.graphs.topological_sort.mc_exists", skill_id: "dsa.graphs.topological_sort", is_primary: true },
+  { learning_item_id: "dsa.graphs.shortest_path_algorithms.lesson", skill_id: "dsa.graphs.shortest_path_algorithms", is_primary: true },
+  { learning_item_id: "dsa.graphs.shortest_path_algorithms.mc_negative", skill_id: "dsa.graphs.shortest_path_algorithms", is_primary: true },
+  { learning_item_id: "dsa.graphs.mst.lesson", skill_id: "dsa.graphs.mst", is_primary: true },
+  { learning_item_id: "dsa.graphs.mst.mc_cycle", skill_id: "dsa.graphs.mst", is_primary: true },
+  { learning_item_id: "dsa.graphs.bipartite_scc.lesson", skill_id: "dsa.graphs.bipartite_scc", is_primary: true },
+  { learning_item_id: "dsa.graphs.bipartite_scc.mc_test", skill_id: "dsa.graphs.bipartite_scc", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.lesson", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.mc_query", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.sliding_window.lesson", skill_id: "dsa.techniques.sliding_window", is_primary: true },
@@ -5653,6 +5734,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.graphs.topological_sort.mc_exists.b", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Connected", is_correct: false, order_index: 20 },
   { id: "dsa.graphs.topological_sort.mc_exists.c", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Undirected", is_correct: false, order_index: 30 },
   { id: "dsa.graphs.topological_sort.mc_exists.d", learning_item_id: "dsa.graphs.topological_sort.mc_exists", content: "Weighted with nonnegative edges", is_correct: false, order_index: 40 },
+  { id: "dsa.graphs.shortest_path_algorithms.mc_negative.a", learning_item_id: "dsa.graphs.shortest_path_algorithms.mc_negative", content: "Bellman-Ford", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.shortest_path_algorithms.mc_negative.b", learning_item_id: "dsa.graphs.shortest_path_algorithms.mc_negative", content: "Dijkstra", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.shortest_path_algorithms.mc_negative.c", learning_item_id: "dsa.graphs.shortest_path_algorithms.mc_negative", content: "Breadth-first search", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.shortest_path_algorithms.mc_negative.d", learning_item_id: "dsa.graphs.shortest_path_algorithms.mc_negative", content: "Binary search", is_correct: false, order_index: 40 },
+  { id: "dsa.graphs.mst.mc_cycle.a", learning_item_id: "dsa.graphs.mst.mc_cycle", content: "A disjoint-set union (union-find) over the vertices", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.mst.mc_cycle.b", learning_item_id: "dsa.graphs.mst.mc_cycle", content: "A min-heap of vertices", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.mst.mc_cycle.c", learning_item_id: "dsa.graphs.mst.mc_cycle", content: "A stack of visited edges", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.mst.mc_cycle.d", learning_item_id: "dsa.graphs.mst.mc_cycle", content: "A 2-D distance matrix", is_correct: false, order_index: 40 },
+  { id: "dsa.graphs.bipartite_scc.mc_test.a", learning_item_id: "dsa.graphs.bipartite_scc.mc_test", content: "2-color it with BFS/DFS; fail if an edge joins two same-colored nodes", is_correct: true, order_index: 10 },
+  { id: "dsa.graphs.bipartite_scc.mc_test.b", learning_item_id: "dsa.graphs.bipartite_scc.mc_test", content: "Check that it has no cycles at all", is_correct: false, order_index: 20 },
+  { id: "dsa.graphs.bipartite_scc.mc_test.c", learning_item_id: "dsa.graphs.bipartite_scc.mc_test", content: "Run Dijkstra from every node", is_correct: false, order_index: 30 },
+  { id: "dsa.graphs.bipartite_scc.mc_test.d", learning_item_id: "dsa.graphs.bipartite_scc.mc_test", content: "Count whether it has an even number of vertices", is_correct: false, order_index: 40 },
 
   { id: "dsa.techniques.prefix_sums.mc_query.a", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(1)", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.prefix_sums.mc_query.b", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(log n)", is_correct: false, order_index: 20 },
