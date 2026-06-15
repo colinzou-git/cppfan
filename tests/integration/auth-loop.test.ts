@@ -372,6 +372,26 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("persists interview rubric self-scores per-user and isolates them (#179)", async () => {
+    const row = {
+      user_id: aId,
+      criterion: "correctness",
+      source: "self",
+      score: 3
+    };
+    const ins = await clientA.from("rubric_scores").upsert(row, { onConflict: "user_id,criterion,source" });
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA.from("rubric_scores").select("criterion,score").eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).find((r) => r.criterion === "correctness")?.score).toBe(3);
+
+    const asB = await clientB.from("rubric_scores").select("criterion").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("rubric_scores").select("criterion");
+    expect((asAnon.data ?? []).length).toBe(0);
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");

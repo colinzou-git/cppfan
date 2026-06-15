@@ -39,6 +39,9 @@ export default function InterviewPage() {
           <Link href="/interview/mocks" className="text-sm font-bold text-blue-700" data-testid="mock-packs-link">
             Timed mock packs →
           </Link>
+          <Link href="/interview/rubric" className="text-sm font-bold text-blue-700" data-testid="rubric-link">
+            Rubric self-review →
+          </Link>
         </div>
       </header>
 
