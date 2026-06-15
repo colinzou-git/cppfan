@@ -2353,6 +2353,81 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.problem_framing.lesson",
+    type: "lesson",
+    title: "Framing a problem before coding",
+    prompt:
+      "Before writing any code, restate the problem precisely — most wrong solutions come from solving the wrong problem. Pin down the exact INPUTS (types, ranges, can they be empty, negative, or duplicated, are they sorted), the exact OUTPUT (one value or all of them, an index or the element, and what happens when there is no answer — return -1, throw, or empty), and the CONSTRAINTS (n up to 10^5 versus 10^9 hints at the target complexity). Then state the INVARIANTS the solution will maintain — a property true at every step, such as left and right always bracketing the answer in binary search, or the prefix up to index i already being sorted. Writing the invariant down turns a vague idea into something you can check each iteration against. Clarifying questions to ask, or assumptions to record: input size, value ranges, duplicates and ties, ordering, memory limits, and what counts as a valid answer when none exists. This framing prevents off-by-one and missing-case bugs and surfaces the constraint that points you at the right algorithm.",
+    explanation:
+      "Restate the problem before coding: exact inputs (types/ranges/empty/duplicates/sorted), exact output (one vs all, index vs value, what on no-answer), and constraints (the n bound hints at target complexity). State the invariant the solution maintains so you can check each step. Most wrong solutions solve the wrong problem.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4830,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.problem_framing.mc_clarify",
+    type: "multiple_choice",
+    title: "The clarification that picks the algorithm",
+    prompt: "A coding problem asks you to find a value. Before coding, which clarification most directly changes the algorithm you choose?",
+    explanation:
+      "The input-size constraint (how large n can be) sets the target complexity and thus the algorithm. Variable names, editor, and comments do not change the algorithm.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4840,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.test_examples.lesson",
+    type: "lesson",
+    title: "Boundary and adversarial examples",
+    prompt:
+      "Concrete examples find bugs that staring at code does not. Before and while solving, build a small set of examples on purpose: a normal case, then the EDGE cases — empty input, a single element, all-equal elements, already-sorted and reverse-sorted, the smallest and largest allowed values, and duplicates or ties where order matters. Add ADVERSARIAL cases aimed at your specific approach: if you sort, try data that is already sorted or all-equal; if you use a sliding window, try a window that never shrinks; if you do arithmetic, try values that overflow a 32-bit int. Trace your idea by hand on each example before trusting it, and keep the examples as test cases afterward. Two payoffs: examples expose missing cases (the empty list, the single element, the no-answer case) early, and an adversarial example often reveals that a plausible greedy or shortcut is wrong — one counterexample is enough to discard it. They are cheap to make and catch the off-by-one and overflow bugs that survive a confident read-through.",
+    explanation:
+      "Build examples on purpose: a normal case plus edges (empty, single, all-equal, sorted, reverse-sorted, min/max values, duplicates/ties) and adversarial cases targeting your approach (already-sorted for a sort, overflow for arithmetic). They expose missing cases, and a single counterexample disproves a wrong greedy. Keep them as tests.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 4850,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.test_examples.mc_why",
+    type: "multiple_choice",
+    title: "Why build adversarial examples",
+    prompt: "Why deliberately construct boundary and adversarial examples before trusting a solution?",
+    explanation:
+      "They surface missing edge cases (empty/single/duplicates/overflow) and a single adversarial counterexample can disprove a plausible-but-wrong greedy or shortcut — far cheaper than finding it in production. They check the algorithm; they do not replace choosing one.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4860,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.bruteforce_then_optimize.lesson",
+    type: "lesson",
+    title: "Brute force first, then remove repeated work",
+    prompt:
+      "A reliable way to reach an efficient solution is to start with the obvious BRUTE FORCE — the simplest correct approach, even if it is O(n^2) or exponential — and get it right. The brute force does two jobs: it is a correctness reference you can test the fast version against, and reading it reveals the REPEATED WORK that optimization removes. Ask what the computation is redoing. Recomputing a sum over a sliding range points to a running total or prefix sums. Re-searching a collection points to sorting once or using a hash set for O(1) lookups. Re-solving the same subproblem points to memoization (top-down) or a table (bottom-up). Recomputing a min or max over a moving window points to a monotonic deque. The pattern is: identify the redundant recomputation, then introduce a data structure or precomputation that turns repeated O(k) work into O(1) or removes a whole loop. Argue correctness informally — state why each step preserves the invariant and why the loop terminates — rather than only trusting that the examples passed. Optimize only after the brute force is correct; a fast wrong answer is worse than a slow right one.",
+    explanation:
+      "Write the simplest correct brute force first — it is both a correctness oracle and a map of the repeated work to remove. Optimize by naming the redundant recomputation and replacing it (running total/prefix sums, hashing, sorting once, memoization/DP, monotonic deque). Argue correctness via the invariant and termination. Optimize only after correct.",
+    difficulty: "advanced",
+    estimated_minutes: 6,
+    order_index: 4870,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.bruteforce_then_optimize.mc_step",
+    type: "multiple_choice",
+    title: "Making a brute force efficient",
+    prompt: "After writing a correct but slow brute-force solution, what is the key step to make it efficient?",
+    explanation:
+      "Identify the repeated/redundant work the brute force does and eliminate it with a data structure or precomputation (prefix sums, hashing, memoization). Rewriting in a faster language or renaming variables does not remove the redundant work.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4880,
+    is_active: true
+  },
+  {
     id: "dsa.arrays.indexing.lesson",
     type: "lesson",
     title: "Zero-based indexing",
@@ -5044,6 +5119,12 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.complexity.container_selection.mc_membership", skill_id: "dsa.complexity.container_selection", is_primary: true },
   { learning_item_id: "dsa.complexity.recursion_choice.lesson", skill_id: "dsa.complexity.recursion_choice", is_primary: true },
   { learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", skill_id: "dsa.complexity.recursion_choice", is_primary: true },
+  { learning_item_id: "dsa.complexity.problem_framing.lesson", skill_id: "dsa.complexity.problem_framing", is_primary: true },
+  { learning_item_id: "dsa.complexity.problem_framing.mc_clarify", skill_id: "dsa.complexity.problem_framing", is_primary: true },
+  { learning_item_id: "dsa.complexity.test_examples.lesson", skill_id: "dsa.complexity.test_examples", is_primary: true },
+  { learning_item_id: "dsa.complexity.test_examples.mc_why", skill_id: "dsa.complexity.test_examples", is_primary: true },
+  { learning_item_id: "dsa.complexity.bruteforce_then_optimize.lesson", skill_id: "dsa.complexity.bruteforce_then_optimize", is_primary: true },
+  { learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", skill_id: "dsa.complexity.bruteforce_then_optimize", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -5695,6 +5776,18 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.complexity.recursion_choice.mc_backtracking.b", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "Dynamic programming", is_correct: false, order_index: 20 },
   { id: "dsa.complexity.recursion_choice.mc_backtracking.c", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "A greedy scan", is_correct: false, order_index: 30 },
   { id: "dsa.complexity.recursion_choice.mc_backtracking.d", learning_item_id: "dsa.complexity.recursion_choice.mc_backtracking", content: "A single while loop", is_correct: false, order_index: 40 },
+  { id: "dsa.complexity.problem_framing.mc_clarify.a", learning_item_id: "dsa.complexity.problem_framing.mc_clarify", content: "The input-size constraint (how large n can be)", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.problem_framing.mc_clarify.b", learning_item_id: "dsa.complexity.problem_framing.mc_clarify", content: "What to name the variables", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.problem_framing.mc_clarify.c", learning_item_id: "dsa.complexity.problem_framing.mc_clarify", content: "Which text editor to use", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.problem_framing.mc_clarify.d", learning_item_id: "dsa.complexity.problem_framing.mc_clarify", content: "Whether to add comments", is_correct: false, order_index: 40 },
+  { id: "dsa.complexity.test_examples.mc_why.a", learning_item_id: "dsa.complexity.test_examples.mc_why", content: "They surface missing edge cases and can disprove a wrong approach with one counterexample", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.test_examples.mc_why.b", learning_item_id: "dsa.complexity.test_examples.mc_why", content: "They make the program run faster", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.test_examples.mc_why.c", learning_item_id: "dsa.complexity.test_examples.mc_why", content: "They replace the need to choose an algorithm", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.test_examples.mc_why.d", learning_item_id: "dsa.complexity.test_examples.mc_why", content: "They are only useful after the code is already correct", is_correct: false, order_index: 40 },
+  { id: "dsa.complexity.bruteforce_then_optimize.mc_step.a", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Identify the repeated work and remove it with a data structure or precomputation", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.bruteforce_then_optimize.mc_step.b", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Rewrite the same approach in a faster language", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.bruteforce_then_optimize.mc_step.c", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Add more comments and rename variables", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.bruteforce_then_optimize.mc_step.d", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Increase the recursion depth limit", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
