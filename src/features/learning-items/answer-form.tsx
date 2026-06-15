@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { submitAnswer, type SubmitAnswerResult } from "./attempt-actions";
+import { submitAnswer } from "./attempt-actions";
+import type { SubmitAnswerResult } from "./submit-service";
 import { ExplanationPanel } from "./explanation-panel";
 import type { PublicLearningItemChoice } from "./learning-item-types";
 
@@ -36,8 +37,11 @@ export function AnswerForm({
       return;
     }
     setError(null);
+    // A stable id per submission makes the server-authoritative write idempotent,
+    // so a double tap or retry of the same answer is recorded once (#218).
+    const submissionId = crypto.randomUUID();
     startTransition(async () => {
-      const response = await submitAnswer({ itemId, choiceId: selectedId });
+      const response = await submitAnswer({ itemId, choiceId: selectedId, submissionId });
       if (response.status === "error") {
         setError("Grading is temporarily unavailable. Please try again in a moment.");
         return;

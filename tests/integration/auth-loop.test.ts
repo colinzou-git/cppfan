@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { applyRating, createInitialSchedule } from "@/lib/fsrs/scheduler";
+import { applyRating } from "@/lib/fsrs/scheduler";
 import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
 
 // Authenticated full-loop + RLS integration tests (#96).
@@ -39,6 +39,7 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
   let wrongChoice = "";
   let skillId = "";
   let cardId = "";
+  let submissionId = "";
 
   async function makeUser(email: string) {
     const { data, error } = await service.auth.admin.createUser({
@@ -134,44 +135,68 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect(asAnon.error).not.toBeNull();
   });
 
-  it("records an attempt only through the server-authoritative RPC", async () => {
-    const rpc = await clientA.rpc("record_learning_item_attempt", {
+  it("atomically records attempt + review card + skill events via one submit RPC", async () => {
+    submissionId = crypto.randomUUID();
+    const submit = await clientA.rpc("submit_learning_item_answer", {
       p_item_id: ITEM_ID,
-      p_choice_id: correctChoice
+      p_choice_id: correctChoice,
+      p_submission_id: submissionId
     });
-    expect(rpc.error).toBeNull();
-    expect(rpc.data?.[0]?.is_correct).toBe(true);
+    expect(submit.error).toBeNull();
+    expect(submit.data?.[0]?.status).toBe("ok");
+    expect(submit.data?.[0]?.is_correct).toBe(true);
+    expect(submit.data?.[0]?.enrolled).toBe(true);
 
-    const rows = await clientA
+    // All three kinds of evidence were committed together.
+    const attempts = await clientA
       .from("learning_item_attempts")
-      .select("user_id,learning_item_id")
+      .select("user_id,is_correct")
       .eq("learning_item_id", ITEM_ID);
-    expect(rows.error).toBeNull();
-    expect((rows.data ?? []).length).toBeGreaterThanOrEqual(1);
-    expect((rows.data ?? []).every((r) => r.user_id === aId)).toBe(true);
+    expect(attempts.error).toBeNull();
+    expect((attempts.data ?? []).length).toBe(1);
+    expect((attempts.data ?? []).every((r) => r.user_id === aId)).toBe(true);
 
-    // Direct client INSERT is revoked — forging an attempt must fail.
-    const forged = await clientA.from("learning_item_attempts").insert({
+    const cards = await clientA.from("review_cards").select("id").eq("learning_item_id", ITEM_ID);
+    expect(cards.error).toBeNull();
+    expect((cards.data ?? []).length).toBe(1);
+    cardId = cards.data![0].id as string;
+
+    const events = await clientA.from("skill_events").select("event_type").eq("skill_id", skillId);
+    expect(events.error).toBeNull();
+    const types = (events.data ?? []).map((e) => e.event_type);
+    expect(types).toContain("quiz_attempted");
+    expect(types).toContain("quiz_correct");
+  });
+
+  it("is idempotent under the same submission id (no double write)", async () => {
+    const replay = await clientA.rpc("submit_learning_item_answer", {
+      p_item_id: ITEM_ID,
+      p_choice_id: correctChoice,
+      p_submission_id: submissionId
+    });
+    expect(replay.error).toBeNull();
+    expect(replay.data?.[0]?.status).toBe("already_processed");
+
+    const attempts = await clientA
+      .from("learning_item_attempts")
+      .select("id")
+      .eq("learning_item_id", ITEM_ID);
+    expect((attempts.data ?? []).length).toBe(1);
+  });
+
+  it("denies direct client INSERT into attempts and review cards (server-authoritative)", async () => {
+    const forgedAttempt = await clientA.from("learning_item_attempts").insert({
       user_id: aId,
       learning_item_id: ITEM_ID,
       selected_choice_id: correctChoice,
       is_correct: true
     });
-    expect(forged.error).not.toBeNull();
-  });
+    expect(forgedAttempt.error).not.toBeNull();
 
-  it("enrolls a review card the owner can read", async () => {
-    // Fresh test user: a plain INSERT enrolls. Direct UPDATE is revoked (#143),
-    // so we do not use ON CONFLICT DO UPDATE here.
-    const initial = createInitialSchedule(new Date());
-    const inserted = await clientA
+    const forgedCard = await clientA
       .from("review_cards")
-      .insert({ user_id: aId, learning_item_id: ITEM_ID, skill_id: skillId, ...initial })
-      .select("id")
-      .single();
-    expect(inserted.error).toBeNull();
-    cardId = inserted.data!.id as string;
-    expect(cardId).toBeTruthy();
+      .insert({ user_id: aId, learning_item_id: ITEM_ID, skill_id: skillId });
+    expect(forgedCard.error).not.toBeNull();
   });
 
   it("applies a review rating atomically and appends a log", async () => {
@@ -209,17 +234,6 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     const logs = await clientA.from("review_logs").select("id").eq("review_card_id", cardId);
     expect(logs.error).toBeNull();
     expect((logs.data ?? []).length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("records skill events the owner can read (mastery evidence)", async () => {
-    const rpc = await clientA.rpc("record_skill_events", {
-      p_events: [{ skill_id: skillId, learning_item_id: ITEM_ID, event_type: "quiz_correct" }]
-    });
-    expect(rpc.error).toBeNull();
-
-    const events = await clientA.from("skill_events").select("skill_id,event_type").eq("skill_id", skillId);
-    expect(events.error).toBeNull();
-    expect((events.data ?? []).some((e) => e.event_type === "quiz_correct")).toBe(true);
   });
 
   it("isolates learner B from learner A's per-user data", async () => {
