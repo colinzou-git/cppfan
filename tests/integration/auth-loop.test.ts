@@ -300,6 +300,34 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((after.data ?? []).length).toBe(0);
   });
 
+  it("persists capstone milestone progress per-user and isolates it (#130)", async () => {
+    const row = {
+      user_id: aId,
+      milestone_id: "note-manager.m1",
+      project_id: "note-manager",
+      status: "completed",
+      verification: "manual_checklist",
+      reflection: "done",
+      completed_at: new Date().toISOString()
+    };
+    const ins = await clientA
+      .from("capstone_milestone_progress")
+      .upsert(row, { onConflict: "user_id,milestone_id" });
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA
+      .from("capstone_milestone_progress")
+      .select("milestone_id,status")
+      .eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).some((r) => r.milestone_id === "note-manager.m1")).toBe(true);
+
+    const asB = await clientB.from("capstone_milestone_progress").select("milestone_id").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("capstone_milestone_progress").select("milestone_id");
+    expect((asAnon.data ?? []).length).toBe(0);
+  });
+
   it("denies anonymous access to per-user tables", async () => {
     for (const table of ["learning_item_attempts", "review_cards", "skill_events"] as const) {
       const res = await anon.from(table).select("user_id");

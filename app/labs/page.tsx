@@ -2,8 +2,24 @@ import Link from "next/link";
 import { FlaskConical } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { projectLabs } from "@/features/labs/project-labs";
+import { createClient } from "@/lib/supabase/server";
+import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
+import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
+import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
 
-export default function LabsPage() {
+export default async function LabsPage() {
+  const tracks = buildCapstoneTrackView();
+  const milestoneProgress = await getMilestoneProgressForUser();
+
+  let authenticated = false;
+  const supabase = await createClient();
+  if (supabase) {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    authenticated = Boolean(user);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
       <header>
@@ -19,6 +35,8 @@ export default function LabsPage() {
           does not run code in the browser.
         </p>
       </header>
+
+      <CapstoneTracksView tracks={tracks} initialProgress={milestoneProgress} authenticated={authenticated} />
 
       <div className="grid gap-4">
         {projectLabs.map((lab) => (
