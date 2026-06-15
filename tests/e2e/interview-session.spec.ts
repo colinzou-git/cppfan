@@ -27,3 +27,19 @@ test("the interview catalog links to a timed session", async ({ page }) => {
   await expect(page).toHaveURL(/\/interview\/session$/);
   await expect(page.getByTestId("session-runner")).toBeVisible();
 });
+
+test("the live timer counts down while the session is in progress", async ({ page }) => {
+  await page.goto("/interview/session");
+
+  const value = page.getByTestId("session-timer-value");
+  await expect(value).toBeVisible();
+  await expect(value).toHaveText(/^\d+:\d{2}$/); // mm:ss remaining
+  const initial = await value.textContent();
+
+  // It ticks down once per second; within a couple seconds it should differ.
+  await expect.poll(async () => value.textContent(), { timeout: 4000 }).not.toBe(initial);
+
+  // Completing the session stops the countdown.
+  await page.getByTestId("session-complete").click();
+  await expect(page.getByTestId("session-runner")).toHaveAttribute("data-status", "completed");
+});

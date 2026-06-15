@@ -1,18 +1,34 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
 import {
   advancePhase,
+  budgetSeconds,
   canRevealSolution,
   completeSession,
   createSession,
   currentPhase,
   goToPreviousPhase,
+  isOverBudget,
+  remainingSeconds,
   SESSION_PHASES,
+  tick,
   type SessionState
 } from "./session-machine";
+
+// Persist elapsed time on a coarse cadence so a refresh resumes near the real
+// time without writing to the database every second.
+const PERSIST_EVERY_SECONDS = 20;
+
+/** mm:ss for a non-negative seconds count (used for the live remaining-time clock). */
+function formatClock(seconds: number): string {
+  const safe = Math.max(0, Math.trunc(seconds));
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
 
 const PHASE_LABEL: Record<string, string> = {
   clarification: "Clarify the problem",
@@ -47,8 +63,7 @@ export function SessionRunner({
   const [notice, setNotice] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  function apply(next: SessionState) {
-    setSession(next);
+  function persist(next: SessionState) {
     startTransition(async () => {
       const result = await saveSession(next);
       if (result.status === "signed_out") {
@@ -61,9 +76,42 @@ export function SessionRunner({
     });
   }
 
+  function apply(next: SessionState) {
+    setSession(next);
+    persist(next);
+  }
+
   const phase = currentPhase(session);
   const inProgress = session.status === "in_progress";
   const atFirstPhase = session.phaseIndex === 0;
+
+  // Live timer: while in progress, accrue one second at a time and persist the
+  // elapsed time on a coarse cadence so a refresh resumes near where the learner
+  // left off. The persist ref avoids resubscribing the interval each tick.
+  const persistRef = useRef(persist);
+  persistRef.current = persist;
+  useEffect(() => {
+    if (session.status !== "in_progress") {
+      return;
+    }
+    const id = setInterval(() => {
+      setSession((prev) => {
+        if (prev.status !== "in_progress") {
+          return prev;
+        }
+        const next = tick(prev, 1);
+        if (next.elapsedSeconds % PERSIST_EVERY_SECONDS === 0) {
+          persistRef.current(next);
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [session.status]);
+
+  const remaining = remainingSeconds(session);
+  const overBudget = isOverBudget(session);
+  const overBy = Math.max(0, session.elapsedSeconds - budgetSeconds(session));
 
   return (
     <div className="grid gap-4" data-testid="session-runner" data-status={session.status}>
@@ -73,6 +121,20 @@ export function SessionRunner({
         <p className="mt-2 text-xs font-medium text-slate-500">
           {session.mode} · {session.durationMinutes} min budget
         </p>
+        <div className="mt-2 flex items-center gap-2" data-testid="session-timer" data-over-budget={overBudget}>
+          <span
+            className={`font-mono text-2xl font-black tabular-nums ${overBudget ? "text-rose-700" : "text-slate-900"}`}
+            role="timer"
+            aria-live="off"
+            aria-label={overBudget ? "Time over budget" : "Time remaining"}
+            data-testid="session-timer-value"
+          >
+            {overBudget ? `+${formatClock(overBy)}` : formatClock(remaining)}
+          </span>
+          <span className="text-xs font-semibold text-slate-500">
+            {overBudget ? "over budget" : "remaining"}
+          </span>
+        </div>
       </div>
 
       <ol className="flex flex-wrap gap-2" aria-label="Session phases">
