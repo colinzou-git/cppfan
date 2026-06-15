@@ -12,7 +12,8 @@ export default async function InterviewLogPage() {
   const problems: EvidenceProblemOption[] = getInterviewProblems().map((problem) => ({
     id: problem.id,
     title: problem.title,
-    group: problem.group
+    group: problem.group,
+    version: problem.version
   }));
 
   let authenticated = false;
