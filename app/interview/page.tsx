@@ -29,6 +29,9 @@ export default function InterviewPage() {
           A curated set of original, Google-style coding problems grouped by pattern. Each is practice
           material — work it in your own editor; cppFan does not run your code.
         </p>
+        <Link href="/interview/mocks" className="mt-2 w-fit text-sm font-bold text-blue-700" data-testid="mock-packs-link">
+          Timed mock packs →
+        </Link>
       </header>
 
       <div className="grid gap-6" data-testid="interview-catalog">
