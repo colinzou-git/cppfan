@@ -48,6 +48,9 @@ export default function InterviewPage() {
           <Link href="/interview/log" className="text-sm font-bold text-blue-700" data-testid="evidence-log-link">
             Log a practice outcome →
           </Link>
+          <Link href="/interview/plan" className="text-sm font-bold text-blue-700" data-testid="plan-link">
+            Study plan →
+          </Link>
         </div>
       </header>
 
