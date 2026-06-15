@@ -322,3 +322,41 @@ begin
   raise notice 'RLS isolation smoke OK (user reads only its own attempts)';
 end $$;
 rollback;
+
+-- 13) #218 (atomic submission boundary): the trusted functions exist, the attempt
+-- table carries the submission_id idempotency key, and direct client INSERT on
+-- review_cards is revoked (cards are created only by the SECURITY DEFINER paths).
+do $$
+begin
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'submit_learning_item_answer'
+  ) then
+    raise exception 'submit_learning_item_answer function is missing (#218)';
+  end if;
+
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname = 'enroll_review_card'
+  ) then
+    raise exception 'enroll_review_card function is missing (#218)';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = 'learning_item_attempts'
+        and column_name = 'submission_id'
+  ) then
+    raise exception 'learning_item_attempts.submission_id is missing (#218)';
+  end if;
+
+  if has_table_privilege('authenticated', 'public.review_cards', 'INSERT') then
+    raise exception 'authenticated must not directly INSERT review_cards (#218)';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.review_cards', 'SELECT') then
+    raise exception 'authenticated should still SELECT its own review_cards (#218)';
+  end if;
+
+  raise notice 'atomic submission-boundary smoke OK';
+end $$;

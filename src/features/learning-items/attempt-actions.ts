@@ -1,24 +1,24 @@
 "use server";
 
-import { gradeChoiceAttempt } from "./grading";
-import { getGradingChoices, gradeViaRpc, recordAttempt } from "./attempt-service";
-import { getPrimarySkillId } from "./learning-item-seed";
-import { recordSkillEvents } from "@/features/events/event-service";
-import { enrollReviewForUser } from "@/features/review/enroll-review";
+import { randomUUID } from "node:crypto";
+import { submitGradedAnswer, type SubmitAnswerResult } from "./submit-service";
 
-export type SubmitAnswerResult =
-  | { status: "invalid" }
-  | { status: "error" }
-  | { status: "graded"; isCorrect: boolean; correctChoiceId: string; persisted: boolean };
+export type { SubmitAnswerResult };
 
 /**
- * Grade a submitted choice for a learning item and, when the learner is signed
- * in, record the attempt. Seed grading is used only in deliberate non-database
- * modes (Supabase unconfigured, or the grading function not migrated yet); a
- * configured-database failure returns a degraded `error` result rather than
- * silently grading against the bundled seed (#146). Recording is best-effort.
+ * Grade a submitted choice and, when the learner is signed in, atomically record
+ * the attempt, enroll an eligible review card, and append skill events through one
+ * idempotent server-authoritative RPC (#218). A stable `submissionId` makes
+ * retries and double taps idempotent; one is generated when the caller omits it.
+ * Seed grading (no persistence) is used only in deliberate non-database modes; a
+ * configured-database failure returns a degraded error rather than seed-grading
+ * (#146).
  */
-export async function submitAnswer(input: { itemId: string; choiceId: string }): Promise<SubmitAnswerResult> {
+export async function submitAnswer(input: {
+  itemId: string;
+  choiceId: string;
+  submissionId?: string;
+}): Promise<SubmitAnswerResult> {
   const itemId = typeof input?.itemId === "string" ? input.itemId : "";
   const choiceId = typeof input?.choiceId === "string" ? input.choiceId : "";
 
@@ -26,44 +26,8 @@ export async function submitAnswer(input: { itemId: string; choiceId: string }):
     return { status: "invalid" };
   }
 
-  // Prefer the DB-authoritative, answer-key-hiding RPC.
-  const viaRpc = await gradeViaRpc(itemId, choiceId);
+  const submissionId =
+    typeof input?.submissionId === "string" && input.submissionId ? input.submissionId : randomUUID();
 
-  if (viaRpc.status === "error") {
-    // Configured database failed — do not grade against the seed answer key.
-    return { status: "error" };
-  }
-
-  // graded → use the database result; unconfigured/unavailable → legitimate
-  // seed grading (demo or pre-migration mode).
-  const outcome =
-    viaRpc.status === "graded"
-      ? ({ status: "graded", isCorrect: viaRpc.isCorrect, correctChoiceId: viaRpc.correctChoiceId } as const)
-      : gradeChoiceAttempt(await getGradingChoices(itemId), choiceId);
-
-  if (outcome.status === "invalid") {
-    return { status: "invalid" };
-  }
-
-  const persisted = await recordAttempt({ itemId, choiceId });
-
-  // #142: a graded practice attempt is real learning evidence, so enroll the
-  // item for spaced review here (the evidence boundary) rather than when the
-  // learner visits /review. Idempotent and best-effort (no-op when signed out or
-  // for non-eligible items).
-  await enrollReviewForUser(itemId);
-
-  // Append skill-mastery evidence (best effort; no-op when signed out).
-  const skillId = getPrimarySkillId(itemId);
-  await recordSkillEvents([
-    { eventType: "quiz_attempted", skillId, learningItemId: itemId },
-    { eventType: outcome.isCorrect ? "quiz_correct" : "quiz_wrong", skillId, learningItemId: itemId }
-  ]);
-
-  return {
-    status: "graded",
-    isCorrect: outcome.isCorrect,
-    correctChoiceId: outcome.correctChoiceId,
-    persisted
-  };
+  return submitGradedAnswer(itemId, choiceId, submissionId);
 }
