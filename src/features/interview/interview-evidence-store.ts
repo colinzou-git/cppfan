@@ -12,6 +12,8 @@ export type EvidenceWriteOutcome = "ok" | "signed_out" | "error";
 const VALID_PATTERNS = new Set<string>(Object.keys(GROUP_LABELS));
 const MODES = new Set<InterviewEvidence["mode"]>(["practice", "interview"]);
 const CONTEXTS = new Set<InterviewContext>(["diagnostic", "guided", "independent", "mock"]);
+export type FollowUpResult = "none" | "passed" | "partial" | "failed";
+const FOLLOW_UPS = new Set<FollowUpResult>(["none", "passed", "partial", "failed"]);
 
 const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_LIMIT = 500;
@@ -25,7 +27,57 @@ export type EvidenceInput = {
   correct: boolean;
   hintsUsed: number;
   context: string;
+  // Optional evidence-model detail (#180).
+  timeToApproachSeconds?: number | null;
+  timeToImplementationSeconds?: number | null;
+  followUpResult?: string;
+  problemVersion?: number;
 };
+
+/** The trusted, normalized column values for an evidence row (no user_id/timestamp). */
+export type NormalizedEvidenceRow = {
+  pattern: string;
+  problem_id: string;
+  unseen: boolean;
+  mode: string;
+  correct: boolean;
+  hints_used: number;
+  context: string;
+  time_to_approach_seconds: number | null;
+  time_to_implementation_seconds: number | null;
+  follow_up_result: FollowUpResult;
+  problem_version: number;
+};
+
+function normalizeSeconds(value: number | null | undefined): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return null;
+  }
+  return Math.trunc(value);
+}
+
+/**
+ * Validate and clamp a raw evidence input into trusted column values. Pure and
+ * exported for unit tests. Whitelists pattern/mode/context/follow-up, clamps hints
+ * and timings to >= 0, and floors the problem version at 1.
+ */
+export function normalizeEvidenceRow(input: EvidenceInput): NormalizedEvidenceRow {
+  return {
+    pattern: input.pattern,
+    problem_id: input.problemId,
+    unseen: Boolean(input.unseen),
+    mode: MODES.has(input.mode as InterviewEvidence["mode"]) ? input.mode : "practice",
+    correct: Boolean(input.correct),
+    hints_used: Math.max(0, Math.trunc(Number(input.hintsUsed) || 0)),
+    context: CONTEXTS.has(input.context as InterviewContext) ? input.context : "independent",
+    time_to_approach_seconds: normalizeSeconds(input.timeToApproachSeconds),
+    time_to_implementation_seconds: normalizeSeconds(input.timeToImplementationSeconds),
+    follow_up_result: FOLLOW_UPS.has(input.followUpResult as FollowUpResult)
+      ? (input.followUpResult as FollowUpResult)
+      : "none",
+    problem_version: Math.max(1, Math.trunc(Number(input.problemVersion) || 1))
+  };
+}
 
 type EvidenceRow = {
   pattern: string;
@@ -108,13 +160,7 @@ export async function recordInterviewEvidence(input: EvidenceInput): Promise<Evi
   }
   const row = {
     user_id: user.id,
-    pattern: input.pattern,
-    problem_id: input.problemId,
-    unseen: Boolean(input.unseen),
-    mode: MODES.has(input.mode as InterviewEvidence["mode"]) ? input.mode : "practice",
-    correct: Boolean(input.correct),
-    hints_used: Math.max(0, Math.trunc(Number(input.hintsUsed) || 0)),
-    context: CONTEXTS.has(input.context as InterviewContext) ? input.context : "independent",
+    ...normalizeEvidenceRow(input),
     completed_at: new Date().toISOString()
   };
   const { error } = await supabase.from("interview_evidence").insert(row);

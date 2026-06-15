@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { logInterviewEvidence } from "./interview-evidence-actions";
 import type { InterviewContext } from "./readiness";
 
-export type EvidenceProblemOption = { id: string; title: string; group: string };
+export type EvidenceProblemOption = { id: string; title: string; group: string; version: number };
 
 const CONTEXTS: { value: InterviewContext; label: string }[] = [
   { value: "independent", label: "Independent" },
@@ -18,6 +18,19 @@ const MODES: { value: "practice" | "interview"; label: string }[] = [
   { value: "practice", label: "Practice" },
   { value: "interview", label: "Interview" }
 ];
+
+const FOLLOW_UPS: { value: string; label: string }[] = [
+  { value: "none", label: "No follow-up" },
+  { value: "passed", label: "Follow-up: passed" },
+  { value: "partial", label: "Follow-up: partial" },
+  { value: "failed", label: "Follow-up: failed" }
+];
+
+/** Minutes (or blank) -> seconds, or null when not provided. */
+function minutesToSeconds(value: string): number | null {
+  const n = Number(value);
+  return value.trim() === "" || !Number.isFinite(n) || n < 0 ? null : Math.round(n * 60);
+}
 
 /**
  * Logs a self-reported interview practice outcome (#180): which problem, whether
@@ -38,6 +51,9 @@ export function EvidenceLog({
   const [unseen, setUnseen] = useState(true);
   const [correct, setCorrect] = useState(true);
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [followUpResult, setFollowUpResult] = useState("none");
+  const [approachMinutes, setApproachMinutes] = useState("");
+  const [implementationMinutes, setImplementationMinutes] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [saving, startTransition] = useTransition();
 
@@ -55,7 +71,11 @@ export function EvidenceLog({
         mode,
         correct,
         hintsUsed,
-        context
+        context,
+        followUpResult,
+        problemVersion: selected.version,
+        timeToApproachSeconds: minutesToSeconds(approachMinutes),
+        timeToImplementationSeconds: minutesToSeconds(implementationMinutes)
       });
       if (result.status === "signed_out") {
         setNotice("Sign in to save this outcome to your readiness evidence.");
@@ -140,16 +160,62 @@ export function EvidenceLog({
         </label>
       </div>
 
-      <label className="grid w-32 gap-1 text-sm font-semibold text-slate-800">
-        Hints used
-        <input
-          type="number"
-          min={0}
-          value={hintsUsed}
-          onChange={(event) => setHintsUsed(Math.max(0, Math.trunc(Number(event.target.value) || 0)))}
+      <div className="flex flex-wrap gap-4">
+        <label className="grid w-32 gap-1 text-sm font-semibold text-slate-800">
+          Hints used
+          <input
+            type="number"
+            min={0}
+            value={hintsUsed}
+            onChange={(event) => setHintsUsed(Math.max(0, Math.trunc(Number(event.target.value) || 0)))}
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-normal"
+            data-testid="evidence-hints"
+          />
+        </label>
+
+        <label className="grid w-40 gap-1 text-sm font-semibold text-slate-800">
+          Min. to approach
+          <input
+            type="number"
+            min={0}
+            inputMode="numeric"
+            value={approachMinutes}
+            onChange={(event) => setApproachMinutes(event.target.value)}
+            placeholder="optional"
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-normal"
+            data-testid="evidence-approach-min"
+          />
+        </label>
+
+        <label className="grid w-40 gap-1 text-sm font-semibold text-slate-800">
+          Min. to working code
+          <input
+            type="number"
+            min={0}
+            inputMode="numeric"
+            value={implementationMinutes}
+            onChange={(event) => setImplementationMinutes(event.target.value)}
+            placeholder="optional"
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-normal"
+            data-testid="evidence-impl-min"
+          />
+        </label>
+      </div>
+
+      <label className="grid gap-1 text-sm font-semibold text-slate-800 sm:w-64">
+        Follow-up result
+        <select
           className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-normal"
-          data-testid="evidence-hints"
-        />
+          value={followUpResult}
+          onChange={(event) => setFollowUpResult(event.target.value)}
+          data-testid="evidence-follow-up"
+        >
+          {FOLLOW_UPS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </label>
 
       <div className="flex flex-wrap items-center gap-3">

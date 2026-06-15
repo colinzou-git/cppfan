@@ -402,14 +402,26 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
       correct: true,
       hints_used: 0,
       context: "mock",
+      // Evidence-model detail (#180).
+      time_to_approach_seconds: 300,
+      time_to_implementation_seconds: 1200,
+      follow_up_result: "passed",
+      problem_version: 1,
       completed_at: new Date().toISOString()
     };
     const ins = await clientA.from("interview_evidence").insert(row);
     expect(ins.error).toBeNull();
 
-    const mine = await clientA.from("interview_evidence").select("problem_id,context").eq("user_id", aId);
+    const mine = await clientA
+      .from("interview_evidence")
+      .select("problem_id,context,time_to_approach_seconds,follow_up_result,problem_version")
+      .eq("user_id", aId);
     expect(mine.error).toBeNull();
-    expect((mine.data ?? []).some((r) => r.problem_id === "iv.prefix.balance-returns-to-zero")).toBe(true);
+    const persisted = (mine.data ?? []).find((r) => r.problem_id === "iv.prefix.balance-returns-to-zero");
+    expect(persisted).toBeTruthy();
+    expect(persisted?.time_to_approach_seconds).toBe(300);
+    expect(persisted?.follow_up_result).toBe("passed");
+    expect(persisted?.problem_version).toBe(1);
 
     const asB = await clientB.from("interview_evidence").select("problem_id").eq("user_id", aId);
     expect((asB.data ?? []).length).toBe(0);

@@ -546,5 +546,15 @@ begin
     raise exception 'interview_evidence must be append-only (no UPDATE) (#180)';
   end if;
 
+  -- Evidence-model detail columns (#180).
+  if not exists (
+    select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = 'interview_evidence'
+        and column_name in ('time_to_approach_seconds', 'time_to_implementation_seconds', 'follow_up_result', 'problem_version')
+      group by table_name having count(*) = 4
+  ) then
+    raise exception 'interview_evidence is missing the evidence-model detail columns (#180)';
+  end if;
+
   raise notice 'interview evidence smoke OK';
 end $$;
