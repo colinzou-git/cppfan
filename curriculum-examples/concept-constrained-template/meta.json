@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.concepts.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\n",
+  "note": "A concept (std::integral) constrains the template parameter so only integer types are accepted."
+}
