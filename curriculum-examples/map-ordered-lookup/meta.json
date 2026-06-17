@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.map.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "apple=5 banana=3 cherry=2 \nhas apple\nno kiwi\n",
+  "note": "std::map keeps unique keys sorted (deterministic iteration order); contains() checks a key without inserting."
+}

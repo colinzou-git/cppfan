@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.smart_pointers.shared_ptr.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "7 1\n2\n1\n",
+  "note": "shared_ptr keeps a reference count: a second owner raises it to 2, and it drops back to 1 when that owner is destroyed."
+}
