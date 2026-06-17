@@ -42,4 +42,8 @@ test("with no evidence the report shows the explicit not-enough-evidence state",
   await expect(gate).toBeVisible();
   await expect(gate).toHaveAttribute("data-gate-ready", "false");
   await expect(page.getByTestId("readiness-gate-condition")).toHaveCount(6);
+
+  // Baseline-vs-current section shows its empty state when nothing is logged.
+  await expect(page.getByTestId("readiness-baseline")).toBeVisible();
+  await expect(page.getByTestId("readiness-baseline-empty")).toBeVisible();
 });
