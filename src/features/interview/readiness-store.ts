@@ -10,6 +10,8 @@ import { getRecentInterviewEvidence, getRecentTimingSamples } from "./interview-
 import { readinessFacets, type ReadinessFacet } from "./readiness-facets";
 import { summarizeTiming, type TimingSummary } from "./interview-timing";
 import { summarizeAssistance, type AssistanceSummary } from "./interview-assistance";
+import { getDiagnosticScores } from "./diagnostic-store";
+import { compareBaselineToCurrent, type AreaComparison } from "./interview-baseline";
 import type { RubricScore } from "./rubric";
 import type { InterviewEvidence, QualityAverages } from "./readiness";
 
@@ -83,4 +85,10 @@ export async function getReadinessTiming(now: number = Date.now()): Promise<Timi
 /** The learner's recent assistance (hint) dependence (#182). */
 export async function getReadinessAssistance(now: number = Date.now()): Promise<AssistanceSummary> {
   return summarizeAssistance(await getRecentInterviewEvidence(now));
+}
+
+/** Per-area baseline-diagnostic vs current-performance comparison (#175/#182). */
+export async function getBaselineComparison(now: number = Date.now()): Promise<AreaComparison[]> {
+  const [baseline, evidence] = await Promise.all([getDiagnosticScores(), getRecentInterviewEvidence(now)]);
+  return compareBaselineToCurrent(baseline, evidence);
 }

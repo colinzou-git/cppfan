@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
 import {
+  getBaselineComparison,
   getReadinessAssistance,
   getReadinessFacets,
   getReadinessInputs,
   getReadinessTiming
 } from "@/features/interview/readiness-store";
 import type { AssistanceBand } from "@/features/interview/interview-assistance";
+import { hasComparableArea, type AreaTrend } from "@/features/interview/interview-baseline";
 import { buildReadinessReport, completionGate, type ReadinessStatus } from "@/features/interview/readiness-report";
 import type { DimensionStatus, ReadinessDimension } from "@/features/interview/readiness";
 import type { ScoreBand } from "@/features/interview/rubric";
@@ -71,6 +73,24 @@ const ASSIST_LABEL: Record<AssistanceBand, string> = {
   reliant: "Hint-reliant"
 };
 
+const TREND_STYLE: Record<AreaTrend, string> = {
+  improved: "bg-emerald-100 text-emerald-800",
+  steady: "bg-blue-100 text-blue-800",
+  declined: "bg-rose-100 text-rose-800",
+  unknown: "bg-slate-100 text-slate-600"
+};
+
+const TREND_LABEL: Record<AreaTrend, string> = {
+  improved: "Improved",
+  steady: "Steady",
+  declined: "Declined",
+  unknown: "No comparison yet"
+};
+
+function pct(score: number | null): string {
+  return score === null ? "—" : `${Math.round(score * 100)}%`;
+}
+
 const BAND_LABEL: Record<ScoreBand, string> = {
   strong: "Strong",
   solid: "Solid",
@@ -87,6 +107,7 @@ export default async function InterviewReadinessPage() {
   const timing = await getReadinessTiming(now);
   const assistance = await getReadinessAssistance(now);
   const gate = completionGate(report);
+  const baseline = await getBaselineComparison(now);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -161,6 +182,39 @@ export default async function InterviewReadinessPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="grid gap-2" data-testid="readiness-baseline">
+        <h2 className="text-lg font-black text-slate-900">Baseline vs current</h2>
+        {!hasComparableArea(baseline) ? (
+          <p className="text-sm text-slate-600" data-testid="readiness-baseline-empty">
+            Rate your{" "}
+            <Link href="/interview/diagnostic" className="font-bold text-blue-700">
+              baseline diagnostic
+            </Link>{" "}
+            and log outcomes in each area to see how your current performance compares.
+          </p>
+        ) : (
+          <div className="grid gap-2">
+            {baseline.map((area) => (
+              <div
+                key={area.sectionId}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/85 p-3 shadow-sm"
+                data-testid="readiness-baseline-area"
+                data-section-id={area.sectionId}
+                data-trend={area.trend}
+              >
+                <span className="min-w-0 flex-1 font-semibold text-slate-800">{area.title}</span>
+                <span className="text-xs font-medium text-slate-600">
+                  baseline {pct(area.baselineScore)} → now {pct(area.currentScore)}
+                </span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${TREND_STYLE[area.trend]}`}>
+                  {TREND_LABEL[area.trend]}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="grid gap-2" data-testid="readiness-dimensions">
