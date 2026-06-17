@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.sorting.comparator.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "bob 50\ncarol 40\nalice 30\n",
+  "note": "A comparator lambda returning a.score > b.score makes std::sort order the structs by score descending."
+}

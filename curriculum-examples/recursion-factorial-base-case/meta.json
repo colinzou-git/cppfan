@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.recursion.base_case.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "1\n120\n",
+  "note": "factorial has a base case (n == 0 returns 1) and a recursive case (n * factorial(n - 1)) that moves toward it: factorial(0) = 1, factorial(5) = 120."
+}
