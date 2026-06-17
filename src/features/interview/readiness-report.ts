@@ -40,6 +40,53 @@ export function readinessStatus(report: ReadinessReport): ReadinessStatus {
   return "refreshing_fundamentals";
 }
 
+export type GateCondition = { id: string; label: string; met: boolean };
+
+export type CompletionGate = {
+  /** True only when every documented condition is met (verdict === ready). */
+  ready: boolean;
+  /** Role-targeted label; never claims a hiring outcome. */
+  label: string;
+  conditions: GateCondition[];
+};
+
+const GATE_LABELS: Record<keyof ReadinessReport["dimensions"], string> = {
+  core_pattern_coverage: "Representative coverage of core patterns",
+  unseen_problem_success: "Multiple unseen problems solved independently",
+  mock_sessions: "At least three completed full mock sessions",
+  quality_scores: "Acceptable testing, complexity, and communication",
+  no_critical_weak_cluster: "No critical weak pattern",
+  not_single_session: "Consistency across more than one session"
+};
+
+const GATE_ORDER: (keyof ReadinessReport["dimensions"])[] = [
+  "core_pattern_coverage",
+  "unseen_problem_success",
+  "mock_sessions",
+  "quality_scores",
+  "no_critical_weak_cluster",
+  "not_single_session"
+];
+
+/**
+ * The "interview-ready for coding rounds" completion gate (#182). Maps the #180
+ * readiness dimensions to the documented gate conditions; `ready` requires the
+ * `ready` verdict (every condition met). Deterministic; makes no hiring claim.
+ */
+export function completionGate(report: Pick<ReadinessReport, "verdict" | "dimensions">): CompletionGate {
+  const conditions = GATE_ORDER.map((id) => ({
+    id,
+    label: GATE_LABELS[id],
+    met: report.dimensions[id] === "met"
+  }));
+  const ready = report.verdict === "ready";
+  return {
+    ready,
+    label: ready ? "Interview-ready for coding rounds" : "Not yet interview-ready for coding rounds",
+    conditions
+  };
+}
+
 export type PatternStanding = { pattern: ProblemGroup; attempts: number; correctRate: number };
 
 function patternStandings(evidence: InterviewEvidence[]): PatternStanding[] {

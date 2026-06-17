@@ -36,4 +36,10 @@ test("with no evidence the report shows the explicit not-enough-evidence state",
   // Assistance dependence is reported, with an honest empty state when no solves.
   await expect(page.getByTestId("readiness-assistance")).toBeVisible();
   await expect(page.getByTestId("readiness-assistance-empty")).toBeVisible();
+
+  // The coding-rounds completion gate shows its conditions and is not ready w/o evidence.
+  const gate = page.getByTestId("readiness-gate");
+  await expect(gate).toBeVisible();
+  await expect(gate).toHaveAttribute("data-gate-ready", "false");
+  await expect(page.getByTestId("readiness-gate-condition")).toHaveCount(6);
 });
