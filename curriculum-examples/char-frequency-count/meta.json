@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.char_frequency.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "yes\nno\nfirst unique: c\n",
+  "note": "A fixed count[26] frequency table (indexed by c - 'a') built in one O(n) pass drives anagram checks and a first-unique-character query."
+}
