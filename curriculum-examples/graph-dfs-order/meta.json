@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.dfs.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "0 1 3 2 4 \n",
+  "note": "Recursive DFS from vertex 0 dives deep then backtracks, visiting 0,1,3,2,4 with a visited set to avoid revisits."
+}
