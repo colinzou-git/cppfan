@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.oop.composition.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "[log] engine started, moving\n4\n",
+  "note": "Car owns an Engine and a Logger as members (has-a) and delegates to their public interfaces rather than inheriting from them."
+}
