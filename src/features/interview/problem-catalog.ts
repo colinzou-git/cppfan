@@ -894,6 +894,194 @@ export const interviewProblems: InterviewProblem[] = [
       }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.graph.flood-fill",
+    version: 1,
+    title: "Recolor a connected region",
+    prompt:
+      "Given a grid of color codes, a start cell, and a new color, recolor the start cell and every cell reachable from it through 4-directional steps over cells of the same original color. Return the updated grid.",
+    group: "graphs_paths",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.graphs.bfs",
+    secondarySkillIds: ["dsa.graphs.dfs"],
+    patternTags: ["grid", "flood-fill", "bfs"],
+    constraints: "1 <= rows, cols <= 1e3; the start cell is inside the grid.",
+    targetComplexity: "O(rows * cols) time and space.",
+    requiredEdgeCases: ["new color equals the original (avoid infinite recursion)", "single-cell region", "the whole grid one color"],
+    clarifyingQuestions: ["Is connectivity 4-directional (not diagonal)?", "What if the new color already equals the start color?"],
+    hintLadder: [
+      "Record the start cell's original color, then traverse only same-colored 4-neighbors.",
+      "Guard against re-visiting (especially when the new color equals the original) to avoid looping.",
+      "BFS from a queue or DFS from a stack both work in O(rows*cols)."
+    ],
+    visibleExamples: [
+      { input: "grid=[[1,1,0],[1,0,0],[0,0,1]], start=(0,0), color=2", output: "[[2,2,0],[2,0,0],[0,0,1]]" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.graph.fewest-hops",
+    version: 1,
+    title: "Fewest hops between two nodes",
+    prompt:
+      "Given an undirected unweighted graph and two nodes, return the minimum number of edges on a path between them, or -1 if they are not connected. Think hops in a flat network.",
+    group: "graphs_paths",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.graphs.bfs",
+    secondarySkillIds: ["dsa.graphs.representation"],
+    patternTags: ["bfs", "shortest-path", "unweighted"],
+    constraints: "1 <= nodes <= 2e5; 0 <= edges <= 4e5; the graph may be disconnected.",
+    targetComplexity: "O(nodes + edges) time and space.",
+    requiredEdgeCases: ["source equals destination (0 hops)", "unreachable destination (-1)", "multiple shortest paths"],
+    clarifyingQuestions: ["Is the graph unweighted?", "Should unreachable return -1?"],
+    hintLadder: [
+      "Breadth-first search explores nodes in increasing distance from the source.",
+      "Track each node's distance as you first reach it; the first time you pop the destination is its shortest hop count.",
+      "If BFS finishes without reaching the destination, return -1."
+    ],
+    visibleExamples: [
+      { input: "n=5, edges=[(0,1),(1,2),(2,3),(0,4),(4,3)], src=0, dst=3", output: "2", note: "0-4-3" },
+      { input: "n=3, edges=[(0,1)], src=0, dst=2", output: "-1" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.graph.count-regions",
+    version: 1,
+    title: "How many regions in the grid?",
+    prompt:
+      "Given a grid of 1s (filled) and 0s (empty), return the number of regions of filled cells, where cells join through 4-directional adjacency. A region is a maximal connected blob of 1s.",
+    group: "graphs_paths",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.graphs.connected_components",
+    secondarySkillIds: ["dsa.graphs.dfs"],
+    patternTags: ["grid", "connected-components", "dfs"],
+    constraints: "1 <= rows, cols <= 1e3; cells are 0 or 1.",
+    targetComplexity: "O(rows * cols) time and space.",
+    requiredEdgeCases: ["all zeros (0 regions)", "all ones (1 region)", "diagonal-only touching cells (separate regions)"],
+    clarifyingQuestions: ["Is adjacency 4-directional only?", "Do diagonally touching filled cells count as connected?"],
+    hintLadder: [
+      "Scan every cell; when you find an unvisited 1, you have found a new region.",
+      "Flood that region (BFS/DFS) marking all its cells visited so it is counted once.",
+      "The number of times you start a new flood is the region count."
+    ],
+    visibleExamples: [
+      { input: "grid=[[1,1,0],[1,1,0],[0,0,1]]", output: "2" },
+      { input: "grid=[[0,0],[0,0]]", output: "0" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.graph.two-colorable",
+    version: 1,
+    title: "Can the graph be two-colored?",
+    prompt:
+      "Given an undirected graph, decide whether the nodes can be split into two groups so that every edge connects nodes in different groups (the graph is bipartite). Return true or false.",
+    group: "graphs_paths",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.graphs.bipartite_scc",
+    secondarySkillIds: ["dsa.graphs.bfs"],
+    patternTags: ["bipartite", "two-coloring", "bfs"],
+    constraints: "1 <= nodes <= 2e5; 0 <= edges <= 4e5; the graph may be disconnected.",
+    targetComplexity: "O(nodes + edges) time and space.",
+    requiredEdgeCases: ["an odd cycle (not bipartite)", "an even cycle (bipartite)", "a disconnected graph (every component must be bipartite)"],
+    clarifyingQuestions: ["Is the graph undirected?", "Must every connected component be checked?"],
+    hintLadder: [
+      "Color a starting node, then alternate colors as you traverse its neighbors.",
+      "If you ever reach an already-colored node with the same color as the current node, it is not bipartite.",
+      "Repeat for every uncolored component; an odd cycle is exactly what breaks two-coloring."
+    ],
+    visibleExamples: [
+      { input: "n=4, edges=[(0,1),(1,2),(2,3),(3,0)]", output: "true", note: "even cycle" },
+      { input: "n=3, edges=[(0,1),(1,2),(2,0)]", output: "false", note: "odd cycle" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.graph.has-directed-cycle",
+    version: 1,
+    title: "Is there a dependency cycle?",
+    prompt:
+      "Given a directed graph of tasks and 'must run before' edges, return whether the graph contains a cycle (which would make the dependencies impossible to satisfy). Return true if a cycle exists.",
+    group: "graphs_paths",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.graphs.cycle_detection",
+    secondarySkillIds: ["dsa.graphs.dfs", "dsa.graphs.topological_sort"],
+    patternTags: ["directed-graph", "cycle-detection", "dfs"],
+    constraints: "1 <= nodes <= 2e5; 0 <= edges <= 4e5; edges are directed and may repeat.",
+    targetComplexity: "O(nodes + edges) time and space.",
+    requiredEdgeCases: ["a self-loop (cycle)", "a DAG (no cycle)", "a back edge deep in the traversal"],
+    clarifyingQuestions: ["Are the edges directed?", "Does a self-loop count as a cycle?"],
+    hintLadder: [
+      "Run DFS tracking three states per node: unvisited, on the current stack, and finished.",
+      "A directed cycle exists exactly when DFS reaches a node currently on the recursion stack (a back edge).",
+      "Equivalently, Kahn's topological sort that cannot place every node implies a cycle."
+    ],
+    visibleExamples: [
+      { input: "n=3, edges=[(0,1),(1,2),(2,0)]", output: "true" },
+      { input: "n=3, edges=[(0,1),(1,2)]", output: "false" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.graph.cheapest-route",
+    version: 1,
+    title: "Cheapest route with non-negative costs",
+    prompt:
+      "Given a weighted graph with non-negative edge costs, return the minimum total cost to travel from a source node to a destination, or -1 if unreachable. Edges model link latencies between machines.",
+    group: "graphs_paths",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.graphs.shortest_path_algorithms",
+    secondarySkillIds: ["dsa.graphs.shortest_path"],
+    patternTags: ["dijkstra", "shortest-path", "weighted", "min-heap"],
+    constraints: "1 <= nodes <= 2e5; 0 <= edges <= 4e5; 0 <= weight <= 1e9; totals may exceed 32 bits.",
+    targetComplexity: "O((nodes + edges) log nodes) time with a binary heap.",
+    requiredEdgeCases: ["unreachable destination (-1)", "source equals destination (0)", "multiple routes of equal cost"],
+    clarifyingQuestions: ["Are all edge weights non-negative (so Dijkstra applies)?", "Should unreachable return -1?"],
+    hintLadder: [
+      "Keep the best known distance to each node; start the source at 0 and others at infinity.",
+      "Use a min-heap to always expand the closest unfinalized node, relaxing its outgoing edges.",
+      "Once the destination is popped its distance is final; use 64-bit sums to avoid overflow."
+    ],
+    visibleExamples: [
+      { input: "n=4, edges=[(0,1,4),(0,2,1),(2,1,2),(1,3,1),(2,3,5)], src=0, dst=3", output: "4", note: "0-2-1-3 = 1+2+1" },
+      { input: "n=2, edges=[], src=0, dst=1", output: "-1" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.graph.min-spanning-cost",
+    version: 1,
+    title: "Cheapest way to connect everything",
+    prompt:
+      "Given a connected undirected weighted graph, return the minimum total edge weight needed to keep every node connected (a minimum spanning tree). Think cheapest set of links that still connects the whole fleet.",
+    group: "graphs_paths",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.graphs.mst",
+    secondarySkillIds: ["dsa.trees.disjoint_set"],
+    patternTags: ["mst", "kruskal", "greedy", "union-find"],
+    constraints: "1 <= nodes <= 2e5; nodes-1 <= edges <= 4e5; 0 <= weight <= 1e9; the graph is connected.",
+    targetComplexity: "O(edges log edges) time with Kruskal + union-find.",
+    requiredEdgeCases: ["a single node (cost 0)", "parallel edges between the same pair", "ties in edge weight"],
+    clarifyingQuestions: ["Is the graph guaranteed connected?", "Can there be parallel edges of different weights?"],
+    hintLadder: [
+      "Sort all edges by weight ascending.",
+      "Add each edge whose endpoints are not already connected (union-find), skipping ones that would form a cycle.",
+      "Stop once nodes-1 edges are chosen; their total weight is the MST cost."
+    ],
+    visibleExamples: [
+      { input: "n=4, edges=[(0,1,1),(1,2,2),(0,2,2),(2,3,3)]", output: "6", note: "1 + 2 + 3" },
+      { input: "n=1, edges=[]", output: "0" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
