@@ -149,6 +149,13 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(tp.some((p) => p.patternTags.includes("sliding-window"))).toBe(true);
   });
 
+  it("covers the intervals/sweep-line group toward the #176 quota (>= 5)", () => {
+    const intervals = getInterviewProblemsByGroup("intervals_sweepline");
+    expect(intervals.length).toBeGreaterThanOrEqual(5);
+    expect(intervals.some((p) => p.patternTags.includes("intervals"))).toBe(true);
+    expect(intervals.some((p) => p.patternTags.includes("sweep-line"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
