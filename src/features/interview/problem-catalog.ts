@@ -54,6 +54,7 @@ export type InterviewProblem = {
 const CSES: ExternalLink = { url: "https://cses.fi/problemset/", annotation: "CSES: extra practice on this pattern." };
 const CPALGO: ExternalLink = { url: "https://cp-algorithms.com/", annotation: "cp-algorithms: reference for the technique." };
 const USACO: ExternalLink = { url: "https://usaco.guide/", annotation: "USACO Guide: topic-ordered explanation." };
+const CPPREF: ExternalLink = { url: "https://en.cppreference.com/", annotation: "cppreference: language/library semantics for this construct." };
 
 export const interviewProblems: InterviewProblem[] = [
   {
@@ -1591,6 +1592,94 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "[(1,10),(2,3),(4,5)]", output: "2" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.cpp.iterator-invalidation",
+    version: 1,
+    title: "Why does this vector loop crash?",
+    prompt:
+      "A function walks a std::vector<int> v and, for every even value, appends value*2 to the same vector while iterating: `for (auto it = v.begin(); it != v.end(); ++it) { if (*it % 2 == 0) v.push_back(*it * 2); }`. It sometimes crashes or skips elements. Explain the defect and give a fix that does not read freed memory.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.stl.iterators",
+    secondarySkillIds: ["dsa.arrays.traversal"],
+    patternTags: ["debugging", "cpp", "iterator-invalidation"],
+    constraints: "Standard C++17/20; v may need to grow beyond its current capacity.",
+    targetComplexity: "Explanation plus an O(n)-pass fix; reasoning, not new algorithms.",
+    requiredEdgeCases: ["push_back triggers reallocation (it is dangling)", "no reallocation by luck (latent bug)", "appended elements re-processed if end is recomputed naively"],
+    clarifyingQuestions: ["Does push_back ever exceed the current capacity?", "Should newly appended values themselves be processed?"],
+    hintLadder: [
+      "push_back can reallocate the vector's buffer, which invalidates all existing iterators (including it and end()).",
+      "After a reallocation, ++it and *it touch freed memory — undefined behavior.",
+      "Fix by collecting the new values into a separate vector and appending after the loop, or by indexing up to the original size captured before the loop."
+    ],
+    visibleExamples: [
+      {
+        input: "v=[2,4]; append value*2 while iterating",
+        output: "iterator invalidated on reallocation (undefined behavior)",
+        note: "capture the original size or buffer the additions instead"
+      }
+    ],
+    externalLinks: [CPPREF]
+  },
+  {
+    id: "iv.cpp.dangling-reference",
+    version: 1,
+    title: "Spot the dangling reference",
+    prompt:
+      "A helper builds a label and returns a reference to it: `const std::string& makeLabel(int id) { std::string s = \"node-\" + std::to_string(id); return s; }`, and callers later read the returned reference. Reads return garbage. Explain the lifetime bug and the correct fix.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "cpp.references.pointers",
+    secondarySkillIds: ["cpp.raii.resource_lifetime"],
+    patternTags: ["debugging", "cpp", "lifetime"],
+    constraints: "Standard C++17/20; the local string is destroyed when the function returns.",
+    targetComplexity: "Explanation plus the fix; reasoning, not new algorithms.",
+    requiredEdgeCases: ["returning a reference to a local", "returning a reference to a function parameter by value", "binding a reference to a temporary that then dies"],
+    clarifyingQuestions: ["What is the lifetime of the local string s?", "Is returning by value acceptable here?"],
+    hintLadder: [
+      "The local s is destroyed when makeLabel returns, so the returned reference dangles.",
+      "Reading through a reference to a destroyed object is undefined behavior.",
+      "Return by value (return std::string) — copy elision/move makes this cheap — rather than returning a reference to a local."
+    ],
+    visibleExamples: [
+      {
+        input: "const std::string& makeLabel(int id) { std::string s = ...; return s; }",
+        output: "returns a reference to a destroyed local (dangling); return by value instead"
+      }
+    ],
+    externalLinks: [CPPREF]
+  },
+  {
+    id: "iv.cpp.missing-virtual-destructor",
+    version: 1,
+    title: "Deleting through a base pointer leaks",
+    prompt:
+      "A factory returns owned objects as a base pointer: `Base* make();` where Derived adds members that own resources, and callers `delete` the returned Base*. Base's destructor is not virtual. Resources leak and behavior is undefined. Explain why, and give the fix and a safer ownership approach.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.oop.polymorphic_ownership",
+    secondarySkillIds: ["cpp.smart_pointers.unique_ptr"],
+    patternTags: ["debugging", "cpp-design", "ownership", "polymorphism"],
+    constraints: "Standard C++17/20; Derived owns resources released in its destructor.",
+    targetComplexity: "Explanation plus the fix; reasoning, not new algorithms.",
+    requiredEdgeCases: ["deleting Derived through Base* with a non-virtual ~Base", "Derived with no extra resources (still UB)", "ownership handed across an API boundary"],
+    clarifyingQuestions: ["Is Base meant to be used polymorphically and deleted through a base pointer?", "Who owns the returned pointer?"],
+    hintLadder: [
+      "Deleting a Derived through a Base* whose destructor is not virtual is undefined behavior; typically only ~Base runs, so Derived's resources leak.",
+      "Declare virtual ~Base() (often = default) so the correct derived destructor is dispatched.",
+      "Safer still: return std::unique_ptr<Base> so ownership and correct destruction are explicit and automatic."
+    ],
+    visibleExamples: [
+      {
+        input: "Base* p = make(); delete p;  // ~Base not virtual, Derived owns resources",
+        output: "undefined behavior; Derived's destructor does not run (leak). Make ~Base virtual."
+      }
+    ],
+    externalLinks: [CPPREF]
   }
 ];
 
