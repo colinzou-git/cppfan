@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.manipulation.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "6\nc\nFan\nababab\n",
+  "note": "std::string exposes size, operator[], and substr (returning a copy); appending with += builds a string in place instead of the O(n^2) repeated s = s + piece."
+}

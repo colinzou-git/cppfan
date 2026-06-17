@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.searching.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "10\nnot found\nfound\n",
+  "note": "std::string::find returns the start index of the first match (10 for \"brown\") or std::string::npos when the pattern is absent."
+}
