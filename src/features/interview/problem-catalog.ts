@@ -1082,6 +1082,138 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "n=1, edges=[]", output: "0" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.heap.kth-largest-stream",
+    version: 1,
+    title: "Running k-th largest reading",
+    prompt:
+      "Process readings one at a time and, after each, report the k-th largest reading seen so far, or -1 until at least k readings have arrived. Keep only what you need rather than re-sorting the whole history.",
+    group: "heaps_topk_streaming",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.heap_applications",
+    secondarySkillIds: ["dsa.trees.heap"],
+    patternTags: ["min-heap", "top-k", "streaming"],
+    constraints: "1 <= k; 1 <= readings <= 2e5; values fit in a 32-bit integer.",
+    targetComplexity: "O(log k) per reading, O(k) space.",
+    requiredEdgeCases: ["fewer than k readings so far (-1)", "duplicate values", "a new reading that does not enter the top k"],
+    clarifyingQuestions: ["Is the k-th largest by value (duplicates counted)?", "What should be reported before k readings exist?"],
+    hintLadder: [
+      "Keep a size-k min-heap holding the k largest readings seen so far.",
+      "On each reading, push it; if the heap exceeds k, pop the smallest.",
+      "Once the heap holds k items, its smallest (the root) is the k-th largest."
+    ],
+    visibleExamples: [
+      { input: "k=3, stream=[4,5,8,2]", output: "[-1,-1,4,4]", note: "3rd largest of {4,5,8} and {4,5,8,2} is 4" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.heap.merge-k-sorted",
+    version: 1,
+    title: "Merge k sorted streams",
+    prompt:
+      "Given k ascending-sorted sequences, merge them into one ascending sequence. Avoid concatenating then sorting; use the fact that each input is already sorted.",
+    group: "heaps_topk_streaming",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.heap_applications",
+    secondarySkillIds: ["dsa.sorting.comparator"],
+    patternTags: ["min-heap", "k-way-merge"],
+    constraints: "1 <= k <= 1e5; total elements N up to 2e5; each input sorted ascending.",
+    targetComplexity: "O(N log k) time, O(k) heap space.",
+    requiredEdgeCases: ["some sequences empty", "all sequences empty (empty result)", "duplicate values across sequences"],
+    clarifyingQuestions: ["Are all inputs sorted ascending?", "Should equal values from different sequences both appear?"],
+    hintLadder: [
+      "Put the first element of each non-empty sequence into a min-heap keyed by value.",
+      "Pop the smallest, append it, and push the next element from that same sequence.",
+      "Repeat until the heap empties; the heap never exceeds k entries."
+    ],
+    visibleExamples: [
+      { input: "[[1,4,7],[2,5],[3,6]]", output: "[1,2,3,4,5,6,7]" },
+      { input: "[[],[2],[]]", output: "[2]" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.heap.k-closest-points",
+    version: 1,
+    title: "k closest points to the origin",
+    prompt:
+      "Given a list of 2D points and an integer k, return the k points nearest the origin (by Euclidean distance), ordered from closest to farthest. Compare squared distances to avoid floating point.",
+    group: "heaps_topk_streaming",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.heap",
+    secondarySkillIds: ["dsa.sorting.comparator"],
+    patternTags: ["max-heap", "top-k", "selection"],
+    constraints: "1 <= k <= points <= 2e5; coordinates fit in a 32-bit integer (use 64-bit for squared distance).",
+    targetComplexity: "O(n log k) time, O(k) space.",
+    requiredEdgeCases: ["k equals the number of points", "ties in distance", "a point at the origin"],
+    clarifyingQuestions: ["Should I compare squared distances to avoid floating point?", "How are distance ties ordered?"],
+    hintLadder: [
+      "Keep a size-k max-heap keyed by squared distance.",
+      "Push each point; when the heap exceeds k, pop the farthest so only the k closest remain.",
+      "Drain and reverse (or sort the k survivors) to list them closest-first."
+    ],
+    visibleExamples: [
+      { input: "points=[(1,3),(-2,2),(5,8),(0,1)], k=2", output: "[(0,1),(-2,2)]", note: "squared distances 1 and 8" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.heap.running-median",
+    version: 1,
+    title: "Running median of a stream",
+    prompt:
+      "Process numeric readings one at a time and, after each, report the median of all readings so far. For an even count, the median is the average of the two middle values. Aim for logarithmic work per reading.",
+    group: "heaps_topk_streaming",
+    roleRelevance: "streaming",
+    difficulty: "hard",
+    primarySkillId: "dsa.trees.heap_applications",
+    secondarySkillIds: ["dsa.trees.heap"],
+    patternTags: ["two-heaps", "median", "streaming"],
+    constraints: "1 <= readings <= 2e5; values fit in a 32-bit integer.",
+    targetComplexity: "O(log n) per reading, O(n) space.",
+    requiredEdgeCases: ["a single reading", "even count (average the two middles)", "all equal readings"],
+    clarifyingQuestions: ["For an even count, is the median the average of the two middles?", "Can readings repeat?"],
+    hintLadder: [
+      "Keep a max-heap of the lower half and a min-heap of the upper half, balanced in size.",
+      "Insert into the correct half, then rebalance so their sizes differ by at most one.",
+      "The median is the larger heap's top, or the average of both tops when the sizes are equal."
+    ],
+    visibleExamples: [
+      { input: "stream=[5,15,1,3]", output: "[5,10,5,4]", note: "medians of [5], [5,15], [1,5,15], [1,3,5,15]" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.heap.task-cooldown",
+    version: 1,
+    title: "Schedule tasks with a cooldown",
+    prompt:
+      "Given counts of task types and a cooldown of n time units required between two runs of the same type, return the minimum number of time units (each unit runs one task or idles) to finish every task. Run the most pressing type as often as the cooldown allows.",
+    group: "heaps_topk_streaming",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.trees.heap_applications",
+    secondarySkillIds: ["dsa.techniques.greedy"],
+    patternTags: ["max-heap", "greedy", "scheduling"],
+    constraints: "1 <= total tasks <= 2e5; 0 <= n <= 1e4; task types are a small alphabet.",
+    targetComplexity: "O(total log types) time, O(types) space.",
+    requiredEdgeCases: ["n = 0 (no idling, answer is the task count)", "one dominant type forcing idles", "many types so no idle is ever needed"],
+    clarifyingQuestions: ["Does each time unit run exactly one task or an idle?", "Is the cooldown the minimum gap between identical types?"],
+    hintLadder: [
+      "Greedily run the type with the most remaining count, then the next most, cycling through a window of size n+1.",
+      "A max-heap by remaining count picks the most pressing runnable type each step.",
+      "Idle only when every remaining type is still cooling down; the busiest type's count drives any idling."
+    ],
+    visibleExamples: [
+      { input: "tasks=[A,A,A,B,B,B], n=2", output: "8", note: "A B idle A B idle A B" },
+      { input: "tasks=[A,A,A,B,B,B], n=0", output: "6" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
