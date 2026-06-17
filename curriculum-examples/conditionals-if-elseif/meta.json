@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.control_flow.conditionals.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "A\nB\nC\nF\n",
+  "note": "if / else if / else selects one branch from a chain of bool conditions built with comparison operators."
+}
