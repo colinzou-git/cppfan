@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.const_correctness.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "5\n7\n",
+  "note": "A const std::string& parameter reads without copying; a const member function (get) is callable through a const reference."
+}

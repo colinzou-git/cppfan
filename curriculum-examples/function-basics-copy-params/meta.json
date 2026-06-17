@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.functions.basics.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "5\ninside: 99\n10\n",
+  "note": "A function returns a value (add); parameters are copies by default, so mutating a parameter leaves the caller's argument unchanged."
+}
