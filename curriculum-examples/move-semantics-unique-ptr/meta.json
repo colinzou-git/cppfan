@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.move.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\nhas value\n42\nempty\n",
+  "note": "std::move transfers ownership of the unique_ptr from a to b; the moved-from unique_ptr is guaranteed null, so a is empty afterward."
+}
