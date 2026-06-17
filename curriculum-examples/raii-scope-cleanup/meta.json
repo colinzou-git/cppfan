@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.raii.resource_lifetime.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "acquire outer\nacquire inner\nwork\nrelease inner\nafter inner\nrelease outer\n",
+  "note": "Constructor acquires, destructor releases; scope exit runs destructors in reverse (LIFO) order automatically."
+}

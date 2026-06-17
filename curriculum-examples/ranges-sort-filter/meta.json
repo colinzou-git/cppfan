@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.ranges.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "2 4 6 \n",
+  "note": "std::ranges::sort takes the container directly; a views::filter pipeline yields the even elements lazily."
+}
