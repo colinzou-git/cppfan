@@ -32,4 +32,8 @@ test("with no evidence the report shows the explicit not-enough-evidence state",
   // The timing breakdown is present with an honest empty state (no timings logged).
   await expect(page.getByTestId("readiness-timing")).toBeVisible();
   await expect(page.getByTestId("readiness-timing-empty")).toBeVisible();
+
+  // Assistance dependence is reported, with an honest empty state when no solves.
+  await expect(page.getByTestId("readiness-assistance")).toBeVisible();
+  await expect(page.getByTestId("readiness-assistance-empty")).toBeVisible();
 });

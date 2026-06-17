@@ -9,6 +9,7 @@ import { getSelfRubricScores } from "./rubric-store";
 import { getRecentInterviewEvidence, getRecentTimingSamples } from "./interview-evidence-store";
 import { readinessFacets, type ReadinessFacet } from "./readiness-facets";
 import { summarizeTiming, type TimingSummary } from "./interview-timing";
+import { summarizeAssistance, type AssistanceSummary } from "./interview-assistance";
 import type { RubricScore } from "./rubric";
 import type { InterviewEvidence, QualityAverages } from "./readiness";
 
@@ -77,4 +78,9 @@ export async function getReadinessFacets(): Promise<ReadinessFacet[]> {
 /** The learner's recent approach/implementation timing breakdown (#182). */
 export async function getReadinessTiming(now: number = Date.now()): Promise<TimingSummary> {
   return summarizeTiming(await getRecentTimingSamples(now));
+}
+
+/** The learner's recent assistance (hint) dependence (#182). */
+export async function getReadinessAssistance(now: number = Date.now()): Promise<AssistanceSummary> {
+  return summarizeAssistance(await getRecentInterviewEvidence(now));
 }

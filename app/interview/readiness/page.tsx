@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
-import { getReadinessFacets, getReadinessInputs, getReadinessTiming } from "@/features/interview/readiness-store";
+import {
+  getReadinessAssistance,
+  getReadinessFacets,
+  getReadinessInputs,
+  getReadinessTiming
+} from "@/features/interview/readiness-store";
+import type { AssistanceBand } from "@/features/interview/interview-assistance";
 import { buildReadinessReport, type ReadinessStatus } from "@/features/interview/readiness-report";
 import type { DimensionStatus, ReadinessDimension } from "@/features/interview/readiness";
 import type { ScoreBand } from "@/features/interview/rubric";
@@ -53,6 +59,18 @@ const BAND_STYLE: Record<ScoreBand, string> = {
   needs_work: "bg-rose-100 text-rose-800"
 };
 
+const ASSIST_STYLE: Record<AssistanceBand, string> = {
+  independent: "bg-emerald-100 text-emerald-800",
+  light: "bg-amber-100 text-amber-800",
+  reliant: "bg-rose-100 text-rose-800"
+};
+
+const ASSIST_LABEL: Record<AssistanceBand, string> = {
+  independent: "Mostly independent",
+  light: "Some hint use",
+  reliant: "Hint-reliant"
+};
+
 const BAND_LABEL: Record<ScoreBand, string> = {
   strong: "Strong",
   solid: "Solid",
@@ -67,6 +85,7 @@ export default async function InterviewReadinessPage() {
   const dimensions = Object.keys(report.dimensions) as ReadinessDimension[];
   const facets = await getReadinessFacets();
   const timing = await getReadinessTiming(now);
+  const assistance = await getReadinessAssistance(now);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -191,6 +210,26 @@ export default async function InterviewReadinessPage() {
               Median to working code:{" "}
               {timing.implementationMedianMinutes === null ? "—" : `${timing.implementationMedianMinutes} min`}
               {timing.implementationSamples > 0 ? ` (${timing.implementationSamples})` : ""}
+            </span>
+          </div>
+        )}
+      </section>
+
+      <section className="grid gap-2" data-testid="readiness-assistance">
+        <h2 className="text-lg font-black text-slate-900">Assistance dependence</h2>
+        {assistance.recentSolves === 0 || assistance.band === null ? (
+          <p className="text-sm text-slate-600" data-testid="readiness-assistance-empty">
+            No solved outcomes logged yet — independent (unhinted) solves are the strongest readiness
+            signal.
+          </p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2" data-band={assistance.band}>
+            <span className={`rounded-full px-3 py-1 text-sm font-bold ${ASSIST_STYLE[assistance.band]}`}>
+              {ASSIST_LABEL[assistance.band]}
+            </span>
+            <span className="text-sm text-slate-700" data-testid="readiness-assistance-counts">
+              {assistance.independentSolves} of {assistance.recentSolves} recent solves were independent
+              {assistance.hintedSolves > 0 ? ` (${assistance.hintedSolves} used hints)` : ""}.
             </span>
           </div>
         )}
