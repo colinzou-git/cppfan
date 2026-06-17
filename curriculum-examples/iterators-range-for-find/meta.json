@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.iterators.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "60\nfound\nmissing\n",
+  "note": "Range-based for walks [begin,end); std::find returns end() to signal not-found."
+}

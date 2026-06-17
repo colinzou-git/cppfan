@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.class_templates.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\nhi\n",
+  "note": "A class template parameterizes a class by type; each instantiation (Box<int>, Box<std::string>) is a separate type."
+}
