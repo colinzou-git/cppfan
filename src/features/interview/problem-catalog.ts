@@ -783,6 +783,117 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "BST=[6,2,8,0,4,7,9,null,null,3,5], a=2, b=4", output: "2", note: "2 is an ancestor of 4" }
     ],
     externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.list.reverse",
+    version: 1,
+    title: "Reverse a singly linked list",
+    prompt:
+      "Given the head of a singly linked list, reverse it in place and return the new head. Rewire the next pointers without allocating a second list.",
+    group: "linked_cache",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.trees.linked_list",
+    secondarySkillIds: [],
+    patternTags: ["linked-list", "pointer-rewiring", "in-place"],
+    constraints: "0 <= n <= 2e5.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["empty list", "single node", "two nodes"],
+    clarifyingQuestions: ["Should the reversal be in place (O(1) space)?", "May the list be empty?"],
+    hintLadder: [
+      "Walk the list keeping prev, curr, and the saved next.",
+      "At each step point curr.next back to prev, then advance prev and curr.",
+      "When curr becomes null, prev is the new head."
+    ],
+    visibleExamples: [
+      { input: "1->2->3->4", output: "[4,3,2,1]" },
+      { input: "(empty)", output: "[]" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.list.merge-sorted",
+    version: 1,
+    title: "Merge two sorted lists",
+    prompt:
+      "Given the heads of two ascending sorted singly linked lists, splice their nodes into one ascending sorted list and return its head. Reuse the existing nodes rather than copying values.",
+    group: "linked_cache",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.linked_list",
+    secondarySkillIds: ["dsa.trees.list_vs_vector"],
+    patternTags: ["linked-list", "merge", "two-pointer"],
+    constraints: "0 <= total nodes <= 2e5; each input list is sorted ascending.",
+    targetComplexity: "O(n + m) time, O(1) extra space.",
+    requiredEdgeCases: ["one list empty", "both empty", "fully interleaved values"],
+    clarifyingQuestions: ["Are both lists already sorted ascending?", "Should I reuse the nodes rather than copy?"],
+    hintLadder: [
+      "Use a dummy head and a tail pointer that you append to.",
+      "Repeatedly attach the smaller of the two current nodes and advance that list.",
+      "When one list runs out, attach the remainder of the other."
+    ],
+    visibleExamples: [
+      { input: "1->3->5 and 2->4->6", output: "[1,2,3,4,5,6]" },
+      { input: "(empty) and 1->2", output: "[1,2]" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.list.detect-cycle",
+    version: 1,
+    title: "Does the list loop back?",
+    prompt:
+      "Given the head of a singly linked list, determine whether following next pointers ever revisits a node (a cycle). Solve it in constant extra space rather than recording visited nodes.",
+    group: "linked_cache",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.linked_list",
+    secondarySkillIds: [],
+    patternTags: ["linked-list", "fast-slow-pointers", "cycle-detection"],
+    constraints: "0 <= n <= 2e5; a cycle, if present, may start at any node.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["no cycle", "the whole list is one cycle", "a single node whose next points to itself"],
+    clarifyingQuestions: ["Must I use O(1) extra space (no visited set)?", "Can the cycle begin partway through the list?"],
+    hintLadder: [
+      "Advance a slow pointer one step and a fast pointer two steps each iteration.",
+      "If they ever meet, there is a cycle; if fast reaches the end (null), there is none.",
+      "The pointers are guaranteed to meet inside a cycle because the gap closes by one each step."
+    ],
+    visibleExamples: [
+      { input: "values=[3,2,0,-4], tail-points-to-index=1", output: "true" },
+      { input: "values=[1,2], tail-points-to-index=-1", output: "false", note: "-1 means no cycle" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.cache.lru-design",
+    version: 1,
+    title: "Design an LRU cache",
+    prompt:
+      "Design a fixed-capacity cache with get(key) and put(key, value), both O(1). get returns the value or -1 if absent; put inserts or updates and, when over capacity, evicts the least-recently-used entry. Any get or put counts as a use. State the data structures and the invariant that keeps both operations O(1).",
+    group: "linked_cache",
+    roleRelevance: "storage",
+    difficulty: "hard",
+    primarySkillId: "dsa.trees.linked_list",
+    secondarySkillIds: ["dsa.trees.list_vs_vector"],
+    patternTags: ["cache", "doubly-linked-list", "hash-map", "data-structure-design"],
+    constraints: "1 <= capacity <= 1e5; up to 2e5 operations; keys and values fit in a 32-bit integer.",
+    targetComplexity: "O(1) per get/put, O(capacity) space.",
+    requiredEdgeCases: ["get on a missing key (-1)", "put that updates an existing key (no eviction)", "eviction when inserting a new key at capacity"],
+    clarifyingQuestions: ["Does a get also count as a recent use?", "On put of an existing key, do I update without evicting?"],
+    hintLadder: [
+      "Pair a hash map (key -> node) with a doubly linked list ordered by recency.",
+      "On access, move the node to the most-recent end; the least-recent end is the eviction target.",
+      "The map gives O(1) lookup; the doubly linked list gives O(1) move and evict."
+    ],
+    visibleExamples: [
+      {
+        input: "cap=2; put(1,1) put(2,2) get(1) put(3,3) get(2) put(4,4) get(1) get(3) get(4)",
+        output: "1 -1 -1 3 4",
+        note: "put(3) evicts key 2; put(4) evicts key 1"
+      }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
