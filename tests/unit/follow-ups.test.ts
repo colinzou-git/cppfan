@@ -79,4 +79,9 @@ describe("deterministic follow-up selection (#181)", () => {
       expect(getFollowUpsForProblem(f.problemId).length).toBeGreaterThan(0);
     }
   });
+
+  it("is growing toward the #181 first release (>= 22 follow-ups across >= 17 problems)", () => {
+    expect(followUps.length).toBeGreaterThanOrEqual(22);
+    expect(new Set(followUps.map((f) => f.problemId)).size).toBeGreaterThanOrEqual(17);
+  });
 });
