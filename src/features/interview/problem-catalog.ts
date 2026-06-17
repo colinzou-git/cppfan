@@ -1483,6 +1483,114 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "heights=[1,1]", output: "1" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.intervals.merge-overlapping",
+    version: 1,
+    title: "Merge overlapping intervals",
+    prompt:
+      "Given a list of closed intervals [start, end], merge every set that overlaps or touches into the fewest disjoint intervals and return them sorted by start. Two intervals merge when one's start is <= the other's end.",
+    group: "intervals_sweepline",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.interval_scheduling",
+    secondarySkillIds: ["dsa.sorting.comparator"],
+    patternTags: ["intervals", "sort", "merge"],
+    constraints: "0 <= n <= 2e5; start <= end; coordinates fit in a 64-bit integer.",
+    targetComplexity: "O(n log n) time (sort), O(n) output.",
+    requiredEdgeCases: ["fully nested intervals", "touching intervals like [1,2] and [2,3]", "already disjoint input"],
+    clarifyingQuestions: ["Do touching intervals ([1,2],[2,3]) merge?", "Is the input already sorted?"],
+    hintLadder: [
+      "Sort the intervals by start.",
+      "Walk them keeping the current merged interval; if the next start is <= the current end, extend the end to the max.",
+      "Otherwise emit the current interval and start a new one."
+    ],
+    visibleExamples: [
+      { input: "[(1,3),(2,6),(8,10),(15,18)]", output: "[(1,6),(8,10),(15,18)]" },
+      { input: "[(1,4),(4,5)]", output: "[(1,5)]", note: "touching merges" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.intervals.insert",
+    version: 1,
+    title: "Insert into a disjoint interval set",
+    prompt:
+      "Given a list of disjoint closed intervals sorted by start, insert a new interval and merge any it overlaps, returning the result still sorted and disjoint. Do it in one linear pass over the existing intervals.",
+    group: "intervals_sweepline",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.interval_scheduling",
+    secondarySkillIds: [],
+    patternTags: ["intervals", "merge", "single-pass"],
+    constraints: "0 <= n <= 2e5; existing intervals disjoint and sorted; coordinates fit in a 64-bit integer.",
+    targetComplexity: "O(n) time, O(n) output.",
+    requiredEdgeCases: ["new interval before all / after all", "new interval spanning several existing ones", "no overlap (simple insert)"],
+    clarifyingQuestions: ["Are the existing intervals guaranteed disjoint and sorted?", "Do touching intervals merge?"],
+    hintLadder: [
+      "Copy intervals that end before the new one starts.",
+      "Merge every interval that overlaps the new one by widening the new interval's start/end.",
+      "Append the merged interval, then copy the intervals that start after it ends."
+    ],
+    visibleExamples: [
+      { input: "existing=[(1,3),(6,9)], new=(2,5)", output: "[(1,5),(6,9)]" },
+      { input: "existing=[(1,2),(7,9)], new=(3,5)", output: "[(1,2),(3,5),(7,9)]" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.intervals.min-rooms",
+    version: 1,
+    title: "Fewest rooms for all meetings",
+    prompt:
+      "Given meeting half-open intervals [start, end) (a meeting frees its room exactly at end), return the minimum number of rooms needed so no two meetings sharing a room overlap. Think peak simultaneous occupancy.",
+    group: "intervals_sweepline",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.techniques.range_structures",
+    secondarySkillIds: ["dsa.techniques.interval_scheduling"],
+    patternTags: ["intervals", "sweep-line", "min-heap"],
+    constraints: "0 <= n <= 2e5; start < end; coordinates fit in a 64-bit integer.",
+    targetComplexity: "O(n log n) time, O(n) space.",
+    requiredEdgeCases: ["a meeting that ends exactly when another starts (shares a room)", "all meetings overlap", "no meetings (0)"],
+    clarifyingQuestions: ["Are intervals half-open so end == next start can reuse a room?", "Can there be zero meetings?"],
+    hintLadder: [
+      "Separate the start and end times and sweep them in increasing order.",
+      "Each start needs a room (+1); each end frees one (-1); process an end before a start at the same coordinate.",
+      "The running maximum of concurrent meetings is the room count (a min-heap of end times gives the same answer)."
+    ],
+    visibleExamples: [
+      { input: "[(0,30),(5,10),(15,20)]", output: "2", note: "(0,30) overlaps each of the others" },
+      { input: "[(1,5),(5,9)]", output: "1", note: "second starts as the first ends" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.intervals.max-non-overlapping",
+    version: 1,
+    title: "Most activities without conflict",
+    prompt:
+      "Given activities as closed intervals [start, end], return the maximum number you can select so that no two selected activities overlap (sharing only an endpoint is allowed). This is the classic activity-selection problem.",
+    group: "intervals_sweepline",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.greedy",
+    secondarySkillIds: ["dsa.techniques.interval_scheduling"],
+    patternTags: ["intervals", "greedy", "activity-selection"],
+    constraints: "0 <= n <= 2e5; start <= end; coordinates fit in a 64-bit integer.",
+    targetComplexity: "O(n log n) time (sort by end), O(1) extra space.",
+    requiredEdgeCases: ["all intervals overlap (select 1)", "all disjoint (select all)", "intervals touching at endpoints (both selectable)"],
+    clarifyingQuestions: ["Does sharing only an endpoint count as non-overlapping?", "Do I return the count, not the set?"],
+    hintLadder: [
+      "Sort the activities by end time.",
+      "Greedily take an activity whenever its start is >= the end of the last one taken.",
+      "Each taken activity frees the most future room, maximizing the count."
+    ],
+    visibleExamples: [
+      { input: "[(1,2),(2,3),(3,4),(1,3)]", output: "3", note: "take (1,2),(2,3),(3,4); drop (1,3)" },
+      { input: "[(1,10),(2,3),(4,5)]", output: "2" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
