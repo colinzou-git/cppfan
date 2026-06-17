@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.vector.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3\n20\n30\n60\n",
+  "note": "std::vector grows with push_back, reports size() == 3, accesses elements with v[i] (unchecked) and v.at(i) (bounds-checked), and sums to 60."
+}

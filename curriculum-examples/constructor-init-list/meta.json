@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.constructors.member_initializer_list.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "2\n12.56\n",
+  "note": "The constructor's initializer list direct-initializes radius_ (a const member, which must be initialized there) and area_; a Circle of radius 2 has area 12.56."
+}
