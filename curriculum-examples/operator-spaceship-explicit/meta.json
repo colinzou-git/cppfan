@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.operators.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "equal\na<b\nyes\n",
+  "note": "A defaulted operator<=> generates ordering (a < b, b >= a) and a defaulted operator== gives equality; the single-arg constructor is explicit to block implicit conversions."
+}
