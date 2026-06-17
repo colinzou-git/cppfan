@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.pointers.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "10\n20\nnull\n",
+  "note": "A pointer holds an address (&a) and is dereferenced with *p; unlike a reference it can be repointed and set to nullptr (checked before any dereference)."
+}
