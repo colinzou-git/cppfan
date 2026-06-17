@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.oop.inheritance.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "Rex is an animal\nRex fetches\n",
+  "note": "Dog publicly inherits Animal (is-a): it reuses the inherited describe()/name() and adds its own fetch() behavior."
+}
