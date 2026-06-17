@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.function_templates.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "7\n2.5\n",
+  "note": "One template definition; the compiler deduces T per call (int, then double)."
+}
