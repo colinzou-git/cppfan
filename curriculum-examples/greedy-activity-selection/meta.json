@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.greedy.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3\n10\n",
+  "note": "Activity selection sorts by finish time and greedily takes each activity that starts after the last chosen one finished — 3 non-overlapping activities, last finishing at 10."
+}
