@@ -7,7 +7,7 @@ import {
   getReadinessTiming
 } from "@/features/interview/readiness-store";
 import type { AssistanceBand } from "@/features/interview/interview-assistance";
-import { buildReadinessReport, type ReadinessStatus } from "@/features/interview/readiness-report";
+import { buildReadinessReport, completionGate, type ReadinessStatus } from "@/features/interview/readiness-report";
 import type { DimensionStatus, ReadinessDimension } from "@/features/interview/readiness";
 import type { ScoreBand } from "@/features/interview/rubric";
 
@@ -86,6 +86,7 @@ export default async function InterviewReadinessPage() {
   const facets = await getReadinessFacets();
   const timing = await getReadinessTiming(now);
   const assistance = await getReadinessAssistance(now);
+  const gate = completionGate(report);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -125,6 +126,41 @@ export default async function InterviewReadinessPage() {
             Your recent evidence is getting stale — fresh independent practice keeps this current.
           </p>
         ) : null}
+      </section>
+
+      <section
+        className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm"
+        data-testid="readiness-gate"
+        data-gate-ready={gate.ready}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-bold ${gate.ready ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700"}`}
+          >
+            {gate.label}
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-slate-600">
+          The coding-rounds gate requires every condition below within the recent window. It reflects
+          your practice evidence only — not an endorsement or a prediction of any hiring decision.
+        </p>
+        <ul className="mt-2 grid gap-1">
+          {gate.conditions.map((c) => (
+            <li
+              key={c.id}
+              className="flex items-center gap-2 text-sm"
+              data-testid="readiness-gate-condition"
+              data-condition-id={c.id}
+              data-met={c.met}
+            >
+              <span className={c.met ? "text-emerald-700" : "text-slate-600"} aria-hidden="true">
+                {c.met ? "✓" : "○"}
+              </span>
+              <span className="text-slate-700">{c.label}</span>
+              <span className="sr-only">{c.met ? "met" : "not met"}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="grid gap-2" data-testid="readiness-dimensions">
