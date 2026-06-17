@@ -134,6 +134,14 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(heaps.some((p) => p.patternTags.includes("two-heaps"))).toBe(true);
   });
 
+  it("covers the arrays/hashing/prefix group toward the #176 quota (>= 7)", () => {
+    const arrays = getInterviewProblemsByGroup("arrays_hashing_prefix");
+    expect(arrays.length).toBeGreaterThanOrEqual(7);
+    // Spans both hash-map and prefix-sum techniques.
+    expect(arrays.some((p) => p.patternTags.includes("hash-map"))).toBe(true);
+    expect(arrays.some((p) => p.patternTags.includes("prefix-sum"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
