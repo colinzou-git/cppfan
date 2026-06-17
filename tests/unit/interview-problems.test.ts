@@ -96,6 +96,12 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(dp.some((p) => p.patternTags.includes("backtracking"))).toBe(true);
   });
 
+  it("covers the union-find group toward the #176 quota (>= 3)", () => {
+    const dsu = getInterviewProblemsByGroup("union_find");
+    expect(dsu.length).toBeGreaterThanOrEqual(3);
+    expect(dsu.every((p) => p.patternTags.includes("union-find"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);

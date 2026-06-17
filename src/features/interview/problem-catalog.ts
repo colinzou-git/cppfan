@@ -540,6 +540,87 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "parts=[1,2,3], capacity=3", output: "2", note: "{3} and {1,2}" }
     ],
     externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.dsu.count-clusters",
+    version: 1,
+    title: "How many clusters form?",
+    prompt:
+      "You have n nodes labeled 0..n-1 and a list of undirected connection pairs. Two nodes are in the same cluster if a path of connections links them. Return the number of distinct clusters. Use a disjoint-set so each pair is near-constant amortized.",
+    group: "union_find",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.disjoint_set",
+    secondarySkillIds: ["dsa.graphs.connected_components"],
+    patternTags: ["union-find", "connected-components"],
+    constraints: "1 <= n <= 2e5; 0 <= pairs <= 2e5; pairs may be duplicated or self-loops.",
+    targetComplexity: "O((n + pairs) * alpha(n)) time, O(n) space.",
+    requiredEdgeCases: ["no pairs (n clusters)", "duplicate pairs", "a self-loop pair (a, a)"],
+    clarifyingQuestions: ["Are the pairs undirected?", "Can a pair repeat or be a self-loop?"],
+    hintLadder: [
+      "Start with n singleton sets and a count of n.",
+      "For each pair, union the two nodes; when a union actually merges two different sets, decrement the count.",
+      "Use path compression and union by size/rank to keep operations near-constant."
+    ],
+    visibleExamples: [
+      { input: "n=5, pairs=[(0,1),(1,2),(3,4)]", output: "2", note: "{0,1,2} and {3,4}" },
+      { input: "n=4, pairs=[]", output: "4" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.dsu.redundant-link",
+    version: 1,
+    title: "Which link closes the loop?",
+    prompt:
+      "A network of n nodes was wired with n undirected links given in order; the links would form a tree except one extra link creates a single cycle. Return the link that, when removed, leaves a connected tree — when more than one qualifies, return the one that appears last in the input.",
+    group: "union_find",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.disjoint_set",
+    secondarySkillIds: ["dsa.graphs.connected_components"],
+    patternTags: ["union-find", "cycle-detection"],
+    constraints: "3 <= n <= 2e5; exactly n links; the graph is connected with exactly one cycle.",
+    targetComplexity: "O(n * alpha(n)) time, O(n) space.",
+    requiredEdgeCases: ["the cycle-closing link is the last one", "a triangle (smallest cycle)", "the extra link connects already-joined nodes early"],
+    clarifyingQuestions: ["Are links processed in input order?", "If several links could be removed, do I return the last one in the input?"],
+    hintLadder: [
+      "Process links in order, unioning their endpoints.",
+      "The first link whose endpoints are already in the same set is the one closing the cycle.",
+      "Because there is exactly one cycle, that link is the answer; scanning in order makes it the last cycle edge."
+    ],
+    visibleExamples: [
+      { input: "n=3, links=[(0,1),(1,2),(0,2)]", output: "(0, 2)", note: "(0,2) closes the triangle" },
+      { input: "n=4, links=[(0,1),(1,2),(2,3),(1,3)]", output: "(1, 3)" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.dsu.earliest-all-connected",
+    version: 1,
+    title: "Earliest time the fleet is fully connected",
+    prompt:
+      "You are given n machines and connection events, each with an increasing timestamp, that link two machines from that time on. Return the earliest timestamp at which every machine can reach every other (one connected component), or -1 if they never all connect.",
+    group: "union_find",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.trees.disjoint_set",
+    secondarySkillIds: ["dsa.graphs.connected_components"],
+    patternTags: ["union-find", "connected-components", "timeline"],
+    constraints: "1 <= n <= 2e5; 0 <= events <= 2e5; timestamps are non-decreasing in input order.",
+    targetComplexity: "O((n + events) * alpha(n)) time, O(n) space.",
+    requiredEdgeCases: ["n = 1 (already connected at time 0)", "events that never connect everyone (-1)", "the final merge happens on the last event"],
+    clarifyingQuestions: ["Are events given in non-decreasing time order?", "If they never fully connect, do I return -1?"],
+    hintLadder: [
+      "Keep a component count starting at n; a single machine is trivially connected.",
+      "Process events in time order, unioning endpoints and decrementing the count on a real merge.",
+      "The moment the count reaches 1, that event's timestamp is the answer; if it never does, return -1."
+    ],
+    visibleExamples: [
+      { input: "n=4, events=[(1,0,1),(2,1,2),(3,0,3)]", output: "3", note: "all four connected after the t=3 event" },
+      { input: "n=3, events=[(5,0,1)]", output: "-1", note: "node 2 never connects" }
+    ],
+    externalLinks: [CPALGO]
   }
 ];
 
