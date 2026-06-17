@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.oop.virtual_polymorphism.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "woof\nmeow\n",
+  "note": "A virtual speak() dispatches on the object's real type through an Animal pointer (Dog -> woof, Cat -> meow); the base has a virtual destructor for safe deletion."
+}
