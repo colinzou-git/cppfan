@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.sliding_window.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "7\n21\n",
+  "note": "A fixed-length-3 window adds the entering element and drops the leaving one each step (O(n)); the first window sums to 7 and the best window to 21."
+}
