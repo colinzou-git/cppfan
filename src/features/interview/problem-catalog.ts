@@ -621,6 +621,168 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "n=3, events=[(5,0,1)]", output: "-1", note: "node 2 never connects" }
     ],
     externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.tree.max-depth",
+    version: 1,
+    title: "Height of a binary tree",
+    prompt:
+      "Given a binary tree (described in level order with null for missing children), return its maximum depth: the number of nodes on the longest path from the root down to a leaf. An empty tree has depth 0.",
+    group: "trees_bst",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.trees.traversal",
+    secondarySkillIds: ["dsa.recursion.base_case"],
+    patternTags: ["tree", "dfs", "recursion"],
+    constraints: "0 <= nodes <= 2e5; the tree may be unbalanced (depth up to the node count).",
+    targetComplexity: "O(n) time, O(h) recursion/stack space for height h.",
+    requiredEdgeCases: ["empty tree (depth 0)", "single node (depth 1)", "a degenerate left/right chain"],
+    clarifyingQuestions: ["Is depth measured in nodes or edges?", "Can the tree be empty?"],
+    hintLadder: [
+      "The depth of a node is 1 plus the larger of its two child depths.",
+      "Recurse to the leaves; a null child contributes depth 0.",
+      "For a very deep, unbalanced tree, prefer an explicit stack to avoid recursion limits."
+    ],
+    visibleExamples: [
+      { input: "[3,9,20,null,null,15,7]", output: "3" },
+      { input: "[]", output: "0" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.tree.right-side-view",
+    version: 1,
+    title: "What you see from the right",
+    prompt:
+      "Given a binary tree in level order, return the value of the last node at each depth — the nodes visible if you look at the tree from the right side, top to bottom.",
+    group: "trees_bst",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.traversal",
+    secondarySkillIds: ["dsa.trees.traversal_techniques"],
+    patternTags: ["tree", "bfs", "level-order"],
+    constraints: "0 <= nodes <= 2e5.",
+    targetComplexity: "O(n) time, O(width) queue space.",
+    requiredEdgeCases: ["empty tree (empty result)", "a left-only chain (each node is its level's rightmost)", "complete tree"],
+    clarifyingQuestions: ["Is the output ordered top to bottom?", "If a level's only node is a left child, is it still visible?"],
+    hintLadder: [
+      "Do a breadth-first traversal level by level.",
+      "The last node dequeued at each level is the one visible from the right.",
+      "Alternatively, a depth-first walk that visits the right child first records the first node seen at each new depth."
+    ],
+    visibleExamples: [
+      { input: "[1,2,3,null,5,null,4]", output: "[1,3,4]" },
+      { input: "[1,2,3,4]", output: "[1,3,4]", note: "level 2's rightmost is the left child 4" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.bst.kth-smallest",
+    version: 1,
+    title: "k-th smallest in a BST",
+    prompt:
+      "Given the root of a binary search tree and an integer k (1-indexed), return the k-th smallest value. Use the BST ordering rather than collecting and sorting all values.",
+    group: "trees_bst",
+    roleRelevance: "storage",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.bst_search",
+    secondarySkillIds: ["dsa.trees.traversal"],
+    patternTags: ["bst", "in-order", "tree"],
+    constraints: "1 <= k <= nodes <= 2e5; all values distinct.",
+    targetComplexity: "O(h + k) time, O(h) space for height h.",
+    requiredEdgeCases: ["k = 1 (the minimum)", "k = nodes (the maximum)", "a right-leaning tree"],
+    clarifyingQuestions: ["Is k 1-indexed?", "Are the values guaranteed distinct?"],
+    hintLadder: [
+      "An in-order traversal of a BST visits values in ascending order.",
+      "Walk in-order and stop at the k-th visited node — you need not traverse the whole tree.",
+      "An explicit stack lets you pause exactly when the count reaches k."
+    ],
+    visibleExamples: [
+      { input: "BST=[5,3,7,2,4,6,8], k=3", output: "4", note: "in-order 2,3,4,5,6,7,8" },
+      { input: "BST=[2,1,3], k=1", output: "1" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.tree.diameter",
+    version: 1,
+    title: "Longest path through a tree",
+    prompt:
+      "Given a binary tree in level order, return its diameter: the number of edges on the longest path between any two nodes. The path need not pass through the root.",
+    group: "trees_bst",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.tree_diameter",
+    secondarySkillIds: ["dsa.trees.traversal"],
+    patternTags: ["tree", "dfs", "diameter"],
+    constraints: "0 <= nodes <= 2e5.",
+    targetComplexity: "O(n) time, O(h) space.",
+    requiredEdgeCases: ["single node (diameter 0)", "a straight chain (diameter = nodes - 1)", "the longest path not through the root"],
+    clarifyingQuestions: ["Is the diameter counted in edges or nodes?", "Must the path go through the root?"],
+    hintLadder: [
+      "For each node compute the height of its left and right subtrees.",
+      "A path through that node spans left height + right height edges.",
+      "Track the maximum such span over all nodes while computing heights in one pass."
+    ],
+    visibleExamples: [
+      { input: "[1,2,3,4,5]", output: "3", note: "4-2-1-3 (or 5-2-1-3) is 3 edges" },
+      { input: "[1]", output: "0" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.bst.validate",
+    version: 1,
+    title: "Is this a valid BST?",
+    prompt:
+      "Given a binary tree in level order, decide whether it is a valid binary search tree: every node's value is greater than all values in its left subtree and less than all values in its right subtree (strict; no duplicates). Return true or false.",
+    group: "trees_bst",
+    roleRelevance: "storage",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.bst_search",
+    secondarySkillIds: ["dsa.trees.traversal"],
+    patternTags: ["bst", "tree", "bounds"],
+    constraints: "0 <= nodes <= 2e5; values fit in a 64-bit integer.",
+    targetComplexity: "O(n) time, O(h) space.",
+    requiredEdgeCases: ["a node valid against its parent but not an ancestor bound", "single node (valid)", "values at the 64-bit extremes"],
+    clarifyingQuestions: ["Are duplicate values allowed?", "Is an empty tree considered valid?"],
+    hintLadder: [
+      "Checking only parent-child order is not enough; a node must satisfy bounds from all its ancestors.",
+      "Recurse carrying an open (low, high) interval; each node must lie strictly inside it.",
+      "Going left tightens the upper bound to the node value; going right tightens the lower bound."
+    ],
+    visibleExamples: [
+      { input: "[2,1,3]", output: "true" },
+      { input: "[5,1,4,null,null,3,6]", output: "false", note: "3 and 4 are in 5's right subtree but below 5" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.bst.lowest-common-ancestor",
+    version: 1,
+    title: "Lowest common ancestor in a BST",
+    prompt:
+      "Given the root of a binary search tree and two present values a and b, return the value of their lowest common ancestor — the deepest node that has both in its subtrees. Use the BST ordering to avoid searching the whole tree.",
+    group: "trees_bst",
+    roleRelevance: "storage",
+    difficulty: "medium",
+    primarySkillId: "dsa.trees.bst_search",
+    secondarySkillIds: [],
+    patternTags: ["bst", "lca", "tree"],
+    constraints: "Both a and b exist in the tree; 1 <= nodes <= 2e5; values distinct.",
+    targetComplexity: "O(h) time, O(1) space for height h.",
+    requiredEdgeCases: ["one value is an ancestor of the other", "a and b on opposite sides of the root", "a and b adjacent (parent/child)"],
+    clarifyingQuestions: ["Are both values guaranteed to be present?", "Can a node be a descendant of itself for LCA purposes?"],
+    hintLadder: [
+      "Start at the root and compare both values to the current node.",
+      "If both are larger, go right; if both are smaller, go left.",
+      "The first node where they diverge (or that equals one of them) is the lowest common ancestor."
+    ],
+    visibleExamples: [
+      { input: "BST=[6,2,8,0,4,7,9,null,null,3,5], a=2, b=8", output: "6" },
+      { input: "BST=[6,2,8,0,4,7,9,null,null,3,5], a=2, b=4", output: "2", note: "2 is an ancestor of 4" }
+    ],
+    externalLinks: [CPALGO]
   }
 ];
 

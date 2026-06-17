@@ -102,6 +102,14 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(dsu.every((p) => p.patternTags.includes("union-find"))).toBe(true);
   });
 
+  it("covers the trees/BST group toward the #176 quota (>= 6)", () => {
+    const trees = getInterviewProblemsByGroup("trees_bst");
+    expect(trees.length).toBeGreaterThanOrEqual(6);
+    // Includes both plain tree-traversal and BST-ordering problems.
+    expect(trees.some((p) => p.patternTags.includes("bst"))).toBe(true);
+    expect(trees.some((p) => p.patternTags.includes("tree"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
