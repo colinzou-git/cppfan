@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.dynamic_programming.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "55\n13\n",
+  "note": "Bottom-up tabulation fills fib[] in dependency order, computing each overlapping subproblem once (O(n)); fib[10] = 55 and fib[7] = 13."
+}
