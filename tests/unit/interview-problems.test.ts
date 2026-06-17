@@ -81,6 +81,13 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(bsearch.some((p) => p.patternTags.includes("search-on-answer"))).toBe(true);
   });
 
+  it("covers the stacks/queues/monotonic group toward the #176 quota (>= 4)", () => {
+    const stacks = getInterviewProblemsByGroup("stacks_queues_monotonic");
+    expect(stacks.length).toBeGreaterThanOrEqual(4);
+    // Includes a monotonic-structure problem, not only plain stack matching.
+    expect(stacks.some((p) => p.patternTags.some((t) => t.startsWith("monotonic")))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);

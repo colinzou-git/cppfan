@@ -320,6 +320,118 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "demands=[5,5,5], m=3", output: "5" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.stack.balanced-delimiters",
+    version: 1,
+    title: "Are the delimiters balanced?",
+    prompt:
+      "A config language uses three delimiter pairs: (), [], and {}. Given a string of those six characters, return whether every opener is closed by the matching closer in the correct nesting order. Solve it in one pass.",
+    group: "stacks_queues_monotonic",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.stacks.basic_stack",
+    secondarySkillIds: [],
+    patternTags: ["stack", "matching", "single-pass"],
+    constraints: "0 <= n <= 2e5; the string contains only the six delimiter characters.",
+    targetComplexity: "O(n) time, O(n) worst-case stack space.",
+    requiredEdgeCases: ["empty string (balanced)", "a lone closer", "correct counts but wrong order like ([)]"],
+    clarifyingQuestions: ["Is an empty string considered balanced?", "Are only the six delimiter characters present?"],
+    hintLadder: [
+      "Push every opener onto a stack.",
+      "On a closer, the stack top must be the matching opener; otherwise it is unbalanced.",
+      "It is balanced only if the stack is empty at the end."
+    ],
+    visibleExamples: [
+      { input: "\"()[]{}\"", output: "true" },
+      { input: "\"([)]\"", output: "false", note: "right counts, wrong nesting" },
+      { input: "\"(]\"", output: "false" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.stack.steps-to-higher-load",
+    version: 1,
+    title: "Steps until a higher load reading",
+    prompt:
+      "Given a list of load readings in time order, return for each reading how many steps forward you must look to find a strictly higher reading, or 0 if none follows. Aim for one linear pass rather than a quadratic scan.",
+    group: "stacks_queues_monotonic",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.stacks.basic_stack",
+    secondarySkillIds: ["dsa.arrays.traversal"],
+    patternTags: ["monotonic-stack", "next-greater"],
+    constraints: "1 <= n <= 2e5; readings fit in a 32-bit integer.",
+    targetComplexity: "O(n) time, O(n) stack space.",
+    requiredEdgeCases: ["strictly increasing (each answer is 1)", "strictly decreasing (all zeros)", "plateaus of equal readings (equal is not strictly higher)"],
+    clarifyingQuestions: ["Is the comparison strict (equal does not count)?", "Should the last element be 0?"],
+    hintLadder: [
+      "Keep a stack of indices whose answer is still unknown.",
+      "When the current reading exceeds the reading at the stack top, you have found that index's next-greater; pop and record the distance.",
+      "Indices left on the stack at the end have no higher reading and stay 0."
+    ],
+    visibleExamples: [
+      { input: "[3,1,4,1,5]", output: "[2,1,2,1,0]", note: "index 0's next-greater (4) is 2 steps away" },
+      { input: "[5,4,3]", output: "[0,0,0]" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.stack.min-stack-design",
+    version: 1,
+    title: "Stack with O(1) minimum",
+    prompt:
+      "Design a stack of integers supporting push, pop, top, and getMin — the smallest value currently on the stack — each in O(1) time. State the invariant that keeps getMin constant-time. Describe the API and how each operation maintains it.",
+    group: "stacks_queues_monotonic",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.stacks.basic_stack",
+    secondarySkillIds: [],
+    patternTags: ["stack", "data-structure-design", "invariant"],
+    constraints: "Up to 2e5 operations; pop/top/getMin are only called on a non-empty stack.",
+    targetComplexity: "O(1) per operation, O(n) space.",
+    requiredEdgeCases: ["getMin after popping the current minimum", "duplicate minima", "single element"],
+    clarifyingQuestions: ["Are pop/top/getMin guaranteed to be called only when non-empty?", "Do duplicate values need to be handled for getMin?"],
+    hintLadder: [
+      "Alongside the value stack, keep a second stack of the minimum-so-far at each level.",
+      "On push, push min(value, current overall min); on pop, pop both stacks together.",
+      "getMin is then the top of the minimum stack — O(1)."
+    ],
+    visibleExamples: [
+      {
+        input: "push 5, push 2, getMin, push 7, getMin, pop, getMin, pop, getMin",
+        output: "2 2 2 5",
+        note: "getMin tracks the live minimum as values come and go"
+      }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.queue.window-peak-load",
+    version: 1,
+    title: "Peak load over each rolling window",
+    prompt:
+      "Given load readings in time order and a window size k, return the maximum reading within each contiguous window of k readings as the window slides one step at a time. Aim for one linear pass overall, not O(n*k).",
+    group: "stacks_queues_monotonic",
+    roleRelevance: "streaming",
+    difficulty: "hard",
+    primarySkillId: "dsa.stacks.basic_stack",
+    secondarySkillIds: ["dsa.techniques.sliding_window"],
+    patternTags: ["monotonic-deque", "sliding-window", "max"],
+    constraints: "1 <= k <= n <= 2e5; readings fit in a 32-bit integer.",
+    targetComplexity: "O(n) time, O(k) deque space.",
+    requiredEdgeCases: ["k = 1 (each reading is its own window)", "k = n (one window)", "strictly decreasing readings"],
+    clarifyingQuestions: ["Is k guaranteed <= n?", "Are windows contiguous and shifted by one each step?"],
+    hintLadder: [
+      "Keep a deque of indices whose readings are candidates for the current window's maximum.",
+      "Before adding index i, pop smaller readings from the back (they can never be the max while i is present), and drop the front if it has slid out of the window.",
+      "The front of the deque is the maximum for each window once the first window is full."
+    ],
+    visibleExamples: [
+      { input: "readings=[1,3,-1,-3,5,3,6,7], k=3", output: "[3,3,5,5,6,7]" },
+      { input: "readings=[4,2,1], k=2", output: "[4,2]" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
