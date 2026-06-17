@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.copy.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3\n4\n5\n",
+  "note": "Copy construction (b = a) and copy assignment (c = a) each make an independent duplicate; modifying a copy leaves the original's size at 3."
+}
