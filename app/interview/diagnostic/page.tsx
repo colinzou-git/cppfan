@@ -1,13 +1,27 @@
 import Link from "next/link";
 import { Gauge } from "lucide-react";
 import { buildDiagnosticView } from "@/features/interview/diagnostic-view";
+import { diagnosticSections } from "@/features/interview/diagnostic";
+import { getDiagnosticScores } from "@/features/interview/diagnostic-store";
+import { DiagnosticForm } from "@/features/interview/diagnostic-form";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Interview diagnostic — cppFan"
 };
 
-export default function DiagnosticPage() {
+export default async function DiagnosticPage() {
   const view = buildDiagnosticView();
+  const initialScores = await getDiagnosticScores();
+
+  let authenticated = false;
+  const supabase = await createClient();
+  if (supabase) {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    authenticated = Boolean(user);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -66,6 +80,14 @@ export default function DiagnosticPage() {
           </article>
         ))}
       </div>
+
+      <section className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm">
+        <DiagnosticForm
+          sections={diagnosticSections.map((s) => ({ id: s.id, title: s.title }))}
+          initialScores={initialScores}
+          authenticated={authenticated}
+        />
+      </section>
     </main>
   );
 }

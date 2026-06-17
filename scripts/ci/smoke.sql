@@ -558,3 +558,27 @@ begin
 
   raise notice 'interview evidence smoke OK';
 end $$;
+
+-- 21) #175/#182 (diagnostic scores): per-learner table with RLS + base grant.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = 'diagnostic_scores'
+  ) then
+    raise exception 'diagnostic_scores table is missing (#175/#182)';
+  end if;
+
+  if not exists (
+    select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relname = 'diagnostic_scores' and c.relrowsecurity
+  ) then
+    raise exception 'diagnostic_scores must have row level security enabled (#175/#182)';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.diagnostic_scores', 'SELECT') then
+    raise exception 'authenticated should SELECT its own diagnostic_scores (#175/#182)';
+  end if;
+
+  raise notice 'diagnostic scores smoke OK';
+end $$;

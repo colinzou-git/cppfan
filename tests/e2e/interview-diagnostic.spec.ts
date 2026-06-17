@@ -19,3 +19,18 @@ test("the interview catalog links to the diagnostic", async ({ page }) => {
   await expect(page).toHaveURL(/\/interview\/diagnostic$/);
   await expect(page.getByTestId("diagnostic-sections")).toBeVisible();
 });
+
+test("rating a baseline area bands it live and saving signed-out prompts a sign-in", async ({ page }) => {
+  await page.goto("/interview/diagnostic");
+
+  const form = page.getByTestId("diagnostic-form");
+  await expect(form).toBeVisible();
+
+  const row = page.getByTestId("diagnostic-section-row").first();
+  await expect(row).toHaveAttribute("data-level", "unrated");
+  await row.getByTestId("diagnostic-rating-select").selectOption("4");
+  await expect(row).toHaveAttribute("data-level", "interview_ready");
+
+  await page.getByTestId("diagnostic-save").click();
+  await expect(page.getByTestId("diagnostic-notice")).toContainText(/sign in/i);
+});
