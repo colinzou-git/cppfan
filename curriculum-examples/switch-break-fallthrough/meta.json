@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.control_flow.switch_statement.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "zero\nsmall\nsmall\nthree-or-four\nbig\n",
+  "note": "switch matches a value against case labels: stacked empty labels (1, 2) share code, [[fallthrough]] marks an intentional fall-through (3 into 4), and default handles the rest."
+}

@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.parameter_passing.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\n3\ncppFan\n",
+  "note": "Small types pass by value (doubled), large read-only inputs by const T& (length), and a non-const T& output parameter (append) writes back to the caller's object."
+}
