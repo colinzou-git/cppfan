@@ -1375,6 +1375,114 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "[0,1,1,0]", output: "4" }
     ],
     externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.twoptr.pair-sum-sorted",
+    version: 1,
+    title: "Target pair in a sorted array",
+    prompt:
+      "Given an array sorted ascending and a target, return the indices of the two distinct positions whose values sum to the target, or [-1,-1] if none. Use the sorted order to avoid a hash map or nested loops.",
+    group: "two_pointers_sliding_window",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.arrays.two_pointers",
+    secondarySkillIds: ["dsa.arrays.indexing"],
+    patternTags: ["two-pointer", "sorted", "converging"],
+    constraints: "0 <= n <= 2e5; array sorted ascending; values and target fit in a 64-bit integer.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["no valid pair ([-1,-1])", "the pair is the two ends", "negative values"],
+    clarifyingQuestions: ["Is the array guaranteed sorted ascending?", "What to return when no pair exists?"],
+    hintLadder: [
+      "Place one pointer at the start and one at the end.",
+      "If the current sum is too small move the left pointer right; if too large move the right pointer left.",
+      "Because the array is sorted, this scans each element at most once."
+    ],
+    visibleExamples: [
+      { input: "a=[1,2,4,7,11], target=15", output: "[2,4]", note: "4 + 11" },
+      { input: "a=[2,3,4], target=10", output: "[-1,-1]" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.twoptr.is-palindrome",
+    version: 1,
+    title: "Palindrome after cleaning",
+    prompt:
+      "Given a string, decide whether it reads the same forward and backward when you ignore case and any non-alphanumeric characters. Return true or false using two converging pointers without building a cleaned copy.",
+    group: "two_pointers_sliding_window",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.arrays.two_pointers",
+    secondarySkillIds: [],
+    patternTags: ["two-pointer", "string", "converging"],
+    constraints: "0 <= length <= 2e5; characters are printable ASCII.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["empty string (true)", "only punctuation (true)", "mixed case and spaces"],
+    clarifyingQuestions: ["Do I ignore case and punctuation?", "Is an empty string a palindrome?"],
+    hintLadder: [
+      "Start a pointer at each end.",
+      "Skip characters that are not alphanumeric, then compare the two in a case-insensitive way.",
+      "If any compared pair differs it is not a palindrome; stop when the pointers cross."
+    ],
+    visibleExamples: [
+      { input: "\"Race car!\"", output: "true", note: "cleans to racecar" },
+      { input: "\"hello\"", output: "false" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.sliding.longest-distinct",
+    version: 1,
+    title: "Longest window with all distinct",
+    prompt:
+      "Given a sequence, return the length of the longest contiguous window in which no element repeats. Grow and shrink a window rather than re-scanning each start.",
+    group: "two_pointers_sliding_window",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.sliding_window",
+    secondarySkillIds: ["dsa.arrays.two_pointers"],
+    patternTags: ["sliding-window", "hash-set", "distinct"],
+    constraints: "0 <= n <= 2e5; elements drawn from a comparable alphabet.",
+    targetComplexity: "O(n) time, O(window) space.",
+    requiredEdgeCases: ["all elements equal (length 1)", "all distinct (length n)", "empty input (0)"],
+    clarifyingQuestions: ["Is the window contiguous?", "Should an empty input return 0?"],
+    hintLadder: [
+      "Expand the right edge, recording the last index of each element.",
+      "When a repeat appears inside the window, move the left edge just past the previous occurrence.",
+      "Track the maximum width while the window stays free of repeats."
+    ],
+    visibleExamples: [
+      { input: "\"abcabcbb\"", output: "3", note: "abc" },
+      { input: "\"bbbb\"", output: "1" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.twoptr.most-water",
+    version: 1,
+    title: "Most water between two lines",
+    prompt:
+      "Given vertical line heights at successive positions, pick two lines so that they and the x-axis hold the most water. The area is the shorter height times the horizontal distance. Return the maximum area.",
+    group: "two_pointers_sliding_window",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "dsa.arrays.two_pointers",
+    secondarySkillIds: [],
+    patternTags: ["two-pointer", "greedy", "converging"],
+    constraints: "2 <= n <= 2e5; 0 <= height[i] <= 1e9; areas may exceed 32 bits.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["two lines only", "all equal heights", "a single tall line that cannot be paired well"],
+    clarifyingQuestions: ["Is the area bounded by the shorter of the two lines?", "Do the lines have zero width?"],
+    hintLadder: [
+      "Start a pointer at each end; the width is largest here.",
+      "The area is limited by the shorter line, so move the pointer at the shorter line inward.",
+      "Moving the taller line in could only lose width without raising the limiting height; track the best area as you converge."
+    ],
+    visibleExamples: [
+      { input: "heights=[1,8,6,2,5,4,8,3,7]", output: "49", note: "lines at index 1 and 8: min(8,7)*7" },
+      { input: "heights=[1,1]", output: "1" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
