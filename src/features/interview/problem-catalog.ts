@@ -1214,6 +1214,167 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "tasks=[A,A,A,B,B,B], n=0", output: "6" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.hash.pair-sums-to-target",
+    version: 1,
+    title: "Two values that hit the target",
+    prompt:
+      "Given an array of integers and a target, return the indices of the two distinct positions whose values sum to the target. Exactly one such pair exists. Solve it in one pass rather than checking every pair.",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.arrays.traversal",
+    secondarySkillIds: ["dsa.arrays.indexing"],
+    patternTags: ["hash-map", "single-pass"],
+    constraints: "2 <= n <= 2e5; exactly one valid pair; values and target fit in a 64-bit integer.",
+    targetComplexity: "O(n) time, O(n) space.",
+    requiredEdgeCases: ["the pair includes the first element", "negative values", "two equal values forming the pair"],
+    clarifyingQuestions: ["Is exactly one pair guaranteed?", "May the same index be used twice (no)?"],
+    hintLadder: [
+      "As you scan, remember each value's index in a hash map.",
+      "For the current value v, check whether target - v was already seen.",
+      "If so, return that stored index and the current index."
+    ],
+    visibleExamples: [
+      { input: "nums=[2,7,11,15], target=9", output: "[0,1]" },
+      { input: "nums=[3,2,4], target=6", output: "[1,2]" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.hash.most-frequent",
+    version: 1,
+    title: "Most frequent value",
+    prompt:
+      "Given an array of integers, return the value that occurs most often; if several tie for the highest count, return the smallest such value. One pass to count, then pick the winner.",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.arrays.traversal",
+    secondarySkillIds: ["dsa.sorting.comparator"],
+    patternTags: ["hash-map", "counting", "tie-break"],
+    constraints: "1 <= n <= 2e5; values fit in a 32-bit integer.",
+    targetComplexity: "O(n) time, O(distinct) space.",
+    requiredEdgeCases: ["all values distinct (smallest wins on a 1-1 tie)", "a single dominant value", "a tie broken by smaller value"],
+    clarifyingQuestions: ["How are count ties broken?", "Can the array contain negatives?"],
+    hintLadder: [
+      "Build a value -> count map in one pass.",
+      "Scan the map tracking the best (highest count, then smallest value).",
+      "Return that value."
+    ],
+    visibleExamples: [
+      { input: "[1,3,3,2,3,2]", output: "3" },
+      { input: "[4,4,5,5]", output: "4", note: "tie on count -> smaller value" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.prefix.range-sum-queries",
+    version: 1,
+    title: "Answer many range-sum queries",
+    prompt:
+      "Given a fixed array and many queries (l, r), return the sum of elements from index l to r inclusive for each query. The array does not change, so precompute once and answer each query in O(1).",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "storage",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.prefix_sums",
+    secondarySkillIds: ["dsa.techniques.range_structures"],
+    patternTags: ["prefix-sum", "range-query"],
+    constraints: "1 <= n <= 2e5; 1 <= queries <= 2e5; 0 <= l <= r < n; sums may exceed 32 bits.",
+    targetComplexity: "O(n) precompute, O(1) per query.",
+    requiredEdgeCases: ["single-element range (l == r)", "the whole array", "sums that overflow 32 bits"],
+    clarifyingQuestions: ["Is the array immutable between queries?", "Are query bounds inclusive?"],
+    hintLadder: [
+      "Build prefix[i] = sum of the first i elements (prefix[0] = 0).",
+      "The sum of [l, r] is prefix[r+1] - prefix[l].",
+      "Use a 64-bit prefix array so large totals do not overflow."
+    ],
+    visibleExamples: [
+      { input: "a=[2,4,1,3], queries=[(0,2),(1,3)]", output: "[7,8]", note: "2+4+1 and 4+1+3" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.prefix.subarrays-sum-k",
+    version: 1,
+    title: "Count subarrays summing to k",
+    prompt:
+      "Given an array of integers (which may be negative) and a target k, return the number of contiguous subarrays whose elements sum to exactly k. Aim for one pass rather than checking every subarray.",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.prefix_sums",
+    secondarySkillIds: ["dsa.arrays.traversal"],
+    patternTags: ["prefix-sum", "hash-map", "counting"],
+    constraints: "1 <= n <= 2e5; values fit in a 32-bit integer; running sums may exceed 32 bits.",
+    targetComplexity: "O(n) time, O(n) space.",
+    requiredEdgeCases: ["negative values", "k = 0", "overlapping qualifying subarrays"],
+    clarifyingQuestions: ["Can values be negative (so the window is not monotonic)?", "Do overlapping subarrays each count?"],
+    hintLadder: [
+      "Track the running prefix sum and a map from prefix value to how many times it has occurred.",
+      "A subarray ending here sums to k exactly when a prior prefix equals current - k.",
+      "Add the count of that prior prefix, then record the current prefix; start the map with prefix 0 seen once."
+    ],
+    visibleExamples: [
+      { input: "nums=[1,1,1], k=2", output: "2" },
+      { input: "nums=[1,2,3], k=3", output: "2", note: "[1,2] and [3]" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.hash.longest-consecutive-run",
+    version: 1,
+    title: "Longest run of consecutive integers",
+    prompt:
+      "Given an unsorted array of integers, return the length of the longest set of consecutive integers present (order in the array does not matter). Aim for linear time using a hash set rather than sorting.",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.arrays.traversal",
+    secondarySkillIds: ["dsa.strings.hashing"],
+    patternTags: ["hash-set", "sequence"],
+    constraints: "0 <= n <= 2e5; values fit in a 32-bit integer; duplicates may appear.",
+    targetComplexity: "O(n) time, O(n) space.",
+    requiredEdgeCases: ["empty array (0)", "duplicates", "negative values bridging a run"],
+    clarifyingQuestions: ["Does the run need to be contiguous in the array or just present?", "Do duplicates affect the length?"],
+    hintLadder: [
+      "Put all values in a hash set for O(1) membership.",
+      "Only start counting a run at a value whose predecessor (v - 1) is absent — that is a run's left end.",
+      "Extend rightward while v + 1 is present, tracking the longest run."
+    ],
+    visibleExamples: [
+      { input: "[100,4,200,1,3,2]", output: "4", note: "1,2,3,4" },
+      { input: "[0,0,-1]", output: "2", note: "-1,0" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.prefix.longest-equal-binary",
+    version: 1,
+    title: "Longest balanced 0/1 stretch",
+    prompt:
+      "Given an array of 0s and 1s, return the length of the longest contiguous subarray containing equal numbers of 0s and 1s. Map 0 to -1 and use prefix sums so a balanced stretch is one where a prefix value repeats.",
+    group: "arrays_hashing_prefix",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.prefix_sums",
+    secondarySkillIds: ["dsa.arrays.traversal"],
+    patternTags: ["prefix-sum", "hash-map", "balance"],
+    constraints: "0 <= n <= 2e5; elements are 0 or 1.",
+    targetComplexity: "O(n) time, O(n) space.",
+    requiredEdgeCases: ["no balanced stretch (0)", "the whole array balanced", "ties in length"],
+    clarifyingQuestions: ["Are elements strictly 0 or 1?", "Is a length-0 answer acceptable when none balances?"],
+    hintLadder: [
+      "Treat 0 as -1; then a balanced subarray is one whose elements sum to 0.",
+      "A zero-sum subarray ends here when the current prefix equals a prefix seen earlier.",
+      "Store the first index each prefix value appears; the distance to a later repeat is a balanced length."
+    ],
+    visibleExamples: [
+      { input: "[0,1]", output: "2" },
+      { input: "[0,1,1,0]", output: "4" }
+    ],
+    externalLinks: [CPALGO]
   }
 ];
 
