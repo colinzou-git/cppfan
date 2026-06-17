@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.utilities.variant.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "even 4\nnone\nhi\nint 42\n",
+  "note": "std::optional models a maybe-present value with value_or; std::variant holds one alternative at a time, read safely via std::visit and std::get_if."
+}
