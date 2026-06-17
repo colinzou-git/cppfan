@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.algorithms.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "1 2 3 4 \n10\n",
+  "note": "std::sort sorts the range in place; std::accumulate sums it — prefer these over hand-written loops."
+}

@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.smart_pointers.unique_ptr.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "5\n1\n5\n",
+  "note": "make_unique creates the owner; std::move transfers ownership, leaving the source null (prints 1)."
+}
