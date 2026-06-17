@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.references.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "8\n9\n",
+  "note": "A reference is an alias for an existing object; assigning through the alias changes the original, and a reference parameter (inc) modifies the caller's variable in place."
+}
