@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.substring_subsequence.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "15\nsubstring\nsubsequence\nnot substring\n",
+  "note": "\"abcde\" has n(n+1)/2 = 15 substrings; \"bcd\" is a contiguous substring while \"ace\" is a subsequence (order-preserving, gapped) but not a substring."
+}

@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.searching.binary_search.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "found\nmissing\n7\n3\n",
+  "note": "On sorted input std::binary_search reports presence (7 found, 8 missing) and std::lower_bound returns the first element >= 6, which is 7 at index 3."
+}
