@@ -110,6 +110,13 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(trees.some((p) => p.patternTags.includes("tree"))).toBe(true);
   });
 
+  it("covers the linked-list/cache group toward the #176 quota (>= 4)", () => {
+    const linked = getInterviewProblemsByGroup("linked_cache");
+    expect(linked.length).toBeGreaterThanOrEqual(4);
+    // Includes a cache-design problem, not only list manipulation.
+    expect(linked.some((p) => p.patternTags.includes("cache"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
