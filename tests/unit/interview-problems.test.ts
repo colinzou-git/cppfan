@@ -126,6 +126,14 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(graphs.some((p) => p.patternTags.includes("mst"))).toBe(true);
   });
 
+  it("covers the heaps/top-k/streaming group toward the #176 quota (>= 6)", () => {
+    const heaps = getInterviewProblemsByGroup("heaps_topk_streaming");
+    expect(heaps.length).toBeGreaterThanOrEqual(6);
+    // Spans top-k selection and a two-heaps streaming statistic.
+    expect(heaps.some((p) => p.patternTags.includes("top-k"))).toBe(true);
+    expect(heaps.some((p) => p.patternTags.includes("two-heaps"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
