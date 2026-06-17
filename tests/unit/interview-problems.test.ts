@@ -156,6 +156,21 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(intervals.some((p) => p.patternTags.includes("sweep-line"))).toBe(true);
   });
 
+  it("covers the C++ implementation/debugging group toward the #176 quota (>= 3)", () => {
+    const cpp = getInterviewProblemsByGroup("cpp_implementation");
+    expect(cpp.length).toBeGreaterThanOrEqual(3);
+    // Each is a C++-specific reasoning task (tags like "cpp" or "cpp-design").
+    expect(cpp.every((p) => p.patternTags.some((t) => t.startsWith("cpp")))).toBe(true);
+    expect(cpp.some((p) => p.patternTags.includes("debugging"))).toBe(true);
+  });
+
+  it("meets the #176 required first catalog: >= 60 problems across all 12 groups", () => {
+    expect(interviewProblems.length).toBeGreaterThanOrEqual(60);
+    expect(new Set(interviewProblems.map((p) => p.group)).size).toBe(12);
+    // >= 20 systems-flavored problems (roleRelevance other than "general").
+    expect(interviewProblems.filter((p) => p.roleRelevance !== "general").length).toBeGreaterThanOrEqual(20);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
