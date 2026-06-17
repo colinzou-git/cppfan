@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.stream_insertion.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "(3, 4)\n",
+  "note": "Non-member operator<< taking the stream by reference and the value by const&, returning the stream so calls chain."
+}
