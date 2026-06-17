@@ -117,6 +117,15 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(linked.some((p) => p.patternTags.includes("cache"))).toBe(true);
   });
 
+  it("covers the graphs/paths group toward the #176 quota (>= 8)", () => {
+    const graphs = getInterviewProblemsByGroup("graphs_paths");
+    expect(graphs.length).toBeGreaterThanOrEqual(8);
+    // Spans traversal, shortest-path, and MST patterns.
+    expect(graphs.some((p) => p.patternTags.includes("bfs"))).toBe(true);
+    expect(graphs.some((p) => p.patternTags.includes("shortest-path"))).toBe(true);
+    expect(graphs.some((p) => p.patternTags.includes("mst"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
