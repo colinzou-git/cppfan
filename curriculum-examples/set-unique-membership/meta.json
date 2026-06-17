@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.set.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "1 2 3 \nsize 3\nhas 2\nno 2\n",
+  "note": "std::set keeps unique elements sorted (a duplicate insert is ignored); contains() tests membership and erase() removes."
+}
