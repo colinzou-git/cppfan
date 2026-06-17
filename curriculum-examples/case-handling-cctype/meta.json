@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.case_handling.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "hello\nsame\ndigit\nalpha\n",
+  "note": "<cctype> tolower/isdigit/isalpha must receive static_cast<unsigned char>(c); folding both sides to lower case gives a case-insensitive comparison."
+}

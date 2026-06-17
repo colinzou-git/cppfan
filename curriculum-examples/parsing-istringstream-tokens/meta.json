@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.parsing.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "words: 4\nsum: 60\nred\ngreen\nblue\n",
+  "note": "std::istringstream with >> reads whitespace-separated tokens and converts numbers; std::getline(stream, token, ',') splits on a comma delimiter."
+}
