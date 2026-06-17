@@ -24,6 +24,14 @@ describe("mock pack catalog integrity (#182)", () => {
     }
   });
 
+  it("meets the #182 first library: >= 12 packs with the required category distribution", () => {
+    expect(mockPacks.length).toBeGreaterThanOrEqual(12);
+    const byCategory = (c: string) => mockPacks.filter((p) => p.category === c).length;
+    expect(byCategory("core_algorithm")).toBeGreaterThanOrEqual(8);
+    expect(byCategory("ds_implementation")).toBeGreaterThanOrEqual(2);
+    expect(byCategory("cpp_debugging")).toBeGreaterThanOrEqual(2);
+  });
+
   it("reserves a calibration pool that ordinary practice cannot select", () => {
     const practice = new Set(getPracticeMockPacks().map((p) => p.id));
     const calibration = getCalibrationMockPacks();

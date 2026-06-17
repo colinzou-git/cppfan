@@ -728,6 +728,40 @@ export const followUps: FollowUp[] = [
     timeBudgetMinutes: 9,
     revealPolicy: "after_attempt",
     explanation: "An ordered map of disjoint intervals lets each insert merge only the overlapping neighbors, avoiding a full re-sort."
+  },
+  {
+    id: "fu.dangling-reference.make-reusable",
+    version: 1,
+    problemId: "iv.cpp.dangling-reference",
+    parentVersion: 1,
+    kind: "make_reusable_testable",
+    trigger: "after_remediation",
+    timing: "after_acceptance",
+    priority: 1,
+    prompt: "After fixing it to return by value, justify that this is cheap (copy elision / move) and write a test that would have caught the original dangling read.",
+    affectedConstraints: "The fix must be packaged with a regression test, and you must argue it is not a performance regression.",
+    expectedReasoningShift: "Explain RVO/move semantics make return-by-value cheap, and add a test asserting the returned label is correct after the call returns.",
+    targetRubricDimensions: ["testing", "cpp_implementation"],
+    timeBudgetMinutes: 7,
+    revealPolicy: "after_attempt",
+    explanation: "Return-by-value is elided/moved (no real copy); a test that reads the result after the call would have exposed the dangling reference."
+  },
+  {
+    id: "fu.missing-virtual-destructor.make-reusable",
+    version: 1,
+    problemId: "iv.cpp.missing-virtual-destructor",
+    parentVersion: 1,
+    kind: "make_reusable_testable",
+    trigger: "after_remediation",
+    timing: "after_acceptance",
+    priority: 1,
+    prompt: "Convert the factory to return std::unique_ptr<Base> and add a test that proves the Derived destructor runs (e.g. instrument it with a counter).",
+    affectedConstraints: "Ownership must be explicit and the fix verified by a test, not by inspection.",
+    expectedReasoningShift: "Use unique_ptr<Base> (with a virtual ~Base) so destruction is automatic and correct; a destructor-counter test proves Derived cleanup happens.",
+    targetRubricDimensions: ["testing", "cpp_implementation"],
+    timeBudgetMinutes: 8,
+    revealPolicy: "after_attempt",
+    explanation: "unique_ptr<Base> with a virtual base destructor destroys the Derived correctly; a counter incremented in ~Derived asserts it ran."
   }
 ];
 

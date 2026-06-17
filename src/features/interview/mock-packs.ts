@@ -71,6 +71,94 @@ export const mockPacks: MockPack[] = [
     followUpIds: ["fu.intervals.witness"],
     patternCoverage: ["intervals_sweepline"],
     calibrationReserved: true
+  },
+  {
+    id: "pack.core.threshold-rate",
+    version: 1,
+    title: "Tune a rate to meet a deadline",
+    category: "core_algorithm",
+    durationMinutes: 45,
+    problemIds: ["iv.bsearch.min-rate-before-deadline"],
+    followUpIds: ["fu.min-rate.stricter-target"],
+    patternCoverage: ["binary_search"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.k-closest-stream",
+    version: 1,
+    title: "Closest signals under load",
+    category: "core_algorithm",
+    durationMinutes: 45,
+    problemIds: ["iv.heap.k-closest-points"],
+    followUpIds: ["fu.k-closest.stream"],
+    patternCoverage: ["heaps_topk_streaming"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.tree-aggregate",
+    version: 1,
+    title: "Aggregate over a tree",
+    category: "core_algorithm",
+    durationMinutes: 45,
+    problemIds: ["iv.tree.diameter"],
+    followUpIds: ["fu.tree-diameter.return-witness"],
+    patternCoverage: ["trees_bst"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.cheapest-route",
+    version: 1,
+    title: "Cheapest route across links",
+    category: "core_algorithm",
+    durationMinutes: 50,
+    problemIds: ["iv.graph.cheapest-route"],
+    followUpIds: ["fu.cheapest-route.compare-approaches"],
+    patternCoverage: ["graphs_paths"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.coin-planning",
+    version: 1,
+    title: "Plan the fewest units",
+    category: "core_algorithm",
+    durationMinutes: 45,
+    problemIds: ["iv.dp.fewest-coins"],
+    followUpIds: ["fu.fewest-coins.return-witness"],
+    patternCoverage: ["dp_backtracking"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.ds.lru-cache",
+    version: 1,
+    title: "Bounded LRU cache design",
+    category: "ds_implementation",
+    durationMinutes: 50,
+    problemIds: ["iv.cache.lru-design"],
+    followUpIds: ["fu.lru.thread-safety"],
+    patternCoverage: ["linked_cache"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.cpp.iterator-invalidation",
+    version: 1,
+    title: "Debug an iterator-invalidation crash",
+    category: "cpp_debugging",
+    durationMinutes: 45,
+    problemIds: ["iv.cpp.iterator-invalidation"],
+    followUpIds: ["fu.iterator-invalidation.make-reusable"],
+    patternCoverage: ["cpp_implementation"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.cpp.ownership-lifetime",
+    version: 1,
+    title: "Fix ownership and lifetime bugs",
+    category: "cpp_debugging",
+    durationMinutes: 50,
+    problemIds: ["iv.cpp.dangling-reference", "iv.cpp.missing-virtual-destructor"],
+    followUpIds: ["fu.dangling-reference.make-reusable", "fu.missing-virtual-destructor.make-reusable"],
+    patternCoverage: ["cpp_implementation"],
+    calibrationReserved: false
   }
 ];
 
