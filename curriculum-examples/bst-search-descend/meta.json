@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.bst_search.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "found\nmissing\nfound\n",
+  "note": "BST search compares the target to each node and descends left/right in O(h): 40 and 70 are present, 65 is absent."
+}
