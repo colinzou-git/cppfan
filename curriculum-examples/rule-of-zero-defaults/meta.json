@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.rule_of_zero_five.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "alice 3\nbob 4\n",
+  "note": "Rule of Zero: Account's std::string/std::vector members self-manage, so the compiler-generated copy is a correct deep copy and no special members are needed."
+}
