@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.values_types.fundamental_types.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\nnot equal\nready\nA\n",
+  "note": "int is exact, double is approximate so 0.1 + 0.2 == 0.3 is false, bool models a flag, and char holds one character — pick the type by range and intent."
+}

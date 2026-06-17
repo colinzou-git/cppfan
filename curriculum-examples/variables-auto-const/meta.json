@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.values_types.variables.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "107\n3.14\n",
+  "note": "Variables are initialized on declaration; auto deduces the type from the initializer, const marks an unchangeable value, and constexpr a compile-time constant."
+}
