@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.oop.abstract_interfaces.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "9\n10\n19\n",
+  "note": "Shape is abstract via a pure virtual area() = 0; Square and Rectangle override it, and code iterates over the interface (areas 9 and 10, total 19)."
+}
