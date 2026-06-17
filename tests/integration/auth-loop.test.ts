@@ -429,6 +429,21 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("persists baseline diagnostic scores per-user and isolates them (#175/#182)", async () => {
+    const row = { user_id: aId, section_id: "diag.arrays_window", score: 0.75 };
+    const ins = await clientA.from("diagnostic_scores").upsert(row, { onConflict: "user_id,section_id" });
+    expect(ins.error).toBeNull();
+
+    const mine = await clientA.from("diagnostic_scores").select("section_id,score").eq("user_id", aId);
+    expect(mine.error).toBeNull();
+    expect((mine.data ?? []).find((r) => r.section_id === "diag.arrays_window")?.score).toBe(0.75);
+
+    const asB = await clientB.from("diagnostic_scores").select("section_id").eq("user_id", aId);
+    expect((asB.data ?? []).length).toBe(0);
+    const asAnon = await anon.from("diagnostic_scores").select("section_id");
+    expect((asAnon.data ?? []).length).toBe(0);
+  });
+
   it("denies forged cross-user and anonymous writes across every learner-writable table (#96)", async () => {
     // A row legitimately owned by A for each learner-writable per-user table, plus a
     // benign patch. Forging A's user_id from B (or anon) must be denied by RLS
@@ -472,6 +487,11 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
         table: "rubric_scores",
         row: { user_id: aId, criterion: "correctness", source: "self", score: 3 },
         patch: { score: 1 }
+      },
+      {
+        table: "diagnostic_scores",
+        row: { user_id: aId, section_id: "diag.arrays_window", score: 0.5 },
+        patch: { score: 0.9 }
       },
       {
         table: "interview_evidence",
