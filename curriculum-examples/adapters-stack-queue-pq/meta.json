@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.adapters.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "stack 3\nqueue 1\npq 5 2 1\n",
+  "note": "stack is LIFO (top returns the last pushed), queue is FIFO (front returns the first pushed), priority_queue pops the largest element first."
+}

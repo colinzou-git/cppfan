@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.utilities.tuples.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3 2\n1 2.5 x\n",
+  "note": "std::pair/std::tuple group a fixed number of values for multiple return values; structured bindings (auto [a, b] = ...) unpack them into named variables."
+}
