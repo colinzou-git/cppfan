@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.strings.palindrome.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "yes\nno\nyes\n",
+  "note": "A two-pointer scan from both ends inward checks for a palindrome in O(n) time and O(1) extra space."
+}
