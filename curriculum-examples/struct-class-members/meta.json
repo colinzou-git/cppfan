@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.structs_classes.syntax.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3,4\n7\n3\n",
+  "note": "A Point struct groups fields (x, y) with a member function (manhattan); each instance carries its own field values."
+}
