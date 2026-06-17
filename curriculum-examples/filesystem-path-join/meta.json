@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.utilities.file_io.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "logs/app.txt\n",
+  "note": "Join a directory and filename with std::filesystem::path operator/; generic_string() normalizes the separator to '/' so the output is portable."
+}
