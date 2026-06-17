@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.functions.decomposition.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "56\n20\n",
+  "note": "Small single-purpose functions (isEven, square) compose into sumOfEvenSquares; sums of even squares are 56 over 1..6 and 20 over 2..4."
+}
