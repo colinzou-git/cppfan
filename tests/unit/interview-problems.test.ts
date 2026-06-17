@@ -88,6 +88,14 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(stacks.some((p) => p.patternTags.some((t) => t.startsWith("monotonic")))).toBe(true);
   });
 
+  it("covers the dp/backtracking group toward the #176 quota (>= 4)", () => {
+    const dp = getInterviewProblemsByGroup("dp_backtracking");
+    expect(dp.length).toBeGreaterThanOrEqual(4);
+    // Includes both a DP and a backtracking representative.
+    expect(dp.some((p) => p.patternTags.includes("dynamic-programming"))).toBe(true);
+    expect(dp.some((p) => p.patternTags.includes("backtracking"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);

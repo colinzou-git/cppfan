@@ -432,6 +432,114 @@ export const interviewProblems: InterviewProblem[] = [
       { input: "readings=[4,2,1], k=2", output: "[4,2]" }
     ],
     externalLinks: [USACO]
+  },
+  {
+    id: "iv.dp.ways-to-reach-step",
+    version: 1,
+    title: "Ways to reach the top step",
+    prompt:
+      "You climb a staircase of n steps, taking either 1 or 2 steps at a time. Return the number of distinct ordered ways to reach step n. Aim for O(n) time and O(1) extra space.",
+    group: "dp_backtracking",
+    roleRelevance: "general",
+    difficulty: "easy",
+    primarySkillId: "dsa.techniques.dynamic_programming",
+    secondarySkillIds: ["dsa.recursion.base_case"],
+    patternTags: ["dynamic-programming", "1d-dp", "fibonacci-recurrence"],
+    constraints: "0 <= n <= 90; the answer fits in a 64-bit integer for this range.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["n = 0 (one way: take no steps)", "n = 1", "large n where the count overflows 32 bits"],
+    clarifyingQuestions: ["Is reaching n = 0 counted as one way?", "Do 1+2 and 2+1 count as different ways?"],
+    hintLadder: [
+      "The ways to reach step n equal the ways to reach n-1 (then a 1-step) plus the ways to reach n-2 (then a 2-step).",
+      "That is the Fibonacci recurrence; you only need the last two values.",
+      "Iterate from the base cases keeping a rolling pair instead of an array."
+    ],
+    visibleExamples: [
+      { input: "n=4", output: "5", note: "1111, 112, 121, 211, 22" },
+      { input: "n=1", output: "1" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.dp.max-contiguous-flow",
+    version: 1,
+    title: "Largest contiguous net flow",
+    prompt:
+      "Given signed net-flow readings in time order (credits positive, debits negative), return the largest sum of any non-empty contiguous run. A run that dips negative may still be worth keeping if a later surge more than recovers it. Solve it in one pass.",
+    group: "dp_backtracking",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.dynamic_programming",
+    secondarySkillIds: [],
+    patternTags: ["dynamic-programming", "kadane", "running-best"],
+    constraints: "1 <= n <= 2e5; readings fit in a 32-bit integer; the running sum may exceed 32 bits.",
+    targetComplexity: "O(n) time, O(1) extra space.",
+    requiredEdgeCases: ["all readings negative (answer is the largest single reading)", "single reading", "a dip that a later surge recovers"],
+    clarifyingQuestions: ["Must the run be non-empty?", "Can all readings be negative?"],
+    hintLadder: [
+      "Track the best run ending at the current position: either extend the previous run or start fresh at the current reading.",
+      "best_ending = max(reading, best_ending + reading).",
+      "Keep the maximum best_ending seen so far; use a 64-bit accumulator for the sum."
+    ],
+    visibleExamples: [
+      { input: "[-2,1,-3,4,-1,2,1,-5,4]", output: "6", note: "the run [4,-1,2,1]" },
+      { input: "[-3,-1,-2]", output: "-1", note: "all negative -> the largest single reading" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.dp.fewest-coins",
+    version: 1,
+    title: "Fewest coins to make an amount",
+    prompt:
+      "Given coin denominations (each usable any number of times) and a target amount, return the fewest coins that sum exactly to the amount, or -1 if it cannot be made. Aim for O(amount * denominations) time.",
+    group: "dp_backtracking",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "dsa.techniques.dp_design",
+    secondarySkillIds: ["dsa.techniques.dynamic_programming"],
+    patternTags: ["dynamic-programming", "unbounded-knapsack", "min-cost"],
+    constraints: "1 <= denominations <= 50; 1 <= coin value <= 1e4; 0 <= amount <= 1e4.",
+    targetComplexity: "O(amount * denominations) time, O(amount) space.",
+    requiredEdgeCases: ["amount = 0 (zero coins)", "amount that no combination can make (-1)", "a single coin that does not divide the amount"],
+    clarifyingQuestions: ["Can each denomination be used unlimited times?", "Should an impossible amount return -1?"],
+    hintLadder: [
+      "Let best[a] be the fewest coins to make amount a; best[0] = 0.",
+      "For each amount a, try every coin c <= a: best[a] = min(best[a], best[a-c] + 1).",
+      "If best[amount] was never updated from infinity, the amount is impossible -> -1."
+    ],
+    visibleExamples: [
+      { input: "coins=[1,3,4], amount=6", output: "2", note: "3 + 3" },
+      { input: "coins=[2], amount=3", output: "-1" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.backtracking.subset-sum-count",
+    version: 1,
+    title: "How many subsets exactly fill the capacity?",
+    prompt:
+      "Given distinct part sizes and a target capacity, return how many subsets of the parts sum to exactly the capacity (each part used at most once). Enumerate with backtracking and prune branches that overshoot; state how the pruning bounds the search.",
+    group: "dp_backtracking",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "dsa.recursion.base_case",
+    secondarySkillIds: ["dsa.techniques.dynamic_programming"],
+    patternTags: ["backtracking", "subset-sum", "pruning"],
+    constraints: "1 <= parts <= 30; 1 <= size <= 1e6; 0 <= capacity <= 1e9; sizes are distinct.",
+    targetComplexity: "O(2^n) worst case, pruned in practice; sorting enables early cutoff.",
+    requiredEdgeCases: ["capacity = 0 (the empty subset counts as one)", "no subset reaches the capacity (0)", "a single part equal to the capacity"],
+    clarifyingQuestions: ["Is each part usable at most once?", "Does the empty subset count when the capacity is 0?"],
+    hintLadder: [
+      "At each part decide include or exclude, recursing on the remaining parts and remaining capacity.",
+      "Sort the sizes so that once a partial sum would overshoot, you can prune the rest of that branch.",
+      "Count a success each time the remaining capacity reaches exactly 0."
+    ],
+    visibleExamples: [
+      { input: "parts=[2,3,5,7], capacity=7", output: "2", note: "{2,5} and {7}" },
+      { input: "parts=[1,2,3], capacity=3", output: "2", note: "{3} and {1,2}" }
+    ],
+    externalLinks: [CPALGO]
   }
 ];
 
