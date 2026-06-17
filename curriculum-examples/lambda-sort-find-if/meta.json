@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.stl.lambdas.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "9 8 5 3 2 1 \nfirst below 4: 3\n",
+  "note": "A lambda comparator drives std::sort (descending); a capturing lambda predicate drives std::find_if to locate the first element below a threshold."
+}

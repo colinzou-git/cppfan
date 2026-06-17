@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.utilities.enums.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "active\nclosed\nis closed\n",
+  "note": "enum class models a closed set of named states with scoped names and no implicit int conversion; an exhaustive switch maps each state to a label."
+}
