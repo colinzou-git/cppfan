@@ -74,6 +74,13 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(groups.size).toBeGreaterThanOrEqual(4);
   });
 
+  it("covers the binary-search group toward the #176 quota (>= 5)", () => {
+    const bsearch = getInterviewProblemsByGroup("binary_search");
+    expect(bsearch.length).toBeGreaterThanOrEqual(5);
+    // Includes a search-on-answer variant, not only array-index search.
+    expect(bsearch.some((p) => p.patternTags.includes("search-on-answer"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);

@@ -184,6 +184,142 @@ export const interviewProblems: InterviewProblem[] = [
     ],
     visibleExamples: [{ input: "[(1,4),(2,5),(7,9)]", output: "2" }],
     externalLinks: [CSES]
+  },
+  {
+    id: "iv.bsearch.insert-position",
+    version: 1,
+    title: "Where does it belong in the sorted log?",
+    prompt:
+      "You keep timestamps in a sorted ascending array. For a new timestamp t, return the index of the first element that is greater than or equal to t — the position where t would be inserted to keep the array sorted. Solve it in O(log n).",
+    group: "binary_search",
+    roleRelevance: "systems",
+    difficulty: "easy",
+    primarySkillId: "dsa.searching.binary_search",
+    secondarySkillIds: [],
+    patternTags: ["binary-search", "lower-bound"],
+    constraints: "0 <= n <= 2e5; the array is sorted ascending; values may repeat; t fits in a 64-bit integer.",
+    targetComplexity: "O(log n) time, O(1) extra space.",
+    requiredEdgeCases: ["t smaller than every element (index 0)", "t larger than every element (index n)", "duplicates of t (return the first)"],
+    clarifyingQuestions: ["If t equals existing values, do I return the first such index?", "Is an empty array possible?"],
+    hintLadder: [
+      "Keep a half-open search range [lo, hi) over indices, starting at [0, n).",
+      "When the midpoint value is less than t, the answer is to its right; otherwise it could be the midpoint or to its left.",
+      "Converge until lo == hi; that index is the first element >= t (this is std::lower_bound)."
+    ],
+    visibleExamples: [
+      { input: "a=[1,3,5,7], t=4", output: "2" },
+      { input: "a=[1,3,5,7], t=8", output: "4", note: "belongs at the end" },
+      { input: "a=[2,2,2], t=2", output: "0", note: "first index >= t" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.bsearch.rotated-min",
+    version: 1,
+    title: "Smallest id in a rotated ring",
+    prompt:
+      "A sorted ascending array of distinct ids was rotated at an unknown pivot (a ring buffer whose logical start moved). Return the smallest id without scanning every element — O(log n).",
+    group: "binary_search",
+    roleRelevance: "storage",
+    difficulty: "medium",
+    primarySkillId: "dsa.searching.binary_search",
+    secondarySkillIds: [],
+    patternTags: ["binary-search", "rotated-array", "monotonic-half"],
+    constraints: "1 <= n <= 2e5; all ids distinct; the array is a rotation of a sorted ascending array (rotation may be zero).",
+    targetComplexity: "O(log n) time, O(1) extra space.",
+    requiredEdgeCases: ["no rotation (already sorted)", "single element", "pivot at the last position"],
+    clarifyingQuestions: ["Are the ids guaranteed distinct?", "Could the rotation amount be zero?"],
+    hintLadder: [
+      "Compare the midpoint to the rightmost element to decide which half holds the wrap-around.",
+      "If a[mid] > a[hi], the minimum is strictly to the right of mid; otherwise it is at mid or to its left.",
+      "Shrink the range accordingly until it holds one element — the minimum."
+    ],
+    visibleExamples: [
+      { input: "[4,5,6,7,0,1,2]", output: "0" },
+      { input: "[11,13,15,17]", output: "11", note: "rotation is zero" }
+    ],
+    externalLinks: [CPALGO]
+  },
+  {
+    id: "iv.bsearch.peak-index",
+    version: 1,
+    title: "Find any local peak",
+    prompt:
+      "Given an array where no two adjacent elements are equal, return the index of any peak — an element strictly greater than its neighbors (the two ends each have a single neighbor). A monitoring trace where you want any local maximum is the motivating case. Solve it in O(log n).",
+    group: "binary_search",
+    roleRelevance: "streaming",
+    difficulty: "medium",
+    primarySkillId: "dsa.searching.binary_search",
+    secondarySkillIds: [],
+    patternTags: ["binary-search", "peak", "slope"],
+    constraints: "1 <= n <= 2e5; no two adjacent elements are equal; treat out-of-bounds neighbors as negative infinity.",
+    targetComplexity: "O(log n) time, O(1) extra space.",
+    requiredEdgeCases: ["single element (it is a peak)", "strictly increasing (peak at the end)", "strictly decreasing (peak at the start)"],
+    clarifyingQuestions: ["Is it guaranteed that adjacent elements differ?", "May I return any peak when several exist?"],
+    hintLadder: [
+      "At a midpoint, compare it to its right neighbor to learn which way the slope rises.",
+      "If the right neighbor is larger, a peak must exist to the right; otherwise mid itself is a peak or one lies to the left.",
+      "Move toward the rising side until the range collapses to a single index."
+    ],
+    visibleExamples: [
+      { input: "[1,3,2]", output: "1" },
+      { input: "[1,2,3,1]", output: "2" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.bsearch.min-rate-before-deadline",
+    version: 1,
+    title: "Slowest rate that still meets the deadline",
+    prompt:
+      "You must drain q work queues with sizes[i] items each. You pick one integer processing rate r (items per hour); queue i then takes ceil(sizes[i] / r) hours, and the queues are processed back to back. Return the smallest r for which the total hours is at most H. The total time only decreases as r increases, so the feasibility is monotonic.",
+    group: "binary_search",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "dsa.searching.binary_search",
+    secondarySkillIds: [],
+    patternTags: ["binary-search", "search-on-answer", "monotonic-predicate"],
+    constraints: "1 <= q <= 2e5; 1 <= sizes[i] <= 1e9; q <= H <= 1e12; a feasible r always exists.",
+    targetComplexity: "O(q log(max size)) time, O(1) extra space.",
+    requiredEdgeCases: ["H equals q (need the largest size as the rate)", "one queue dominates", "very large sizes (use 64-bit for the hour total)"],
+    clarifyingQuestions: ["Is the rate required to be an integer?", "Is a feasible rate guaranteed to exist within H?"],
+    hintLadder: [
+      "Binary search on the answer r, not on an index: the candidate range is 1..max(sizes).",
+      "For a candidate r, sum ceil(sizes[i]/r) and compare to H — this feasibility test is monotonic in r.",
+      "Find the smallest feasible r by shrinking toward the boundary between infeasible and feasible."
+    ],
+    visibleExamples: [
+      { input: "sizes=[4,5,9], H=6", output: "4", note: "r=4 -> 1+2+3=6 hours; r=3 -> 2+2+3=7 > 6" },
+      { input: "sizes=[10], H=2", output: "5", note: "ceil(10/5)=2" }
+    ],
+    externalLinks: [USACO]
+  },
+  {
+    id: "iv.bsearch.balance-link-load",
+    version: 1,
+    title: "Balance load across links",
+    prompt:
+      "Given non-negative throughput demands in arrival order and m links, split the demands into m contiguous groups (you may not reorder them) and assign each group to a link. Return the smallest possible value of the largest group sum — the best worst-case link load. Larger allowed loads are easier to satisfy, so feasibility is monotonic in the cap.",
+    group: "binary_search",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "dsa.searching.binary_search",
+    secondarySkillIds: ["dsa.techniques.greedy"],
+    patternTags: ["binary-search", "search-on-answer", "partition", "greedy-check"],
+    constraints: "1 <= m <= n <= 2e5; 0 <= demand[i] <= 1e9; the total can exceed 32 bits.",
+    targetComplexity: "O(n log(sum)) time, O(1) extra space.",
+    requiredEdgeCases: ["m == n (each demand its own group)", "m == 1 (one group is the whole array)", "a single demand larger than the average group"],
+    clarifyingQuestions: ["Must groups be contiguous (no reordering)?", "Can a demand be zero?"],
+    hintLadder: [
+      "Binary search the answer: the cap ranges from max(demand) up to sum(demand).",
+      "For a candidate cap, greedily fill a group until adding the next demand would exceed the cap, then start a new group; count the groups needed.",
+      "The cap is feasible when the greedy needs at most m groups; find the smallest feasible cap."
+    ],
+    visibleExamples: [
+      { input: "demands=[2,3,1,2,4,3], m=3", output: "6", note: "[2,3,1] | [2,4] | [3] -> max 6" },
+      { input: "demands=[5,5,5], m=3", output: "5" }
+    ],
+    externalLinks: [USACO]
   }
 ];
 
