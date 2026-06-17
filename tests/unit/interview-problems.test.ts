@@ -142,6 +142,13 @@ describe("interview problem catalog integrity (#176)", () => {
     expect(arrays.some((p) => p.patternTags.includes("prefix-sum"))).toBe(true);
   });
 
+  it("covers the two-pointers/sliding-window group toward the #176 quota (>= 5)", () => {
+    const tp = getInterviewProblemsByGroup("two_pointers_sliding_window");
+    expect(tp.length).toBeGreaterThanOrEqual(5);
+    expect(tp.some((p) => p.patternTags.includes("two-pointer"))).toBe(true);
+    expect(tp.some((p) => p.patternTags.includes("sliding-window"))).toBe(true);
+  });
+
   it("accessors resolve by id and group", () => {
     const sample = interviewProblems[0];
     expect(getInterviewProblem(sample.id)?.title).toBe(sample.title);
