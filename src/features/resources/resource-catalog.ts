@@ -74,6 +74,38 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "cpp-core-guidelines-rule-of-zero",
+    name: "C++ Core Guidelines: default operations",
+    url: "https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-zero",
+    kind: "guidelines",
+    description: "Guidance to avoid defining copy, move, and destructor operations when members can manage themselves.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-rule-of-three",
+    name: "cppreference: rule of three/five/zero",
+    url: "https://en.cppreference.com/w/cpp/language/rule_of_three",
+    kind: "reference",
+    description: "Reference for special-member ownership rules, including Rule of Zero and Rule of Five.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-copy-assignment",
+    name: "cppreference: copy assignment",
+    url: "https://en.cppreference.com/w/cpp/language/as_operator",
+    kind: "reference",
+    description: "Reference for copy-assignment generation and overload behavior.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-explicit",
+    name: "cppreference: explicit",
+    url: "https://en.cppreference.com/w/cpp/language/explicit",
+    kind: "reference",
+    description: "Reference for explicit constructors and conversion functions.",
+    tags: ["cpp"]
+  },
+  {
     id: "cppreference-optional",
     name: "cppreference: std::optional",
     url: "https://en.cppreference.com/w/cpp/utility/optional",

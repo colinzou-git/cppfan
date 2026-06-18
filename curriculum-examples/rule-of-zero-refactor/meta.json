@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.rule_of_zero_five.bug_refactor_zero",
+  "kind": "positive",
+  "standard": "c++17",
+  "expectedOutput": "3 2\n3 20\n",
+  "note": "A vector member replaces manual new/delete, so default copy and move behavior is correct without custom special members."
+}

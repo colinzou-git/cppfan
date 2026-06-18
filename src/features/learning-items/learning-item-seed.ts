@@ -1268,6 +1268,58 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.value_semantics.rule_of_zero_five.bug_refactor_zero",
+    type: "bug_spotting",
+    title: "Refactor manual ownership to Rule of Zero",
+    prompt:
+      "This class owns a dynamic array manually:\n\n```cpp\nclass Scores {\n  int* data_;\n  std::size_t size_;\npublic:\n  Scores(std::size_t n) : data_(new int[n]{}), size_(n) {}\n  ~Scores() { delete[] data_; }\n  // copy/move members omitted\n};\n```\n\nWhat is the safest modern refactor if `Scores` should copy like a normal value?",
+    explanation:
+      "Store `std::vector<int> data_;` instead of a raw owning pointer and remove the custom destructor/copy/move members. Then the compiler-generated special members copy and move the vector correctly, which is the Rule of Zero.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 3570,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.special_members.bug_missing_assignment",
+    type: "bug_spotting",
+    title: "Missing copy assignment",
+    prompt:
+      "A class owns a raw pointer, defines a destructor and a deep-copy constructor, but does not define `operator=`:\n\n```cpp\nclass Buffer {\n  int* p_;\npublic:\n  Buffer(int v) : p_(new int(v)) {}\n  ~Buffer() { delete p_; }\n  Buffer(const Buffer& other) : p_(new int(*other.p_)) {}\n};\n\nBuffer a(1);\nBuffer b(2);\nb = a;\n```\n\nWhat is the defect?",
+    explanation:
+      "`b = a;` uses the compiler-generated copy assignment operator, which copies the pointer value shallowly. Now `a` and `b` both own the same int and both destructors delete it. If a class manually owns a resource and defines a destructor/copy constructor, it must also define copy assignment (Rule of Three/Five), or better refactor to Rule of Zero.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 3580,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.special_members.code_state_trace",
+    type: "code_reading",
+    title: "Trace ownership after copy and move",
+    prompt:
+      "Read this snippet:\n\n```cpp\nauto first = std::make_unique<int>(7);\nauto second = std::move(first);\nauto third = std::make_unique<int>(*second);\n*third = 9;\n```\n\nWhich object owns `7`, what is guaranteed about `first`, and what value does `third` own?",
+    explanation:
+      "`second` owns the original int with value 7. After moving from a `std::unique_ptr`, `first` is guaranteed to be empty/null and can be destroyed or assigned to. `third` owns a separate copied int, then changes its own value to 9; it does not modify `second`.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3590,
+    is_active: true
+  },
+  {
+    id: "cpp.value_semantics.operators.bug_implicit_conversion",
+    type: "bug_spotting",
+    title: "Spot the implicit conversion",
+    prompt:
+      "```cpp\nstruct Money {\n  Money(int cents) : cents(cents) {}\n  int cents;\n};\n\nvoid charge(Money amount);\ncharge(5); // compiles\n```\n\nWhy can `charge(5)` compile, and what design change prevents the surprise?",
+    explanation:
+      "A single-argument constructor is a converting constructor unless it is marked `explicit`, so the int `5` is implicitly converted to `Money`. Write `explicit Money(int cents)` so callers must spell `charge(Money{5})`, making the API intent clear.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3600,
+    is_active: true
+  },
+  {
     id: "cpp.raii.resource_lifetime.lesson",
     type: "lesson",
     title: "RAII: tie a resource to an object",
@@ -5407,6 +5459,13 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.value_semantics.deep_copy.bug_double_free", skill_id: "cpp.value_semantics.deep_copy", is_primary: true },
   { learning_item_id: "cpp.value_semantics.stream_insertion.lesson", skill_id: "cpp.value_semantics.stream_insertion", is_primary: true },
   { learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", skill_id: "cpp.value_semantics.stream_insertion", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.rule_of_zero_five.bug_refactor_zero", skill_id: "cpp.value_semantics.rule_of_zero_five", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.rule_of_zero_five.bug_refactor_zero", skill_id: "cpp.value_semantics.deep_copy", is_primary: false },
+  { learning_item_id: "cpp.value_semantics.special_members.bug_missing_assignment", skill_id: "cpp.value_semantics.special_members", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.special_members.bug_missing_assignment", skill_id: "cpp.value_semantics.deep_copy", is_primary: false },
+  { learning_item_id: "cpp.value_semantics.special_members.code_state_trace", skill_id: "cpp.value_semantics.special_members", is_primary: true },
+  { learning_item_id: "cpp.value_semantics.special_members.code_state_trace", skill_id: "cpp.value_semantics.move", is_primary: false },
+  { learning_item_id: "cpp.value_semantics.operators.bug_implicit_conversion", skill_id: "cpp.value_semantics.operators", is_primary: true },
   { learning_item_id: "cpp.value_semantics.move.lesson", skill_id: "cpp.smart_pointers.ownership_transfer", is_primary: false },
   { learning_item_id: "cpp.raii.resource_lifetime.lesson", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
   { learning_item_id: "cpp.raii.resource_lifetime.mc_ties", skill_id: "cpp.raii.resource_lifetime", is_primary: true },
@@ -5959,6 +6018,10 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.value_semantics.stream_insertion.mc_signature.b", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "void Point::operator<<(std::ostream& os)", is_correct: false, order_index: 20 },
   { id: "cpp.value_semantics.stream_insertion.mc_signature.c", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "std::ostream operator<<(Point p, std::ostream os)", is_correct: false, order_index: 30 },
   { id: "cpp.value_semantics.stream_insertion.mc_signature.d", learning_item_id: "cpp.value_semantics.stream_insertion.mc_signature", content: "Point operator<<(const Point& p)", is_correct: false, order_index: 40 },
+  { id: "cpp.value_semantics.operators.bug_implicit_conversion.a", learning_item_id: "cpp.value_semantics.operators.bug_implicit_conversion", content: "The single-argument constructor is implicit; mark it explicit", is_correct: true, order_index: 10 },
+  { id: "cpp.value_semantics.operators.bug_implicit_conversion.b", learning_item_id: "cpp.value_semantics.operators.bug_implicit_conversion", content: "The function charge is overloaded by default; delete the overload", is_correct: false, order_index: 20 },
+  { id: "cpp.value_semantics.operators.bug_implicit_conversion.c", learning_item_id: "cpp.value_semantics.operators.bug_implicit_conversion", content: "The int is copied into cents by reference; add const", is_correct: false, order_index: 30 },
+  { id: "cpp.value_semantics.operators.bug_implicit_conversion.d", learning_item_id: "cpp.value_semantics.operators.bug_implicit_conversion", content: "All constructors are explicit automatically in modern C++", is_correct: false, order_index: 40 },
 
   { id: "cpp.raii.resource_lifetime.mc_ties.a", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of an object (constructor acquires, destructor releases)", is_correct: true, order_index: 10 },
   { id: "cpp.raii.resource_lifetime.mc_ties.b", learning_item_id: "cpp.raii.resource_lifetime.mc_ties", content: "The lifetime of the whole program", is_correct: false, order_index: 20 },

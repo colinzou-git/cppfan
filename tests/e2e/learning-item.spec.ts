@@ -22,6 +22,17 @@ test("a multiple-choice item lists its choices without revealing the answer", as
   await expect(choices.getByText("Private", { exact: true })).toBeVisible();
 });
 
+test("a value-semantics state-tracing item renders as code reading", async ({ page }) => {
+  await page.goto("/learn/cpp.value_semantics.special_members.code_state_trace");
+
+  const item = page.getByTestId("learning-item");
+  await expect(item).toBeVisible();
+  await expect(item.getByRole("heading", { name: "Trace ownership after copy and move" })).toBeVisible();
+  await expect(item.getByTestId("learning-item-type")).toHaveText(/code reading/i);
+  await expect(item).toContainText("std::move");
+  await expect(item).toContainText("third");
+});
+
 test("the dashboard skill map links into a learning item or shows an auth gate", async ({ page }) => {
   await page.goto("/dashboard");
 
