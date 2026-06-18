@@ -49,6 +49,8 @@ export function CapstoneTracksView({
         setProgress((prev) => ({ ...prev, [milestoneId]: { status, reflection } }));
       } else if (result.status === "signed_out") {
         setNotice("Sign in to save your capstone progress.");
+      } else if (result.status === "unavailable") {
+        setNotice("Progress saving is temporarily unavailable. Please try again soon.");
       } else {
         setNotice("Could not save that just now. Please try again.");
       }

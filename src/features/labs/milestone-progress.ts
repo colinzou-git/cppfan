@@ -3,6 +3,7 @@
 // is signed out, or the table is not migrated, so /labs still renders signed-out
 // and pre-migration. Progress is the learner's own self-reported state (RLS-own).
 import { createClient } from "@/lib/supabase/server";
+import { isMissingObjectError } from "@/lib/supabase/errors";
 import { getCapstoneMilestone, getCapstoneProjectIdForMilestone } from "./capstone-tracks";
 
 export type MilestoneStatus = "started" | "completed";
@@ -42,7 +43,18 @@ export async function getMilestoneProgressForUser(): Promise<MilestoneProgress[]
 }
 
 /** Typed outcome so the UI can distinguish "sign in to save" from a real error. */
-export type MilestoneWriteOutcome = "ok" | "signed_out" | "invalid" | "error";
+export type MilestoneWriteOutcome = "ok" | "signed_out" | "invalid" | "unavailable" | "error";
+
+type SupabaseWriteError = { code?: string | null } | null | undefined;
+
+const RETRYABLE_UPSERT_CODES = new Set([
+  "42P10", // onConflict target missing/stale in PostgREST schema cache.
+  "PGRST204" // column metadata stale; retry with the minimal progress row.
+]);
+
+export function isRetryableMilestoneUpsertError(error: SupabaseWriteError): boolean {
+  return Boolean(error) && RETRYABLE_UPSERT_CODES.has(error?.code ?? "");
+}
 
 /**
  * Upsert the learner's progress for one milestone. Idempotent on
@@ -75,18 +87,65 @@ export async function setMilestoneProgress(input: {
   const projectId = getCapstoneProjectIdForMilestone(input.milestoneId) ?? milestone.id;
   const now = new Date().toISOString();
 
+  const baseRow = {
+    user_id: user.id,
+    milestone_id: input.milestoneId,
+    project_id: projectId,
+    status: input.status,
+    reflection: input.reflection ?? null,
+    completed_at: input.status === "completed" ? now : null
+  };
+
   const { error } = await supabase.from("capstone_milestone_progress").upsert(
     {
-      user_id: user.id,
-      milestone_id: input.milestoneId,
-      project_id: projectId,
-      status: input.status,
-      verification: milestone.verification,
-      reflection: input.reflection ?? null,
-      completed_at: input.status === "completed" ? now : null
+      ...baseRow,
+      verification: milestone.verification
     },
     { onConflict: "user_id,milestone_id" }
   );
 
-  return error ? "error" : "ok";
+  if (!error) {
+    return "ok";
+  }
+  if (isMissingObjectError(error)) {
+    return "unavailable";
+  }
+  if (!isRetryableMilestoneUpsertError(error)) {
+    console.error(`[capstone-progress] write failed (code=${error.code ?? "none"})`);
+    return "error";
+  }
+
+  const patch = {
+    project_id: projectId,
+    status: input.status,
+    reflection: input.reflection ?? null,
+    completed_at: input.status === "completed" ? now : null
+  };
+  const updated = await supabase
+    .from("capstone_milestone_progress")
+    .update(patch)
+    .eq("user_id", user.id)
+    .eq("milestone_id", input.milestoneId)
+    .select("milestone_id");
+
+  if (updated.error) {
+    if (isMissingObjectError(updated.error)) {
+      return "unavailable";
+    }
+    console.error(`[capstone-progress] fallback update failed (code=${updated.error.code ?? "none"})`);
+    return "error";
+  }
+  if ((updated.data ?? []).length > 0) {
+    return "ok";
+  }
+
+  const inserted = await supabase.from("capstone_milestone_progress").insert(baseRow);
+  if (!inserted.error) {
+    return "ok";
+  }
+  if (isMissingObjectError(inserted.error)) {
+    return "unavailable";
+  }
+  console.error(`[capstone-progress] fallback insert failed (code=${inserted.error.code ?? "none"})`);
+  return "error";
 }

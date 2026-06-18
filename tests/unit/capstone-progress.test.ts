@@ -4,6 +4,7 @@ import {
   getCapstoneProjectIdForMilestone,
   practicedSkillsForMilestones
 } from "@/features/labs/capstone-tracks";
+import { isRetryableMilestoneUpsertError } from "@/features/labs/milestone-progress";
 import { skillSeed } from "@/features/skills/skill-seed";
 
 const skillIds = new Set(skillSeed.map((s) => s.id));
@@ -38,5 +39,12 @@ describe("capstone milestone evidence mapping (#130)", () => {
   it("looks up a milestone and its verification method", () => {
     expect(getCapstoneMilestone("note-manager.m4")?.verification).toBe("exercise_tests");
     expect(getCapstoneMilestone("nope")).toBeNull();
+  });
+
+  it("classifies retryable capstone upsert rollout errors", () => {
+    expect(isRetryableMilestoneUpsertError({ code: "42P10" })).toBe(true);
+    expect(isRetryableMilestoneUpsertError({ code: "PGRST204" })).toBe(true);
+    expect(isRetryableMilestoneUpsertError({ code: "42501" })).toBe(false);
+    expect(isRetryableMilestoneUpsertError(null)).toBe(false);
   });
 });

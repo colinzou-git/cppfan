@@ -34,5 +34,8 @@ export async function setMilestone(input: {
   if (outcome === "signed_out") {
     return { status: "signed_out" };
   }
+  if (outcome === "unavailable") {
+    return { status: "unavailable" };
+  }
   return { status: "error" };
 }
