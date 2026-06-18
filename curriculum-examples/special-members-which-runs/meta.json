@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.special_members.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "default\ncopy ctor\ndefault\ncopy assign\nmove ctor\nmove assign\n",
+  "note": "Construction from an lvalue runs the copy ctor; assignment to an existing object runs copy assign; an rvalue source selects the move ctor / move assign instead."
+}
