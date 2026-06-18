@@ -17,7 +17,8 @@ export const REMAINING_WORK_PATTERNS = [
 ];
 
 // A final closure-evidence audit comment (required before a tracked issue closes).
-export const FINAL_AUDIT_MARKER = /(^|\n)#{1,6}\s*final closure audit/i;
+// Some Windows-created UTF-8 files carry a BOM; GitHub preserves it in comments.
+export const FINAL_AUDIT_MARKER = /(^|\n)\uFEFF?#{1,6}\s*final closure audit/i;
 
 // Title patterns that mark an issue as completion/parent/roadmap tracked.
 export const COMPLETION_TITLE_PATTERNS = [

@@ -64,6 +64,20 @@ describe("text helpers (#147)", () => {
     ).toEqual({ allowed: true, violations: [] });
   });
 
+  it("recognizes a BOM-prefixed final audit comment", () => {
+    const comments = ["Remaining work was documented earlier.", `\uFEFF${COMPLETE_AUDIT}`];
+    expect(hasFinalAudit(comments)).toBe(true);
+    expect(latestFinalAuditIndex(comments)).toBe(1);
+    expect(
+      evaluateIssueClosure({
+        body: "- [x] done",
+        comments,
+        completionTracked: true,
+        linkedPrCompletion: "complete"
+      })
+    ).toEqual({ allowed: true, violations: [] });
+  });
+
   it("still blocks remaining-work comments posted after the final audit", () => {
     const result = evaluateIssueClosure({
       body: "- [x] done",

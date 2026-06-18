@@ -96,10 +96,12 @@ async function handleIssueClosed(event) {
     method: "POST",
     body: {
       body:
+        (
         `⚠️ **Closure guard reopened this completion-tracked issue** (#147).\n\n` +
         `It was closed before its full scope was verified:\n\n${reasons}\n\n` +
         `Use \`Part of #${issue.number}\` for partial work, and post a \`## Final closure audit\` ` +
         `mapping every acceptance criterion to evidence before closing. See CLAUDE.md.`
+        ).replace("(#147)", `(#${issue.number})`)
     }
   });
   await gh(`/issues/${issue.number}`, { method: "PATCH", body: { state: "open" } });
