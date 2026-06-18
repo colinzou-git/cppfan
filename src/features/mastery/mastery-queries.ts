@@ -42,7 +42,7 @@ export async function getMasterySummary(): Promise<MasterySummary> {
 
   const { data, error } = await supabase
     .from("skill_events")
-    .select("skill_id,event_type,event_time")
+    .select("skill_id,event_type,event_time,metadata")
     .eq("user_id", user.id)
     .not("skill_id", "is", null)
     .gte("event_time", since)
@@ -64,7 +64,11 @@ export async function getMasterySummary(): Promise<MasterySummary> {
       continue;
     }
     const list = bySkill.get(skillId) ?? [];
-    list.push({ event_type: row.event_type, event_time: row.event_time });
+    list.push({
+      event_type: row.event_type,
+      event_time: row.event_time,
+      metadata: (row.metadata as Record<string, unknown> | null) ?? null
+    });
     bySkill.set(skillId, list);
   }
 

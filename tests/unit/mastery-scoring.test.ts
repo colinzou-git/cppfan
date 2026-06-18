@@ -33,6 +33,24 @@ describe("scoreSkillFromEvents", () => {
     expect(result.score).toBeGreaterThanOrEqual(80);
   });
 
+  it("scores correct completion and Parsons submissions as reconstruction evidence", () => {
+    const result = scoreSkillFromEvents([
+      { ...ev("completion_submitted"), metadata: { is_correct: true } },
+      { ...ev("parsons_submitted"), metadata: { is_correct: true } }
+    ]);
+    expect(result.status).toBe("strong");
+    expect(result.reason).toMatch(/reconstruction/i);
+  });
+
+  it("treats Parsons hints as hint evidence", () => {
+    const result = scoreSkillFromEvents([
+      { ...ev("parsons_submitted"), metadata: { is_correct: true } },
+      ev("parsons_hint_used"),
+      ev("parsons_hint_used")
+    ]);
+    expect(result.status).toBe("weak");
+  });
+
   it("is reviewing when only reviews exist", () => {
     expect(scoreSkillFromEvents([ev("review_completed")]).status).toBe("reviewing");
   });

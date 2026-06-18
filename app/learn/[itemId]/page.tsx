@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LearningItemView } from "@/features/learning-items/learning-item-view";
 import { getLearningItemWithDetails } from "@/features/learning-items/learning-item-queries";
+import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
+import { recordSkillEvent } from "@/features/events/event-service";
 
 export default async function LearningItemPage({ params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
@@ -9,6 +11,14 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
 
   if (result.status === "not_found") {
     notFound();
+  }
+
+  if (result.status === "ok" && result.data.item.type === "worked_example") {
+    await recordSkillEvent({
+      eventType: "worked_example_viewed",
+      skillId: getPrimarySkillId(result.data.item.id),
+      learningItemId: result.data.item.id
+    });
   }
 
   return (

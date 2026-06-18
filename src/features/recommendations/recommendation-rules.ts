@@ -37,7 +37,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
     recommendations.push({
       kind: "regressed_skill",
       title: `Revisit ${skill.title}`,
-      reason: "This skill regressed — recent answers slipped after it was strong.",
+      reason: skill.reason ?? "This skill regressed; recent answers slipped after it was strong.",
       href: skillHref(skill)
     });
   }
@@ -46,7 +46,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
     recommendations.push({
       kind: "weak_skill",
       title: `Practice ${skill.title}`,
-      reason: "Recent mistakes or repeated hints suggest this skill is still weak.",
+      reason: skill.reason ?? "Recent mistakes or repeated hints suggest this skill is still weak.",
       href: skillHref(skill)
     });
   }
@@ -66,7 +66,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
       title: `Start with ${start.title}`,
       reason:
         start.level === "start_here"
-          ? "Your placement check suggests starting here — a suggestion, not a lock."
+          ? "Your placement check suggests starting here; a suggestion, not a lock."
           : `Your placement check flagged ${start.title} to review soon.`,
       href: start.itemId ? `/learn/${encodeURIComponent(start.itemId)}` : "/placement"
     });
@@ -76,7 +76,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
     recommendations.push({
       kind: "next_lesson",
       title: `Start ${input.nextLesson.title}`,
-      reason: "The next step on your current C++ path.",
+      reason: input.nextLesson.reason ?? "The next step on your current C++ path.",
       href: skillHref(input.nextLesson)
     });
   }
@@ -85,7 +85,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
     recommendations.push({
       kind: "prerequisite",
       title: `Shore up ${input.prerequisite.title} first`,
-      reason: "A recommended prerequisite for your next skill — a suggestion, not a hard lock.",
+      reason: "A recommended prerequisite for your next skill; a suggestion, not a hard lock.",
       href: skillHref(input.prerequisite)
     });
   }
@@ -94,7 +94,7 @@ export function buildRecommendations(input: RecommendationInput): Recommendation
     recommendations.push({
       kind: "capstone_milestone",
       title: `Build: ${input.nextMilestone.title}`,
-      reason: `Your next capstone milestone in ${input.nextMilestone.projectTitle} — apply skills you have practiced.`,
+      reason: `Your next capstone milestone in ${input.nextMilestone.projectTitle}; apply skills you have practiced.`,
       href: "/labs"
     });
   }

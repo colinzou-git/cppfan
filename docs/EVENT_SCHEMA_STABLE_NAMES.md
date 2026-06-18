@@ -15,6 +15,11 @@ Use these event names in code:
 - skill_regressed
 - error_pattern_observed
 - error_pattern_cleared
+- worked_example_viewed
+- completion_submitted
+- parsons_submitted
+- parsons_hint_used
+- parsons_checked
 
 Common fields:
 

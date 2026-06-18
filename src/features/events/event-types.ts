@@ -16,4 +16,5 @@ export type SkillEvent = {
 export type ScoringEvent = {
   event_type: SkillEventName;
   event_time: string;
+  metadata?: Record<string, unknown> | null;
 };

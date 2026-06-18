@@ -471,8 +471,8 @@ begin
   raise notice 'interview sessions smoke OK';
 end $$;
 
--- 18) #126 (error-pattern evidence events): the skill_events type CHECK accepts the
--- new stable event names.
+-- 18) #126 / #123 (event evidence): the skill_events type CHECK accepts the
+-- stable error-pattern and adaptive-practice event names.
 do $$
 declare
   v_def text;
@@ -486,7 +486,14 @@ begin
   if position('error_pattern_observed' in v_def) = 0 or position('error_pattern_cleared' in v_def) = 0 then
     raise exception 'skill_events must allow error_pattern_observed/cleared (#126)';
   end if;
-  raise notice 'error-pattern event names smoke OK';
+  if position('worked_example_viewed' in v_def) = 0
+    or position('completion_submitted' in v_def) = 0
+    or position('parsons_submitted' in v_def) = 0
+    or position('parsons_hint_used' in v_def) = 0
+    or position('parsons_checked' in v_def) = 0 then
+    raise exception 'skill_events must allow adaptive practice events (#123)';
+  end if;
+  raise notice 'event names smoke OK';
 end $$;
 
 -- 19) #179 (interview rubric self-review): per-learner table with RLS + base grant.

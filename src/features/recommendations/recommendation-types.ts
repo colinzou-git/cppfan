@@ -21,6 +21,8 @@ export type SkillRef = {
   skillId: string;
   title: string;
   itemId: string | null;
+  /** Transparent adaptive-practice reason shown when the item was selected from evidence. */
+  reason?: string;
 };
 
 /** An observed-misconception remediation suggestion (#126). */

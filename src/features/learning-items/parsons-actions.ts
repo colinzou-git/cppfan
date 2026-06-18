@@ -52,9 +52,32 @@ export async function submitParsons(input: { itemId: string; blockIds: string[] 
 
   const skillId = getPrimarySkillId(itemId);
   await recordSkillEvents([
-    { eventType: "quiz_attempted", skillId, learningItemId: itemId },
-    { eventType: graded.isCorrect ? "quiz_correct" : "quiz_wrong", skillId, learningItemId: itemId }
+    {
+      eventType: "parsons_checked",
+      skillId,
+      learningItemId: itemId,
+      metadata: { selected_count: blockIds.length }
+    },
+    {
+      eventType: "parsons_submitted",
+      skillId,
+      learningItemId: itemId,
+      metadata: { is_correct: graded.isCorrect, correct_count: graded.correctCount, total: graded.total }
+    }
   ]);
 
   return { status: "graded", isCorrect: graded.isCorrect, correctCount: graded.correctCount, total: graded.total };
+}
+
+/** Best-effort evidence for Parsons hint usage; the UI never waits on it. */
+export async function recordParsonsHint(input: { itemId: string }): Promise<void> {
+  const itemId = typeof input?.itemId === "string" ? input.itemId : "";
+  if (!itemId) {
+    return;
+  }
+  const skillId = getPrimarySkillId(itemId);
+  await recordSkillEvents([
+    { eventType: "parsons_hint_used", skillId, learningItemId: itemId },
+    { eventType: "hint_used", skillId, learningItemId: itemId }
+  ]);
 }

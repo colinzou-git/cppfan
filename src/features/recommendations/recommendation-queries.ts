@@ -2,7 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { logConfiguredFailure } from "@/lib/supabase/errors";
 import { getProfileForUser } from "@/features/profile/profile-queries";
 import { getMasterySummary } from "@/features/mastery/mastery-queries";
-import { getEligibleReviewItems, getFirstLearningItemIdForSkill } from "@/features/learning-items/learning-item-seed";
+import {
+  getEligibleReviewItems,
+  getFirstLearningItemIdForSkill,
+  getLearningItemsForSkill
+} from "@/features/learning-items/learning-item-seed";
 import { skillPrerequisitesSeed, skillSeed } from "@/features/skills/skill-seed";
 import { getPlacementResults } from "@/features/placement/placement-queries";
 import { getPlacementModules } from "@/features/placement/placement-seed";
@@ -10,6 +14,7 @@ import { buildCapstoneTrackView, nextCapstoneMilestone } from "@/features/labs/c
 import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
 import { remediationRecsFromAttempts } from "@/features/remediation/remediation-recs";
 import { buildRecommendations } from "./recommendation-rules";
+import { selectPracticeStep } from "./practice-step-selection";
 import type {
   CapstoneMilestoneRef,
   DailyPlan,
@@ -17,6 +22,7 @@ import type {
   PlacementStartRef,
   SkillRef
 } from "./recommendation-types";
+import type { SkillStatus } from "@/features/mastery/mastery-types";
 
 const MAX_PER_CATEGORY = 2;
 const REMEDIATION_WINDOW_DAYS = 14;
@@ -61,6 +67,21 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
   const statusBySkill = new Map(mastery.skills.map((skill) => [skill.skillId, skill.status]));
   const titleBySkill = new Map(skillSeed.map((skill) => [skill.id, skill.title]));
 
+  const toPracticeRef = (skillId: string, title: string, status: SkillStatus | "unknown"): SkillRef => {
+    const selection = selectPracticeStep({ status });
+    const items = getLearningItemsForSkill(skillId);
+    const selected =
+      selection.preferredTypes
+        .map((type) => items.find((item) => item.type === type))
+        .find((item) => item !== undefined) ?? null;
+    return {
+      skillId,
+      title,
+      itemId: selected?.id ?? getFirstLearningItemIdForSkill(skillId),
+      reason: selected ? selection.reason : undefined
+    };
+  };
+
   const toRef = (skillId: string, title: string): SkillRef => ({
     skillId,
     title,
@@ -70,19 +91,19 @@ export async function getDailyPlan(now: Date = new Date()): Promise<DailyPlan> {
   const regressedSkills = mastery.skills
     .filter((skill) => skill.status === "regressed")
     .slice(0, MAX_PER_CATEGORY)
-    .map((skill) => toRef(skill.skillId, skill.title));
+    .map((skill) => toPracticeRef(skill.skillId, skill.title, skill.status));
 
   const weakSkills = mastery.skills
     .filter((skill) => skill.status === "weak")
     .slice(0, MAX_PER_CATEGORY)
-    .map((skill) => toRef(skill.skillId, skill.title));
+    .map((skill) => toPracticeRef(skill.skillId, skill.title, skill.status));
 
   const settled = new Set(
     mastery.skills.filter((skill) => skill.status === "strong" || skill.status === "mastered").map((skill) => skill.skillId)
   );
   const nextEligible = getEligibleReviewItems().find(({ skillId }) => !settled.has(skillId));
   const nextLesson: SkillRef | null = nextEligible
-    ? { skillId: nextEligible.skillId, title: nextEligible.item.title, itemId: nextEligible.item.id }
+    ? toPracticeRef(nextEligible.skillId, nextEligible.item.title, statusBySkill.get(nextEligible.skillId) ?? "unknown")
     : null;
 
   // A weak prerequisite of the next skill, surfaced as a recommendation only.

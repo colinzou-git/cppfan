@@ -27,6 +27,12 @@ test("Parsons: checking gives structural feedback, not the solution", async ({ p
   await page.getByTestId("parsons-check").click();
   // Partial, structural feedback only — never reveals the ordered solution.
   await expect(page.getByTestId("parsons-feedback")).toContainText(/correctly placed/i);
+
+  await page.getByTestId("parsons-hint").click();
+  await expect(page.getByTestId("parsons-hint-text")).toContainText(/setup before the loop/i);
+
+  await page.getByTestId("parsons-retry").click();
+  await expect(page.getByTestId("parsons-announcement")).toContainText(/reset/i);
 });
 
 test("Parsons: arranging the lines correctly (keyboard controls) is graded correct", async ({ page }) => {

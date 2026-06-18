@@ -56,8 +56,12 @@ export async function submitCompletion(input: {
 
   const skillId = getPrimarySkillId(itemId);
   await recordSkillEvents([
-    { eventType: "quiz_attempted", skillId, learningItemId: itemId },
-    { eventType: graded.isCorrect ? "quiz_correct" : "quiz_wrong", skillId, learningItemId: itemId }
+    {
+      eventType: "completion_submitted",
+      skillId,
+      learningItemId: itemId,
+      metadata: { is_correct: graded.isCorrect, correct_count: graded.correctCount, total: graded.total }
+    }
   ]);
 
   return { status: "graded", isCorrect: graded.isCorrect, correctCount: graded.correctCount, total: graded.total };

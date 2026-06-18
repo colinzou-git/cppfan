@@ -4,9 +4,11 @@ import { ParsonsExercise } from "@/features/learning-items/parsons-exercise";
 import type { PublicParsonsBlock } from "@/features/learning-items/learning-item-types";
 
 const submitParsons = vi.fn();
+const recordParsonsHint = vi.fn();
 
 vi.mock("@/features/learning-items/parsons-actions", () => ({
-  submitParsons: (...args: unknown[]) => submitParsons(...args)
+  submitParsons: (...args: unknown[]) => submitParsons(...args),
+  recordParsonsHint: (...args: unknown[]) => recordParsonsHint(...args)
 }));
 
 function blocks(): PublicParsonsBlock[] {
@@ -20,7 +22,9 @@ function blocks(): PublicParsonsBlock[] {
 describe("ParsonsExercise (#124)", () => {
   beforeEach(() => {
     submitParsons.mockReset();
+    recordParsonsHint.mockReset();
     submitParsons.mockResolvedValue({ status: "graded", isCorrect: true, correctCount: 2, total: 2 });
+    recordParsonsHint.mockResolvedValue(undefined);
   });
 
   it("renders every block and keeps drag from being the only input (move buttons exist)", () => {
@@ -54,6 +58,28 @@ describe("ParsonsExercise (#124)", () => {
     await waitFor(() =>
       expect(submitParsons).toHaveBeenCalledWith({ itemId: "item", blockIds: ["b2", "b1"] })
     );
+  });
+
+  it("announces reordering and can reset with retry", () => {
+    render(<ParsonsExercise itemId="item" blocks={blocks()} />);
+
+    fireEvent.click(screen.getAllByTestId("parsons-move-down")[0]);
+    expect(screen.getByTestId("parsons-announcement")).toHaveTextContent(/moved line down/i);
+    expect(screen.getAllByTestId("parsons-block")[1]).toHaveAttribute("data-block-id", "b1");
+
+    fireEvent.click(screen.getByTestId("parsons-retry"));
+    expect(screen.getAllByTestId("parsons-block")[0]).toHaveAttribute("data-block-id", "b1");
+    expect(screen.getByTestId("parsons-announcement")).toHaveTextContent(/reset/i);
+  });
+
+  it("shows a partial hint without revealing a complete ordered solution", async () => {
+    render(<ParsonsExercise itemId="item" blocks={blocks()} />);
+
+    fireEvent.click(screen.getByTestId("parsons-hint"));
+
+    expect(await screen.findByTestId("parsons-hint-text")).toHaveTextContent(/setup before the loop/i);
+    expect(screen.getByTestId("parsons-hint-text")).not.toHaveTextContent(/int sum = 0.*sum \+= i.*return sum/s);
+    await waitFor(() => expect(recordParsonsHint).toHaveBeenCalledWith({ itemId: "item" }));
   });
 
   it("shows partial structural feedback without revealing the solution", async () => {

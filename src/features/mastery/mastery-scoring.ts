@@ -51,13 +51,29 @@ export function scoreSkillFromEvents(events: ScoringEvent[], now?: string | numb
   let wrong = 0;
   let reviews = 0;
   let hints = 0;
+  let reconstruction = 0;
+  let independent = 0;
   let lastMarker: "skill_mastered" | "skill_regressed" | null = null;
   let lastMarkerIndex = -1;
 
   recent.forEach((event, index) => {
     switch (event.event_type) {
       case "quiz_correct":
+        correct += 1;
+        break;
+      case "completion_submitted":
+      case "parsons_submitted": {
+        reconstruction += 1;
+        const isCorrect = event.metadata?.is_correct;
+        if (isCorrect === true) {
+          correct += 1;
+        } else if (isCorrect === false) {
+          wrong += 1;
+        }
+        break;
+      }
       case "code_passed":
+        independent += 1;
         correct += 1;
         break;
       case "quiz_wrong":
@@ -67,6 +83,7 @@ export function scoreSkillFromEvents(events: ScoringEvent[], now?: string | numb
         reviews += 1;
         break;
       case "hint_used":
+      case "parsons_hint_used":
         hints += 1;
         break;
       case "skill_mastered":
@@ -84,10 +101,19 @@ export function scoreSkillFromEvents(events: ScoringEvent[], now?: string | numb
 
   const sinceMarker = lastMarkerIndex >= 0 ? recent.slice(lastMarkerIndex + 1) : [];
   const failedSinceMarker = sinceMarker.some(
-    (event) => event.event_type === "quiz_wrong" || event.event_type === "hint_used"
+    (event) =>
+      event.event_type === "quiz_wrong" ||
+      event.event_type === "hint_used" ||
+      event.event_type === "parsons_hint_used" ||
+      ((event.event_type === "completion_submitted" || event.event_type === "parsons_submitted") &&
+        event.metadata?.is_correct === false)
   );
   const passedSinceMarker = sinceMarker.some(
-    (event) => event.event_type === "quiz_correct" || event.event_type === "code_passed"
+    (event) =>
+      event.event_type === "quiz_correct" ||
+      event.event_type === "code_passed" ||
+      ((event.event_type === "completion_submitted" || event.event_type === "parsons_submitted") &&
+        event.metadata?.is_correct === true)
   );
 
   const attempts = correct + wrong;
@@ -106,7 +132,8 @@ export function scoreSkillFromEvents(events: ScoringEvent[], now?: string | numb
   }
 
   if (attempts >= 2 && correctness >= 0.8) {
-    return { status: "strong", score, reason: "Recent answers are mostly correct." };
+    const evidence = independent > 0 ? "independent practice" : reconstruction > 0 ? "reconstruction practice" : "recognition practice";
+    return { status: "strong", score, reason: `Recent ${evidence} is mostly correct.` };
   }
   if (attempts > 0 && (wrong > correct || hints >= 2)) {
     return { status: "weak", score, reason: "Recent mistakes or repeated hint usage." };

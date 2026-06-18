@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Lightbulb, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { submitParsons } from "./parsons-actions";
+import { recordParsonsHint, submitParsons } from "./parsons-actions";
 import type { PublicParsonsBlock } from "./learning-item-types";
 
 type Row = { block: PublicParsonsBlock; included: boolean };
@@ -21,18 +22,23 @@ type Feedback =
  * through the server (submitParsons); only structural feedback is shown.
  */
 export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: PublicParsonsBlock[] }) {
-  const [rows, setRows] = useState<Row[]>(() => blocks.map((block) => ({ block, included: true })));
+  const initialRows = () => blocks.map((block) => ({ block, included: true }));
+  const [rows, setRows] = useState<Row[]>(initialRows);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function move(index: number, delta: number) {
+    const target = index + delta;
+    if (target < 0 || target >= rows.length) {
+      return;
+    }
     setFeedback(null);
+    const movedContent = rows[index]?.block.content ?? "";
+    setAnnouncement(`Moved line ${delta < 0 ? "up" : "down"}: ${movedContent}`);
     setRows((prev) => {
       const next = [...prev];
-      const target = index + delta;
-      if (target < 0 || target >= next.length) {
-        return prev;
-      }
       [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
@@ -40,12 +46,29 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
 
   function toggleInclude(index: number) {
     setFeedback(null);
+    setAnnouncement(`${rows[index]?.included ? "Excluded" : "Included"} line: ${rows[index]?.block.content ?? ""}`);
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, included: !row.included } : row)));
+  }
+
+  function retry() {
+    setRows(initialRows());
+    setFeedback(null);
+    setHintVisible(false);
+    setAnnouncement("Reset the lines. Try the structure again.");
+  }
+
+  function showHint() {
+    setHintVisible(true);
+    setAnnouncement("Hint opened. Look for the setup, loop, update, and return shape.");
+    startTransition(async () => {
+      await recordParsonsHint({ itemId });
+    });
   }
 
   function check() {
     const blockIds = rows.filter((row) => row.included).map((row) => row.block.id);
     if (blockIds.length === 0) {
+      setAnnouncement("Include at least one line before checking.");
       return;
     }
     startTransition(async () => {
@@ -59,6 +82,7 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
       } else {
         setFeedback({ kind: "error" });
       }
+      setAnnouncement(result.status === "graded" && result.isCorrect ? "Structure complete." : "Structure checked.");
     });
   }
 
@@ -125,10 +149,50 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
       </ol>
 
       <div>
-        <Button type="button" onClick={check} disabled={isPending} data-testid="parsons-check">
-          Check structure
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" onClick={check} disabled={isPending} data-testid="parsons-check">
+            Check structure
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={retry}
+            disabled={isPending}
+            data-testid="parsons-retry"
+            aria-label="Reset Parsons lines and try again"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+            Retry
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={showHint}
+            disabled={isPending || hintVisible}
+            data-testid="parsons-hint"
+            aria-label="Show a Parsons structure hint"
+          >
+            <Lightbulb className="mr-2 h-4 w-4" aria-hidden="true" />
+            Hint
+          </Button>
+        </div>
       </div>
+
+      {hintVisible ? (
+        <p
+          className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-950"
+          role="status"
+          aria-live="polite"
+          data-testid="parsons-hint-text"
+        >
+          Start with setup before the loop, keep the repeated update inside the loop, then return the accumulated
+          value after the loop. Leave out the line that changes the total in the wrong direction.
+        </p>
+      ) : null}
+
+      <p className="sr-only" role="status" aria-live="polite" data-testid="parsons-announcement">
+        {announcement}
+      </p>
 
       <p
         className={`min-h-[1.25rem] text-sm font-semibold ${

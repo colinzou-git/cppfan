@@ -60,6 +60,22 @@ describe("buildRecommendations ordering", () => {
     expect(weak?.href).toBe("/learn/item.w");
   });
 
+  it("uses transparent practice-selection reasons when present (#124)", () => {
+    const recs = buildRecommendations(
+      input({
+        weakSkills: [
+          {
+            skillId: "w",
+            title: "Weak",
+            itemId: "item.w",
+            reason: "Recent evidence is weak, so rebuild the missing code shape."
+          }
+        ]
+      })
+    );
+    expect(recs.find((rec) => rec.kind === "weak_skill")?.reason).toMatch(/rebuild/i);
+  });
+
   it("falls back to the dashboard when a skill has no learning item", () => {
     const recs = buildRecommendations(input({ regressedSkills: [skill("r", "Regressed", null)] }));
     const regressed = recs.find((rec) => rec.kind === "regressed_skill");
