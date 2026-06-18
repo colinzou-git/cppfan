@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.views.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "hello\n5\n20\n",
+  "note": "std::string_view borrows \"hello\" from a std::string (length 5) and std::span<const int> borrows a vector to sum it (20), both without copying or owning."
+}
