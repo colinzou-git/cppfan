@@ -21,7 +21,10 @@ export const SKILL_EVENT_NAMES = [
   "completion_submitted",
   "parsons_submitted",
   "parsons_hint_used",
-  "parsons_checked"
+  "parsons_checked",
+  "capstone_milestone_started",
+  "capstone_milestone_completed",
+  "capstone_reflection_submitted"
 ] as const;
 
 export type SkillEventName = (typeof SKILL_EVENT_NAMES)[number];

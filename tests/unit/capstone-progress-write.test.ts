@@ -2,8 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
 import { setMilestoneProgress } from "@/features/labs/milestone-progress";
 
+const recordSkillEvents = vi.fn();
+
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn()
+}));
+
+vi.mock("@/features/events/event-service", () => ({
+  recordSkillEvents: (...args: unknown[]) => recordSkillEvents(...args)
 }));
 
 function signedInClient(table: Record<string, unknown>) {
@@ -18,6 +24,8 @@ function signedInClient(table: Record<string, unknown>) {
 describe("setMilestoneProgress write resilience (#328)", () => {
   beforeEach(() => {
     vi.mocked(createClient).mockReset();
+    recordSkillEvents.mockReset();
+    recordSkillEvents.mockResolvedValue(true);
   });
 
   it("falls back to update/insert when composite upsert is rejected during rollout", async () => {
@@ -48,6 +56,39 @@ describe("setMilestoneProgress write resilience (#328)", () => {
       })
     );
     expect(insert.mock.calls[0]?.[0]).not.toHaveProperty("verification");
+    expect(recordSkillEvents).toHaveBeenCalledWith([
+      expect.objectContaining({
+        eventType: "capstone_milestone_started",
+        metadata: expect.objectContaining({ milestone_id: "note-manager.m1", project_id: "note-manager" })
+      })
+    ]);
+  });
+
+  it("records completed milestone and practiced-skill evidence", async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const client = signedInClient({ upsert });
+    vi.mocked(createClient).mockResolvedValue(client as never);
+
+    await expect(
+      setMilestoneProgress({
+        milestoneId: "note-manager.m1",
+        status: "completed",
+        reflection: "I modeled the note state."
+      })
+    ).resolves.toBe("ok");
+
+    const events = recordSkillEvents.mock.calls[0]?.[0] ?? [];
+    expect(events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ eventType: "capstone_milestone_completed" }),
+        expect.objectContaining({ eventType: "capstone_reflection_submitted" }),
+        expect.objectContaining({
+          eventType: "code_passed",
+          skillId: "cpp.structs_classes.syntax",
+          metadata: expect.objectContaining({ source: "capstone_milestone" })
+        })
+      ])
+    );
   });
 
   it("reports unavailable instead of generic error when the progress table is not migrated", async () => {

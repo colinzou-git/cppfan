@@ -493,6 +493,11 @@ begin
     or position('parsons_checked' in v_def) = 0 then
     raise exception 'skill_events must allow adaptive practice events (#123)';
   end if;
+  if position('capstone_milestone_started' in v_def) = 0
+    or position('capstone_milestone_completed' in v_def) = 0
+    or position('capstone_reflection_submitted' in v_def) = 0 then
+    raise exception 'skill_events must allow capstone events (#130)';
+  end if;
   raise notice 'event names smoke OK';
 end $$;
 

@@ -5,6 +5,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
 import { getCapstoneMilestone, getCapstoneProjectIdForMilestone } from "./capstone-tracks";
+import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events/event-service";
+import type { CapstoneMilestone } from "./capstone-tracks";
 
 export type MilestoneStatus = "started" | "completed";
 
@@ -56,6 +58,44 @@ export function isRetryableMilestoneUpsertError(error: SupabaseWriteError): bool
   return Boolean(error) && RETRYABLE_UPSERT_CODES.has(error?.code ?? "");
 }
 
+async function recordMilestoneEvidence(input: {
+  milestone: CapstoneMilestone;
+  milestoneId: string;
+  projectId: string;
+  status: MilestoneStatus;
+  reflection?: string | null;
+}) {
+  const metadata = {
+    milestone_id: input.milestoneId,
+    project_id: input.projectId,
+    verification: input.milestone.verification,
+    required: input.milestone.required
+  };
+  const events: RecordSkillEventInput[] = [
+    {
+      eventType:
+        input.status === "completed" ? "capstone_milestone_completed" : "capstone_milestone_started",
+      metadata
+    }
+  ];
+
+  if (input.status === "completed") {
+    for (const skillId of input.milestone.practicedSkillIds) {
+      events.push({
+        eventType: "code_passed",
+        skillId,
+        metadata: { ...metadata, source: "capstone_milestone" }
+      });
+    }
+  }
+
+  if ((input.reflection ?? "").trim()) {
+    events.push({ eventType: "capstone_reflection_submitted", metadata });
+  }
+
+  await recordSkillEvents(events);
+}
+
 /**
  * Upsert the learner's progress for one milestone. Idempotent on
  * (user_id, milestone_id); completing stamps completed_at. `signed_out` covers
@@ -105,6 +145,7 @@ export async function setMilestoneProgress(input: {
   );
 
   if (!error) {
+    await recordMilestoneEvidence({ milestone, milestoneId: input.milestoneId, projectId, status: input.status, reflection: input.reflection });
     return "ok";
   }
   if (isMissingObjectError(error)) {
@@ -136,11 +177,13 @@ export async function setMilestoneProgress(input: {
     return "error";
   }
   if ((updated.data ?? []).length > 0) {
+    await recordMilestoneEvidence({ milestone, milestoneId: input.milestoneId, projectId, status: input.status, reflection: input.reflection });
     return "ok";
   }
 
   const inserted = await supabase.from("capstone_milestone_progress").insert(baseRow);
   if (!inserted.error) {
+    await recordMilestoneEvidence({ milestone, milestoneId: input.milestoneId, projectId, status: input.status, reflection: input.reflection });
     return "ok";
   }
   if (isMissingObjectError(inserted.error)) {

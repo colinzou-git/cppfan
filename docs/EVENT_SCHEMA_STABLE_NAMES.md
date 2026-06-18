@@ -20,6 +20,9 @@ Use these event names in code:
 - parsons_submitted
 - parsons_hint_used
 - parsons_checked
+- capstone_milestone_started
+- capstone_milestone_completed
+- capstone_reflection_submitted
 
 Common fields:
 

@@ -3,7 +3,7 @@
 // (project-labs.ts) into ordered tracks and gives selected projects explicit,
 // individually-trackable, skill-linked milestones. Like project-labs this is a
 // typed catalog (labs are not DB-backed), so no migration is needed. Per-learner
-// milestone progress (#130) and the track/milestone UI are follow-up slices.
+// milestone progress (#130) is stored separately under RLS.
 
 export type MilestoneVerification = "manual_checklist" | "exercise_tests" | "reflection";
 
