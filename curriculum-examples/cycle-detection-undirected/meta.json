@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.cycle_detection.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "cycle\nacyclic\n",
+  "note": "Undirected DFS reports a cycle on a triangle (edge to a visited non-parent) and acyclic on a path, skipping the edge back to the parent."
+}

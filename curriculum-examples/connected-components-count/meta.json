@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.connected_components.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "4\n",
+  "note": "Each DFS launch from an unvisited vertex marks one component; {0,1,2}, {3,4}, {5}, {6} gives 4 connected components."
+}
