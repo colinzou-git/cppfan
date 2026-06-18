@@ -112,26 +112,6 @@ export async function createAuthenticatedLearner(context: BrowserContext, baseUR
   }
 
   const userId = created.data.user.id;
-  const profile = await service.from("profiles").upsert(
-    {
-      id: userId,
-      email,
-      display_name: "Playwright Learner",
-      experience_level: "some_cpp",
-      daily_new_skills_goal: 2,
-      daily_review_minutes: 15,
-      learning_goals: ["cpp_core", "dsa_patterns"],
-      preferred_platforms: ["windows_pc"],
-      onboarding_completed: true,
-      onboarding_completed_at: new Date().toISOString()
-    },
-    { onConflict: "id" }
-  );
-  if (profile.error) {
-    await service.auth.admin.deleteUser(userId).catch(() => undefined);
-    throw profile.error;
-  }
-
   const jar: CookieToSet[] = [];
   const browserLikeClient = createServerClient(env.url, env.anonKey, {
     cookies: {
@@ -150,6 +130,26 @@ export async function createAuthenticatedLearner(context: BrowserContext, baseUR
   if (signedIn.error) {
     await service.auth.admin.deleteUser(userId).catch(() => undefined);
     throw signedIn.error;
+  }
+
+  const profile = await browserLikeClient.from("profiles").upsert(
+    {
+      id: userId,
+      email,
+      display_name: "Playwright Learner",
+      experience_level: "some_cpp",
+      daily_new_skills_goal: 2,
+      daily_review_minutes: 15,
+      learning_goals: ["cpp_core", "dsa_patterns"],
+      preferred_platforms: ["windows_pc"],
+      onboarding_completed: true,
+      onboarding_completed_at: new Date().toISOString()
+    },
+    { onConflict: "id" }
+  );
+  if (profile.error) {
+    await service.auth.admin.deleteUser(userId).catch(() => undefined);
+    throw profile.error;
   }
 
   const activeCookies = jar.filter((cookie) => cookie.value && (cookie.options?.maxAge ?? 1) > 0);
