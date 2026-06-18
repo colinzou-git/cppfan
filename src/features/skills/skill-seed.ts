@@ -1615,6 +1615,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.time_space_tradeoffs",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Time and space tradeoffs",
+    description: "Trade extra memory for faster queries, and recognize when memory limits rule out an approach.",
+    learner_goal: "Choose when precomputation, hashing, or prefix data is worth the extra space.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 1010,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.pattern_recognition",
     domain: "dsa",
     module_id: "dsa.complexity",
@@ -1684,6 +1696,18 @@ export const skillSeed: Skill[] = [
     level: "advanced",
     item_types: ["lesson", "quiz"],
     order_index: 1015,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.correctness_reasoning",
+    domain: "dsa",
+    module_id: "dsa.complexity",
+    title: "Informal correctness reasoning",
+    description: "Explain why an algorithm maintains its invariant and terminates with the right answer.",
+    learner_goal: "Give a short correctness argument using the invariant, progress, and termination.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1016,
     is_active: true
   },
   {
@@ -2656,6 +2680,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.complexity.problem_framing", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.test_examples", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.bruteforce_then_optimize", prerequisite_skill_id: "dsa.complexity.problem_solving", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.time_space_tradeoffs", prerequisite_skill_id: "dsa.complexity.constraints", relationship_type: "recommended" },
+  { skill_id: "dsa.complexity.correctness_reasoning", prerequisite_skill_id: "dsa.complexity.bruteforce_then_optimize", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.traversal", prerequisite_skill_id: "dsa.arrays.indexing", relationship_type: "recommended" },
   { skill_id: "dsa.sorting.comparator", prerequisite_skill_id: "cpp.stl.algorithms", relationship_type: "recommended" },

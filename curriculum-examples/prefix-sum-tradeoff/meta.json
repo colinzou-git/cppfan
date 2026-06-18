@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.complexity.time_space_tradeoffs.mc_prefix",
+  "kind": "positive",
+  "standard": "c++17",
+  "expectedOutput": "9\n",
+  "note": "Demonstrates O(n) preprocessing and O(1) static range-sum queries."
+}

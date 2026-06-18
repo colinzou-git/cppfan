@@ -130,6 +130,30 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cp-algorithms-range-queries",
+    name: "cp-algorithms: range queries",
+    url: "https://cp-algorithms.com/data_structures/segment_tree.html",
+    kind: "reference",
+    description: "Range-query data-structure reference that motivates query/update and memory tradeoffs.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-prefix-sums",
+    name: "USACO Guide: prefix sums",
+    url: "https://usaco.guide/silver/prefix-sums",
+    kind: "guidelines",
+    description: "Practice-oriented walkthrough of prefix sums as a time/space tradeoff for repeated range queries.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cses-sorting-searching",
+    name: "CSES: Sorting and Searching",
+    url: "https://cses.fi/problemset/list/",
+    kind: "practice",
+    description: "Problem set section with constraint-driven choices among sorting, scanning, hashing, and prefix-style techniques.",
+    tags: ["dsa"]
+  },
+  {
     id: "the-algorithms-cpp",
     name: "TheAlgorithms / C++",
     url: "https://github.com/TheAlgorithms/C-Plus-Plus",

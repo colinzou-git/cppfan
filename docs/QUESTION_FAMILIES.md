@@ -43,6 +43,20 @@ constructors, RAII, and smart-pointer modules), then deepen high-value skills wi
 more of the family above. Keep each expansion to **one module/skill-group per PR**
 so reviews stay small.
 
+## DSA complexity and pattern-selection items
+
+For complexity/problem-solving coverage (#110), prefer prompts that force a
+decision rather than vocabulary recall alone:
+
+- count the operation inside each loop, including hidden work such as substring
+  copies, searches, and per-iteration scans;
+- compare both time and space when precomputation, hashing, memoization, or
+  prefix data removes repeated work;
+- ask for the invariant, progress step, and termination argument behind an
+  algorithm, not just a passing sample;
+- match the required operations to a pattern or container before asking for code
+  details.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

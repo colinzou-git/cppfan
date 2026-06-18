@@ -2495,6 +2495,45 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.complexity.constraints.mc_hidden_cost",
+    type: "multiple_choice",
+    title: "Finding hidden nested cost",
+    prompt:
+      "A solution loops over every start index `i` in a string of length n and calls `s.substr(i)` inside the loop. What cost should you suspect before accepting the solution as O(n)?",
+    explanation:
+      "`substr(i)` copies a suffix whose length can be O(n), so doing it for every i hides a second factor and can make the solution O(n^2). Count the work done inside each loop, not just the loop headers.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3030,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.time_space_tradeoffs.lesson",
+    type: "lesson",
+    title: "Time and space tradeoffs",
+    prompt:
+      "Many faster algorithms spend extra memory to avoid repeated work. A prefix-sum array stores n + 1 partial totals so each range-sum query becomes O(1) instead of rescanning O(k) elements. A frequency map stores counts so membership or duplicate checks are average O(1) instead of O(n) scans. A memo table stores solved subproblems so recursion does not recompute the same state. The tradeoff question is: does the saved time justify the extra space, and do the memory limits allow it? If n is 100,000, an O(n) helper array is usually fine; an O(n^2) table may be impossible. State both complexities when comparing approaches: brute force might be O(nq) time and O(1) extra space, while prefix sums are O(n + q) time and O(n) extra space.",
+    explanation:
+      "Extra memory can buy speed: prefix sums, frequency maps, and memo tables replace repeated scans or subproblems. Compare both time and space, and reject approaches whose helper storage exceeds the memory limit.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3040,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.time_space_tradeoffs.mc_prefix",
+    type: "multiple_choice",
+    title: "Choosing a prefix-sum tradeoff",
+    prompt:
+      "You need to answer many range-sum queries on a static array. Which comparison best explains using prefix sums?",
+    explanation:
+      "Prefix sums spend O(n) extra space and O(n) preprocessing so each query is O(1), improving many queries from repeated O(k) scans to O(n + q) total time.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3050,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.pattern_recognition.lesson",
     type: "lesson",
     title: "Recognizing the right pattern",
@@ -2642,6 +2681,32 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 4880,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.correctness_reasoning.lesson",
+    type: "lesson",
+    title: "Informal correctness reasoning",
+    prompt:
+      "A correctness argument is a short explanation of why the algorithm must return the right answer, not a formal proof ceremony. For a loop, name the INVARIANT: what is true before the first iteration and after every iteration. Then show progress: each step preserves the invariant while moving closer to done. Finally, explain termination: when the loop ends, the invariant plus the stop condition imply the answer is complete. For example, in a prefix-sum build, the invariant can be `prefix[i]` equals the sum of the first i elements. Each iteration appends one more element's contribution, and when i reaches n, every prefix value is correct. For greedy algorithms, the argument often says why the local choice never blocks an optimal solution; for binary search, it says the answer always remains inside the current search range.",
+    explanation:
+      "Argue correctness by naming the invariant, showing each step preserves it and makes progress, then connecting the termination condition to the desired result. Examples help, but the invariant explains why all valid inputs work.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 4890,
+    is_active: true
+  },
+  {
+    id: "dsa.complexity.correctness_reasoning.mc_invariant",
+    type: "multiple_choice",
+    title: "What an invariant does",
+    prompt:
+      "In an informal correctness argument for a loop-based algorithm, what should the invariant establish?",
+    explanation:
+      "An invariant is a statement that is true before the loop and remains true after each iteration. Combined with the loop's termination condition, it explains why the final result is correct.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4900,
     is_active: true
   },
   {
@@ -5448,6 +5513,9 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.complexity.amortized.mc_pushback", skill_id: "dsa.complexity.amortized", is_primary: true },
   { learning_item_id: "dsa.complexity.constraints.lesson", skill_id: "dsa.complexity.constraints", is_primary: true },
   { learning_item_id: "dsa.complexity.constraints.mc_feasible", skill_id: "dsa.complexity.constraints", is_primary: true },
+  { learning_item_id: "dsa.complexity.constraints.mc_hidden_cost", skill_id: "dsa.complexity.constraints", is_primary: true },
+  { learning_item_id: "dsa.complexity.time_space_tradeoffs.lesson", skill_id: "dsa.complexity.time_space_tradeoffs", is_primary: true },
+  { learning_item_id: "dsa.complexity.time_space_tradeoffs.mc_prefix", skill_id: "dsa.complexity.time_space_tradeoffs", is_primary: true },
   { learning_item_id: "dsa.complexity.pattern_recognition.lesson", skill_id: "dsa.complexity.pattern_recognition", is_primary: true },
   { learning_item_id: "dsa.complexity.pattern_recognition.mc_window", skill_id: "dsa.complexity.pattern_recognition", is_primary: true },
   { learning_item_id: "dsa.complexity.container_selection.lesson", skill_id: "dsa.complexity.container_selection", is_primary: true },
@@ -5460,6 +5528,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.complexity.test_examples.mc_why", skill_id: "dsa.complexity.test_examples", is_primary: true },
   { learning_item_id: "dsa.complexity.bruteforce_then_optimize.lesson", skill_id: "dsa.complexity.bruteforce_then_optimize", is_primary: true },
   { learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", skill_id: "dsa.complexity.bruteforce_then_optimize", is_primary: true },
+  { learning_item_id: "dsa.complexity.correctness_reasoning.lesson", skill_id: "dsa.complexity.correctness_reasoning", is_primary: true },
+  { learning_item_id: "dsa.complexity.correctness_reasoning.mc_invariant", skill_id: "dsa.complexity.correctness_reasoning", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.lesson", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.indexing.mc_last_index", skill_id: "dsa.arrays.indexing", is_primary: true },
   { learning_item_id: "dsa.arrays.traversal.code_reading", skill_id: "dsa.arrays.traversal", is_primary: true },
@@ -6128,6 +6198,15 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.complexity.constraints.mc_feasible.b", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n log n) approach", is_correct: false, order_index: 20 },
   { id: "dsa.complexity.constraints.mc_feasible.c", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(n) approach", is_correct: false, order_index: 30 },
   { id: "dsa.complexity.constraints.mc_feasible.d", learning_item_id: "dsa.complexity.constraints.mc_feasible", content: "An O(log n) approach", is_correct: false, order_index: 40 },
+  { id: "dsa.complexity.constraints.mc_hidden_cost.a", learning_item_id: "dsa.complexity.constraints.mc_hidden_cost", content: "O(n^2), because each substr can copy O(n) characters", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.constraints.mc_hidden_cost.b", learning_item_id: "dsa.complexity.constraints.mc_hidden_cost", content: "O(n), because there is only one visible loop", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.constraints.mc_hidden_cost.c", learning_item_id: "dsa.complexity.constraints.mc_hidden_cost", content: "O(log n), because suffixes get shorter", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.constraints.mc_hidden_cost.d", learning_item_id: "dsa.complexity.constraints.mc_hidden_cost", content: "O(1), because substr is just a view", is_correct: false, order_index: 40 },
+
+  { id: "dsa.complexity.time_space_tradeoffs.mc_prefix.a", learning_item_id: "dsa.complexity.time_space_tradeoffs.mc_prefix", content: "Spend O(n) extra space and preprocessing so each query is O(1)", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.time_space_tradeoffs.mc_prefix.b", learning_item_id: "dsa.complexity.time_space_tradeoffs.mc_prefix", content: "Use no extra space and make each query O(1)", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.time_space_tradeoffs.mc_prefix.c", learning_item_id: "dsa.complexity.time_space_tradeoffs.mc_prefix", content: "Spend O(n^2) space so each query scans the whole array", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.time_space_tradeoffs.mc_prefix.d", learning_item_id: "dsa.complexity.time_space_tradeoffs.mc_prefix", content: "Sort the array first so original ranges are preserved", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.pattern_recognition.mc_window.a", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "Sliding window", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.pattern_recognition.mc_window.b", learning_item_id: "dsa.complexity.pattern_recognition.mc_window", content: "Binary search on the answer", is_correct: false, order_index: 20 },
@@ -6155,6 +6234,10 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.complexity.bruteforce_then_optimize.mc_step.b", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Rewrite the same approach in a faster language", is_correct: false, order_index: 20 },
   { id: "dsa.complexity.bruteforce_then_optimize.mc_step.c", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Add more comments and rename variables", is_correct: false, order_index: 30 },
   { id: "dsa.complexity.bruteforce_then_optimize.mc_step.d", learning_item_id: "dsa.complexity.bruteforce_then_optimize.mc_step", content: "Increase the recursion depth limit", is_correct: false, order_index: 40 },
+  { id: "dsa.complexity.correctness_reasoning.mc_invariant.a", learning_item_id: "dsa.complexity.correctness_reasoning.mc_invariant", content: "A fact that is true before the loop and preserved after every iteration", is_correct: true, order_index: 10 },
+  { id: "dsa.complexity.correctness_reasoning.mc_invariant.b", learning_item_id: "dsa.complexity.correctness_reasoning.mc_invariant", content: "A benchmark showing the implementation is fast enough", is_correct: false, order_index: 20 },
+  { id: "dsa.complexity.correctness_reasoning.mc_invariant.c", learning_item_id: "dsa.complexity.correctness_reasoning.mc_invariant", content: "A sample input that happens to pass", is_correct: false, order_index: 30 },
+  { id: "dsa.complexity.correctness_reasoning.mc_invariant.d", learning_item_id: "dsa.complexity.correctness_reasoning.mc_invariant", content: "A variable name chosen before coding", is_correct: false, order_index: 40 },
 
   { id: "dsa.arrays.indexing.mc_last_index.a", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n - 1", is_correct: true, order_index: 10 },
   { id: "dsa.arrays.indexing.mc_last_index.b", learning_item_id: "dsa.arrays.indexing.mc_last_index", content: "n", is_correct: false, order_index: 20 },
