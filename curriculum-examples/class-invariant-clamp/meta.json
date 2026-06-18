@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.structs_classes.invariants_intro.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "100\n0\n100\n",
+  "note": "Percentage keeps the invariant value in [0,100]: the constructor clamps 150 to 100 and -20 to 0, and set() preserves it by clamping 200 to 100."
+}

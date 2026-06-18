@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.self_assignment.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\n7\n",
+  "note": "The self-assignment guard keeps a = alias (aliasing a itself) valid at 42; a normal assignment from b then deep-copies to 7."
+}
