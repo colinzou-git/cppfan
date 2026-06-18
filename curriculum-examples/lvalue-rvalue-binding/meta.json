@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.lvalue_rvalue.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "lvalue\nrvalue\nrvalue\nrvalue\n42\n",
+  "note": "Overload resolution sends the lvalue x to const int& and temporaries (42, x+1, std::move(x)) to int&&; a const lvalue reference binds the temporary 42."
+}

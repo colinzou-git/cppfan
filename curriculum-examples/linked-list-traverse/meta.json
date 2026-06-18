@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.linked_list.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "10 20 30 \n30\n",
+  "note": "A unique_ptr-owned singly linked list built by push-front (10->20->30) is traversed via next pointers; indexed access at position 2 is O(n) and yields 30."
+}
