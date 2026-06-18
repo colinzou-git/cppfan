@@ -1,14 +1,14 @@
 # Write-Code Exercises (Codespaces workflow)
 
-Status: First slice of roadmap issue #81. Quizzes, code reading, and Parsons
-puzzles scaffold understanding, but proficiency needs writing, compiling,
-testing, and debugging real code. These exercises run in **GitHub Codespaces**
-(or any machine with a C++20 compiler) — cppFan never executes arbitrary C++ on
-its web server.
+Status: implemented roadmap issue #81 / #128 workflow. Quizzes, code reading,
+and Parsons puzzles scaffold understanding, but proficiency needs writing,
+compiling, testing, and debugging real code. These exercises run in **GitHub
+Codespaces** (or any machine with a C++20 compiler); cppFan never executes
+arbitrary C++ on its web server.
 
 ## Package layout
 
-```
+```text
 exercises/<exercise-id>/
   README.md          # the task, requirements, and commands
   exercise.json      # id, skills, difficulty, editable files, build/test commands
@@ -23,7 +23,7 @@ and lists the editable files, build/test commands, required test names, and
 hints. The solution and the tests' answer logic are kept out of the
 learner-facing default path (`work/` only ever contains the starter).
 
-## The three commands
+## The Three Commands
 
 All scripts write **only** inside the exercise's own `work/` directory and
 refuse to touch anything else.
@@ -42,31 +42,34 @@ scripts/exercises/reset.sh <exercise-id>
 ```
 
 The build uses `g++ -std=c++20 -Wall -Wextra -Wpedantic
--fsanitize=address,undefined`. On a toolchain without AddressSanitizer (e.g.
-some Windows/MinGW setups) prefix with `EX_SANITIZE=0`. Linux Codespaces have
+-fsanitize=address,undefined`. On a toolchain without AddressSanitizer, such as
+some Windows/MinGW setups, prefix with `EX_SANITIZE=0`. Linux Codespaces have
 ASan, so leave it on there.
 
 ## On iPhone / iPad
 
-1. In cppFan, open an exercise and tap **Open exercise instructions** — this
-   points at `exercises/<id>/README.md` on GitHub.
+1. In cppFan, open an exercise and tap **Open instructions** to see the package
+   path and commands.
 2. Open the repo in a **Codespace** from the GitHub mobile app or Safari
-   (Code → Codespaces → Create). Codespaces give you a real Linux terminal in
-   the browser, so the three commands above work unchanged on a phone.
-3. Run `prepare`, edit `work/<file>` in the Codespace editor, run `test`.
+   (`Code` -> `Codespaces` -> `Create`). Codespaces give you a real Linux
+   terminal in the browser, so the three commands above work unchanged on a
+   phone.
+3. Run `prepare`, edit `work/<file>` in the Codespace editor, then run `test`.
 4. When the tests pass, return to cppFan and mark the exercise complete.
 
-## Completion evidence
+## Completion Evidence
 
-The first version is explicit/manual: the learner marks **tests passed** and
-optionally records a short reflection. cppFan records `write_code_started` and
-`write_code_completed` skill events for the exercise's `skill_ids`. As with all
-practice, this contributes mastery **evidence** — it does not automatically
-declare mastery, and it stays separate from FSRS review scheduling (ADR 0003).
+The workflow is explicit/manual: the learner marks **tests passed** and
+optionally records a short reflection. cppFan records write-code skill evidence
+with the stable ledger names `code_attempted` and `code_passed` for the
+exercise's `skill_ids`. As with all practice, this contributes mastery
+**evidence**; it does not automatically declare mastery, and it stays separate
+from FSRS review scheduling (ADR 0003).
+
 A later iteration may verify a GitHub Actions result or a signed exercise
 report instead of a manual mark.
 
-## Current exercises
+## Current Exercises
 
 | id | skills | lab |
 | --- | --- | --- |
@@ -74,18 +77,15 @@ report instead of a manual mark.
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `dsa-two-sum-sorted` | two pointers, Big-O | `csv-table-summarizer` |
 
-## Maintaining exercises (CI)
+## Maintaining Exercises (CI)
 
 `scripts/exercises/verify-all.sh` builds every reference solution and confirms
-it passes its own tests, and builds every starter (which is expected to *fail*
-the tests until implemented). Run it before changing an exercise:
+it passes its own tests, and builds every starter (which is expected to fail the
+tests until implemented). Run it before changing an exercise:
 
 ```bash
 scripts/exercises/verify-all.sh        # EX_SANITIZE=0 on MinGW
 ```
 
-**Follow-up:** wire `verify-all.sh` into CI as a job that installs `g++` and
-runs the script, so starter and solution builds are validated on every change
-(acceptance criterion of #81). That touches `.github/workflows`, a guardrailed
-area, so it is intentionally left as a separate, reviewed change rather than
-bundled here.
+The CI `C++ exercises` job runs `scripts/exercises/verify-all.sh`, so starter
+and solution builds are validated on every change from a clean Linux checkout.
