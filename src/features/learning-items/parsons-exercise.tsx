@@ -27,6 +27,7 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [hintVisible, setHintVisible] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function move(index: number, delta: number) {
@@ -48,6 +49,26 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
     setFeedback(null);
     setAnnouncement(`${rows[index]?.included ? "Excluded" : "Included"} line: ${rows[index]?.block.content ?? ""}`);
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, included: !row.included } : row)));
+  }
+
+  function moveDraggedBlock(targetId: string) {
+    if (!draggingId || draggingId === targetId) {
+      return;
+    }
+    setFeedback(null);
+    const targetContent = rows.find((row) => row.block.id === targetId)?.block.content ?? "";
+    setAnnouncement(`Dragged line before: ${targetContent}`);
+    setRows((prev) => {
+      const from = prev.findIndex((row) => row.block.id === draggingId);
+      const to = prev.findIndex((row) => row.block.id === targetId);
+      if (from < 0 || to < 0 || from === to) {
+        return prev;
+      }
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   }
 
   function retry() {
@@ -101,6 +122,25 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
         {rows.map((row, index) => (
           <li
             key={row.block.id}
+            draggable={!isPending}
+            onDragStart={(event) => {
+              setDraggingId(row.block.id);
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", row.block.id);
+              setAnnouncement(`Started dragging line: ${row.block.content}`);
+            }}
+            onDragOver={(event) => {
+              if (draggingId) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              moveDraggedBlock(row.block.id);
+              setDraggingId(null);
+            }}
+            onDragEnd={() => setDraggingId(null)}
             className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${
               row.included ? "border-slate-200 bg-white" : "border-dashed border-slate-300 bg-slate-50 opacity-60"
             }`}

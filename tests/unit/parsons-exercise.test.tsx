@@ -19,6 +19,15 @@ function blocks(): PublicParsonsBlock[] {
   ];
 }
 
+function dataTransfer() {
+  return {
+    effectAllowed: "move",
+    dropEffect: "move",
+    setData: vi.fn(),
+    getData: vi.fn()
+  };
+}
+
 describe("ParsonsExercise (#124)", () => {
   beforeEach(() => {
     submitParsons.mockReset();
@@ -58,6 +67,22 @@ describe("ParsonsExercise (#124)", () => {
     await waitFor(() =>
       expect(submitParsons).toHaveBeenCalledWith({ itemId: "item", blockIds: ["b2", "b1"] })
     );
+  });
+
+  it("supports drag reorder as an additional pointer path", () => {
+    render(<ParsonsExercise itemId="item" blocks={blocks()} />);
+    const transfer = dataTransfer();
+
+    fireEvent.dragStart(screen.getAllByTestId("parsons-block")[0], { dataTransfer: transfer });
+    fireEvent.dragOver(screen.getAllByTestId("parsons-block")[2], { dataTransfer: transfer });
+    fireEvent.drop(screen.getAllByTestId("parsons-block")[2], { dataTransfer: transfer });
+
+    expect(screen.getAllByTestId("parsons-block").map((row) => row.getAttribute("data-block-id"))).toEqual([
+      "b2",
+      "d1",
+      "b1"
+    ]);
+    expect(screen.getByTestId("parsons-announcement")).toHaveTextContent(/dragged line before/i);
   });
 
   it("announces reordering and can reset with retry", () => {
