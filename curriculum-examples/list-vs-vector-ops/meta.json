@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.list_vs_vector.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3 3\n1 2 3 4 \n",
+  "note": "std::vector appends and indexes contiguously (size 3, v[2]==3); std::list inserts in O(1) given an iterator, splicing 3 before 4 to make 1 2 3 4."
+}
