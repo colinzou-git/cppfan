@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.value_semantics.deep_copy.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "10\n99\n",
+  "note": "A hand-written deep copy allocates a separate buffer, so modifying the copy (b -> 99) leaves the original independent at 10."
+}
