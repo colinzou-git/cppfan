@@ -110,6 +110,39 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect(skillId).toBeTruthy();
   });
 
+  it("allows shared curriculum reads without exposing answer-key columns", async () => {
+    for (const client of [clientA, anon]) {
+      const item = await client.from("learning_items").select("id,title").eq("id", ITEM_ID).single();
+      expect(item.error).toBeNull();
+      expect(item.data?.id).toBe(ITEM_ID);
+
+      const skills = await client.from("skills").select("id,title").eq("id", skillId).single();
+      expect(skills.error).toBeNull();
+      expect(skills.data?.id).toBe(skillId);
+
+      const mappings = await client
+        .from("learning_item_skills")
+        .select("learning_item_id,skill_id")
+        .eq("learning_item_id", ITEM_ID);
+      expect(mappings.error).toBeNull();
+      expect((mappings.data ?? []).some((row) => row.skill_id === skillId)).toBe(true);
+
+      const choices = await client
+        .from("learning_item_choices")
+        .select("id,content,order_index")
+        .eq("learning_item_id", ITEM_ID)
+        .order("order_index");
+      expect(choices.error).toBeNull();
+      expect((choices.data ?? []).map((row) => row.id)).toContain(correctChoice);
+    }
+
+    const asUser = await clientA.from("learning_item_choices").select("is_correct").limit(1);
+    expect(asUser.error).not.toBeNull();
+
+    const asAnon = await anon.from("learning_item_choices").select("is_correct").limit(1);
+    expect(asAnon.error).not.toBeNull();
+  });
+
   it("grades from the database answer key, not a client-supplied verdict", async () => {
     const wrong = await clientA.rpc("grade_learning_item_choice", {
       p_item_id: ITEM_ID,
