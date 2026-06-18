@@ -3,7 +3,7 @@
 // out, offline, and pre-migration. Persisted results are read per-user via RLS.
 import { createClient } from "@/lib/supabase/server";
 import { getLearningItemById } from "@/features/learning-items/learning-item-seed";
-import { getPlacementModules } from "./placement-seed";
+import { getPlacementModules, MAX_PLACEMENT_QUESTION_COUNT } from "./placement-seed";
 import type { PlacementLevel } from "./placement-scoring";
 import type { PublicLearningItemChoice } from "@/features/learning-items/learning-item-types";
 
@@ -22,11 +22,18 @@ export type StoredPlacementResult = {
   total: number;
 };
 
-/** The placement questions in module/display order (answer keys never included). */
+/** The placement questions in balanced module order (answer keys never included). */
 export function getPlacementAssessment(): PlacementQuestion[] {
   const questions: PlacementQuestion[] = [];
-  for (const module of getPlacementModules()) {
-    for (const itemId of module.item_ids) {
+  const modules = getPlacementModules();
+  const maxModuleItems = Math.max(...modules.map((module) => module.item_ids.length));
+
+  for (let itemIndex = 0; itemIndex < maxModuleItems; itemIndex += 1) {
+    for (const module of modules) {
+      const itemId = module.item_ids[itemIndex];
+      if (!itemId) {
+        continue;
+      }
       const details = getLearningItemById(itemId);
       if (!details) {
         continue;
@@ -38,6 +45,9 @@ export function getPlacementAssessment(): PlacementQuestion[] {
         prompt: details.item.prompt,
         choices: details.choices
       });
+      if (questions.length >= MAX_PLACEMENT_QUESTION_COUNT) {
+        return questions;
+      }
     }
   }
   return questions;

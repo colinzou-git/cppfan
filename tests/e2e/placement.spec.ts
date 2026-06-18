@@ -9,6 +9,10 @@ test("taking the placement assessment shows per-module suggestions", async ({ pa
 
   const form = page.getByTestId("placement-assessment");
   await expect(form).toBeVisible();
+  await expect(page.getByTestId("placement-question-count")).toContainText("Showing 7 of 60");
+
+  await page.getByTestId("placement-show-more").click();
+  await expect(page.getByTestId("placement-question-count")).toContainText("Showing 14 of 60");
 
   // Answer the first question correctly; the rest stay unanswered (start here).
   await form.getByText("Public", { exact: true }).first().click();

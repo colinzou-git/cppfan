@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { learningItems } from "@/features/learning-items/learning-item-seed";
 import {
+  INITIAL_PLACEMENT_QUESTION_COUNT,
+  MAX_PLACEMENT_QUESTION_COUNT,
   getPlacementItemIds,
   getPlacementModules,
   placementModules
 } from "@/features/placement/placement-seed";
+import { getPlacementAssessment } from "@/features/placement/placement-queries";
 import { classifyPlacement, summarizeModule } from "@/features/placement/placement-scoring";
 
 const itemIds = new Set(learningItems.map((item) => item.id));
@@ -36,6 +39,15 @@ describe("placement definitions integrity (#125)", () => {
     const ids = getPlacementItemIds();
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids[0]).toBe(getPlacementModules()[0].item_ids[0]);
+  });
+
+  it("offers an extended placement check after the first 7 questions, capped at 60", () => {
+    const questions = getPlacementAssessment();
+    expect(questions.length).toBeGreaterThan(INITIAL_PLACEMENT_QUESTION_COUNT);
+    expect(questions.length).toBeLessThanOrEqual(MAX_PLACEMENT_QUESTION_COUNT);
+    expect(questions.slice(0, INITIAL_PLACEMENT_QUESTION_COUNT).map((q) => q.moduleId)).toEqual(
+      getPlacementModules().map((module) => module.module_id)
+    );
   });
 });
 

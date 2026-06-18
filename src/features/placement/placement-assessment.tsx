@@ -4,6 +4,11 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { resetPlacement, submitPlacement } from "./placement-actions";
+import {
+  INITIAL_PLACEMENT_QUESTION_COUNT,
+  MAX_PLACEMENT_QUESTION_COUNT,
+  PLACEMENT_QUESTION_BATCH_SIZE
+} from "./placement-seed";
 import type { PlacementModuleResult } from "./placement-scoring";
 import type { PlacementQuestion, StoredPlacementResult } from "./placement-queries";
 
@@ -63,10 +68,17 @@ export function PlacementAssessment({
   const [results, setResults] = useState<PlacementModuleResult[] | null>(null);
   const [persisted, setPersisted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(() =>
+    Math.min(INITIAL_PLACEMENT_QUESTION_COUNT, questions.length, MAX_PLACEMENT_QUESTION_COUNT)
+  );
   const [isPending, startTransition] = useTransition();
 
   const answeredCount = Object.keys(answers).length;
   const hasStored = initialResults.length > 0;
+  const maxVisible = Math.min(questions.length, MAX_PLACEMENT_QUESTION_COUNT);
+  const visibleQuestions = questions.slice(0, visibleCount);
+  const remainingQuestionCount = maxVisible - visibleCount;
+  const nextQuestionBatchSize = Math.min(PLACEMENT_QUESTION_BATCH_SIZE, Math.max(0, remainingQuestionCount));
 
   function onSubmit() {
     setError(null);
@@ -85,6 +97,7 @@ export function PlacementAssessment({
     setAnswers({});
     setResults(null);
     setError(null);
+    setVisibleCount(Math.min(INITIAL_PLACEMENT_QUESTION_COUNT, questions.length, MAX_PLACEMENT_QUESTION_COUNT));
   }
 
   function onReset() {
@@ -97,6 +110,7 @@ export function PlacementAssessment({
       }
       setAnswers({});
       setResults(null);
+      setVisibleCount(Math.min(INITIAL_PLACEMENT_QUESTION_COUNT, questions.length, MAX_PLACEMENT_QUESTION_COUNT));
     });
   }
 
@@ -133,6 +147,9 @@ export function PlacementAssessment({
         Answer what you can — skip anything you are unsure about. This optional check suggests where to
         start. It never locks content or changes your mastery.
       </p>
+      <p className="text-xs font-semibold text-slate-500" data-testid="placement-question-count">
+        Showing {visibleQuestions.length} of {maxVisible} placement questions.
+      </p>
 
       {hasStored ? (
         <p className="text-xs font-medium text-slate-500" data-testid="placement-has-stored">
@@ -141,7 +158,7 @@ export function PlacementAssessment({
       ) : null}
 
       <ol className="grid gap-5">
-        {questions.map((q, index) => (
+        {visibleQuestions.map((q, index) => (
           <li key={q.itemId}>
             <fieldset className="grid gap-2">
               <legend className="text-sm font-semibold text-slate-800">
@@ -189,6 +206,17 @@ export function PlacementAssessment({
         <Button type="button" onClick={onSubmit} disabled={isPending} data-testid="placement-submit">
           {isPending ? "Scoring…" : `See my suggestions${answeredCount > 0 ? ` (${answeredCount})` : ""}`}
         </Button>
+        {nextQuestionBatchSize > 0 ? (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setVisibleCount((count) => Math.min(count + PLACEMENT_QUESTION_BATCH_SIZE, maxVisible))}
+            disabled={isPending}
+            data-testid="placement-show-more"
+          >
+            Add {nextQuestionBatchSize} more questions
+          </Button>
+        ) : null}
         {authenticated && hasStored ? (
           <Button type="button" variant="secondary" onClick={onReset} disabled={isPending} data-testid="placement-reset">
             Reset saved results
