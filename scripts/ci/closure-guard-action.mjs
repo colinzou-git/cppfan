@@ -12,19 +12,18 @@
 // code, so it is safe to run on the `pull_request` trigger (not pull_request_target).
 
 import { readFileSync } from "node:fs";
-import { evaluateIssueClosure, isCompletionTracked } from "./closure-guard.mjs";
-
-const CLOSING_KEYWORD = /\b(clos|fix|resolv)e[sd]?\s+#\d+/i;
+import {
+  evaluateIssueClosure,
+  evaluatePullRequestClosure,
+  isCompletionTracked,
+  parsePrCompletion,
+  referencedIssueNumbers
+} from "./closure-guard.mjs";
 
 function readEvent() {
   const path = process.env.GITHUB_EVENT_PATH;
   if (!path) throw new Error("GITHUB_EVENT_PATH is not set");
   return JSON.parse(readFileSync(path, "utf8"));
-}
-
-function parsePrCompletion(body = "") {
-  const m = body.match(/Completion status:\s*(partial|complete)\b/i);
-  return m ? m[1].toLowerCase() : null;
 }
 
 async function gh(pathname, { method = "GET", body } = {}) {
@@ -41,6 +40,27 @@ async function gh(pathname, { method = "GET", body } = {}) {
   });
   if (!res.ok) throw new Error(`GitHub API ${method} ${pathname} -> ${res.status} ${await res.text()}`);
   return res.status === 204 ? null : res.json();
+}
+
+async function getIssue(number) {
+  const issue = await gh(`/issues/${number}`);
+  return {
+    number: issue.number,
+    title: issue.title ?? "",
+    labels: issue.labels ?? [],
+    body: issue.body ?? ""
+  };
+}
+
+async function getClosingPrCompletion(issueNumber) {
+  const timeline = await gh(`/issues/${issueNumber}/timeline?per_page=100`);
+  const closingEvent = [...timeline].reverse().find((event) => event.event === "closed");
+  const sourceIssue = closingEvent?.source?.issue;
+  if (!sourceIssue?.pull_request || !sourceIssue.number) {
+    return null;
+  }
+  const pr = await gh(`/pulls/${sourceIssue.number}`);
+  return parsePrCompletion(pr.body ?? "");
 }
 
 async function handleIssueClosed(event) {
@@ -63,7 +83,7 @@ async function handleIssueClosed(event) {
     body: issue.body ?? "",
     comments,
     completionTracked: true,
-    linkedPrCompletion: null
+    linkedPrCompletion: await getClosingPrCompletion(issue.number)
   });
 
   if (allowed) {
@@ -86,16 +106,14 @@ async function handleIssueClosed(event) {
   console.log(`Reopened #${issue.number}: ${violations.length} violation(s).`);
 }
 
-function handlePullRequest(event) {
+async function handlePullRequest(event) {
   const pr = event.pull_request;
   if (!pr) return;
   const body = pr.body ?? "";
-  const completion = parsePrCompletion(body);
-  if (completion === "partial" && CLOSING_KEYWORD.test(body)) {
-    console.error(
-      "Closure-guard FAIL: this PR is marked `Completion status: partial` but uses a closing " +
-        "keyword (Closes/Fixes/Resolves #N). Use `Part of #N` for partial work."
-    );
+  const referencedIssues = await Promise.all(referencedIssueNumbers(body).map((number) => getIssue(number)));
+  const { allowed, violations, completion } = evaluatePullRequestClosure({ body, referencedIssues });
+  if (!allowed) {
+    console.error(`Closure-guard FAIL:\n${violations.map((v) => `- ${v}`).join("\n")}`);
     process.exitCode = 1;
     return;
   }
@@ -108,7 +126,7 @@ async function main() {
   if (eventName === "issues") {
     await handleIssueClosed(event);
   } else if (eventName === "pull_request" || eventName === "pull_request_target") {
-    handlePullRequest(event);
+    await handlePullRequest(event);
   } else {
     console.log(`closure-guard: no action for event ${eventName}`);
   }

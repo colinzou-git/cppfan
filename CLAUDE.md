@@ -140,6 +140,8 @@ slice is a recurring defect (see #132/#147); these rules prevent it.
   enforces this: a completion-tracked issue closed with unchecked boxes, a
   "still open"/"not closing" comment, a linked partial PR, or no final audit is
   automatically reopened with the reasons.
+- Persistent unfinished-work rules live in `.claude/UNFINISHED_WORK.md`; read them
+  before acting on any parent, roadmap, completion, or multi-slice issue.
 
 ## Quality bar
 

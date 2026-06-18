@@ -47,6 +47,37 @@ export function hasFinalAudit(comments = []) {
   return comments.some((c) => FINAL_AUDIT_MARKER.test(c ?? ""));
 }
 
+export function latestFinalAuditIndex(comments = []) {
+  for (let index = comments.length - 1; index >= 0; index -= 1) {
+    if (FINAL_AUDIT_MARKER.test(comments[index] ?? "")) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+export function remainingWorkCommentsToEvaluate(comments = []) {
+  const auditIndex = latestFinalAuditIndex(comments);
+  return auditIndex >= 0 ? comments.slice(auditIndex + 1) : comments;
+}
+
+export function parsePrCompletion(body = "") {
+  const match = (body ?? "").match(/Completion status:\s*`?(partial|complete)`?\b/i);
+  return match ? match[1].toLowerCase() : null;
+}
+
+export function closingIssueNumbers(body = "") {
+  return [
+    ...new Set(
+      [...(body ?? "").matchAll(/\b(?:clos|fix|resolv)e[sd]?\s+#(\d+)/gi)].map((match) => Number(match[1]))
+    )
+  ];
+}
+
+export function referencedIssueNumbers(body = "") {
+  return [...new Set([...(body ?? "").matchAll(/#(\d+)/g)].map((match) => Number(match[1])))];
+}
+
 function normalizeLabels(labels = []) {
   return new Set(
     labels.map((l) => (typeof l === "string" ? l : (l?.name ?? "")).toLowerCase()).filter(Boolean)
@@ -99,7 +130,7 @@ export function evaluateIssueClosure({
   if (hasUncheckedBoxes(body)) {
     violations.push("Issue body still has unchecked acceptance/task items (`- [ ]`).");
   }
-  if (comments.some((c) => mentionsRemainingWork(c))) {
+  if (remainingWorkCommentsToEvaluate(comments).some((c) => mentionsRemainingWork(c))) {
     violations.push('A comment records remaining work (e.g. "still open" / "not closing" / "remaining work").');
   }
   if (!hasFinalAudit(comments)) {
@@ -107,4 +138,32 @@ export function evaluateIssueClosure({
   }
 
   return { allowed: violations.length === 0, violations };
+}
+
+/**
+ * Evaluate PR body closure declarations against referenced issue metadata.
+ * Missing completion status is allowed for PRs that reference only focused
+ * one-PR issues, but rejected when any referenced issue is completion-tracked.
+ */
+export function evaluatePullRequestClosure({ body = "", referencedIssues = [] } = {}) {
+  const completion = parsePrCompletion(body);
+  const closing = new Set(closingIssueNumbers(body));
+  const trackedReferenced = referencedIssues.filter((issue) => isCompletionTracked(issue));
+  const violations = [];
+
+  if (trackedReferenced.length > 0 && !completion) {
+    violations.push("Completion status is required when a PR references completion-tracked issues.");
+  }
+  if (completion === "partial" && closing.size > 0) {
+    violations.push("A partial PR cannot use issue-closing keywords.");
+  }
+  if (completion === "partial") {
+    for (const issue of trackedReferenced) {
+      if (closing.has(issue.number)) {
+        violations.push(`Partial PR attempts to close completion-tracked issue #${issue.number}.`);
+      }
+    }
+  }
+
+  return { allowed: violations.length === 0, violations, completion };
 }
