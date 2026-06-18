@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.interface_intent.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "2\nmissing\n",
+  "note": "Borrow input with std::span and return std::optional for expected absence."
+}

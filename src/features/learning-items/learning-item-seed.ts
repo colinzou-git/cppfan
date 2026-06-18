@@ -776,6 +776,69 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.references.interface_intent.lesson",
+    type: "lesson",
+    title: "Reading function-interface intent",
+    prompt:
+      "A good function signature tells you who owns data, who may mutate it, and what result to expect. Inputs that are small or cheap to copy can be passed by value (`int count`). Large read-only inputs use `const T&`, `std::span<const T>`, or `std::string_view`. A non-const `T&` means in-out or output: the caller's object may change, so use it sparingly and name it clearly. Prefer returning a value for a new result (`Stats summarize(...)`) instead of filling an output parameter; modern C++ makes returned values cheap through copy elision and moves. Use raw pointers only for non-owning optional observation (`const Widget* maybe_parent`), never to imply ownership transfer. When a signature mixes return values, refs, pointers, and views, ask: is this input only, output, in-out, optional, or borrowed?",
+    explanation:
+      "Signatures communicate contracts: value/const&/view for inputs, non-const& for deliberate mutation, pointer for nullable non-owning access, and return values for new results.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3450,
+    is_active: true
+  },
+  {
+    id: "cpp.references.interface_intent.mc_result",
+    type: "multiple_choice",
+    title: "Prefer the clearest result channel",
+    prompt: "Which signature best communicates that a function computes and returns a new `Stats` value from read-only samples?",
+    explanation:
+      "`Stats summarize(std::span<const Sample>)` makes samples read-only borrowed input and returns the new result directly. Output parameters obscure the result channel and are unnecessary here.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3460,
+    is_active: true
+  },
+  {
+    id: "cpp.references.interface_intent.bug_ownership",
+    type: "bug_spotting",
+    title: "Spot the misleading ownership signal",
+    prompt:
+      "What is misleading about this interface?\n\n```cpp\nvoid render(Widget* widget);\n```\n\nThe function only reads a widget, and the widget is required to exist.",
+    explanation:
+      "A raw pointer suggests nullable observation, and some readers may wonder whether ownership is involved. Since the widget is required and read-only, `void render(const Widget& widget);` communicates the contract more clearly.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 3470,
+    is_active: true
+  },
+  {
+    id: "cpp.references.optional_overloads.lesson",
+    type: "lesson",
+    title: "Optional results, overloads, and defaults",
+    prompt:
+      "`std::optional<T>` is the right return type when a value may be absent and absence is an expected outcome: `std::optional<User> find_user(Id id)`. It beats magic sentinels like `-1` because the type forces the caller to check. For parameters, use a default argument when one value is just a common default (`int limit = 10`). Use overloads when the caller has genuinely different input shapes, such as `load(std::string_view path)` and `load(std::istream& in)`. Avoid overload sets that differ only by subtle conversions, and avoid optional output parameters that hide whether the function succeeded. Pair this with views: use `std::string_view` or `std::span<const T>` for borrowed input, `std::optional<T>` for maybe-output, and a clear return type for the main result.",
+    explanation:
+      "Use optional for expected absence, default arguments for simple default values, and overloads for genuinely different input forms. Keep the main result in the return type.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3480,
+    is_active: true
+  },
+  {
+    id: "cpp.references.optional_overloads.mc_find",
+    type: "multiple_choice",
+    title: "Choosing optional for absence",
+    prompt: "A lookup may or may not find a matching index. Which return type best communicates that expected absence?",
+    explanation:
+      "`std::optional<std::size_t>` states that the function either returns an index or no value. It avoids magic sentinels and makes the caller handle the empty case.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 3490,
+    is_active: true
+  },
+  {
     id: "cpp.structs_classes.syntax.lesson",
     type: "lesson",
     title: "Defining a struct or class",
@@ -5237,6 +5300,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.references.non_owning.mc_select", skill_id: "cpp.references.non_owning", is_primary: true },
   { learning_item_id: "cpp.references.views.lesson", skill_id: "cpp.references.views", is_primary: true },
   { learning_item_id: "cpp.references.views.mc_use", skill_id: "cpp.references.views", is_primary: true },
+  { learning_item_id: "cpp.references.interface_intent.lesson", skill_id: "cpp.references.interface_intent", is_primary: true },
+  { learning_item_id: "cpp.references.interface_intent.mc_result", skill_id: "cpp.references.interface_intent", is_primary: true },
+  { learning_item_id: "cpp.references.interface_intent.bug_ownership", skill_id: "cpp.references.interface_intent", is_primary: true },
+  { learning_item_id: "cpp.references.optional_overloads.lesson", skill_id: "cpp.references.optional_overloads", is_primary: true },
+  { learning_item_id: "cpp.references.optional_overloads.mc_find", skill_id: "cpp.references.optional_overloads", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.lesson", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.mc_default_access", skill_id: "cpp.structs_classes.syntax", is_primary: true },
   { learning_item_id: "cpp.structs_classes.syntax.code_reading_object", skill_id: "cpp.structs_classes.syntax", is_primary: true },
@@ -5744,6 +5812,14 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.references.views.mc_use.c", learning_item_id: "cpp.references.views.mc_use", content: "Take a std::string by value (copy it)", is_correct: false, order_index: 30 },
   { id: "cpp.references.views.mc_use.d", learning_item_id: "cpp.references.views.mc_use", content: "Take a char* and use pointer arithmetic", is_correct: false, order_index: 40 },
 
+  { id: "cpp.references.interface_intent.mc_result.a", learning_item_id: "cpp.references.interface_intent.mc_result", content: "Stats summarize(std::span<const Sample> samples)", is_correct: true, order_index: 10 },
+  { id: "cpp.references.interface_intent.mc_result.b", learning_item_id: "cpp.references.interface_intent.mc_result", content: "void summarize(std::span<const Sample> samples, Stats& out)", is_correct: false, order_index: 20 },
+  { id: "cpp.references.interface_intent.mc_result.c", learning_item_id: "cpp.references.interface_intent.mc_result", content: "Stats* summarize(const Sample* samples, int count)", is_correct: false, order_index: 30 },
+  { id: "cpp.references.interface_intent.mc_result.d", learning_item_id: "cpp.references.interface_intent.mc_result", content: "void summarize(Sample* samples)", is_correct: false, order_index: 40 },
+  { id: "cpp.references.optional_overloads.mc_find.a", learning_item_id: "cpp.references.optional_overloads.mc_find", content: "std::optional<std::size_t>", is_correct: true, order_index: 10 },
+  { id: "cpp.references.optional_overloads.mc_find.b", learning_item_id: "cpp.references.optional_overloads.mc_find", content: "std::size_t, returning 0 when missing", is_correct: false, order_index: 20 },
+  { id: "cpp.references.optional_overloads.mc_find.c", learning_item_id: "cpp.references.optional_overloads.mc_find", content: "bool with an output parameter for the index", is_correct: false, order_index: 30 },
+  { id: "cpp.references.optional_overloads.mc_find.d", learning_item_id: "cpp.references.optional_overloads.mc_find", content: "A raw pointer to a local index", is_correct: false, order_index: 40 },
   { id: "cpp.structs_classes.syntax.mc_default_access.a", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Public", is_correct: true, order_index: 10 },
   { id: "cpp.structs_classes.syntax.mc_default_access.b", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Private", is_correct: false, order_index: 20 },
   { id: "cpp.structs_classes.syntax.mc_default_access.c", learning_item_id: "cpp.structs_classes.syntax.mc_default_access", content: "Protected", is_correct: false, order_index: 30 },

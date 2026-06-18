@@ -66,6 +66,38 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "cpp-core-guidelines-interfaces",
+    name: "C++ Core Guidelines: interfaces",
+    url: "https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-interfaces",
+    kind: "guidelines",
+    description: "Guidance for function interfaces, parameter passing, ownership, and clear contracts.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-optional",
+    name: "cppreference: std::optional",
+    url: "https://en.cppreference.com/w/cpp/utility/optional",
+    kind: "reference",
+    description: "Reference for representing an expected maybe-value without sentinel values.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-span",
+    name: "cppreference: std::span",
+    url: "https://en.cppreference.com/w/cpp/container/span",
+    kind: "reference",
+    description: "Reference for non-owning contiguous range parameters.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-string-view",
+    name: "cppreference: std::string_view",
+    url: "https://en.cppreference.com/w/cpp/string/basic_string_view",
+    kind: "reference",
+    description: "Reference for non-owning string parameters and lifetime caveats.",
+    tags: ["cpp"]
+  },
+  {
     id: "hackerrank-cpp",
     name: "HackerRank C++",
     url: "https://www.hackerrank.com/domains/cpp",
