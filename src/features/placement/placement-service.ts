@@ -4,6 +4,7 @@
 // suggestions, and persists them per-user. Suggestion-only: no content lock, no
 // durable mastery.
 import { createClient } from "@/lib/supabase/server";
+import { recordSkillEvents } from "@/features/events/event-service";
 import { getGradingChoices, gradeViaRpc } from "@/features/learning-items/attempt-service";
 import { gradeChoiceAttempt } from "@/features/learning-items/grading";
 import { getPlacementAssessment } from "./placement-queries";
@@ -45,6 +46,7 @@ export async function runPlacement(answers: Record<string, string>): Promise<Pla
       data: { user }
     } = await supabase.auth.getUser();
     if (user) {
+      await recordSkillEvents([{ eventType: "placement_started", metadata: { answered_count: Object.keys(answers).length } }]);
       const now = new Date().toISOString();
       const rows = results.map((r) => ({
         user_id: user.id,
@@ -58,6 +60,17 @@ export async function runPlacement(answers: Record<string, string>): Promise<Pla
         .from("placement_results")
         .upsert(rows, { onConflict: "user_id,module_id" });
       persisted = !error;
+      if (persisted) {
+        await recordSkillEvents([
+          {
+            eventType: "placement_completed",
+            metadata: {
+              answered_count: Object.keys(answers).length,
+              module_count: results.length
+            }
+          }
+        ]);
+      }
     }
   }
 
@@ -76,5 +89,8 @@ export async function clearPlacement(): Promise<PlacementResetResult> {
     return { status: "ok" };
   }
   const { error } = await supabase.from("placement_results").delete().eq("user_id", user.id);
+  if (!error) {
+    await recordSkillEvents([{ eventType: "placement_reset" }]);
+  }
   return error ? { status: "error" } : { status: "ok" };
 }

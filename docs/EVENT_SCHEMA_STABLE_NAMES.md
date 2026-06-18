@@ -23,6 +23,9 @@ Use these event names in code:
 - capstone_milestone_started
 - capstone_milestone_completed
 - capstone_reflection_submitted
+- placement_started
+- placement_completed
+- placement_reset
 
 Common fields:
 

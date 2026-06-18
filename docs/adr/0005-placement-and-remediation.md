@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Tracks roadmap issue #73. Depends on the curriculum foundation (#65)
+Accepted / implemented. Tracks roadmap issue #73. Depends on the curriculum foundation (#65)
 and complements ADR 0004 (adaptive practice progression).
 
 ## Context
@@ -74,7 +74,7 @@ When an error pattern is observed (a tag accrues enough recent hits for a user):
 
 ## Events (stable names)
 
-Add to `docs/EVENT_SCHEMA_STABLE_NAMES.md`:
+Stable names in `docs/EVENT_SCHEMA_STABLE_NAMES.md`:
 `placement_started`, `placement_completed`, `placement_reset`,
 `error_pattern_observed`, `error_pattern_cleared`. These feed the mastery /
 recommendation engine, not FSRS scheduling (ADR 0003).

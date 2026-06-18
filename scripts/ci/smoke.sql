@@ -498,6 +498,11 @@ begin
     or position('capstone_reflection_submitted' in v_def) = 0 then
     raise exception 'skill_events must allow capstone events (#130)';
   end if;
+  if position('placement_started' in v_def) = 0
+    or position('placement_completed' in v_def) = 0
+    or position('placement_reset' in v_def) = 0 then
+    raise exception 'skill_events must allow placement events (#125)';
+  end if;
   raise notice 'event names smoke OK';
 end $$;
 
