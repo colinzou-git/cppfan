@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.return_semantics.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "42\n10\n20\n",
+  "note": "doubled returns by value (42); a member function returns a safe reference to a member (writes accumulate to 10); operator[] returns a reference into a container (20)."
+}
