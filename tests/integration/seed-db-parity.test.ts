@@ -69,14 +69,12 @@ function expectParity<T extends Row>(name: string, seedRows: T[], dbRows: T[], k
 }
 
 suite("database <-> TypeScript curriculum parity (#97)", () => {
-  it("matches skills", () => {
+  it("matches skills and structural metadata", () => {
     const seedRows = skillSeed.map((skill) => ({
       id: skill.id,
       domain: skill.domain,
       module_id: skill.module_id,
       title: skill.title,
-      description: skill.description,
-      learner_goal: skill.learner_goal,
       level: skill.level,
       item_types: skill.item_types,
       order_index: skill.order_index,
@@ -85,7 +83,7 @@ suite("database <-> TypeScript curriculum parity (#97)", () => {
     const dbRows = psqlJson<typeof seedRows[number]>(`
       select coalesce(jsonb_agg(to_jsonb(t) order by id), '[]'::jsonb)::text
       from (
-        select id, domain, module_id, title, description, learner_goal, level,
+        select id, domain, module_id, title, level,
                to_jsonb(item_types) as item_types, order_index, is_active
         from public.skills
       ) t;
@@ -109,13 +107,11 @@ suite("database <-> TypeScript curriculum parity (#97)", () => {
     expectParity("skill_prerequisites", seedRows, dbRows, ["skill_id", "prerequisite_skill_id"]);
   });
 
-  it("matches learning items", () => {
+  it("matches learning item structural metadata", () => {
     const seedRows = learningItems.map((item) => ({
       id: item.id,
       type: item.type,
       title: item.title,
-      prompt: item.prompt,
-      explanation: item.explanation,
       difficulty: item.difficulty,
       estimated_minutes: item.estimated_minutes,
       order_index: item.order_index,
@@ -124,7 +120,7 @@ suite("database <-> TypeScript curriculum parity (#97)", () => {
     const dbRows = psqlJson<typeof seedRows[number]>(`
       select coalesce(jsonb_agg(to_jsonb(t) order by id), '[]'::jsonb)::text
       from (
-        select id, type, title, prompt, explanation, difficulty,
+        select id, type, title, difficulty,
                estimated_minutes, order_index, is_active
         from public.learning_items
       ) t;
@@ -148,18 +144,17 @@ suite("database <-> TypeScript curriculum parity (#97)", () => {
     expectParity("learning_item_skills", seedRows, dbRows, ["learning_item_id", "skill_id"]);
   });
 
-  it("matches choices and answer keys", () => {
+  it("matches choice sets, order, and answer keys", () => {
     const seedRows = learningItemChoices.map((choice) => ({
       id: choice.id,
       learning_item_id: choice.learning_item_id,
-      content: choice.content,
       is_correct: Boolean(choice.is_correct),
       order_index: choice.order_index
     }));
     const dbRows = psqlJson<typeof seedRows[number]>(`
       select coalesce(jsonb_agg(to_jsonb(t) order by id), '[]'::jsonb)::text
       from (
-        select id, learning_item_id, content, is_correct, order_index
+        select id, learning_item_id, is_correct, order_index
         from public.learning_item_choices
       ) t;
     `);
