@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.constructors.default_constructor.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "0\n5\n",
+  "note": "Once Widget declares a parameterized constructor, `Widget() = default;` restores the no-arg one: a default-constructed Widget has count 0, a parameterized one 5."
+}

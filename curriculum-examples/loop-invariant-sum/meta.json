@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.control_flow.loop_invariants.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "150\n60\n",
+  "note": "A half-open [0, n) loop sums all five values to 150; a second loop uses continue (skip 40) and break (stop before 50) to total 10+20+30 = 60."
+}
