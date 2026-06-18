@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.representation.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "neighbors of 0: 1 2\n1\n0\n",
+  "note": "The adjacency list iterates vertex 0's neighbors (1, 2); the adjacency matrix gives O(1) edge lookups (0-1 present = 1, 1-2 absent = 0)."
+}

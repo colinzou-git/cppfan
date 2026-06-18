@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.shortest_path.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "0 3 1 4 7 \n",
+  "note": "Dijkstra with a min-priority queue computes shortest distances from vertex 0 over non-negative weights: 0,3,1,4,7."
+}
