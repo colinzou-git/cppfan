@@ -4,13 +4,15 @@
 // PROTECTED grading metadata: it lives server-side (choice_error_tags, locked
 // like is_correct) and is returned only AFTER a submission. This module is the
 // typed seed mirror + the pure rules; per-user evidence storage and the UI are
-// follow-up slices.
+// paired with per-user evidence storage and UI after submission.
 
 export type ErrorTagInfo = {
   /** Learner-friendly name of the misconception, used in recommendation reasons. */
   label: string;
   /** A concise explanation shown when the pattern is observed. */
   explanation: string;
+  /** Existing learning item used as a contrasting follow-up after remediation. */
+  followUpItemId: string;
 };
 
 /** Stable instructional error-tag catalog. Keys are the stable tag ids. */
@@ -18,19 +20,22 @@ export const ERROR_TAGS = {
   "cpp.references.copy_vs_alias": {
     label: "references are aliases, not copies or pointers",
     explanation:
-      "A C++ reference is another name for an existing object. It must bind to something that already exists, cannot be null, and is not created with new — assigning through it changes the original."
+      "A C++ reference is another name for an existing object. It must bind to something that already exists, cannot be null, and is not created with new -- assigning through it changes the original.",
+    followUpItemId: "cpp.references.const_correctness.mc_constref"
   },
   "cpp.structs_classes.struct_default_access": {
     label: "struct members are public by default",
     explanation:
-      "In a struct, members are public by default (private in a class). It is a fixed language rule, not compiler-dependent."
+      "In a struct, members are public by default (private in a class). It is a fixed language rule, not compiler-dependent.",
+    followUpItemId: "cpp.structs_classes.syntax.code_reading_object"
   },
   "dsa.complexity.loop_cost": {
     label: "a single loop over n is O(n)",
     explanation:
-      "One loop that visits each of n elements a constant amount of work is O(n) — not O(1) (work grows with n) and not O(n^2) (that needs a nested loop over n)."
+      "One loop that visits each of n elements a constant amount of work is O(n) -- not O(1) (work grows with n) and not O(n^2) (that needs a nested loop over n).",
+    followUpItemId: "dsa.complexity.growth_rates.mc_order"
   }
-} as const;
+} as const satisfies Record<string, ErrorTagInfo>;
 
 export type InstructionalTag = keyof typeof ERROR_TAGS;
 

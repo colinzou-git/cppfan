@@ -20,7 +20,7 @@ export type RemediationRec = {
   title: string;
   /** Reason naming the observed misconception. */
   reason: string;
-  /** A learning item that exercised the misconception, to re-practice. */
+  /** A contrasting follow-up learning item for the observed misconception. */
   itemId: string | null;
 };
 
@@ -31,7 +31,6 @@ export type RemediationRec = {
  */
 export function remediationRecsFromAttempts(attempts: WrongAttempt[], threshold?: number): RemediationRec[] {
   const hits: Partial<Record<InstructionalTag, number>> = {};
-  const itemByTag: Partial<Record<InstructionalTag, string>> = {};
 
   for (const attempt of attempts) {
     if (!attempt.selected_choice_id) {
@@ -42,15 +41,12 @@ export function remediationRecsFromAttempts(attempts: WrongAttempt[], threshold?
       continue;
     }
     hits[tag] = (hits[tag] ?? 0) + 1;
-    if (!itemByTag[tag]) {
-      itemByTag[tag] = attempt.learning_item_id;
-    }
   }
 
   return observedPatterns(hits, threshold).map((tag) => ({
     tag,
     title: ERROR_TAGS[tag].label,
     reason: remediationReason(tag),
-    itemId: itemByTag[tag] ?? null
+    itemId: ERROR_TAGS[tag].followUpItemId
   }));
 }

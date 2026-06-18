@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { remediationRecsFromAttempts } from "@/features/remediation/remediation-recs";
-import { OBSERVE_THRESHOLD } from "@/features/remediation/error-tags";
+import { ERROR_TAGS, OBSERVE_THRESHOLD } from "@/features/remediation/error-tags";
 
 // Observed-misconception remediation from recent wrong attempts (#126). Uses the
 // real seeded choice->tag mapping: the references mc_init distractors b/c/d map to
@@ -15,7 +15,7 @@ describe("remediationRecsFromAttempts (#126)", () => {
     expect(recs).toEqual([]);
   });
 
-  it("surfaces a misconception once it reaches the threshold, with a reason and item", () => {
+  it("surfaces a misconception once it reaches the threshold, with a reason and contrasting item", () => {
     const attempts = Array.from({ length: OBSERVE_THRESHOLD }, () => ({
       learning_item_id: REF_ITEM,
       selected_choice_id: WRONG_REF
@@ -24,7 +24,8 @@ describe("remediationRecsFromAttempts (#126)", () => {
     expect(recs.length).toBe(1);
     expect(recs[0].tag).toBe("cpp.references.copy_vs_alias");
     expect(recs[0].reason).toMatch(/missed/i);
-    expect(recs[0].itemId).toBe(REF_ITEM);
+    expect(recs[0].itemId).toBe(ERROR_TAGS["cpp.references.copy_vs_alias"].followUpItemId);
+    expect(recs[0].itemId).not.toBe(REF_ITEM);
   });
 
   it("counts distinct wrong choices of the same tag toward the threshold", () => {

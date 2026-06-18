@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { learningItemChoices } from "@/features/learning-items/learning-item-seed";
+import { getLearningItemById, learningItemChoices } from "@/features/learning-items/learning-item-seed";
 import {
   ERROR_TAGS,
   OBSERVE_THRESHOLD,
@@ -34,6 +34,13 @@ describe("wrong-answer error-tag catalog + mapping (#126)", () => {
       choiceErrorTags.map((e) => e.choice_id.split(".").slice(0, 2).join("."))
     );
     expect(modules.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it("points every tag at an existing contrasting follow-up item", () => {
+    for (const [tag, info] of Object.entries(ERROR_TAGS)) {
+      expect(info.followUpItemId, `${tag} follow-up`).not.toBe("");
+      expect(getLearningItemById(info.followUpItemId), `${tag} follow-up item`).not.toBeNull();
+    }
   });
 
   it("resolves a tag for a mapped distractor and null otherwise", () => {
