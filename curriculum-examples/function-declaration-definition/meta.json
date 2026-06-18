@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.functions.declarations_definitions.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "12\n",
+  "note": "A function declaration lets main call the function before its definition appears later in the translation unit."
+}

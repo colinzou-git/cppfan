@@ -198,6 +198,32 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.values_types.initialization_pitfalls.lesson",
+    type: "lesson",
+    title: "Initialization and const intent",
+    prompt:
+      "Initialize every object before reading it. `int count;` leaves count with an indeterminate value, so using it before assignment is a bug; prefer `int count{};` or `int count = 0;`. Braced initialization (`int n{value};`) also rejects narrowing conversions that would silently lose information. Use `const` when a value should not change after initialization, `constexpr` when it must be computable at compile time, and `auto` when the initializer already makes the type obvious. Those tools work together: initialize first, make non-changing values const, and make compile-time facts constexpr.",
+    explanation:
+      "Uninitialized reads are bugs; brace initialization catches narrowing. const documents a value that will not change, constexpr requires a compile-time value, and auto should follow a clear initializer.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 3265,
+    is_active: true
+  },
+  {
+    id: "cpp.values_types.initialization_pitfalls.bug_uninitialized",
+    type: "bug_spotting",
+    title: "Spot the uninitialized value",
+    prompt:
+      "Find the bug:\n\n```cpp\nint total;\nfor (int x : values) {\n  total += x;\n}\nreturn total;\n```",
+    explanation:
+      "`total` is read by `total += x` before it has a known value. Initialize it first, for example `int total = 0;` or `int total{};`, so the loop accumulates from zero.",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 3266,
+    is_active: true
+  },
+  {
     id: "cpp.values_types.fundamental_types.lesson",
     type: "lesson",
     title: "Choosing a fundamental type",
@@ -446,6 +472,57 @@ export const learningItems: LearningItem[] = [
     difficulty: "beginner",
     estimated_minutes: 2,
     order_index: 16,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.declarations_definitions.lesson",
+    type: "lesson",
+    title: "Declarations, definitions, and headers",
+    prompt:
+      "A declaration tells the compiler a name exists and how to call it: `int add(int, int);`. A definition supplies the body: `int add(int a, int b) { return a + b; }`. Code that calls a function must see a declaration before the call, and the whole program must provide exactly one matching non-inline definition or the linker reports an unresolved symbol or duplicate definition. In multi-file programs, put shared function declarations in a header (`math_utils.h`) and definitions in one source file (`math_utils.cpp`); other files include the header so the compiler can check calls. Include guards or `#pragma once` prevent a header from being processed twice in one translation unit.",
+    explanation:
+      "A declaration is the callable promise; the definition is the body. Headers share declarations, source files hold one definition, and missing/duplicate definitions are link-time errors.",
+    difficulty: "beginner",
+    estimated_minutes: 5,
+    order_index: 3390,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.declarations_definitions.code_link_error",
+    type: "code_reading",
+    title: "Predict the link failure",
+    prompt:
+      "Read this file:\n\n```cpp\nint area(int width, int height);\n\nint main() {\n  return area(3, 4);\n}\n```\n\nIt compiles by itself, but no source file defines `area`. What stage fails, and why?",
+    explanation:
+      "The compiler accepts the call because it has a declaration. The linker fails later because it cannot find a matching definition of `area(int, int)` to connect to the call.",
+    difficulty: "beginner",
+    estimated_minutes: 3,
+    order_index: 3400,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.namespaces.lesson",
+    type: "lesson",
+    title: "Namespaces and name collisions",
+    prompt:
+      "A namespace groups names so they do not collide with the same name elsewhere. `geometry::area(rect)` and `ui::area(window)` can coexist because their qualified names differ. Use `namespace geometry { ... }` around related declarations and call them with `geometry::area(...)`, or bring in a single name with `using geometry::area;` in a small scope. Avoid `using namespace ...;` in headers: every file that includes the header inherits that directive, increasing collision risk. Namespaces are especially important when your project grows across many files or links with libraries.",
+    explanation:
+      "Namespaces make qualified names such as geometry::area distinct from ui::area. Prefer qualification or narrow using-declarations; never put broad using namespace directives in headers.",
+    difficulty: "beginner",
+    estimated_minutes: 4,
+    order_index: 3410,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.namespaces.mc_header_using",
+    type: "multiple_choice",
+    title: "Using-directives in headers",
+    prompt: "Why should a header avoid `using namespace std;`?",
+    explanation:
+      "A header is included into other files. A broad using-directive in that header leaks into every including file and can create ambiguous names or collisions far away from the header itself.",
+    difficulty: "beginner",
+    estimated_minutes: 2,
+    order_index: 3420,
     is_active: true
   },
   {
@@ -5114,6 +5191,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.values_types.variables.mc_auto", skill_id: "cpp.values_types.variables", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.lesson", skill_id: "cpp.values_types.conversions", is_primary: true },
   { learning_item_id: "cpp.values_types.conversions.mc_static_cast", skill_id: "cpp.values_types.conversions", is_primary: true },
+  { learning_item_id: "cpp.values_types.initialization_pitfalls.lesson", skill_id: "cpp.values_types.initialization_pitfalls", is_primary: true },
+  { learning_item_id: "cpp.values_types.initialization_pitfalls.bug_uninitialized", skill_id: "cpp.values_types.initialization_pitfalls", is_primary: true },
   { learning_item_id: "cpp.values_types.fundamental_types.lesson", skill_id: "cpp.values_types.fundamental_types", is_primary: true },
   { learning_item_id: "cpp.values_types.fundamental_types.mc_money", skill_id: "cpp.values_types.fundamental_types", is_primary: true },
   { learning_item_id: "cpp.values_types.signed_unsigned.lesson", skill_id: "cpp.values_types.signed_unsigned", is_primary: true },
@@ -5134,6 +5213,10 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.functions.basics.mc_scope", skill_id: "cpp.functions.basics", is_primary: true },
   { learning_item_id: "cpp.functions.decomposition.lesson", skill_id: "cpp.functions.decomposition", is_primary: true },
   { learning_item_id: "cpp.functions.decomposition.mc_why", skill_id: "cpp.functions.decomposition", is_primary: true },
+  { learning_item_id: "cpp.functions.declarations_definitions.lesson", skill_id: "cpp.functions.declarations_definitions", is_primary: true },
+  { learning_item_id: "cpp.functions.declarations_definitions.code_link_error", skill_id: "cpp.functions.declarations_definitions", is_primary: true },
+  { learning_item_id: "cpp.functions.namespaces.lesson", skill_id: "cpp.functions.namespaces", is_primary: true },
+  { learning_item_id: "cpp.functions.namespaces.mc_header_using", skill_id: "cpp.functions.namespaces", is_primary: true },
   { learning_item_id: "cpp.references.references.lesson", skill_id: "cpp.references.references", is_primary: true },
   { learning_item_id: "cpp.references.references.mc_init", skill_id: "cpp.references.references", is_primary: true },
   { learning_item_id: "cpp.references.pointers.lesson", skill_id: "cpp.references.pointers", is_primary: true },
@@ -5607,6 +5690,10 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.functions.decomposition.mc_why.c", learning_item_id: "cpp.functions.decomposition.mc_why", content: "C++ requires functions under 10 lines", is_correct: false, order_index: 30 },
   { id: "cpp.functions.decomposition.mc_why.d", learning_item_id: "cpp.functions.decomposition.mc_why", content: "It uses more memory", is_correct: false, order_index: 40 },
 
+  { id: "cpp.functions.namespaces.mc_header_using.a", learning_item_id: "cpp.functions.namespaces.mc_header_using", content: "It leaks the directive into every file that includes the header, increasing name-collision risk", is_correct: true, order_index: 10 },
+  { id: "cpp.functions.namespaces.mc_header_using.b", learning_item_id: "cpp.functions.namespaces.mc_header_using", content: "It makes the standard library unavailable", is_correct: false, order_index: 20 },
+  { id: "cpp.functions.namespaces.mc_header_using.c", learning_item_id: "cpp.functions.namespaces.mc_header_using", content: "It prevents the header from compiling more than once", is_correct: false, order_index: 30 },
+  { id: "cpp.functions.namespaces.mc_header_using.d", learning_item_id: "cpp.functions.namespaces.mc_header_using", content: "It changes functions into inline definitions", is_correct: false, order_index: 40 },
   { id: "cpp.references.references.mc_init.a", learning_item_id: "cpp.references.references.mc_init", content: "It must be initialized with an existing object", is_correct: true, order_index: 10 },
   { id: "cpp.references.references.mc_init.b", learning_item_id: "cpp.references.references.mc_init", content: "It must be left null until assigned", is_correct: false, order_index: 20 },
   { id: "cpp.references.references.mc_init.c", learning_item_id: "cpp.references.references.mc_init", content: "It must be created with new", is_correct: false, order_index: 30 },

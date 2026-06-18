@@ -127,6 +127,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.values_types.initialization_pitfalls",
+    domain: "cpp",
+    module_id: "cpp.values_types",
+    title: "Initialization and const intent",
+    description: "Avoid uninitialized values, choose initialization forms, and use const/constexpr/auto deliberately.",
+    learner_goal: "Initialize every object, spot narrowing and indeterminate-value bugs, and choose const/constexpr/auto by intent.",
+    level: "beginner",
+    item_types: ["lesson", "bug_spotting"],
+    order_index: 5,
+    is_active: true
+  },
+  {
     id: "cpp.values_types.fundamental_types",
     domain: "cpp",
     module_id: "cpp.values_types",
@@ -135,7 +147,7 @@ export const skillSeed: Skill[] = [
     learner_goal: "Choose int/double/bool/char appropriately and know integers are exact while doubles are approximate.",
     level: "beginner",
     item_types: ["lesson", "quiz"],
-    order_index: 5,
+    order_index: 6,
     is_active: true
   },
   {
@@ -147,7 +159,7 @@ export const skillSeed: Skill[] = [
     learner_goal: "Spot signed/unsigned comparison and wraparound bugs, e.g. with container .size().",
     level: "intermediate",
     item_types: ["lesson", "quiz"],
-    order_index: 6,
+    order_index: 7,
     is_active: true
   },
   {
@@ -159,7 +171,7 @@ export const skillSeed: Skill[] = [
     learner_goal: "Predict an expression's value, including integer division and operator precedence.",
     level: "beginner",
     item_types: ["lesson", "quiz"],
-    order_index: 7,
+    order_index: 8,
     is_active: true
   },
   {
@@ -244,6 +256,30 @@ export const skillSeed: Skill[] = [
     level: "beginner",
     item_types: ["lesson", "quiz"],
     order_index: 8,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.declarations_definitions",
+    domain: "cpp",
+    module_id: "cpp.functions",
+    title: "Declarations, definitions, and headers",
+    description: "Separate function declarations from definitions and place shared declarations in headers.",
+    learner_goal: "Explain why callers need declarations, why definitions must exist once, and how headers/source files fit together.",
+    level: "beginner",
+    item_types: ["lesson", "code_reading"],
+    order_index: 9,
+    is_active: true
+  },
+  {
+    id: "cpp.functions.namespaces",
+    domain: "cpp",
+    module_id: "cpp.functions",
+    title: "Namespaces and name collisions",
+    description: "Use namespaces to group names and avoid collisions across files and libraries.",
+    learner_goal: "Read qualified names, avoid broad using-directives in headers, and resolve same-name functions safely.",
+    level: "beginner",
+    item_types: ["lesson", "quiz"],
+    order_index: 10,
     is_active: true
   },
   {
@@ -2463,6 +2499,7 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.program_basics.error_kinds", prerequisite_skill_id: "cpp.program_basics.statements_comments", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.variables", prerequisite_skill_id: "cpp.program_basics.structure", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.conversions", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
+  { skill_id: "cpp.values_types.initialization_pitfalls", prerequisite_skill_id: "cpp.values_types.conversions", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.fundamental_types", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.signed_unsigned", prerequisite_skill_id: "cpp.values_types.fundamental_types", relationship_type: "recommended" },
   { skill_id: "cpp.values_types.literals", prerequisite_skill_id: "cpp.values_types.variables", relationship_type: "recommended" },
@@ -2473,6 +2510,8 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.control_flow.loop_invariants", prerequisite_skill_id: "cpp.control_flow.loops", relationship_type: "recommended" },
   { skill_id: "cpp.functions.basics", prerequisite_skill_id: "cpp.control_flow.loops", relationship_type: "recommended" },
   { skill_id: "cpp.functions.decomposition", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
+  { skill_id: "cpp.functions.declarations_definitions", prerequisite_skill_id: "cpp.functions.decomposition", relationship_type: "recommended" },
+  { skill_id: "cpp.functions.namespaces", prerequisite_skill_id: "cpp.functions.declarations_definitions", relationship_type: "recommended" },
   { skill_id: "cpp.structs_classes.syntax", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.references.references", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.references.pointers", prerequisite_skill_id: "cpp.references.references", relationship_type: "recommended" },

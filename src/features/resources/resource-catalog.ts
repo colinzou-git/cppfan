@@ -26,6 +26,30 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "learncpp-initialization",
+    name: "Variable assignment and initialization",
+    url: "https://www.learncpp.com/cpp-tutorial/variable-assignment-and-initialization/",
+    kind: "tutorial",
+    description: "Focused beginner reference for assignment, initialization forms, and safe initialization habits.",
+    tags: ["cpp"]
+  },
+  {
+    id: "learncpp-forward-declarations",
+    name: "Forward declarations",
+    url: "https://www.learncpp.com/cpp-tutorial/forward-declarations/",
+    kind: "tutorial",
+    description: "Beginner-friendly explanation of declarations, definitions, and why link errors happen.",
+    tags: ["cpp"]
+  },
+  {
+    id: "learncpp-namespaces",
+    name: "Naming collisions and namespaces",
+    url: "https://www.learncpp.com/cpp-tutorial/naming-collisions-and-an-introduction-to-namespaces/",
+    kind: "tutorial",
+    description: "Introduction to naming collisions, namespaces, and qualified names.",
+    tags: ["cpp"]
+  },
+  {
     id: "cppreference",
     name: "cppreference",
     url: "https://en.cppreference.com",
