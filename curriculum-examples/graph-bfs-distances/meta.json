@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.bfs.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "0 1 1 2 3 4 \n",
+  "note": "BFS from vertex 0 over an adjacency list assigns each vertex its shortest distance in edges: 0,1,1,2,3,4."
+}
