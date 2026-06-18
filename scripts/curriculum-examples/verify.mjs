@@ -3,6 +3,7 @@
 // Each example lives in curriculum-examples/<id>/ with a meta.json and an
 // example.cpp. POSITIVE examples must compile clean under their declared standard
 // with strong warnings, and (when expectedOutput is set) run and match it.
+// On Linux/macOS the positive examples are also rebuilt and run with ASan/UBSan.
 // BUG_SPOTTING examples are intentionally defective and are NOT compiled here —
 // their structure is validated by tests/unit/curriculum-examples.test.ts. Fails
 // with the owning learning-item id and the compiler/runtime output.
@@ -17,6 +18,8 @@ const ROOT = join(import.meta.dirname, "..", "..");
 const EXAMPLES_DIR = join(ROOT, "curriculum-examples");
 const CXX = process.env.CXX || "g++";
 const STD_FLAG = { "c++17": "-std=c++17", "c++20": "-std=c++20", "c++23": "-std=c++23" };
+const RUN_SANITIZERS = process.env.CPPFAN_SKIP_SANITIZERS !== "1" && process.platform !== "win32";
+const SANITIZER_FLAGS = ["-fsanitize=address,undefined", "-fno-omit-frame-pointer"];
 
 const failures = [];
 
@@ -30,6 +33,7 @@ const dirs = readdirSync(EXAMPLES_DIR, { withFileTypes: true })
   .sort();
 
 let positives = 0;
+let sanitized = 0;
 for (const id of dirs) {
   const dir = join(EXAMPLES_DIR, id);
   const metaPath = join(dir, "meta.json");
@@ -62,6 +66,7 @@ for (const id of dirs) {
 
   const tmp = mkdtempSync(join(tmpdir(), "cppfan-example-"));
   const bin = join(tmp, "a.out");
+  const sanitizedBin = join(tmp, "a.san.out");
   try {
     try {
       execFileSync(CXX, [std, "-Wall", "-Wextra", "-Wpedantic", "-Werror", src, "-o", bin], {
@@ -88,6 +93,36 @@ for (const id of dirs) {
         fail(id, itemId, `output mismatch.\n expected: ${JSON.stringify(expected)}\n actual:   ${JSON.stringify(actual)}`);
       }
     }
+
+    if (RUN_SANITIZERS) {
+      try {
+        execFileSync(
+          CXX,
+          [std, "-Wall", "-Wextra", "-Wpedantic", "-Werror", ...SANITIZER_FLAGS, src, "-o", sanitizedBin],
+          { stdio: "pipe" }
+        );
+      } catch (err) {
+        fail(id, itemId, `sanitizer build failed:\n${err.stderr?.toString() ?? err.message}`);
+        continue;
+      }
+      try {
+        const sanitizedOut = execFileSync(sanitizedBin, [], { stdio: "pipe" }).toString();
+        sanitized += 1;
+        if (typeof meta.expectedOutput === "string") {
+          const actual = sanitizedOut.replace(/\r\n/g, "\n");
+          const expected = meta.expectedOutput.replace(/\r\n/g, "\n");
+          if (actual !== expected) {
+            fail(
+              id,
+              itemId,
+              `sanitizer output mismatch.\n expected: ${JSON.stringify(expected)}\n actual:   ${JSON.stringify(actual)}`
+            );
+          }
+        }
+      } catch (err) {
+        fail(id, itemId, `sanitizer run failed:\n${err.stderr?.toString() ?? err.message}`);
+      }
+    }
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -98,4 +133,7 @@ if (failures.length > 0) {
   for (const f of failures) console.error(`- ${f}`);
   process.exit(1);
 }
-console.log(`all curriculum examples verified (${positives} positive compiled/ran across ${dirs.length} examples)`);
+const sanitizerSummary = RUN_SANITIZERS ? `; ${sanitized} sanitizer-backed runs` : "; sanitizer runs skipped";
+console.log(
+  `all curriculum examples verified (${positives} positive compiled/ran across ${dirs.length} examples${sanitizerSummary})`
+);

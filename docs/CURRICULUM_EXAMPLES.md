@@ -34,6 +34,9 @@ curriculum-examples/<example-id>/
 - compiles every `positive` example with `-std=<standard> -Wall -Wextra -Wpedantic -Werror`;
 - runs it and compares stdout to `expectedOutput` when that contract is set (line
   endings normalized so the contract is OS-independent);
+- on Linux/macOS, rebuilds and runs positive examples with AddressSanitizer and
+  UndefinedBehaviorSanitizer (`CPPFAN_SKIP_SANITIZERS=1` disables this for local
+  toolchains that do not ship sanitizer runtimes);
 - **skips** `bug_spotting` examples — they are intentionally defective and must not
   be mistaken for positive examples;
 - fails with the owning learning-item ID and the compiler/runtime output.
@@ -53,8 +56,8 @@ document a defect and any `correctedBy` companion exists and is positive).
 5. Verify locally: `node scripts/curriculum-examples/verify.mjs` (needs `g++`; set
    `CXX` to override) and `pnpm test`.
 
-## Scope / not yet covered
+## Coverage note
 
-Lesson prompts still embed illustrative snippets inline; migrating those into this
-structured representation (so they are compiled too) is the remaining #98 work, as
-is sanitizer coverage on suitable examples.
+New executable examples should be added to this structured representation instead
+of remaining only as inline prose snippets. The CI gate compiles/runs the current
+example catalog and sanitizer-checks positive examples on the Linux runner.
