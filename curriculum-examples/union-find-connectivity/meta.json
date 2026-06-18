@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.disjoint_set.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "same\ndiff\nsame\ndiff\n",
+  "note": "After uniting {0,1,2} and {3,4}, find tells that 0 and 2 share a group, 0 and 3 do not, 3 and 4 do, and 5 is alone."
+}

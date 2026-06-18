@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.heap.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "5\n1\n8\n",
+  "note": "std::priority_queue is a max-heap (top 5); with std::greater it is a min-heap (top 1); std::make_heap puts the max (8) at the front of a range."
+}
