@@ -154,16 +154,18 @@ export async function createAuthenticatedLearner(context: BrowserContext, baseUR
 
   const activeCookies = jar.filter((cookie) => cookie.value && (cookie.options?.maxAge ?? 1) > 0);
   await context.addCookies(
-    activeCookies.map((cookie) => ({
-      name: cookie.name,
-      value: cookie.value,
-      url: baseURL,
-      path: cookie.options?.path ?? "/",
-      httpOnly: cookie.options?.httpOnly ?? false,
-      secure: cookie.options?.secure ?? false,
-      sameSite: normalizeSameSite(cookie.options?.sameSite),
-      expires: toExpires(cookie.options)
-    }))
+    activeCookies.map((cookie) => {
+      const expires = toExpires(cookie.options);
+      return {
+        name: cookie.name,
+        value: cookie.value,
+        url: baseURL,
+        httpOnly: cookie.options?.httpOnly ?? false,
+        secure: cookie.options?.secure ?? false,
+        sameSite: normalizeSameSite(cookie.options?.sameSite),
+        ...(expires ? { expires } : {})
+      };
+    })
   );
 
   return {
