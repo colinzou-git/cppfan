@@ -163,6 +163,9 @@ jobs:
       - name: Start local Supabase stack (applies all migrations)
         run: supabase start
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+
       - name: Run authenticated integration tests
         run: |
           eval "$(supabase status -o env \
@@ -172,6 +175,18 @@ jobs:
           export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
           echo "Supabase URL: ${SUPABASE_URL}"
           pnpm test:integration
+
+      - name: Run authenticated browser E2E tests
+        run: |
+          eval "$(supabase status -o env \
+            --override-name api.url=SUPABASE_URL \
+            --override-name auth.anon_key=SUPABASE_ANON_KEY \
+            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY)"
+          export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+          export NEXT_PUBLIC_SUPABASE_URL="${SUPABASE_URL}"
+          export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${SUPABASE_ANON_KEY}"
+          export NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
+          pnpm exec playwright test tests/e2e/authenticated-learning-loop.spec.ts --project=chromium --project=iphone
 
       - name: Stop local Supabase stack
         if: always()

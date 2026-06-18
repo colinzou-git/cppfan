@@ -51,7 +51,7 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
 
   if (!current) {
     return (
-      <Card className="border-emerald-200 bg-emerald-50/90 shadow-sm" data-testid="review-empty">
+      <Card className="border-emerald-200 bg-emerald-50/90 shadow-sm" data-testid="review-empty" role="status">
         <CardHeader>
           <CardTitle>All caught up</CardTitle>
         </CardHeader>
@@ -120,6 +120,8 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
               <div
                 className="rounded-2xl bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-950"
                 data-testid="review-explanation"
+                role="status"
+                aria-live="polite"
               >
                 {current.explanation}
               </div>

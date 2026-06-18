@@ -27,3 +27,12 @@ pnpm test:e2e
 ```
 
 The Playwright web server command builds and starts the production Next.js server automatically.
+
+## Authenticated Supabase Flow
+
+`tests/e2e/authenticated-learning-loop.spec.ts` is a focused browser test for the
+real signed-in learning loop. It self-skips unless `SUPABASE_URL`,
+`SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` point at a local Supabase
+stack. CI runs it in the `auth-integration` job after `supabase start`, with
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` mapped to
+that disposable local stack.

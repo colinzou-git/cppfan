@@ -22,6 +22,7 @@ test("a learner can select, submit, and retry a quiz with the keyboard only", as
 
   const result = page.getByTestId("answer-result");
   await expect(result).toBeVisible();
+  await expect(result).toHaveAttribute("role", "status");
   await expect(result).toContainText(/correct/i);
 
   // Retry with the keyboard resets the form.
@@ -45,6 +46,7 @@ test("a learner can fill and check a completion item with the keyboard only", as
   }
   await page.getByTestId("completion-check").press("Enter");
   await expect(page.getByTestId("completion-feedback")).toContainText(/correct/i);
+  await expect(page.getByTestId("completion-feedback")).toHaveAttribute("role", "status");
 });
 
 test("the Parsons move and check controls are operable by keyboard", async ({ page }) => {
@@ -59,4 +61,29 @@ test("the Parsons move and check controls are operable by keyboard", async ({ pa
 
   await page.getByTestId("parsons-check").press("Enter");
   await expect(page.getByTestId("parsons-feedback")).not.toBeEmpty();
+  await expect(page.getByTestId("parsons-feedback")).toHaveAttribute("role", "status");
+});
+
+test("skill-map and lab navigation are reachable by keyboard", async ({ page }) => {
+  await page.goto("/dashboard");
+
+  const dashboardHeading = page.getByRole("heading", { name: /your learning dashboard/i });
+  if (await dashboardHeading.isVisible().catch(() => false)) {
+    const firstSkill = page.getByTestId("skill-map-skill-link").first();
+    await firstSkill.focus();
+    await expect(firstSkill).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/learn\//);
+    await expect(page.getByTestId("learning-item")).toBeVisible();
+  } else {
+    await expect(page).toHaveURL(/\/login|\/onboarding/);
+  }
+
+  await page.goto("/labs");
+  const firstTrack = page.getByTestId("capstone-track-link").first();
+  await firstTrack.focus();
+  await expect(firstTrack).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/labs\/tracks\//);
+  await expect(page.getByTestId("capstone-tracks")).toBeVisible();
 });
