@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.references.pointer_const.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "2\n9\n",
+  "note": "const int* (pointer to const) can be repointed from &a to &b (prints 2); int* const (const pointer) can modify the pointed-to data, setting a to 9."
+}

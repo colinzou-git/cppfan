@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.constructors.destructor_intro.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "construct A\nconstruct B\nbody\ndestruct B\ndestruct A\n",
+  "note": "Local objects A then B are constructed in order; at scope end their destructors run in reverse order (B before A)."
+}
