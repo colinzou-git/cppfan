@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.topological_sort.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "4 5 2 0 3 1 \n6\n",
+  "note": "Kahn's in-degree BFS orders the DAG as 4 5 2 0 3 1; ordering all 6 vertices confirms the graph is acyclic."
+}
