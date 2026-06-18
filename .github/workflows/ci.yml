@@ -81,6 +81,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable pnpm through Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Bootstrap Supabase-compatible objects
         run: psql -v ON_ERROR_STOP=1 -f scripts/ci/bootstrap.sql
 
@@ -93,6 +106,9 @@ jobs:
 
       - name: Smoke-test migrated schema
         run: psql -v ON_ERROR_STOP=1 -f scripts/ci/smoke.sql
+
+      - name: Verify DB and TypeScript seed parity
+        run: pnpm test:db-parity
 
   cpp:
     name: C++ exercises
@@ -160,4 +176,3 @@ jobs:
       - name: Stop local Supabase stack
         if: always()
         run: supabase stop --no-backup || true
-
