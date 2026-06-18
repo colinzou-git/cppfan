@@ -1,3 +1,5 @@
+import { FormattedContent } from "./formatted-content";
+
 /*
  * Presentational explanation block. Rendered inline for lessons (it is lesson
  * content), and only after grading/reveal for graded items (#145) — gating
@@ -10,7 +12,7 @@ export function ExplanationPanel({ explanation }: { explanation: string }) {
       data-testid="learning-item-explanation"
     >
       <p className="font-bold">Explanation</p>
-      <p className="mt-2 whitespace-pre-wrap break-words leading-6">{explanation}</p>
+      <FormattedContent content={explanation} className="mt-2" />
     </div>
   );
 }

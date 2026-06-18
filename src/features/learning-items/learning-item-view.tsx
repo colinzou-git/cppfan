@@ -2,6 +2,7 @@ import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
+import { FormattedContent } from "./formatted-content";
 import { RevealExplanation } from "./reveal-explanation";
 import { ParsonsExercise } from "./parsons-exercise";
 import { CompletionExercise } from "./completion-exercise";
@@ -60,8 +61,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5">
-        <div className="whitespace-pre-wrap break-words rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-800">
-          {item.prompt}
+        <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-800">
+          <FormattedContent content={item.prompt} />
         </div>
 
         {hasChoices ? (
