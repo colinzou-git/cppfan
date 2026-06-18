@@ -16,6 +16,19 @@ test.describe("authenticated browser learning loop (#96/#99)", () => {
       await expect(page.getByText(learner.email)).toBeVisible();
 
       await page.goto(ITEM_URL);
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const wrong = page.getByRole("radio", { name: "Private" });
+        await wrong.focus();
+        await page.keyboard.press("Space");
+        await expect(wrong).toBeChecked();
+        await page.getByTestId("answer-submit").press("Enter");
+        const wrongResult = page.getByTestId("answer-result");
+        await expect(wrongResult).toBeVisible();
+        await expect(wrongResult).toHaveAttribute("role", "status");
+        await expect(wrongResult).toContainText(/not quite/i);
+        await page.getByTestId("answer-retry").press("Enter");
+      }
+
       const correct = page.getByRole("radio", { name: "Public" });
       await correct.focus();
       await page.keyboard.press("Space");
@@ -45,6 +58,12 @@ test.describe("authenticated browser learning loop (#96/#99)", () => {
       await page.keyboard.press("Enter");
       await expect(page.getByTestId("review-empty")).toBeVisible();
       await expect(page.getByTestId("review-empty")).toHaveAttribute("role", "status");
+
+      await page.goto("/dashboard");
+      const masterySkill = page.getByTestId("mastery-skill").filter({ hasText: "Struct/class syntax" });
+      await expect(masterySkill).toContainText("Weak");
+      const weakRecommendation = page.getByTestId("daily-plan-item").filter({ hasText: "Practice Struct/class syntax" });
+      await expect(weakRecommendation).toBeVisible();
     } finally {
       await learner.cleanup();
     }
