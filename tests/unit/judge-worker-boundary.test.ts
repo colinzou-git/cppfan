@@ -71,14 +71,17 @@ describe("judge worker boundary (#178)", () => {
       runtimeBoundary: "separate_worker_service",
       network: "none",
       rootFilesystem: "read_only",
-      writableWorkspace: "ephemeral_tmpfs",
+      writableWorkspace: "ephemeral_workspace",
       user: "non_root",
       syscallIsolation: "seccomp_or_microvm",
       cleanup: "always"
     });
     expect(manifest.args).toContain("--network=none");
     expect(manifest.args).toContain("--read-only");
-    expect(manifest.args).toContain("--tmpfs=/workspace:rw,nosuid,nodev");
+    expect(manifest.args).toContain("--tmpfs=/tmp:rw,nosuid,nodev,noexec");
+    expect(manifest.args).toContain("type=bind,source=<temporary workspace>,target=/workspace");
+    expect(manifest.args).toContain("--workdir");
+    expect(manifest.args).toContain("/workspace");
     expect(manifest.args).toContain("--user=65532:65532");
     expect(manifest.args).toContain("--cap-drop=ALL");
     expect(manifest.args).toContain("--security-opt=no-new-privileges");

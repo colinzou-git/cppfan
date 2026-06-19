@@ -21,7 +21,9 @@ The CI-safe TypeScript modules in this directory define the protocol, policy, an
 worker runner contract. `worker-runner.ts` orchestrates compile/run commands over
 an injected process executor; `docker-executor.ts` wraps those commands in the
 local/Codespaces Docker isolation envelope; `process-launcher.ts` supervises the
-Docker CLI with timeout and output caps for local worker wiring. Unit tests use
+Docker CLI with timeout and output caps for local worker wiring; and
+`workspace-lifecycle.ts` materializes `submission.cpp` in a per-submission
+temporary directory and cleans it up with `withJudgeWorkspace()`. Unit tests use
 fake launchers so `pnpm test` never executes learner code.
 
 ## Local Manifest
@@ -30,7 +32,9 @@ fake launchers so `pnpm test` never executes learner code.
 
 ```text
 docker run --rm --network=none --read-only \
-  --tmpfs=/workspace:rw,nosuid,nodev \
+  --tmpfs=/tmp:rw,nosuid,nodev,noexec \
+  --mount type=bind,source=<temporary workspace>,target=/workspace \
+  --workdir /workspace \
   --user=65532:65532 --cap-drop=ALL \
   --security-opt=no-new-privileges \
   --pids-limit 32 --memory 256m cppfan/interview-judge:local
