@@ -16,7 +16,7 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ goa
     getDailyNewPlan(),
     getDailyReviewView(goal.timezone)
   ]);
-  const goalActions = [...dailyNew.actions, ...(dailyNew.extraAction ? [dailyNew.extraAction] : [])]
+  const goalActions = [...dailyNew.actions, ...dailyNew.allocatedExtraActions]
     .filter((action) => action.goalIds.includes(goal.id));
 
   return (
@@ -48,7 +48,7 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ goa
 
       <section className="grid gap-4 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
         <h2 className="text-xl font-black text-slate-950">Today</h2>
-        <p className="text-sm text-slate-600"><strong>{goalActions.length}</strong> Daily New action{goalActions.length === 1 ? "" : "s"} contributes to this goal.</p>
+        <p className="text-sm text-slate-600"><strong>{goalActions.length}</strong> allocated Daily New action{goalActions.length === 1 ? "" : "s"} contributes to this goal.</p>
         <p className="text-sm text-slate-600"><strong>{dailyReview.items.length}</strong> FSRS review{dailyReview.items.length === 1 ? "" : "s"} due through today, displayed separately.</p>
         {goalActions.map((action) => (
           <Button asChild variant="secondary" key={action.id}><Link href={action.href}>{action.source === "learn_extra" ? "Extra" : "Planned"}: {action.title}</Link></Button>
