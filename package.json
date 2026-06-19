@@ -24,6 +24,10 @@
     "verify:codespace": "bash scripts/verify-codespace.sh",
     "db:migrate": "bash scripts/apply-migrations.sh",
     "db:verify": "bash scripts/verify-db.sh",
+    "ai:index": "node scripts/ai/code-index.mjs",
+    "ai:query": "node scripts/ai/query-code-index.mjs",
+    "ai:tokens:report": "node scripts/ai/token-savings-report.mjs",
+    "ai:usage:record": "node scripts/ai/record-ai-usage.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
