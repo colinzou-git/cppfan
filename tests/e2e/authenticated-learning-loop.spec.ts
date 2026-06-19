@@ -62,8 +62,8 @@ test.describe("authenticated browser learning loop (#96/#99)", () => {
       await page.goto("/dashboard");
       const masterySkill = page.getByTestId("mastery-skill").filter({ hasText: "Struct/class syntax" });
       await expect(masterySkill).toContainText("Weak");
-      const weakRecommendation = page.getByTestId("daily-plan-item").filter({ hasText: "Practice Struct/class syntax" });
-      await expect(weakRecommendation).toBeVisible();
+      await expect(page.getByTestId("daily-review")).toContainText(/FSRS/i);
+      await expect(page.getByTestId("daily-new-for-goals")).toContainText(/FSRS reviews never appear here/i);
     } finally {
       await learner.cleanup();
     }
