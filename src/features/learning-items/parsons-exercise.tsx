@@ -66,7 +66,8 @@ export function ParsonsExercise({ itemId, blocks }: { itemId: string; blocks: Pu
       }
       const next = [...prev];
       const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
+      const insertionIndex = next.findIndex((row) => row.block.id === targetId);
+      next.splice(insertionIndex, 0, moved);
       return next;
     });
   }
