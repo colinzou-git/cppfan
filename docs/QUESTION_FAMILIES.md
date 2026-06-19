@@ -69,6 +69,20 @@ make learners read compiler diagnostics and choose the right abstraction:
 - ask when a plain loop or ordinary algorithm is clearer than a lazy view;
 - include at least one dangling-view bug and an owning materialization fix.
 
+## Tooling and debugging items
+
+For debugging/testing/tooling coverage (#113), prefer realistic output snippets
+and workflow decisions over tool-name recall:
+
+- ask for the first actionable compiler diagnostic and why later messages may be
+  cascades;
+- include failing-test output that names the behavior, input, expected value, and
+  actual value;
+- include sanitizer reports that ask learners to identify the bug class and the
+  source line to inspect;
+- pair guided write-code exercises with warnings, tests, and sanitizer-backed
+  builds so tool usage is practiced, not only described.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

@@ -76,6 +76,7 @@ report instead of a manual mark.
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `dsa-two-sum-sorted` | two pointers, Big-O | `csv-table-summarizer` |
+| `tooling-status-parser` | debugging method, unit/regression tests, warnings, sanitizers, CMake | `debugging-toolchain-lab` |
 
 ## Maintaining Exercises (CI)
 

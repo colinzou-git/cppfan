@@ -122,6 +122,46 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "cmake-tutorial",
+    name: "CMake tutorial",
+    url: "https://cmake.org/cmake/help/latest/guide/tutorial/index.html",
+    kind: "tutorial",
+    description: "Official CMake tutorial covering targets, build directories, and project structure.",
+    tags: ["cpp"]
+  },
+  {
+    id: "gcc-warning-options",
+    name: "GCC warning options",
+    url: "https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html",
+    kind: "reference",
+    description: "Reference for GCC warning flags such as -Wall, -Wextra, -Wpedantic, and -Werror.",
+    tags: ["cpp"]
+  },
+  {
+    id: "clang-address-sanitizer",
+    name: "Clang AddressSanitizer",
+    url: "https://clang.llvm.org/docs/AddressSanitizer.html",
+    kind: "reference",
+    description: "Official AddressSanitizer guide with build flags, reports, and usage notes.",
+    tags: ["cpp"]
+  },
+  {
+    id: "clang-undefined-behavior-sanitizer",
+    name: "Clang UndefinedBehaviorSanitizer",
+    url: "https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html",
+    kind: "reference",
+    description: "Official UBSan guide for catching undefined behavior in debug/test builds.",
+    tags: ["cpp"]
+  },
+  {
+    id: "clang-tidy",
+    name: "clang-tidy",
+    url: "https://clang.llvm.org/extra/clang-tidy/",
+    kind: "reference",
+    description: "Static-analysis and linting tool for catching C++ defects and maintainability issues.",
+    tags: ["cpp"]
+  },
+  {
     id: "cpp-core-guidelines",
     name: "C++ Core Guidelines",
     url: "https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines",

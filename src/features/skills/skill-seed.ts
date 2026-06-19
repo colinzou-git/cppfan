@@ -1243,6 +1243,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.format_static_analysis",
+    domain: "cpp",
+    module_id: "cpp.tooling",
+    title: "Formatting and static analysis",
+    description: "Use automated formatting and static analysis as fast feedback before review.",
+    learner_goal: "Format code consistently and use static analysis to catch likely defects beyond compiler warnings.",
+    level: "intermediate",
+    item_types: ["lesson", "quiz"],
+    order_index: 714,
+    is_active: true
+  },
+  {
     id: "cpp.concurrency.threads",
     domain: "cpp",
     module_id: "cpp.concurrency",
@@ -2643,6 +2655,7 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.tooling.debugging_method", prerequisite_skill_id: "cpp.tooling.debugging", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.unit_testing", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
   { skill_id: "cpp.tooling.regression_testing", prerequisite_skill_id: "cpp.tooling.testing", relationship_type: "recommended" },
+  { skill_id: "cpp.tooling.format_static_analysis", prerequisite_skill_id: "cpp.tooling.warnings", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.threads", prerequisite_skill_id: "cpp.functions.basics", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.data_races", prerequisite_skill_id: "cpp.concurrency.threads", relationship_type: "recommended" },
   { skill_id: "cpp.concurrency.mutexes", prerequisite_skill_id: "cpp.concurrency.data_races", relationship_type: "recommended" },

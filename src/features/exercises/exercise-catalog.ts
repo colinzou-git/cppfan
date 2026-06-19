@@ -76,6 +76,34 @@ export const exerciseCatalog: Exercise[] = [
       "For top_n, copy the map into a vector and std::sort with a comparator: count descending, then word ascending."
     ],
     projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "tooling-status-parser",
+    title: "Tooling: status parser with tests",
+    skillIds: [
+      "cpp.tooling.debugging_method",
+      "cpp.tooling.unit_testing",
+      "cpp.tooling.regression_testing",
+      "cpp.tooling.warnings",
+      "cpp.tooling.sanitizers",
+      "cpp.tooling.cmake"
+    ],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["status_parser.hpp"],
+    requiredTests: [
+      "test_parses_ok_status",
+      "test_parses_error_status",
+      "test_rejects_missing_message_boundary",
+      "test_rejects_negative_code_adversarial",
+      "test_regression_preserves_message_spaces"
+    ],
+    hints: [
+      "Parse the status word, numeric code, and the rest of the line as the message.",
+      "Treat malformed input as {false, -1, \"malformed\"}; validate negative codes separately.",
+      "Keep the message after the code intact except for one leading separator space."
+    ],
+    projectLab: "debugging-toolchain-lab"
   }
 ];
 

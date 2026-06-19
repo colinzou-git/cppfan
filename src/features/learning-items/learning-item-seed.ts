@@ -2460,6 +2460,94 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.tooling.debugging_method.code_first_diagnostic",
+    type: "code_reading",
+    title: "Read the first actionable diagnostic",
+    prompt:
+      "A build prints: `parser.cpp:17:12: error: expected ';' after return statement`, then twenty more errors in STL headers. Which line should you investigate first, and why?",
+    explanation:
+      "Start at the first actionable diagnostic in your code: `parser.cpp:17`. Later messages are often cascade errors caused by the first syntax problem. Fix the missing semicolon there, rebuild, and only then read any remaining diagnostics.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 4950,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.debugging_method.mc_failure_kind",
+    type: "multiple_choice",
+    title: "Classify the failure",
+    prompt: "The program builds successfully, but prints `17` when the expected answer is `16`. What kind of failure is this?",
+    explanation:
+      "That is a logic failure: the program runs, but the result is wrong. Syntax/compile errors stop the build, link errors happen before an executable is produced, and run-time failures crash or abort while running.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4960,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.unit_testing.code_failure_output",
+    type: "code_reading",
+    title: "Interpret a test failure",
+    prompt:
+      "A test named `test_empty_input_returns_zero` fails with `CHECK(count_words(\"\") == 0)` and reports `actual: 1`. What behavior should you inspect first?",
+    explanation:
+      "The test name and assertion say the empty-input boundary case is wrong. Inspect the path that handles an empty string before looking at unrelated normal cases; good failure output points to the behavior, input, and expected value.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 4970,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.unit_testing.mc_boundaries",
+    type: "multiple_choice",
+    title: "Choose boundary and adversarial cases",
+    prompt: "Which test set best checks a function that returns the maximum element of a vector?",
+    explanation:
+      "A strong test set includes a normal case, a single-element boundary, duplicates, negative values, and the empty/error case. Only happy-path tests miss boundary and adversarial defects.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 4980,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.sanitizers.code_asan_report",
+    type: "code_reading",
+    title: "Read an AddressSanitizer report",
+    prompt:
+      "A sanitizer run reports `ERROR: AddressSanitizer: heap-buffer-overflow` and the top frame points to `scores.cpp:42` inside `scores[i]`. What should you inspect first?",
+    explanation:
+      "Inspect the index and bounds around `scores.cpp:42`. ASan reports the memory bug class and the stack frame for the invalid access; a heap-buffer-overflow usually means an index went before the beginning or past the end of the allocation.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4990,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.format_static_analysis.lesson",
+    type: "lesson",
+    title: "Formatting and static analysis",
+    prompt:
+      "Formatting and static analysis are fast feedback tools before review. A formatter such as clang-format makes layout mechanical, so reviews focus on behavior instead of brace placement. Static analysis tools such as clang-tidy inspect code without running it and catch patterns compilers may not warn about: suspicious copies, ignored return values, dangling references, missing virtual destructors, or expensive pass-by-value. They complement warnings and tests; they do not replace either. Run them locally or in CI, keep the configuration small enough that the team trusts it, and fix or document each warning rather than letting a backlog grow.",
+    explanation:
+      "Use a formatter for consistent style and static analysis for likely defects beyond compiler warnings. They are fast pre-review feedback, complementary to tests and sanitizers, and only useful if warnings are kept actionable.",
+    difficulty: "intermediate",
+    estimated_minutes: 4,
+    order_index: 5000,
+    is_active: true
+  },
+  {
+    id: "cpp.tooling.format_static_analysis.mc_role",
+    type: "multiple_choice",
+    title: "What static analysis is for",
+    prompt: "What is the best role for a tool like clang-tidy in a C++ workflow?",
+    explanation:
+      "Static analysis scans source for likely defects and maintainability issues before the program runs. It complements compiler warnings, tests, and sanitizers; it is not a formatter and cannot prove the whole program correct.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 5010,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o.lesson",
     type: "lesson",
     title: "Big-O notation",
@@ -5602,6 +5690,13 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.tooling.unit_testing.mc_aaa", skill_id: "cpp.tooling.unit_testing", is_primary: true },
   { learning_item_id: "cpp.tooling.regression_testing.lesson", skill_id: "cpp.tooling.regression_testing", is_primary: true },
   { learning_item_id: "cpp.tooling.regression_testing.mc_first", skill_id: "cpp.tooling.regression_testing", is_primary: true },
+  { learning_item_id: "cpp.tooling.debugging_method.code_first_diagnostic", skill_id: "cpp.tooling.debugging_method", is_primary: true },
+  { learning_item_id: "cpp.tooling.debugging_method.mc_failure_kind", skill_id: "cpp.tooling.debugging_method", is_primary: true },
+  { learning_item_id: "cpp.tooling.unit_testing.code_failure_output", skill_id: "cpp.tooling.unit_testing", is_primary: true },
+  { learning_item_id: "cpp.tooling.unit_testing.mc_boundaries", skill_id: "cpp.tooling.unit_testing", is_primary: true },
+  { learning_item_id: "cpp.tooling.sanitizers.code_asan_report", skill_id: "cpp.tooling.sanitizers", is_primary: true },
+  { learning_item_id: "cpp.tooling.format_static_analysis.lesson", skill_id: "cpp.tooling.format_static_analysis", is_primary: true },
+  { learning_item_id: "cpp.tooling.format_static_analysis.mc_role", skill_id: "cpp.tooling.format_static_analysis", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.raii.exception_safety_intro", is_primary: false },
   { learning_item_id: "dsa.complexity.big_o.lesson", skill_id: "dsa.complexity.big_o", is_primary: true },
   { learning_item_id: "dsa.complexity.big_o.mc_single_loop", skill_id: "dsa.complexity.big_o", is_primary: true },
@@ -6282,6 +6377,19 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.tooling.regression_testing.mc_first.b", learning_item_id: "cpp.tooling.regression_testing.mc_first", content: "Patch the code immediately and move on", is_correct: false, order_index: 20 },
   { id: "cpp.tooling.regression_testing.mc_first.c", learning_item_id: "cpp.tooling.regression_testing.mc_first", content: "Disable the failing feature", is_correct: false, order_index: 30 },
   { id: "cpp.tooling.regression_testing.mc_first.d", learning_item_id: "cpp.tooling.regression_testing.mc_first", content: "Add logging and wait for it to recur", is_correct: false, order_index: 40 },
+
+  { id: "cpp.tooling.debugging_method.mc_failure_kind.a", learning_item_id: "cpp.tooling.debugging_method.mc_failure_kind", content: "Logic failure", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.debugging_method.mc_failure_kind.b", learning_item_id: "cpp.tooling.debugging_method.mc_failure_kind", content: "Syntax/compile failure", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.debugging_method.mc_failure_kind.c", learning_item_id: "cpp.tooling.debugging_method.mc_failure_kind", content: "Link failure", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.debugging_method.mc_failure_kind.d", learning_item_id: "cpp.tooling.debugging_method.mc_failure_kind", content: "Run-time crash", is_correct: false, order_index: 40 },
+  { id: "cpp.tooling.unit_testing.mc_boundaries.a", learning_item_id: "cpp.tooling.unit_testing.mc_boundaries", content: "Normal input, one element, duplicates, negative values, and empty/error input", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.unit_testing.mc_boundaries.b", learning_item_id: "cpp.tooling.unit_testing.mc_boundaries", content: "Only a large random vector with positive values", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.unit_testing.mc_boundaries.c", learning_item_id: "cpp.tooling.unit_testing.mc_boundaries", content: "Only the example from the README", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.unit_testing.mc_boundaries.d", learning_item_id: "cpp.tooling.unit_testing.mc_boundaries", content: "No tests; rely on the compiler to catch it", is_correct: false, order_index: 40 },
+  { id: "cpp.tooling.format_static_analysis.mc_role.a", learning_item_id: "cpp.tooling.format_static_analysis.mc_role", content: "Scan source for likely defects and maintainability issues before running it", is_correct: true, order_index: 10 },
+  { id: "cpp.tooling.format_static_analysis.mc_role.b", learning_item_id: "cpp.tooling.format_static_analysis.mc_role", content: "Automatically prove every execution path correct", is_correct: false, order_index: 20 },
+  { id: "cpp.tooling.format_static_analysis.mc_role.c", learning_item_id: "cpp.tooling.format_static_analysis.mc_role", content: "Replace unit tests and sanitizer runs", is_correct: false, order_index: 30 },
+  { id: "cpp.tooling.format_static_analysis.mc_role.d", learning_item_id: "cpp.tooling.format_static_analysis.mc_role", content: "Only reformat whitespace and braces", is_correct: false, order_index: 40 },
 
   { id: "dsa.complexity.big_o.mc_single_loop.a", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(n)", is_correct: true, order_index: 10 },
   { id: "dsa.complexity.big_o.mc_single_loop.b", learning_item_id: "dsa.complexity.big_o.mc_single_loop", content: "O(1)", is_correct: false, order_index: 20 },
