@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.shortest_path_algorithms.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "bellman: 0 4 2 5\nfloyd A->C: 7\n",
+  "note": "Bellman-Ford handles a negative edge with no negative cycle; Floyd-Warshall improves an all-pairs distance through an intermediate vertex."
+}

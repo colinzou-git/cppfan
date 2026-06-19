@@ -298,6 +298,86 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cses-graph-algorithms",
+    name: "CSES: Graph Algorithms",
+    url: "https://cses.fi/problemset/",
+    kind: "practice",
+    description: "Problem set section covering graph traversal, routes, connectivity, DAGs, and shortest paths.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-graph-traversal",
+    name: "USACO Guide: graph traversal",
+    url: "https://usaco.guide/silver/graph-traversal",
+    kind: "guidelines",
+    description: "Practice-oriented guide for DFS/BFS traversal, connected components, and grid-as-graph modeling.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-unweighted-shortest-paths",
+    name: "USACO Guide: unweighted shortest paths",
+    url: "https://usaco.guide/gold/unweighted-shortest-paths",
+    kind: "guidelines",
+    description: "Guide to BFS shortest paths and parent-style route reconstruction on unweighted graphs.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-bfs",
+    name: "cp-algorithms: breadth-first search",
+    url: "https://cp-algorithms.com/graph/breadth-first-search.html",
+    kind: "reference",
+    description: "Reference for BFS traversal, shortest paths in unweighted graphs, and path restoration.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-dijkstra",
+    name: "cp-algorithms: Dijkstra",
+    url: "https://cp-algorithms.com/graph/dijkstra.html",
+    kind: "reference",
+    description: "Reference for Dijkstra's algorithm and its nonnegative-weight precondition.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-bellman-ford",
+    name: "cp-algorithms: Bellman-Ford",
+    url: "https://cp-algorithms.com/graph/bellman_ford.html",
+    kind: "reference",
+    description: "Reference for single-source shortest paths with negative edges and negative-cycle detection.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-floyd-warshall",
+    name: "cp-algorithms: Floyd-Warshall",
+    url: "https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html",
+    kind: "reference",
+    description: "Reference for all-pairs shortest paths on small graphs using O(V^3) dynamic programming.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-kruskal-dsu",
+    name: "cp-algorithms: Kruskal with DSU",
+    url: "https://cp-algorithms.com/graph/mst_kruskal_with_dsu.html",
+    kind: "reference",
+    description: "Reference for minimum spanning tree construction with sorted edges and union-find.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-strongly-connected-components",
+    name: "cp-algorithms: strongly connected components",
+    url: "https://cp-algorithms.com/graph/strongly-connected-components.html",
+    kind: "reference",
+    description: "Reference for SCC decomposition and condensation graphs in directed graphs.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-bridges",
+    name: "cp-algorithms: bridges",
+    url: "https://cp-algorithms.com/graph/bridge-searching.html",
+    kind: "reference",
+    description: "Reference for finding bridge edges with DFS low-link values.",
+    tags: ["dsa"]
+  },
+  {
     id: "cp-algorithms-range-queries",
     name: "cp-algorithms: range queries",
     url: "https://cp-algorithms.com/data_structures/segment_tree.html",

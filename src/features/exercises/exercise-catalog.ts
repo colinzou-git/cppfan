@@ -104,6 +104,27 @@ export const exerciseCatalog: Exercise[] = [
       "Keep the message after the code intact except for one leading separator space."
     ],
     projectLab: "debugging-toolchain-lab"
+  },
+  {
+    id: "graph-maze-shortest-path",
+    title: "Graph: shortest path through a maze",
+    skillIds: ["dsa.graphs.bfs", "dsa.graphs.connected_components", "dsa.graphs.shortest_path"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["maze_route.hpp"],
+    requiredTests: [
+      "test_shortest_route_exists",
+      "test_start_is_goal",
+      "test_unreachable_goal",
+      "test_rejects_missing_start_or_goal",
+      "test_handles_single_corridor"
+    ],
+    hints: [
+      "Treat every non-wall cell as a graph vertex.",
+      "Use a queue for BFS and mark a cell visited when you enqueue it.",
+      "The first time BFS reaches G, that distance is the shortest number of moves."
+    ],
+    projectLab: "maze-route-planner"
   }
 ];
 

@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.bipartite_scc.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "not bipartite\nbipartite\n",
+  "note": "BFS 2-coloring rejects an odd cycle and accepts a simple two-sided graph."
+}

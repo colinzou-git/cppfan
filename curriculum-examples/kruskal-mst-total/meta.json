@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.graphs.mst.lesson",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "total=4\nA-B B-C C-D\n",
+  "note": "Kruskal sorts edges and accepts only edges that connect different DSU components, producing MST total weight 4."
+}

@@ -2071,6 +2071,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "dsa.graphs.connectivity_patterns",
+    domain: "dsa",
+    module_id: "dsa.graphs",
+    title: "Offline connectivity and graph cuts",
+    description: "Use DSU for offline connectivity and recognize bridges and articulation points.",
+    learner_goal: "Process offline connectivity queries in reverse and identify when bridges/articulation points matter.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 1810,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_sums",
     domain: "dsa",
     module_id: "dsa.techniques",
@@ -2723,6 +2735,7 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "dsa.graphs.shortest_path_algorithms", prerequisite_skill_id: "dsa.graphs.shortest_path", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.mst", prerequisite_skill_id: "dsa.graphs.representation", relationship_type: "recommended" },
   { skill_id: "dsa.graphs.bipartite_scc", prerequisite_skill_id: "dsa.graphs.dfs", relationship_type: "recommended" },
+  { skill_id: "dsa.graphs.connectivity_patterns", prerequisite_skill_id: "dsa.graphs.connected_components", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.prefix_sums", prerequisite_skill_id: "dsa.arrays.traversal", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.sliding_window", prerequisite_skill_id: "dsa.arrays.two_pointers", relationship_type: "recommended" },
   { skill_id: "dsa.techniques.greedy", prerequisite_skill_id: "dsa.sorting.comparator", relationship_type: "recommended" },

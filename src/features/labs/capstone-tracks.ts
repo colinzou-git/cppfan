@@ -64,6 +64,13 @@ export const capstoneTracks: CapstoneTrack[] = [
     summary: "Interactive programs using randomness, state, and aggregate statistics.",
     order_index: 30,
     projectIds: ["quiz-generator", "number-guessing-stats"]
+  },
+  {
+    id: "dsa_graphs",
+    title: "Graph problem-solving track",
+    summary: "Model graph states, trace traversal, and turn BFS/DFS ideas into small tools.",
+    order_index: 40,
+    projectIds: ["maze-route-planner"]
   }
 ];
 
@@ -172,6 +179,60 @@ export const capstoneProjects: CapstoneProject[] = [
         verification: "exercise_tests",
         reflectionPrompt: "Why is two-pointer O(n) better than the nested-loop O(n^2) approach here?",
         exerciseId: "dsa-two-sum-sorted"
+      }
+    ]
+  },
+  {
+    id: "maze-route-planner",
+    trackId: "dsa_graphs",
+    prerequisiteSkillIds: ["dsa.graphs.representation", "dsa.graphs.bfs"],
+    milestones: [
+      {
+        id: "maze-route-planner.m1",
+        title: "Model the grid as an implicit graph",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["dsa.graphs.connected_components"],
+        verification: "reflection",
+        reflectionPrompt: "Which cells are vertices, which moves are edges, and why does a wall remove an edge?"
+      },
+      {
+        id: "maze-route-planner.m2",
+        title: "Trace BFS queue and visited state",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["dsa.graphs.bfs"],
+        verification: "manual_checklist",
+        reflectionPrompt: "What invariant tells you that the first time BFS reaches a cell, its distance is shortest?"
+      },
+      {
+        id: "maze-route-planner.m3",
+        title: "Store parents for route reconstruction",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["dsa.graphs.bfs", "dsa.graphs.shortest_path"],
+        verification: "manual_checklist",
+        reflectionPrompt: "How do parent links let you recover the route after BFS reaches the goal?"
+      },
+      {
+        id: "maze-route-planner.m4",
+        title: "Implement and test shortest route length",
+        required: true,
+        estimatedMinutes: 30,
+        practicedSkillIds: ["dsa.graphs.bfs", "dsa.graphs.connected_components"],
+        verification: "exercise_tests",
+        reflectionPrompt: "Which unreachable and boundary cases did your tests cover?",
+        exerciseId: "graph-maze-shortest-path"
+      },
+      {
+        id: "maze-route-planner.m5",
+        title: "Compare BFS, DFS, and Dijkstra choices",
+        required: false,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["dsa.graphs.shortest_path_algorithms"],
+        verification: "reflection",
+        reflectionPrompt: "Why is BFS enough for an unweighted maze, and what would change if moves had different costs?",
+        extensionTask: "Add weighted terrain costs and switch the route finder to Dijkstra."
       }
     ]
   }

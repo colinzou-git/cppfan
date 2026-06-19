@@ -112,6 +112,18 @@ export const projectLabs: ProjectLab[] = [
       "Track attempts per game.",
       "Persist and display aggregate statistics across games."
     ]
+  },
+  {
+    id: "maze-route-planner",
+    title: "Maze route planner",
+    summary: "Read a small grid maze and find the shortest route from start to goal using BFS.",
+    difficulty: "intermediate",
+    focus: ["graphs", "BFS", "grid modeling", "path reconstruction"],
+    milestones: [
+      "Model open grid cells as graph vertices with 4-directional edges.",
+      "Run BFS from S while storing distance and parent direction.",
+      "Reconstruct and print the shortest route to G, or report that no route exists."
+    ]
   }
 ];
 

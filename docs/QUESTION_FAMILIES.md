@@ -96,6 +96,21 @@ trace prompts that fit on mobile and include a text equivalent for every diagram
 - keep examples small enough to trace by hand, then back important code patterns
   with executable curriculum examples.
 
+## Graph items
+
+For graph completion coverage (#115), every algorithm item should state the graph
+conditions and complexity that make the algorithm valid:
+
+- use shared typed fixtures for diagrams so prompt text, tests, and expected
+  paths/edges stay synchronized;
+- include equivalent text for every graph diagram, grid, parent table, or edge
+  list visualization;
+- ask learners to trace queue/stack/visited state, parent reconstruction,
+  coloring conflicts, or greedy edge acceptance;
+- make shortest-path and connectivity prompts choose algorithms from input
+  conditions: unweighted, nonnegative weights, negative edges, all-pairs,
+  online/offline updates, and cut-edge/cut-vertex needs.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

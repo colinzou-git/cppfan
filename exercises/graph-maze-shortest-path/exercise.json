@@ -1,0 +1,23 @@
+{
+  "id": "graph-maze-shortest-path",
+  "title": "Graph: shortest path through a maze",
+  "skill_ids": ["dsa.graphs.bfs", "dsa.graphs.connected_components", "dsa.graphs.shortest_path"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["maze_route.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-maze-shortest-path/work exercises/graph-maze-shortest-path/tests/tests.cpp -o exercises/graph-maze-shortest-path/work/run",
+  "test_command": "exercises/graph-maze-shortest-path/work/run",
+  "required_tests": [
+    "test_shortest_route_exists",
+    "test_start_is_goal",
+    "test_unreachable_goal",
+    "test_rejects_missing_start_or_goal",
+    "test_handles_single_corridor"
+  ],
+  "hints": [
+    "Treat every non-wall cell as a graph vertex.",
+    "Use a queue for BFS and mark a cell visited when you enqueue it.",
+    "The first time BFS reaches G, that distance is the shortest number of moves."
+  ],
+  "project_lab": "maze-route-planner"
+}
