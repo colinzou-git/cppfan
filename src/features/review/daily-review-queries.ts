@@ -25,6 +25,7 @@ export async function getDailyReviewView(
     .eq("user_id", auth.user.id)
     .lt("due_at", nextLocalMidnight(now, timezone).toISOString())
     .order("due_at", { ascending: true })
+    .order("id", { ascending: true })
     .limit(100);
 
   if (result.error) {
