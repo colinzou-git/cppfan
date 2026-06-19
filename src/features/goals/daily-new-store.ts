@@ -27,10 +27,10 @@ export async function allocateGoalExtra(input: {
     p_revision_id: input.action.revisionId,
     p_target_id: input.action.primaryTargetId,
     p_action_id: input.action.id,
-    p_acquisition_step_id: input.action.itemId,
-    p_destination_kind: "learning_item",
-    p_destination_id: input.action.itemId,
-    p_algorithm_version: "daily-new-v1",
+    p_acquisition_step_id: input.action.acquisitionStepId,
+    p_destination_kind: input.action.destinationKind,
+    p_destination_id: input.action.destinationId,
+    p_algorithm_version: input.action.algorithmVersion,
     p_acquisition_contract_version: input.action.acquisitionContractVersion
   });
 
