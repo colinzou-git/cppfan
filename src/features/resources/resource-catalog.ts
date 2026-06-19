@@ -266,6 +266,38 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cppreference-vector",
+    name: "cppreference: std::vector",
+    url: "https://en.cppreference.com/w/cpp/container/vector",
+    kind: "reference",
+    description: "Reference for contiguous dynamic arrays, iterator invalidation, and amortized append behavior.",
+    tags: ["cpp", "dsa"]
+  },
+  {
+    id: "cppreference-list",
+    name: "cppreference: std::list",
+    url: "https://en.cppreference.com/w/cpp/container/list",
+    kind: "reference",
+    description: "Reference for node-based lists, splice behavior, and iterator stability tradeoffs.",
+    tags: ["cpp", "dsa"]
+  },
+  {
+    id: "cppreference-priority-queue",
+    name: "cppreference: std::priority_queue",
+    url: "https://en.cppreference.com/w/cpp/container/priority_queue",
+    kind: "reference",
+    description: "Reference for the heap-backed priority queue adapter and its push/pop/top complexity.",
+    tags: ["cpp", "dsa"]
+  },
+  {
+    id: "cp-algorithms-disjoint-set-union",
+    name: "cp-algorithms: disjoint set union",
+    url: "https://cp-algorithms.com/data_structures/disjoint_set_union.html",
+    kind: "reference",
+    description: "Implementation-oriented guide to union-find with path compression, union by size/rank, and applications.",
+    tags: ["dsa"]
+  },
+  {
     id: "cp-algorithms-range-queries",
     name: "cp-algorithms: range queries",
     url: "https://cp-algorithms.com/data_structures/segment_tree.html",

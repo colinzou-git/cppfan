@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.trees.dsu_internals.code_union_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "representative=0\n0 0 0 0 0 5\nsame\nseparate\n",
+  "note": "find(4) follows 4->3->2->1->0, returns representative 0, and compresses every visited node directly to 0."
+}

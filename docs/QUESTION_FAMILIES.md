@@ -83,6 +83,19 @@ and workflow decisions over tool-name recall:
 - pair guided write-code exercises with warnings, tests, and sanitizer-backed
   builds so tool usage is practiced, not only described.
 
+## Trees, heaps, and DSU items
+
+For linked-structure/tree/heap/DSU completion coverage (#114), prefer compact
+trace prompts that fit on mobile and include a text equivalent for every diagram:
+
+- pair each ASCII tree or parent table with explicit root/child/parent wording;
+- ask learners to trace traversal queues, reconstruction splits, diameter
+  height returns, or union-find parent rewrites rather than only name concepts;
+- include operation-selection prompts that choose among vector/list, heap,
+  sorted vector, map/set, and DSU from the required operations;
+- keep examples small enough to trace by hand, then back important code patterns
+  with executable curriculum examples.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo
