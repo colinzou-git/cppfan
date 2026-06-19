@@ -40,6 +40,12 @@ test.describe("authenticated browser learning loop (#96/#99)", () => {
     test.info().annotations.push({ type: "learner", description: learner.userId });
 
     try {
+      await learner.createStudyGoal({
+        skillId: "cpp.structs_classes.syntax",
+        skillTitle: "Struct/class syntax",
+        title: "Practice class syntax"
+      });
+
       await page.goto("/dashboard");
       await expect(page.getByRole("heading", { name: /your learning dashboard/i })).toBeVisible();
       await expect(page.getByText(learner.email)).toBeVisible();
@@ -69,6 +75,14 @@ test.describe("authenticated browser learning loop (#96/#99)", () => {
       await expect(answerResult).toHaveAttribute("role", "status");
       await expect(answerResult).toContainText(/correct/i);
       await expect(answerResult).not.toContainText(/not recorded/i);
+
+      await page.goto("/dashboard");
+      const dueReview = page.getByTestId("daily-review").getByRole("link");
+      const nextAcquisition = page.getByTestId("daily-new-for-goals").getByRole("link").first();
+      await expect(dueReview).toHaveCount(1);
+      await expect(dueReview).toHaveAttribute("href", /^\/review\?card=/);
+      await expect(nextAcquisition).toHaveAttribute("href", /^\/learn\//);
+      await expect(nextAcquisition).not.toHaveAttribute("href", ITEM_URL);
 
       await page.goto("/review");
       await expect(page.getByRole("heading", { name: /review queue/i })).toBeVisible();

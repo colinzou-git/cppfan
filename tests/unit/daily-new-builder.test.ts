@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildDailyNewPlan } from "@/features/goals/daily-new-builder";
+import { buildDailyReviewItems } from "@/features/review/daily-review-builder";
 import { getLearningItemsForSkill } from "@/features/learning-items/learning-item-seed";
 import { skillPrerequisitesSeed, skillSeed } from "@/features/skills/skill-seed";
 import type { StudyGoalView } from "@/features/goals/goal-view-types";
@@ -106,6 +107,35 @@ describe("buildDailyNewPlan", () => {
       acquisitionState: "in_progress",
       reasonCodes: ["CONTINUE_UNFINISHED_SKILL"]
     });
+  });
+
+  it("keeps a due review separate while allowing a different acquisition action for the same skill", () => {
+    const [reviewedItem] = getLearningItemsForSkill("cpp.program_basics.structure");
+    const now = new Date("2026-06-19T12:00:00.000Z");
+    const reviews = buildDailyReviewItems(
+      [{
+        id: "card-1",
+        learning_item_id: reviewedItem.id,
+        skill_id: "cpp.program_basics.structure",
+        due_at: "2026-06-19T11:00:00.000Z"
+      }],
+      "UTC",
+      now
+    );
+    const plan = buildDailyNewPlan({
+      goals: [goal("one")],
+      evidencedItemIds: new Set([reviewedItem.id]),
+      dailyCap: 1,
+      localPlanDate: "2026-06-19",
+      timezone: "UTC"
+    });
+
+    expect(reviews).toHaveLength(1);
+    expect(plan.actions).toHaveLength(1);
+    expect(plan.actions[0].skillId).toBe(reviews[0].skillId);
+    expect(plan.actions[0].itemId).not.toBe(reviews[0].itemId);
+    expect(plan.actions[0].id).not.toBe(reviews[0].cardId);
+    expect(plan.actions[0].isFsrsReview).toBe(false);
   });
 
   it("excludes a target whose initial learning contract is already complete", () => {
