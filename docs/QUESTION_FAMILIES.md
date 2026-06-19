@@ -57,6 +57,18 @@ decision rather than vocabulary recall alone:
 - match the required operations to a pattern or container before asking for code
   details.
 
+## Templates, concepts, and ranges items
+
+For templates/ranges completion coverage (#112), include applied prompts that
+make learners read compiler diagnostics and choose the right abstraction:
+
+- identify the failed constraint in a short concepts diagnostic before changing
+  code;
+- distinguish `requires`, abbreviated constrained parameters, and unconstrained
+  templates by intent;
+- ask when a plain loop or ordinary algorithm is clearer than a lazy view;
+- include at least one dangling-view bug and an owning materialization fix.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

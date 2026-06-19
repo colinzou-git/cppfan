@@ -1,0 +1,7 @@
+{
+  "itemId": "cpp.templates.view_lifetime.bug_return_view",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "1 2 \n",
+  "note": "Materializes a lazy filter view into an owning vector before returning so the result does not dangle."
+}

@@ -58,6 +58,70 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp", "dsa"]
   },
   {
+    id: "cppreference-concepts-library",
+    name: "cppreference: standard concepts",
+    url: "https://en.cppreference.com/w/cpp/concepts",
+    kind: "reference",
+    description: "Reference index for standard concepts such as integral, floating_point, same_as, and ranges concepts.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-constraints",
+    name: "cppreference: constraints and concepts",
+    url: "https://en.cppreference.com/w/cpp/language/constraints",
+    kind: "reference",
+    description: "Language reference for requires clauses, constrained declarations, and concept diagnostics.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-ranges-algorithms",
+    name: "cppreference: ranges algorithms",
+    url: "https://en.cppreference.com/w/cpp/algorithm/ranges",
+    kind: "reference",
+    description: "Reference index for std::ranges algorithms that operate on whole ranges.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-filter-view",
+    name: "cppreference: filter_view",
+    url: "https://en.cppreference.com/w/cpp/ranges/filter_view",
+    kind: "reference",
+    description: "Reference for lazy filtering views and their range/lifetime requirements.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-transform-view",
+    name: "cppreference: transform_view",
+    url: "https://en.cppreference.com/w/cpp/ranges/transform_view",
+    kind: "reference",
+    description: "Reference for lazy transformation views in ranges pipelines.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-take-view",
+    name: "cppreference: take_view",
+    url: "https://en.cppreference.com/w/cpp/ranges/take_view",
+    kind: "reference",
+    description: "Reference for limiting a lazy view pipeline to the first n elements.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-constexpr",
+    name: "cppreference: constexpr",
+    url: "https://en.cppreference.com/w/cpp/language/constexpr",
+    kind: "reference",
+    description: "Language reference for constexpr variables, functions, and compile-time evaluation.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-static-assert",
+    name: "cppreference: static_assert",
+    url: "https://en.cppreference.com/w/cpp/language/static_assert",
+    kind: "reference",
+    description: "Language reference for compile-time assertions and diagnostic messages.",
+    tags: ["cpp"]
+  },
+  {
     id: "cpp-core-guidelines",
     name: "C++ Core Guidelines",
     url: "https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines",

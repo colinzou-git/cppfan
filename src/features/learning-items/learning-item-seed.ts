@@ -2097,6 +2097,44 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.templates.concepts_depth.code_diagnostic",
+    type: "code_reading",
+    title: "Reading a concept diagnostic",
+    prompt:
+      "A call `twice(3.14)` produces this shortened diagnostic: `candidate template ignored: constraints not satisfied [with T = double]` and `note: because double does not satisfy std::integral`. What requirement failed, and what is the smallest fix if floating-point inputs are valid?",
+    explanation:
+      "The template was constrained with `std::integral`, so `double` is rejected before the function body is considered. If floating-point inputs are valid, change the constraint deliberately (for example add a `std::floating_point` overload or use a broader numeric concept); if they are not valid, pass an integral argument. The useful diagnostic is the failed constraint near the call site.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 4710,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.ranges_depth.mc_choose_tool",
+    type: "multiple_choice",
+    title: "Choosing loop, algorithm, or view",
+    prompt: "You need to uppercase every character of one `std::string` in place. Which approach is clearest?",
+    explanation:
+      "For a small in-place mutation, a simple loop (or `std::ranges::transform` writing back to the same range) is direct and obvious. Lazy views are best when you want a non-owning pipeline that filters/transforms elements as they are iterated, not when you simply mutate one container.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4720,
+    is_active: true
+  },
+  {
+    id: "cpp.templates.view_lifetime.bug_return_view",
+    type: "bug_spotting",
+    title: "Returning a view over a local",
+    prompt:
+      "Spot the bug: `auto small_values() { std::vector<int> values{1, 2, 3, 4}; return values | std::views::filter([](int x) { return x < 3; }); }`",
+    explanation:
+      "`small_values` returns a view that refers to `values`, but `values` is destroyed when the function returns. Return an owning container, or accept a caller-owned range and document that the returned view must not outlive it.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4730,
+    is_active: true
+  },
+  {
     id: "cpp.tooling.error_handling.lesson",
     type: "lesson",
     title: "Error handling",
@@ -5534,6 +5572,9 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.templates.ranges_depth.mc_lazy", skill_id: "cpp.templates.ranges_depth", is_primary: true },
   { learning_item_id: "cpp.templates.view_lifetime.lesson", skill_id: "cpp.templates.view_lifetime", is_primary: true },
   { learning_item_id: "cpp.templates.view_lifetime.mc_dangling", skill_id: "cpp.templates.view_lifetime", is_primary: true },
+  { learning_item_id: "cpp.templates.concepts_depth.code_diagnostic", skill_id: "cpp.templates.concepts_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.ranges_depth.mc_choose_tool", skill_id: "cpp.templates.ranges_depth", is_primary: true },
+  { learning_item_id: "cpp.templates.view_lifetime.bug_return_view", skill_id: "cpp.templates.view_lifetime", is_primary: true },
   { learning_item_id: "cpp.templates.class_templates.mc_vector", skill_id: "cpp.stl.vector", is_primary: false },
   { learning_item_id: "cpp.tooling.error_handling.lesson", skill_id: "cpp.tooling.error_handling", is_primary: true },
   { learning_item_id: "cpp.tooling.error_handling.mc_unwind", skill_id: "cpp.tooling.error_handling", is_primary: true },
@@ -6174,6 +6215,11 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.templates.view_lifetime.mc_dangling.b", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "Views cannot be returned from functions at all", is_correct: false, order_index: 20 },
   { id: "cpp.templates.view_lifetime.mc_dangling.c", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "filter copies the vector, doubling memory", is_correct: false, order_index: 30 },
   { id: "cpp.templates.view_lifetime.mc_dangling.d", learning_item_id: "cpp.templates.view_lifetime.mc_dangling", content: "The predicate runs too early", is_correct: false, order_index: 40 },
+
+  { id: "cpp.templates.ranges_depth.mc_choose_tool.a", learning_item_id: "cpp.templates.ranges_depth.mc_choose_tool", content: "Use a simple loop, or std::ranges::transform writing back into the same string", is_correct: true, order_index: 10 },
+  { id: "cpp.templates.ranges_depth.mc_choose_tool.b", learning_item_id: "cpp.templates.ranges_depth.mc_choose_tool", content: "Build a lazy filter/transform/take view and ignore the original string", is_correct: false, order_index: 20 },
+  { id: "cpp.templates.ranges_depth.mc_choose_tool.c", learning_item_id: "cpp.templates.ranges_depth.mc_choose_tool", content: "Call std::ranges::sort first because range algorithms require sorted input", is_correct: false, order_index: 30 },
+  { id: "cpp.templates.ranges_depth.mc_choose_tool.d", learning_item_id: "cpp.templates.ranges_depth.mc_choose_tool", content: "Return a view over a local temporary string so the mutation happens later", is_correct: false, order_index: 40 },
 
   { id: "cpp.tooling.error_handling.mc_unwind.a", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They are destroyed by stack unwinding (their destructors run)", is_correct: true, order_index: 10 },
   { id: "cpp.tooling.error_handling.mc_unwind.b", learning_item_id: "cpp.tooling.error_handling.mc_unwind", content: "They leak; destructors are skipped", is_correct: false, order_index: 20 },
