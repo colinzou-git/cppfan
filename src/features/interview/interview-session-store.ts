@@ -6,8 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import {
   SESSION_DURATIONS,
   SESSION_PHASES,
+  emptyPhaseElapsedSeconds,
+  type PhaseElapsedSeconds,
+  type PhaseNotes,
   type SessionDuration,
   type SessionMode,
+  type SessionPhase,
   type SessionState,
   type SessionStatus
 } from "./session-machine";
@@ -24,8 +28,40 @@ type SessionRow = {
   duration_minutes: number;
   phase_index: number;
   elapsed_seconds: number;
+  phase_elapsed_seconds?: unknown;
+  notes_by_phase?: unknown;
+  code_draft?: string | null;
+  test_notes?: string | null;
+  assistance_used?: boolean | null;
+  abandonment_reason?: string | null;
   status: string;
 };
+
+function coerceObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function coercePhaseElapsedSeconds(value: unknown): PhaseElapsedSeconds {
+  const source = coerceObject(value);
+  const elapsed = emptyPhaseElapsedSeconds();
+  for (const phase of SESSION_PHASES) {
+    const raw = source[phase];
+    elapsed[phase] = typeof raw === "number" && Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0;
+  }
+  return elapsed;
+}
+
+function coerceNotes(value: unknown): PhaseNotes {
+  const source = coerceObject(value);
+  const notes: PhaseNotes = {};
+  for (const phase of SESSION_PHASES) {
+    const raw = source[phase];
+    if (typeof raw === "string") {
+      notes[phase as SessionPhase] = raw.slice(0, 4000);
+    }
+  }
+  return notes;
+}
 
 /** Coerce a stored row into a valid SessionState (clamps/whitelists defensively). */
 export function rowToSessionState(row: SessionRow): SessionState {
@@ -42,6 +78,12 @@ export function rowToSessionState(row: SessionRow): SessionState {
     durationMinutes,
     phaseIndex: Math.min(Math.max(0, Math.trunc(row.phase_index)), LAST_PHASE_INDEX),
     elapsedSeconds: Math.max(0, Math.trunc(row.elapsed_seconds)),
+    phaseElapsedSeconds: coercePhaseElapsedSeconds(row.phase_elapsed_seconds),
+    notesByPhase: coerceNotes(row.notes_by_phase),
+    codeDraft: typeof row.code_draft === "string" ? row.code_draft.slice(0, 12000) : "",
+    testNotes: typeof row.test_notes === "string" ? row.test_notes.slice(0, 4000) : "",
+    assistanceUsed: Boolean(row.assistance_used),
+    abandonmentReason: typeof row.abandonment_reason === "string" ? row.abandonment_reason.slice(0, 500) : null,
     status
   };
 }
@@ -54,6 +96,12 @@ export function sessionStateToRow(state: SessionState): SessionRow {
     duration_minutes: SESSION_DURATIONS.includes(state.durationMinutes) ? state.durationMinutes : 45,
     phase_index: Math.min(Math.max(0, Math.trunc(state.phaseIndex)), LAST_PHASE_INDEX),
     elapsed_seconds: Math.max(0, Math.trunc(state.elapsedSeconds)),
+    phase_elapsed_seconds: coercePhaseElapsedSeconds(state.phaseElapsedSeconds),
+    notes_by_phase: coerceNotes(state.notesByPhase),
+    code_draft: state.codeDraft.slice(0, 12000),
+    test_notes: state.testNotes.slice(0, 4000),
+    assistance_used: Boolean(state.assistanceUsed),
+    abandonment_reason: state.abandonmentReason ? state.abandonmentReason.slice(0, 500) : null,
     status: STATUSES.includes(state.status) ? state.status : "in_progress"
   };
 }
@@ -72,7 +120,9 @@ export async function getCurrentSession(): Promise<SessionState | null> {
   }
   const { data, error } = await supabase
     .from("interview_sessions")
-    .select("problem_id,mode,duration_minutes,phase_index,elapsed_seconds,status")
+    .select(
+      "problem_id,mode,duration_minutes,phase_index,elapsed_seconds,phase_elapsed_seconds,notes_by_phase,code_draft,test_notes,assistance_used,abandonment_reason,status"
+    )
     .eq("user_id", user.id)
     .maybeSingle();
   if (error || !data) {

@@ -1,7 +1,6 @@
 // Timed coding-interview session state machine (#177 / #174). Pure and
 // serializable so it can drive the UI, persist across refresh, and be tested
-// deterministically. Solutions stay hidden until the appropriate state. Per-user
-// persistence (RLS) and the desktop/iPad UI are follow-up slices.
+// deterministically. Solutions stay hidden until the appropriate state.
 
 export const SESSION_PHASES = [
   "clarification",
@@ -20,6 +19,8 @@ export type SessionPhase = (typeof SESSION_PHASES)[number];
 export type SessionMode = "practice" | "interview";
 export type SessionDuration = 35 | 45 | 50;
 export type SessionStatus = "in_progress" | "completed" | "abandoned";
+export type PhaseElapsedSeconds = Record<SessionPhase, number>;
+export type PhaseNotes = Partial<Record<SessionPhase, string>>;
 
 export const SESSION_DURATIONS: SessionDuration[] = [35, 45, 50];
 
@@ -29,8 +30,18 @@ export type SessionState = {
   durationMinutes: SessionDuration;
   phaseIndex: number;
   elapsedSeconds: number;
+  phaseElapsedSeconds: PhaseElapsedSeconds;
+  notesByPhase: PhaseNotes;
+  codeDraft: string;
+  testNotes: string;
+  assistanceUsed: boolean;
+  abandonmentReason: string | null;
   status: SessionStatus;
 };
+
+export function emptyPhaseElapsedSeconds(): PhaseElapsedSeconds {
+  return Object.fromEntries(SESSION_PHASES.map((phase) => [phase, 0])) as PhaseElapsedSeconds;
+}
 
 export function createSession(input: {
   problemId: string;
@@ -46,6 +57,12 @@ export function createSession(input: {
     durationMinutes: input.durationMinutes,
     phaseIndex: 0,
     elapsedSeconds: 0,
+    phaseElapsedSeconds: emptyPhaseElapsedSeconds(),
+    notesByPhase: {},
+    codeDraft: "",
+    testNotes: "",
+    assistanceUsed: false,
+    abandonmentReason: null,
     status: "in_progress"
   };
 }
@@ -80,7 +97,17 @@ export function tick(state: SessionState, seconds: number): SessionState {
   if (state.status !== "in_progress" || seconds <= 0) {
     return state;
   }
-  return { ...state, elapsedSeconds: state.elapsedSeconds + seconds };
+  const wholeSeconds = Math.trunc(seconds);
+  const phase = currentPhase(state);
+  return {
+    ...state,
+    elapsedSeconds: state.elapsedSeconds + wholeSeconds,
+    phaseElapsedSeconds: {
+      ...emptyPhaseElapsedSeconds(),
+      ...state.phaseElapsedSeconds,
+      [phase]: (state.phaseElapsedSeconds[phase] ?? 0) + wholeSeconds
+    }
+  };
 }
 
 export function budgetSeconds(state: SessionState): number {
@@ -100,7 +127,26 @@ export function completeSession(state: SessionState): SessionState {
 }
 
 export function abandonSession(state: SessionState): SessionState {
-  return state.status === "in_progress" ? { ...state, status: "abandoned" } : state;
+  return state.status === "in_progress"
+    ? { ...state, status: "abandoned", abandonmentReason: state.abandonmentReason ?? "manual_stop" }
+    : state;
+}
+
+export function updatePhaseNote(state: SessionState, phase: SessionPhase, note: string): SessionState {
+  return {
+    ...state,
+    notesByPhase: {
+      ...state.notesByPhase,
+      [phase]: note
+    }
+  };
+}
+
+export function updateSessionEvidence(
+  state: SessionState,
+  patch: Partial<Pick<SessionState, "codeDraft" | "testNotes" | "assistanceUsed" | "abandonmentReason">>
+): SessionState {
+  return { ...state, ...patch };
 }
 
 /**
