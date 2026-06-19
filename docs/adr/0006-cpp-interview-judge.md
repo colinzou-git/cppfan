@@ -89,7 +89,9 @@ measurements, not percentile rankings.
 compiler + standard, source hash + version, compile result, visible/hidden test
 summary (counts + which categories failed — not inputs/outputs), diagnostic
 runtime/memory, session/problem version, and whether hints/prior-solution
-exposure occurred. Submissions are idempotent by submission id.
+exposure occurred. Submissions are idempotent by submission id. The database
+record is authoritative for the web app; worker-specific fixture material stays
+inside the worker-side hidden-test store.
 
 ## Local development
 
@@ -105,6 +107,13 @@ idempotent queue behavior, cancellation/worker-loss handling, and security
 regression cases. The Next.js app talks through `src/features/interview/judge-client.ts`,
 which validates and enqueues only; compiler and process execution APIs stay out
 of `app/`, API routes, and server actions.
+
+Durable submission metadata is stored in `public.interview_judge_submissions`
+through `src/features/interview/judge-submission-store.ts`. Rows are owned by a
+single learner under RLS, keyed by an idempotent `submission_id`, and store source
+hash/version, problem/session metadata, queue/result status, visible/hidden pass
+counts, and runtime/memory diagnostics. The table intentionally does not store
+raw source text or hidden fixture inputs/expected outputs.
 
 ## Consequences
 
