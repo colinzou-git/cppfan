@@ -98,6 +98,14 @@ where practical. CI validates reference solutions and intentionally-failing
 submissions (Stage A, #98) **without** production credentials and without running
 untrusted code in CI.
 
+The repository-owned Stage B boundary is under `services/interview-judge/`.
+`protocol.ts` defines the queue/worker request shape, and `sandbox-policy.ts`
+defines the local run manifest, isolation profile, capability matrix, rate limits,
+idempotent queue behavior, cancellation/worker-loss handling, and security
+regression cases. The Next.js app talks through `src/features/interview/judge-client.ts`,
+which validates and enqueues only; compiler and process execution APIs stay out
+of `app/`, API routes, and server actions.
+
 ## Consequences
 
 - Clear separation: the web app never executes learner code; a dedicated sandbox
