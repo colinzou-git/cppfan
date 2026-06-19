@@ -46,7 +46,7 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
           : `Evaluation could not save this response: ${result.status.replaceAll("_", " ")}.`);
         return;
       }
-      setMessage(result.lastAnswerCorrect ? "Response recorded." : "Response recorded. The next question will probe a prerequisite or contrast.");
+      setMessage("Response recorded. Next question selected.");
       setChoiceId("");
       setView(result.view);
     });
