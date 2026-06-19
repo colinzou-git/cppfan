@@ -1,12 +1,12 @@
-import { getLearningItemsForSkill } from "@/features/learning-items/learning-item-seed";
 import { skillPrerequisitesSeed } from "@/features/skills/skill-seed";
+import { getNextAcquisitionItemForSkill } from "./acquisition-contracts";
 import type { StudyGoalView } from "./goal-view-types";
 import type { DailyNewAction, DailyNewPlan } from "./daily-new-model";
 
 type Input = { goals: StudyGoalView[]; evidencedItemIds: ReadonlySet<string>; dailyCap: number };
 
 function nextItem(skillId: string, done: ReadonlySet<string>) {
-  return getLearningItemsForSkill(skillId).find((item) => !done.has(item.id)) ?? null;
+  return getNextAcquisitionItemForSkill(skillId, done);
 }
 
 function makeAction(goal: StudyGoalView, target: StudyGoalView["targets"][number], skillId: string, reason: string, done: ReadonlySet<string>) {
