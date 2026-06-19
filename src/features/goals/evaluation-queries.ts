@@ -1,0 +1,1 @@
+export const EVALUATION_QUERY_LIMIT = 30;
