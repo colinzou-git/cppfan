@@ -78,6 +78,28 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "text-statistics-analyzer"
   },
   {
+    id: "trie-autocomplete",
+    title: "Strings: trie autocomplete",
+    skillIds: ["dsa.strings.trie", "dsa.strings.char_frequency", "dsa.strings.case_handling"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["autocomplete.hpp"],
+    requiredTests: [
+      "test_exact_membership",
+      "test_prefix_suggestions_sorted",
+      "test_limit_and_missing_prefix",
+      "test_insert_adds_word_without_duplicates",
+      "test_empty_prefix_returns_dictionary_order"
+    ],
+    hints: [
+      "Each trie edge represents one character; walking a prefix lands on the subtree of completions.",
+      "Mark terminal nodes so exact membership differs from just being a prefix.",
+      "Traverse children in sorted key order so suggestions are deterministic.",
+      "Stop collecting suggestions once you reach the requested limit."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
     id: "tooling-status-parser",
     title: "Tooling: status parser with tests",
     skillIds: [

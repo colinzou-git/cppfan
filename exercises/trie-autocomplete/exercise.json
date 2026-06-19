@@ -1,0 +1,24 @@
+{
+  "id": "trie-autocomplete",
+  "title": "Strings: trie autocomplete",
+  "skill_ids": ["dsa.strings.trie", "dsa.strings.char_frequency", "dsa.strings.case_handling"],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": ["autocomplete.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/trie-autocomplete/work exercises/trie-autocomplete/tests/tests.cpp -o exercises/trie-autocomplete/work/run",
+  "test_command": "exercises/trie-autocomplete/work/run",
+  "required_tests": [
+    "test_exact_membership",
+    "test_prefix_suggestions_sorted",
+    "test_limit_and_missing_prefix",
+    "test_insert_adds_word_without_duplicates",
+    "test_empty_prefix_returns_dictionary_order"
+  ],
+  "hints": [
+    "Each trie edge represents one character; walking a prefix lands on the subtree of completions.",
+    "Mark terminal nodes so exact membership differs from just being a prefix.",
+    "Traverse children in sorted key order so suggestions are deterministic.",
+    "Stop collecting suggestions once you reach the requested limit."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

@@ -143,6 +143,22 @@ deterministic reasoning and tests over timing demonstrations:
 - keep memory-ordering coverage introductory: seq_cst defaults, release/acquire
   publication, and relaxed only for independent counters/flags.
 
+## String algorithm items
+
+For string completion coverage (#120), every prefix/search trace should include
+an index table plus a text equivalent:
+
+- show naive search repetition before KMP/Z so learners see the work being
+  avoided;
+- make prefix-function and Z-function prompts ask learners to read concrete
+  table values, not just define the arrays;
+- distinguish exact matching, prefix enumeration, and probabilistic substring
+  equality when choosing KMP, Z, tries, or rolling hashes;
+- state that double hashing is enrichment that lowers collision risk, while
+  direct character verification is the correctness safeguard;
+- pair trie/prefix lessons with an autocomplete or dictionary project so prefix
+  queries are practiced in context.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo
