@@ -33,6 +33,7 @@ export type WorkerProcessResult = {
   stderr: string;
   timedOut?: boolean;
   memoryExceeded?: boolean;
+  outputExceeded?: boolean;
   signal?: string | null;
   runtimeMs?: number | null;
   memoryMb?: number | null;
@@ -91,6 +92,7 @@ function normalizeOutput(value: string): string {
 function statusFromProcess(result: WorkerProcessResult): JudgeStatus | null {
   if (result.timedOut) return "timeout";
   if (result.memoryExceeded) return "memory_limit";
+  if (result.outputExceeded) return "runtime_error";
   if (result.exitCode !== 0) return "runtime_error";
   return null;
 }
