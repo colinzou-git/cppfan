@@ -33,4 +33,18 @@ describe("DailyReview", () => {
     expect(within(item).getByText("2026-06-19 - America/Los_Angeles")).toBeVisible();
     expect(within(item).getByRole("link")).toHaveAttribute("href", "/review?card=card-1");
   });
+
+  it("renders a genuine empty-due state separately from configured failures", () => {
+    render(<DailyReview view={{ ...view(), items: [] }} />);
+
+    expect(screen.getByText("No FSRS reviews are due today.")).toBeVisible();
+    expect(screen.queryByText(/temporarily unavailable/i)).not.toBeInTheDocument();
+  });
+
+  it("renders unavailable review scheduling without implying an empty FSRS queue", () => {
+    render(<DailyReview view={{ ...view(), state: "unavailable", items: [] }} />);
+
+    expect(screen.getByText(/Review scheduling is temporarily unavailable/i)).toBeVisible();
+    expect(screen.queryByText("No FSRS reviews are due today.")).not.toBeInTheDocument();
+  });
 });
