@@ -3,8 +3,8 @@
 // interview catalog, plus pure deterministic scoring that yields a per-pattern
 // heat map and a 4-8 week plan. It measures interview execution, not seniority;
 // it never hard-locks content or declares mastery, and is separate from FSRS.
-// Per-user results storage (RLS), the target-profile field, and the onboarding
-// UI are follow-up slices.
+// Per-user result storage, target-profile editing, and the result UI are layered
+// around these pure rules so identical evidence yields identical guidance.
 import { getInterviewProblemsByGroup, type ProblemGroup } from "./problem-catalog";
 
 export type DiagnosticDimension =
@@ -109,7 +109,23 @@ export function buildHeatMap(scores: Partial<Record<string, number>>): HeatMapEn
   });
 }
 
-export type PlanWeek = { week: number; sectionId: string; level: AreaLevel; reason: string; problemIds: string[] };
+export type DiagnosticNextStepKind = "refresh" | "implementation_practice" | "timed_practice" | "maintenance";
+
+export type DiagnosticNextStep = {
+  kind: DiagnosticNextStepKind;
+  label: string;
+  detail: string;
+  href: string;
+};
+
+export type PlanWeek = {
+  week: number;
+  sectionId: string;
+  level: AreaLevel;
+  reason: string;
+  problemIds: string[];
+  nextStep: DiagnosticNextStep;
+};
 
 const LEVEL_RANK: Record<AreaLevel, number> = { refresh_first: 0, practice_under_time: 1, interview_ready: 2 };
 const MIN_WEEKS = 4;
@@ -141,7 +157,8 @@ export function generatePlan(heatMap: HeatMapEntry[]): PlanWeek[] {
       sectionId: entry.sectionId,
       level: entry.level,
       reason: planReason(entry),
-      problemIds: getInterviewProblemsByGroup(entry.group).map((p) => p.id)
+      problemIds: getInterviewProblemsByGroup(entry.group).map((p) => p.id),
+      nextStep: nextStepFor(entry)
     });
   }
   return plan;
@@ -156,4 +173,40 @@ function planReason(entry: HeatMapEntry): string {
     default:
       return `Refresh first: ${entry.title} showed gaps to rebuild before timed practice.`;
   }
+}
+
+function nextStepFor(entry: HeatMapEntry): DiagnosticNextStep {
+  if (entry.level === "interview_ready") {
+    return {
+      kind: "maintenance",
+      label: "Start a timed maintenance rep",
+      detail: "Skip beginner review for this strong area and keep it warm with a short independent solve.",
+      href: "/interview/session"
+    };
+  }
+
+  if (entry.level === "practice_under_time") {
+    return {
+      kind: "timed_practice",
+      label: "Practice this area under time",
+      detail: "Reasoning is close; use timed sessions to make the execution reliable.",
+      href: "/interview/session"
+    };
+  }
+
+  if (entry.group === "cpp_implementation") {
+    return {
+      kind: "implementation_practice",
+      label: "Drill C++ implementation scaffolding",
+      detail: "Correct reasoning with shaky C++ should rebuild through focused implementation exercises before another full interview problem.",
+      href: "/exercises"
+    };
+  }
+
+  return {
+    kind: "refresh",
+    label: "Refresh the pattern, then solve",
+    detail: "Use the interview plan to review the pattern and pick an unseen catalog problem in this weak area.",
+    href: "/interview/plan"
+  };
 }

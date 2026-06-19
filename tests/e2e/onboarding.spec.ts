@@ -12,6 +12,7 @@ test("onboarding route shows profile form or auth gate", async ({ page }) => {
     await expect(onboardingHeading).toBeVisible();
     await expect(page.getByRole("heading", { name: /set up your cppFan profile/i })).toBeVisible();
     await expect(page.getByLabel(/display name/i)).toBeVisible();
+    await expect(page.getByTestId("interview-target-profile-link")).toBeVisible();
     await expect(page.getByRole("button", { name: /finish onboarding/i })).toBeVisible();
     return;
   }
@@ -32,6 +33,7 @@ test("profile route shows setup guidance or auth gate", async ({ page }) => {
   if (profileVisible) {
     await expect(profileHeading).toBeVisible();
     await expect(page.getByRole("heading", { name: /profile settings/i })).toBeVisible();
+    await expect(page.getByTestId("interview-target-profile-link")).toBeVisible();
     return;
   }
 

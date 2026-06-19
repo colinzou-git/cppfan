@@ -1,8 +1,16 @@
 // Pure view model for the diagnostic overview UI (#175/#174): the assembled
 // baseline diagnostic sections with readable dimension labels and resolved source
-// titles, plus the total time budget. DB-independent and unit-testable. The scored
-// run (heat map + study plan) needs persisted section scores and is a follow-up.
-import { diagnosticMinutes, diagnosticSections, type DiagnosticDimension, type DiagnosticSource } from "./diagnostic";
+// titles, plus deterministic result-plan views from saved section scores.
+import {
+  buildHeatMap,
+  diagnosticMinutes,
+  diagnosticSections,
+  generatePlan,
+  type DiagnosticDimension,
+  type DiagnosticNextStep,
+  type DiagnosticSource,
+  type HeatMapEntry
+} from "./diagnostic";
 import { getInterviewProblem } from "./problem-catalog";
 import { getLearningItemById } from "@/features/learning-items/learning-item-seed";
 
@@ -31,6 +39,21 @@ export type DiagnosticView = {
   sections: DiagnosticSectionView[];
 };
 
+export type DiagnosticPlanWeekView = {
+  week: number;
+  sectionId: string;
+  level: HeatMapEntry["level"];
+  reason: string;
+  problemTitles: string[];
+  nextStep: DiagnosticNextStep;
+};
+
+export type DiagnosticResultView = {
+  hasScores: boolean;
+  heatMap: HeatMapEntry[];
+  plan: DiagnosticPlanWeekView[];
+};
+
 function sourceTitle(source: DiagnosticSource): string {
   if (source.kind === "interview_problem") {
     return getInterviewProblem(source.problemId)?.title ?? source.problemId;
@@ -49,4 +72,21 @@ export function buildDiagnosticView(): DiagnosticView {
       dimensionLabels: section.dimensions.map((d) => DIMENSION_LABEL[d] ?? d)
     }))
   };
+}
+
+export function buildDiagnosticResultView(scores: Partial<Record<string, number>>): DiagnosticResultView {
+  const hasScores = Object.keys(scores).length > 0;
+  const heatMap = buildHeatMap(scores);
+  const plan = hasScores
+    ? generatePlan(heatMap).map((week) => ({
+        week: week.week,
+        sectionId: week.sectionId,
+        level: week.level,
+        reason: week.reason,
+        problemTitles: week.problemIds.map((id) => getInterviewProblem(id)?.title ?? id),
+        nextStep: week.nextStep
+      }))
+    : [];
+
+  return { hasScores, heatMap, plan };
 }

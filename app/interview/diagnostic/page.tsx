@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Gauge } from "lucide-react";
-import { buildDiagnosticView } from "@/features/interview/diagnostic-view";
+import { buildDiagnosticResultView, buildDiagnosticView } from "@/features/interview/diagnostic-view";
 import { diagnosticSections } from "@/features/interview/diagnostic";
 import { getDiagnosticHistory, getDiagnosticScores } from "@/features/interview/diagnostic-store";
 import { DiagnosticRetakeForm } from "@/features/interview/diagnostic-retake-form";
@@ -14,9 +14,14 @@ function average(scores: Record<string, number>) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function levelLabel(level: string) {
+  return level.replaceAll("_", " ");
+}
+
 export default async function DiagnosticPage() {
   const view = buildDiagnosticView();
   const [initialScores, history] = await Promise.all([getDiagnosticScores(), getDiagnosticHistory()]);
+  const resultView = buildDiagnosticResultView(initialScores);
 
   let authenticated = false;
   const supabase = await createClient();
@@ -69,6 +74,54 @@ export default async function DiagnosticPage() {
           lastCompletedAt={history[0]?.completedAt ?? null}
         />
       </section>
+
+      {resultView.hasScores ? (
+        <section className="grid gap-3" data-testid="diagnostic-result-plan">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">Saved result plan</h2>
+            <p className="text-sm text-slate-600">
+              This plan uses only diagnostic evidence. It does not mark skills mastered, edit FSRS cards, or lock other cppFan content.
+            </p>
+          </div>
+
+          <div className="grid gap-2 rounded-2xl border border-slate-200 bg-white/85 p-4">
+            <h3 className="font-bold text-slate-900">Pattern heat map</h3>
+            <div className="grid gap-2">
+              {resultView.heatMap.map((entry) => (
+                <div key={entry.sectionId} className="grid gap-1 sm:grid-cols-[1fr_auto] sm:items-center" data-testid="diagnostic-heatmap-row">
+                  <span className="text-sm font-semibold text-slate-800">{entry.title}</span>
+                  <span className="text-sm font-bold text-blue-800">
+                    {Math.round(entry.score * 100)}% - {levelLabel(entry.level)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <ol className="grid gap-3">
+            {resultView.plan.map((week) => (
+              <li key={`${week.week}-${week.sectionId}`} className="grid gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm" data-testid="diagnostic-plan-week">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-black text-slate-900">Week {week.week}</h3>
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">{levelLabel(week.level)}</span>
+                </div>
+                <p className="text-sm text-slate-700">{week.reason}</p>
+                {week.problemTitles.length > 0 ? (
+                  <p className="text-sm text-slate-600">
+                    Catalog options: <span className="font-semibold text-slate-800">{week.problemTitles.slice(0, 3).join(", ")}</span>
+                  </p>
+                ) : null}
+                <div className="grid gap-1">
+                  <Link href={week.nextStep.href} className="font-bold text-blue-700" data-testid="diagnostic-plan-link">
+                    {week.nextStep.label}
+                  </Link>
+                  <p className="text-sm text-slate-600">{week.nextStep.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <section className="grid gap-3" data-testid="diagnostic-history">
         <div>
