@@ -62,7 +62,11 @@ export function buildDailyNewPlan({ goals, evidencedItemIds, dailyCap }: BuildIn
 
       const prerequisites = skillPrerequisitesSeed
         .filter((edge) => edge.skill_id === target.skillId)
-        .sort((a, b) => a.relationship_type.localeCompare(b.relationship_type) || a.prerequisite_skill_id.localeCompare(b.prerequisite_skill_id));
+        .sort(
+          (a, b) =>
+            Number(b.relationship_type === "required") - Number(a.relationship_type === "required") ||
+            a.prerequisite_skill_id.localeCompare(b.prerequisite_skill_id)
+        );
       const unfinishedPrerequisite = prerequisites.find((edge) => nextItem(edge.prerequisite_skill_id, evidencedItemIds));
       const action = unfinishedPrerequisite
         ? candidate(
