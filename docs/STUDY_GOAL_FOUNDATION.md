@@ -14,6 +14,7 @@ daily-allocation boundary from ADR 0007.
 - deterministic Daily New allocation with persisted Learn Extra snapshots
 - idempotent, concurrency-safe Learn Extra allocation
 - explicit complete, reopen, and cancel lifecycle mutations
+- bounded, cursor-paginated completed/cancelled goal history
 - user-owned RLS with browser reads only
 - trusted create, revise, cancel, complete, reopen, and Learn Extra RPCs
 
