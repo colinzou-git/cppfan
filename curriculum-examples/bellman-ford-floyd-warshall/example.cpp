@@ -21,7 +21,7 @@ int main() {
     std::vector<int> dist(n, INF);
     dist[0] = 0;
     for (int pass = 0; pass < n - 1; ++pass) {
-        for (const auto [u, v, w] : edges) {
+        for (const auto& [u, v, w] : edges) {
             if (dist[u] != INF) {
                 dist[v] = std::min(dist[v], dist[u] + w);
             }
