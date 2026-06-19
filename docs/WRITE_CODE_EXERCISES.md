@@ -81,6 +81,7 @@ report instead of a manual mark.
 | `filesystem-inventory` | filesystem, file streams, stream validation | `directory-inventory-reporter` |
 | `concurrency-task-queue` | threads, mutexes, condition variables, shared-state design | `task-queue-lab` |
 | `graph-maze-shortest-path` | graph BFS, connected components, shortest paths | `maze-route-planner` |
+| `math-combination-generator` | counting principle, combination generation, bitmask subsets | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

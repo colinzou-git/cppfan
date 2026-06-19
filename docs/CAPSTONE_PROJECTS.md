@@ -13,6 +13,9 @@ The shipped seed organizes every existing project lab into coherent tracks:
 - Text and data analysis track
 - String applications track
 - Games and simulation track
+- Graph problem-solving track
+- Math technique track
+- Concurrency correctness track
 
 The model remains additive: `project-labs.ts` still preserves the original flat
 lab catalog, while `capstone-tracks.ts` adds structured projects and milestones
@@ -36,17 +39,19 @@ track manually even when recommendations point to a safer starting place.
 
 ## Current Sequenced Projects
 
-Four projects currently have five sequenced milestones each:
+Several projects currently have five sequenced milestones each:
 
 - `note-manager` in the beginner utility track
 - `csv-table-summarizer` in the text and data analysis track
 - `dictionary-autocomplete` in the string applications track
 - `directory-inventory-reporter` in the text and data analysis track
+- `math-technique-playground` in the math technique track
 
 The beginner project links to `raii-scoped-array`; the DSA/data project links to
 `dsa-two-sum-sorted`; the string project links to `trie-autocomplete`; the
-filesystem utility project links to `filesystem-inventory`. All are test-backed
-write-code exercise packages.
+filesystem utility project links to `filesystem-inventory`; the math project
+links to `math-combination-generator`. All are test-backed write-code exercise
+packages.
 
 ## Progress And Evidence
 

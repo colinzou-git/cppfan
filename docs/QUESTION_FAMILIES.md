@@ -176,6 +176,21 @@ program traces and write-code tasks over vocabulary-only prompts:
   choose optional, variant, templates, polymorphism, or enum class first when
   those better describe the shape.
 
+## Math technique items
+
+For bitmask/number-theory/combinatorics/geometry completion coverage (#122),
+prompts should make the learner choose the technique and name its assumptions:
+
+- pair each bit row or coordinate diagram with a text equivalent;
+- state integer range, shift width, overflow, and floating-point precision
+  cautions in the item explanation;
+- connect counting items to both formulas and generation/backtracking, since
+  counting C(n,k) is different from enumerating C(n,k) outputs;
+- keep convex hull as enrichment after cross-product orientation, segment
+  intersection, polygon area, and precision basics are already grounded;
+- back at least one math application with a write-code exercise so technique
+  selection is practiced in code, not only in multiple-choice recall.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

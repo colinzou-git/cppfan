@@ -196,6 +196,33 @@ export const exerciseCatalog: Exercise[] = [
       "The first time BFS reaches G, that distance is the shortest number of moves."
     ],
     projectLab: "maze-route-planner"
+  },
+  {
+    id: "math-combination-generator",
+    title: "Math: combination generator",
+    skillIds: [
+      "dsa.math.counting_principle",
+      "dsa.math.generate_combinations",
+      "dsa.math.bitmask_techniques"
+    ],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["combination_generator.hpp"],
+    requiredTests: [
+      "test_count_small_combinations",
+      "test_rejects_impossible_counts",
+      "test_generates_lexicographic_combinations",
+      "test_handles_empty_selection",
+      "test_subset_from_mask_decodes_flags",
+      "test_generated_count_matches_pascal_count"
+    ],
+    hints: [
+      "For counting, use Pascal's recurrence C(n,k)=C(n-1,k-1)+C(n-1,k) with base cases k=0 and k=n.",
+      "For generation, keep a current vector and recurse from an advancing start index.",
+      "Undo each choice with pop_back before trying the next element.",
+      "For subset_from_mask, include values[i] when bit i of mask is 1."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 

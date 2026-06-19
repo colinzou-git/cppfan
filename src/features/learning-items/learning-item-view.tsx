@@ -6,6 +6,7 @@ import { FormattedContent } from "./formatted-content";
 import { RevealExplanation } from "./reveal-explanation";
 import { ParsonsExercise } from "./parsons-exercise";
 import { CompletionExercise } from "./completion-exercise";
+import { MathVisualization } from "./math-visualization";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
 import {
   getPublicCompletionBlanksForItem,
@@ -64,6 +65,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-800">
           <FormattedContent content={item.prompt} />
         </div>
+
+        <MathVisualization itemId={item.id} />
 
         {hasChoices ? (
           <div data-testid="learning-item-choices">

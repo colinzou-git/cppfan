@@ -570,6 +570,174 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cses-mathematics",
+    name: "CSES: Mathematics",
+    url: "https://cses.fi/problemset/",
+    kind: "practice",
+    description: "Problem set section for number theory, modular arithmetic, combinatorics, and counting practice.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cses-geometry",
+    name: "CSES: Geometry",
+    url: "https://cses.fi/problemset/",
+    kind: "practice",
+    description: "Problem set section for orientation, segment intersection, polygon area, point-in-polygon, and convex hull practice.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-bit-manipulation",
+    name: "cp-algorithms: bit manipulation",
+    url: "https://cp-algorithms.com/algebra/bit-manipulation.html",
+    kind: "reference",
+    description: "Reference for binary representation, shifts, bitwise operators, and common bit tricks.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-submasks",
+    name: "cp-algorithms: enumerating submasks",
+    url: "https://cp-algorithms.com/algebra/all-submasks.html",
+    kind: "reference",
+    description: "Reference for iterating all submasks of a mask and the zero-submask edge case.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-euclid",
+    name: "cp-algorithms: Euclidean algorithm",
+    url: "https://cp-algorithms.com/algebra/euclid-algorithm.html",
+    kind: "reference",
+    description: "Reference for GCD, LCM via GCD, and Euclid's logarithmic algorithm.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-sieve",
+    name: "cp-algorithms: sieve of Eratosthenes",
+    url: "https://cp-algorithms.com/algebra/sieve-of-eratosthenes.html",
+    kind: "reference",
+    description: "Reference for prime precomputation, marking multiples, and sieve complexity.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-factorization",
+    name: "cp-algorithms: integer factorization",
+    url: "https://cp-algorithms.com/algebra/factorization.html",
+    kind: "reference",
+    description: "Reference for trial division, factor extraction, and factorization method choices.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-binary-exp",
+    name: "cp-algorithms: binary exponentiation",
+    url: "https://cp-algorithms.com/algebra/binary-exp.html",
+    kind: "reference",
+    description: "Reference for exponentiation by squaring, modular power, and logarithmic exponent handling.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-modular-inverse",
+    name: "cp-algorithms: modular inverse",
+    url: "https://cp-algorithms.com/algebra/module-inverse.html",
+    kind: "reference",
+    description: "Reference for modular inverse prerequisites, prime-modulus shortcuts, and inverse existence.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-binomial-coefficients",
+    name: "cp-algorithms: binomial coefficients",
+    url: "https://cp-algorithms.com/combinatorics/binomial-coefficients.html",
+    kind: "reference",
+    description: "Reference for Pascal recurrence, factorial formulas, and modular binomial coefficients.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-inclusion-exclusion",
+    name: "cp-algorithms: inclusion-exclusion",
+    url: "https://cp-algorithms.com/combinatorics/inclusion-exclusion.html",
+    kind: "reference",
+    description: "Reference for adding and subtracting intersections to count unions without double-counting.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-generating-combinations",
+    name: "cp-algorithms: generating combinations",
+    url: "https://cp-algorithms.com/combinatorics/generating_combinations.html",
+    kind: "reference",
+    description: "Reference for generating k-combinations and connecting combinations to bitmask-style ordering.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-basic-geometry",
+    name: "cp-algorithms: basic geometry",
+    url: "https://cp-algorithms.com/geometry/basic-geometry.html",
+    kind: "reference",
+    description: "Reference for points, vectors, dot products, cross products, and geometric primitives.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-segment-intersection",
+    name: "cp-algorithms: segment intersection",
+    url: "https://cp-algorithms.com/geometry/segments-intersection.html",
+    kind: "reference",
+    description: "Reference for checking whether two line segments intersect, including collinear cases.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-polygon-area",
+    name: "cp-algorithms: polygon area",
+    url: "https://cp-algorithms.com/geometry/area-of-simple-polygon.html",
+    kind: "reference",
+    description: "Reference for computing simple polygon area from ordered vertices.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-convex-hull",
+    name: "cp-algorithms: convex hull",
+    url: "https://cp-algorithms.com/geometry/convex-hull.html",
+    kind: "reference",
+    description: "Reference for convex hull construction and the orientation checks used by hull algorithms.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-complete-recursion",
+    name: "USACO Guide: complete search with recursion",
+    url: "https://usaco.guide/bronze/complete-rec",
+    kind: "guidelines",
+    description: "Practice-oriented guide for recursive generation, including permutations and bitmask subsets.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-bitmask-dp",
+    name: "USACO Guide: bitmask DP",
+    url: "https://usaco.guide/gold/dp-bitmasks",
+    kind: "guidelines",
+    description: "Guide for representing subsets as masks and using bit operations in small-state DP.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-combinatorics",
+    name: "USACO Guide: combinatorics",
+    url: "https://usaco.guide/gold/combo",
+    kind: "guidelines",
+    description: "Practice-oriented guide for combinations, permutations, and modular counting patterns.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-geometry-primitives",
+    name: "USACO Guide: geometry primitives",
+    url: "https://usaco.guide/plat/geo-pri",
+    kind: "guidelines",
+    description: "Guide for points, vectors, orientation, and segment-intersection primitives.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-convex-hull",
+    name: "USACO Guide: convex hull",
+    url: "https://usaco.guide/plat/convex-hull",
+    kind: "guidelines",
+    description: "Guide and visualization-oriented reference for convex hull as advanced geometry enrichment.",
+    tags: ["dsa"]
+  },
+  {
     id: "the-algorithms-cpp",
     name: "TheAlgorithms / C++",
     url: "https://github.com/TheAlgorithms/C-Plus-Plus",

@@ -80,6 +80,13 @@ export const capstoneTracks: CapstoneTrack[] = [
     projectIds: ["maze-route-planner"]
   },
   {
+    id: "dsa_math",
+    title: "Math technique track",
+    summary: "Practice bitmasks, number theory, combinatorics, and geometry as reusable problem-solving tools.",
+    order_index: 45,
+    projectIds: ["math-technique-playground"]
+  },
+  {
     id: "concurrency_practice",
     title: "Concurrency correctness track",
     summary: "Practice shared-state design, synchronization, and deterministic concurrent testing.",
@@ -414,6 +421,68 @@ export const capstoneProjects: CapstoneProject[] = [
         verification: "reflection",
         reflectionPrompt: "When would a future, promise, or message-passing design be simpler than a shared queue?",
         extensionTask: "Add a packaged_task-based producer and compare the ownership and shutdown rules."
+      }
+    ]
+  },
+  {
+    id: "math-technique-playground",
+    trackId: "dsa_math",
+    prerequisiteSkillIds: ["dsa.math.bit_manipulation", "dsa.math.number_theory", "dsa.math.combinatorics"],
+    milestones: [
+      {
+        id: "math-technique-playground.m1",
+        title: "Trace bit rows and masks",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["dsa.math.bit_manipulation", "dsa.math.bitmask_techniques"],
+        verification: "manual_checklist",
+        reflectionPrompt: "Which bitwise operator did each flag operation need, and what overflow assumption did you state?"
+      },
+      {
+        id: "math-technique-playground.m2",
+        title: "Consolidate GCD, LCM, and divisibility helpers",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["dsa.math.number_theory"],
+        verification: "reflection",
+        reflectionPrompt: "Why is LCM safer to compute as a / gcd(a,b) * b, and where can overflow still occur?"
+      },
+      {
+        id: "math-technique-playground.m3",
+        title: "Generate combinations with tests",
+        required: true,
+        estimatedMinutes: 35,
+        practicedSkillIds: [
+          "dsa.math.counting_principle",
+          "dsa.math.generate_combinations",
+          "dsa.math.bitmask_techniques"
+        ],
+        verification: "exercise_tests",
+        reflectionPrompt: "How does the advancing start index prevent duplicate combinations?",
+        exerciseId: "math-combination-generator"
+      },
+      {
+        id: "math-technique-playground.m4",
+        title: "Trace coordinate geometry primitives",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: [
+          "dsa.math.vectors_dot_cross",
+          "dsa.math.segment_intersection",
+          "dsa.math.geometry_precision"
+        ],
+        verification: "manual_checklist",
+        reflectionPrompt: "Which geometry checks stayed exact as integers, and which would need an epsilon?"
+      },
+      {
+        id: "math-technique-playground.m5",
+        title: "Use convex hull as enrichment",
+        required: false,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["dsa.math.convex_hull", "dsa.math.geometry_area"],
+        verification: "reflection",
+        reflectionPrompt: "What prerequisite primitive does monotone chain reuse, and why is hull optional enrichment here?",
+        extensionTask: "Add a small monotone-chain demo and decide whether to keep or drop collinear boundary points."
       }
     ]
   }
