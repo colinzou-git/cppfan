@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildDailyNewPlan } from "@/features/goals/daily-new-builder";
+import { getLearningItemsForSkill } from "@/features/learning-items/learning-item-seed";
+import { skillPrerequisitesSeed, skillSeed } from "@/features/skills/skill-seed";
 import type { StudyGoalView } from "@/features/goals/goal-view-types";
 
 function goal(id: string): StudyGoalView {
@@ -35,6 +37,14 @@ function goal(id: string): StudyGoalView {
   };
 }
 
+function anotherRootSkill() {
+  return skillSeed.find((skill) =>
+    skill.id !== "cpp.program_basics.structure" &&
+    getLearningItemsForSkill(skill.id).length > 0 &&
+    !skillPrerequisitesSeed.some((edge) => edge.skill_id === skill.id)
+  );
+}
+
 describe("buildDailyNewPlan", () => {
   it("allocates unfinished initial learning, not review work", () => {
     const plan = buildDailyNewPlan({ goals: [goal("one")], evidencedItemIds: new Set(), dailyCap: 1 });
@@ -50,8 +60,10 @@ describe("buildDailyNewPlan", () => {
   });
 
   it("exposes exactly one additional candidate beyond the daily cap", () => {
+    const root = anotherRootSkill();
+    expect(root).toBeDefined();
     const second = goal("two");
-    second.targets[0] = { ...second.targets[0], id: "target-two", referenceId: "cpp.program_basics.io", skillId: "cpp.program_basics.io", title: "Console input and output" };
+    second.targets[0] = { ...second.targets[0], id: "target-two", referenceId: root!.id, skillId: root!.id, title: root!.title };
     const plan = buildDailyNewPlan({ goals: [goal("one"), second], evidencedItemIds: new Set(), dailyCap: 1 });
     expect(plan.actions).toHaveLength(1);
     expect(plan.extraAction?.source).toBe("learn_extra");
