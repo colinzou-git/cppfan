@@ -19,7 +19,7 @@ export type JudgeIsolationProfile = {
   runtimeBoundary: "separate_worker_service";
   network: "none";
   rootFilesystem: "read_only";
-  writableWorkspace: "ephemeral_tmpfs";
+  writableWorkspace: "ephemeral_workspace";
   user: "non_root";
   syscallIsolation: "seccomp_or_microvm";
   cleanup: "always";
@@ -49,7 +49,7 @@ export const JUDGE_SANDBOX_POLICY: JudgeSandboxPolicy = {
     runtimeBoundary: "separate_worker_service",
     network: "none",
     rootFilesystem: "read_only",
-    writableWorkspace: "ephemeral_tmpfs",
+    writableWorkspace: "ephemeral_workspace",
     user: "non_root",
     syscallIsolation: "seccomp_or_microvm",
     cleanup: "always"
@@ -63,6 +63,8 @@ export const JUDGE_SANDBOX_POLICY: JudgeSandboxPolicy = {
 
 export type SandboxRunManifest = {
   image: string;
+  workspacePath: string;
+  containerWorkspace: string;
   args: string[];
   timeoutMs: number;
   memoryMb: number;
@@ -73,16 +75,24 @@ export type SandboxRunManifest = {
 
 export function buildSandboxRunManifest(
   request: JudgeWorkerRequest,
-  image = "cppfan/interview-judge:local"
+  image = "cppfan/interview-judge:local",
+  workspacePath = "<temporary workspace>",
+  containerWorkspace = "/workspace"
 ): SandboxRunManifest {
   return {
     image,
+    workspacePath,
+    containerWorkspace,
     args: [
       "run",
       "--rm",
       "--network=none",
       "--read-only",
-      "--tmpfs=/workspace:rw,nosuid,nodev",
+      "--tmpfs=/tmp:rw,nosuid,nodev,noexec",
+      "--mount",
+      `type=bind,source=${workspacePath},target=${containerWorkspace}`,
+      "--workdir",
+      containerWorkspace,
       "--user=65532:65532",
       "--cap-drop=ALL",
       "--security-opt=no-new-privileges",

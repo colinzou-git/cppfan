@@ -65,7 +65,7 @@ Untrusted submissions are assumed hostile. Each attack maps to a control:
 | Fork bomb / extra processes | process/thread cap (rlimit/cgroup) |
 | Memory exhaustion | memory limit -> `memory_limit` |
 | Disk fill / huge output | file-size + output byte caps (truncate) |
-| Filesystem escape / tamper | read-only rootfs + ephemeral tmpfs workspace; non-root; mount namespace |
+| Filesystem escape / tamper | read-only rootfs + ephemeral per-submission workspace; non-root; mount namespace |
 | Network exfiltration | no outbound network (network namespace with no interfaces) |
 | Crash / UB / signals | run under a supervisor; map to `runtime_error` |
 | Hidden-test disclosure | tests live server-side; results expose only pass/fail categories + counts, never inputs/expected; logs are truncated/sanitized |
