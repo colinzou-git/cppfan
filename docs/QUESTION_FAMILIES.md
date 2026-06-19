@@ -159,6 +159,23 @@ an index table plus a text equivalent:
 - pair trie/prefix lessons with an autocomplete or dictionary project so prefix
   queries are practiced in context.
 
+## Utility library items
+
+For robust I/O/filesystem/utility completion coverage (#121), prefer small
+program traces and write-code tasks over vocabulary-only prompts:
+
+- show failed stream state, unchanged output variables, buffered bad input, and
+  the `clear()` plus `ignore()` recovery sequence;
+- make file-stream prompts mention RAII closing and the rare cases where an
+  explicit `close()` is needed to observe errors;
+- use `std::filesystem::path`, type checks, directory iterators, and
+  `std::error_code` overloads in projects rather than manual path parsing;
+- pair chrono/random lessons with deterministic examples: `steady_clock` for
+  elapsed time, engines seeded once, and distributions instead of modulo;
+- treat `std::any` as an advanced type-erasure escape hatch and ask learners to
+  choose optional, variant, templates, polymorphism, or enum class first when
+  those better describe the shape.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

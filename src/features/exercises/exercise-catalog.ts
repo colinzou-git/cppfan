@@ -128,6 +128,28 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "debugging-toolchain-lab"
   },
   {
+    id: "filesystem-inventory",
+    title: "Utilities: filesystem inventory",
+    skillIds: ["cpp.utilities.filesystem", "cpp.utilities.file_io", "cpp.utilities.stream_validation"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["inventory.hpp"],
+    requiredTests: [
+      "test_missing_root_is_empty",
+      "test_rejects_plain_file_root",
+      "test_counts_nested_files_and_directories",
+      "test_counts_extensions_and_no_extension",
+      "test_empty_directory"
+    ],
+    hints: [
+      "Check exists(root, ec) and is_directory(root, ec) before iterating.",
+      "Use recursive_directory_iterator with directory_options::skip_permission_denied and increment(error_code).",
+      "Use entry.is_regular_file(ec), entry.is_directory(ec), and entry.file_size(ec) instead of parsing path text.",
+      "path.extension().string() is empty for extensionless files; store those as \"(none)\"."
+    ],
+    projectLab: "directory-inventory-reporter"
+  },
+  {
     id: "concurrency-task-queue",
     title: "Concurrency: bounded task queue",
     skillIds: [

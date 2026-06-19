@@ -36,15 +36,17 @@ track manually even when recommendations point to a safer starting place.
 
 ## Current Sequenced Projects
 
-Three projects currently have five sequenced milestones each:
+Four projects currently have five sequenced milestones each:
 
 - `note-manager` in the beginner utility track
 - `csv-table-summarizer` in the text and data analysis track
 - `dictionary-autocomplete` in the string applications track
+- `directory-inventory-reporter` in the text and data analysis track
 
 The beginner project links to `raii-scoped-array`; the DSA/data project links to
-`dsa-two-sum-sorted`; the string project links to `trie-autocomplete`. All are
-test-backed write-code exercise packages.
+`dsa-two-sum-sorted`; the string project links to `trie-autocomplete`; the
+filesystem utility project links to `filesystem-inventory`. All are test-backed
+write-code exercise packages.
 
 ## Progress And Evidence
 

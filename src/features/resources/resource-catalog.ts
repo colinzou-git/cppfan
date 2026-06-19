@@ -258,6 +258,62 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "cppreference-filesystem",
+    name: "cppreference: std::filesystem",
+    url: "https://en.cppreference.com/w/cpp/filesystem",
+    kind: "reference",
+    description: "Reference for portable paths, file type checks, directory iteration, and error_code overloads.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-fstream",
+    name: "cppreference: file streams",
+    url: "https://en.cppreference.com/w/cpp/io/basic_fstream",
+    kind: "reference",
+    description: "Reference for file stream ownership, open modes, state checks, and RAII closing.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-chrono",
+    name: "cppreference: chrono",
+    url: "https://en.cppreference.com/w/cpp/chrono",
+    kind: "reference",
+    description: "Reference for clocks, durations, time points, duration_cast, and elapsed-time measurement.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-random",
+    name: "cppreference: random",
+    url: "https://en.cppreference.com/w/cpp/numeric/random",
+    kind: "reference",
+    description: "Reference for random engines, distributions, seeding, and unbiased range generation.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-variant",
+    name: "cppreference: std::variant",
+    url: "https://en.cppreference.com/w/cpp/utility/variant",
+    kind: "reference",
+    description: "Reference for type-safe alternatives, std::visit, and exhaustive variant handling.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-any",
+    name: "cppreference: std::any",
+    url: "https://en.cppreference.com/w/cpp/utility/any",
+    kind: "reference",
+    description: "Reference for type-erased storage, any_cast, and runtime cast failures.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-tuple",
+    name: "cppreference: std::tuple",
+    url: "https://en.cppreference.com/w/cpp/utility/tuple",
+    kind: "reference",
+    description: "Reference for fixed-size heterogeneous value groups and structured-binding-friendly access.",
+    tags: ["cpp"]
+  },
+  {
     id: "cppreference-span",
     name: "cppreference: std::span",
     url: "https://en.cppreference.com/w/cpp/container/span",
