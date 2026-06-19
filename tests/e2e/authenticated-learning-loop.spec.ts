@@ -6,6 +6,35 @@ const ITEM_URL = "/learn/cpp.structs_classes.syntax.mc_default_access";
 test.describe("authenticated browser learning loop (#96/#99)", () => {
   test.skip(!hasAuthenticatedE2EEnv(), "requires disposable local Supabase auth env");
 
+  test("a first-time learner sees blank Daily Review while Daily New shows distinct goal work", async ({ page, context, baseURL }) => {
+    const learner = await createAuthenticatedLearner(context, baseURL ?? "http://127.0.0.1:3000");
+    test.info().annotations.push({ type: "learner", description: learner.userId });
+
+    try {
+      await learner.createStudyGoal({
+        skillId: "cpp.program_basics.structure",
+        skillTitle: "A minimal C++ program",
+        title: "Refresh C++ foundations"
+      });
+
+      await page.goto("/dashboard");
+      await expect(page.getByRole("heading", { name: /your learning dashboard/i })).toBeVisible();
+
+      const review = page.getByTestId("daily-review");
+      await expect(review.getByRole("heading", { name: "Daily Review" })).toBeVisible();
+      await expect(review).toContainText(/No FSRS reviews are due today/i);
+      await expect(review.getByRole("link")).toHaveCount(0);
+
+      const dailyNew = page.getByTestId("daily-new-for-goals");
+      await expect(dailyNew.getByRole("heading", { name: "Daily New for Goals" })).toBeVisible();
+      await expect(dailyNew).toContainText(/FSRS reviews never appear here/i);
+      await expect(dailyNew.getByRole("link", { name: /A minimal C\+\+ program/i })).toBeVisible();
+      await expect(dailyNew.getByRole("link", { name: /A minimal C\+\+ program/i })).toHaveAttribute("href", /^\/learn\//);
+    } finally {
+      await learner.cleanup();
+    }
+  });
+
   test("a signed-in learner can answer, review, and rate with the keyboard", async ({ page, context, baseURL }) => {
     const learner = await createAuthenticatedLearner(context, baseURL ?? "http://127.0.0.1:3000");
     test.info().annotations.push({ type: "learner", description: learner.userId });

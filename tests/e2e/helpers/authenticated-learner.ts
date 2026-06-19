@@ -28,6 +28,32 @@ type CreateAuthenticatedLearnerOptions = {
   completeOnboarding?: boolean;
 };
 
+type SeedStudyGoalInput = {
+  endLocalDate?: string;
+  skillId?: string;
+  skillTitle?: string;
+  startLocalDate?: string;
+  timezone?: string;
+  title?: string;
+};
+
+function localDateKey(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone,
+    year: "numeric"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function addUtcDays(localDate: string, days: number) {
+  const [year, month, day] = localDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + days));
+  return date.toISOString().slice(0, 10);
+}
+
 function maybeLocalAuthEnv(): AuthEnv | null {
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const anonKey =
@@ -181,6 +207,36 @@ export async function createAuthenticatedLearner(
   return {
     email,
     userId,
+    async createStudyGoal(input: SeedStudyGoalInput = {}) {
+      const timezone = input.timezone ?? "America/Los_Angeles";
+      const startLocalDate = input.startLocalDate ?? localDateKey(new Date(), timezone);
+      const endLocalDate = input.endLocalDate ?? addUtcDays(startLocalDate, 6);
+      const skillId = input.skillId ?? "cpp.program_basics.structure";
+      const result = await browserLikeClient.rpc("create_study_goal", {
+        p_algorithm_version: "study-goals-v1",
+        p_end_local_date: endLocalDate,
+        p_learner_note: null,
+        p_recommendation_reason: "Seeded by authenticated Playwright coverage.",
+        p_recommendation_source: "manual",
+        p_start_local_date: startLocalDate,
+        p_submission_id: crypto.randomUUID(),
+        p_targets: [{
+          acquisitionContractId: "skill-initial-learning",
+          acquisitionContractVersion: 1,
+          orderIndex: 0,
+          referenceId: skillId,
+          source: "manual",
+          targetKind: "acquire_skill",
+          titleSnapshot: input.skillTitle ?? "A minimal C++ program"
+        }],
+        p_timezone: timezone,
+        p_title: input.title ?? "Playwright goal"
+      });
+      if (result.error) {
+        throw result.error;
+      }
+      return result.data;
+    },
     async cleanup() {
       await service.auth.admin.deleteUser(userId).catch(() => undefined);
     }
