@@ -17,8 +17,10 @@ Production Stage B uses a separate worker process/container or microVM:
 - CPU, wall-time, memory, process, file-size, output, source-size, and test-count limits
 - cleanup on success, cancellation, timeout, and worker loss
 
-The CI-safe TypeScript modules in this directory define the protocol and policy.
-They do not execute learner code during `pnpm test`.
+The CI-safe TypeScript modules in this directory define the protocol, policy, and
+worker runner contract. `worker-runner.ts` orchestrates compile/run commands over
+an injected process executor; unit tests use a fake executor so `pnpm test` never
+executes learner code.
 
 ## Local Manifest
 
