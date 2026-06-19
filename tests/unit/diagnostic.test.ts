@@ -68,6 +68,8 @@ describe("deterministic plan generation (#175)", () => {
     // The weakest area (lowest score) is scheduled first.
     expect(plan[0].sectionId).toBe("diag.cpp_debugging");
     expect(plan[0].reason).toMatch(/refresh first/i);
+    expect(plan[0].nextStep.kind).toBe("implementation_practice");
+    expect(plan[0].nextStep.href).toBe("/exercises");
   });
 
   it("is stable: identical evidence yields an identical plan", () => {
@@ -79,5 +81,16 @@ describe("deterministic plan generation (#175)", () => {
     const heat = buildHeatMap({ "diag.graph_dependency": 0.1 });
     const week = generatePlan(heat).find((w) => w.sectionId === "diag.graph_dependency");
     expect(week?.problemIds).toContain("iv.graph.service-init-order");
+  });
+
+  it("routes strong areas directly to timed maintenance instead of beginner lessons", () => {
+    const heat = buildHeatMap({
+      "diag.arrays_window": 0.95,
+      "diag.graph_dependency": 0.92,
+      "diag.ds_design": 0.9,
+      "diag.cpp_debugging": 0.88
+    });
+    expect(generatePlan(heat).every((week) => week.nextStep.href === "/interview/session")).toBe(true);
+    expect(generatePlan(heat).every((week) => week.nextStep.kind === "maintenance")).toBe(true);
   });
 });

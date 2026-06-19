@@ -20,6 +20,7 @@ test.describe("authenticated onboarding and profile (#99)", () => {
       await page.goto("/dashboard");
       await expect(page).toHaveURL(/\/onboarding\?next=(?:%2F|\/)dashboard/);
       await expect(page.getByRole("heading", { name: /onboarding/i })).toBeVisible();
+      await expect(page.getByTestId("interview-target-profile-link")).toHaveAttribute("href", "/interview/target");
 
       await page.getByLabel("Display name").fill("Browser Learner");
       await page.getByRole("radio", { name: /Some C\+\+/i }).check();
@@ -43,6 +44,7 @@ test.describe("authenticated onboarding and profile (#99)", () => {
       await expect(page.getByRole("checkbox", { name: /^iPad$/i })).toBeChecked();
       await expect(page.getByLabel("New skills per day")).toHaveValue("3");
       await expect(page.getByLabel("Review minutes per day")).toHaveValue("25");
+      await expect(page.getByTestId("interview-target-profile-link")).toHaveAttribute("href", "/interview/target");
 
       await page.getByLabel("Display name").fill("Browser Learner Updated");
       await page.getByLabel("New skills per day").fill("4");

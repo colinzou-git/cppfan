@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Target, Timer, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,6 +129,25 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                   {option.label}
                 </label>
               ))}
+            </div>
+          </section>
+
+          <section className="grid gap-2 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+            <div className="flex items-start gap-3">
+              <Target className="mt-1 h-5 w-5 text-blue-700" />
+              <div className="grid gap-1">
+                <h2 className="text-base font-black text-slate-950">Staff systems interview target</h2>
+                <p className="text-sm text-slate-700">
+                  Configure role, C++ standard, prep horizon, and recent interview practice separately from ordinary cppFan progress.
+                </p>
+                <Link
+                  className="w-fit text-sm font-black text-blue-700"
+                  data-testid="interview-target-profile-link"
+                  href="/interview/target"
+                >
+                  Configure interview target
+                </Link>
+              </div>
             </div>
           </section>
 
