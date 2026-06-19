@@ -24,9 +24,9 @@ This feature adds the first user-specific state after Supabase Auth.
 | `email` | User email snapshot |
 | `display_name` | User-facing name |
 | `experience_level` | Beginner/intermediate signal for recommendations |
-| `daily_new_skills_goal` | Future daily new-skill target |
-| `daily_review_minutes` | Future review load target |
-| `learning_goals` | Selected learning goals |
+| `daily_new_skills_goal` | Baseline new-skill preference; Learn Extra may exceed it for one day without changing it |
+| `daily_review_minutes` | Daily Review load preference, separate from new goal learning |
+| `learning_goals` | Backward-compatible selected learning interests, not dated Goals |
 | `preferred_platforms` | Windows/iPad/iPhone preference |
 | `onboarding_completed` | Dashboard gate |
 | `onboarding_completed_at` | Completion timestamp |
