@@ -10,6 +10,7 @@ import type {
   PublicParsonsBlock
 } from "./learning-item-types";
 import { graphFixtureText } from "./graph-fixtures";
+import { stringFixtureText } from "./string-fixtures";
 
 /*
  * This seed mirrors supabase/migrations/20260612120000_create_learning_items.sql.
@@ -4263,6 +4264,32 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.searching.code_naive_trace",
+    type: "code_reading",
+    title: "Trace naive substring search",
+    prompt:
+      `${stringFixtureText("naiveSearch")}\n\nWhy does this input make naive substring search repeat work, and what is the worst-case time complexity for text length n and pattern length m?`,
+    explanation:
+      "The almost-matching prefix causes each start position to compare several characters before failing, then the next start repeats those comparisons. In the worst case, naive search tries O(n) starts and O(m) characters per start, for O(n*m) time.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 2345,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.searching.mc_method_constraints",
+    type: "multiple_choice",
+    title: "Choose a string matching method",
+    prompt:
+      "You need guaranteed linear-time pattern matching on a very large adversarial text, and you only need exact matches for one pattern. Which method best fits?",
+    explanation:
+      "KMP gives deterministic O(n + m) time for exact matching after building the prefix table. Z-function is also linear and valid, but the prefix table is the direct KMP fit here; rolling hash is probabilistic unless matches are verified, and a trie is for many keys/prefix queries.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 2346,
+    is_active: true
+  },
+  {
     id: "dsa.strings.palindrome.lesson",
     type: "lesson",
     title: "Palindromes and anagrams",
@@ -4338,6 +4365,19 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.prefix_function.code_table_trace",
+    type: "code_reading",
+    title: "Read a KMP prefix table",
+    prompt:
+      `${stringFixtureText("prefixTable")}\n\nRead the table: what does pi[3] = 2 mean, and why does pi[4] fall back to 0?`,
+    explanation:
+      "pi[3] = 2 means AB is both a proper prefix and suffix of ABAB. At index 4 the character C does not extend the current AB border, and the shorter fallback borders do not match either, so pi[4] becomes 0.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3945,
+    is_active: true
+  },
+  {
     id: "dsa.strings.trie.lesson",
     type: "lesson",
     title: "Tries (prefix trees)",
@@ -4388,6 +4428,19 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.strings.hashing.mc_double_hash",
+    type: "multiple_choice",
+    title: "When double hashing helps",
+    prompt:
+      "A rolling-hash substring comparator uses two independent moduli instead of one. What guarantee does this give?",
+    explanation:
+      "Double hashing makes accidental collisions dramatically less likely, but it is still a probabilistic filter. If the problem requires absolute correctness, verify candidate matches character-by-character.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3985,
+    is_active: true
+  },
+  {
     id: "dsa.strings.z_function.lesson",
     type: "lesson",
     title: "Z-function",
@@ -4410,6 +4463,19 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 4180,
+    is_active: true
+  },
+  {
+    id: "dsa.strings.z_function.code_table_trace",
+    type: "code_reading",
+    title: "Read a Z-array trace",
+    prompt:
+      `${stringFixtureText("zTable")}\n\nRead the table: why is z[4] = 3, and how would this style of value identify a pattern match in pattern+separator+text?`,
+    explanation:
+      "z[4] = 3 because the substring starting at index 4 is aab, matching the string prefix aab. In pattern+separator+text matching, any position whose Z-value equals the pattern length marks a full occurrence beginning in the text part.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4185,
     is_active: true
   },
   {
@@ -6160,18 +6226,27 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.strings.manipulation.mc_concat", skill_id: "dsa.strings.manipulation", is_primary: true },
   { learning_item_id: "dsa.strings.searching.lesson", skill_id: "dsa.strings.searching", is_primary: true },
   { learning_item_id: "dsa.strings.searching.mc_kmp", skill_id: "dsa.strings.searching", is_primary: true },
+  { learning_item_id: "dsa.strings.searching.code_naive_trace", skill_id: "dsa.strings.searching", is_primary: true },
+  { learning_item_id: "dsa.strings.searching.mc_method_constraints", skill_id: "dsa.strings.searching", is_primary: true },
   { learning_item_id: "dsa.strings.palindrome.lesson", skill_id: "dsa.strings.palindrome", is_primary: true },
   { learning_item_id: "dsa.strings.palindrome.mc_anagram", skill_id: "dsa.strings.palindrome", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.lesson", skill_id: "dsa.strings.parsing", is_primary: true },
   { learning_item_id: "dsa.strings.parsing.mc_delim", skill_id: "dsa.strings.parsing", is_primary: true },
   { learning_item_id: "dsa.strings.prefix_function.lesson", skill_id: "dsa.strings.prefix_function", is_primary: true },
   { learning_item_id: "dsa.strings.prefix_function.mc_value", skill_id: "dsa.strings.prefix_function", is_primary: true },
+  {
+    learning_item_id: "dsa.strings.prefix_function.code_table_trace",
+    skill_id: "dsa.strings.prefix_function",
+    is_primary: true
+  },
   { learning_item_id: "dsa.strings.trie.lesson", skill_id: "dsa.strings.trie", is_primary: true },
   { learning_item_id: "dsa.strings.trie.mc_usecase", skill_id: "dsa.strings.trie", is_primary: true },
   { learning_item_id: "dsa.strings.hashing.lesson", skill_id: "dsa.strings.hashing", is_primary: true },
   { learning_item_id: "dsa.strings.hashing.mc_collision", skill_id: "dsa.strings.hashing", is_primary: true },
+  { learning_item_id: "dsa.strings.hashing.mc_double_hash", skill_id: "dsa.strings.hashing", is_primary: true },
   { learning_item_id: "dsa.strings.z_function.lesson", skill_id: "dsa.strings.z_function", is_primary: true },
   { learning_item_id: "dsa.strings.z_function.mc_meaning", skill_id: "dsa.strings.z_function", is_primary: true },
+  { learning_item_id: "dsa.strings.z_function.code_table_trace", skill_id: "dsa.strings.z_function", is_primary: true },
   { learning_item_id: "dsa.strings.palindrome_substrings.lesson", skill_id: "dsa.strings.palindrome_substrings", is_primary: true },
   { learning_item_id: "dsa.strings.palindrome_substrings.mc_centers", skill_id: "dsa.strings.palindrome_substrings", is_primary: true },
   { learning_item_id: "dsa.strings.parsing_edge_cases.lesson", skill_id: "dsa.strings.parsing_edge_cases", is_primary: true },
@@ -7029,6 +7104,34 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.searching.mc_kmp.b", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(n * m)", is_correct: false, order_index: 20 },
   { id: "dsa.strings.searching.mc_kmp.c", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(n^2)", is_correct: false, order_index: 30 },
   { id: "dsa.strings.searching.mc_kmp.d", learning_item_id: "dsa.strings.searching.mc_kmp", content: "O(m log n)", is_correct: false, order_index: 40 },
+  {
+    id: "dsa.strings.searching.mc_method_constraints.a",
+    learning_item_id: "dsa.strings.searching.mc_method_constraints",
+    content: "KMP with a prefix table",
+    is_correct: true,
+    order_index: 10
+  },
+  {
+    id: "dsa.strings.searching.mc_method_constraints.b",
+    learning_item_id: "dsa.strings.searching.mc_method_constraints",
+    content: "A single rolling hash with no verification",
+    is_correct: false,
+    order_index: 20
+  },
+  {
+    id: "dsa.strings.searching.mc_method_constraints.c",
+    learning_item_id: "dsa.strings.searching.mc_method_constraints",
+    content: "A trie of all text suffixes built by hand for one pattern",
+    is_correct: false,
+    order_index: 30
+  },
+  {
+    id: "dsa.strings.searching.mc_method_constraints.d",
+    learning_item_id: "dsa.strings.searching.mc_method_constraints",
+    content: "Naive search, because it uses no preprocessing",
+    is_correct: false,
+    order_index: 40
+  },
 
   { id: "dsa.strings.palindrome.mc_anagram.a", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Count each character's frequency in both strings and compare the counts", is_correct: true, order_index: 10 },
   { id: "dsa.strings.palindrome.mc_anagram.b", learning_item_id: "dsa.strings.palindrome.mc_anagram", content: "Compare the strings with two pointers from both ends", is_correct: false, order_index: 20 },
@@ -7054,6 +7157,34 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.strings.hashing.mc_collision.b", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be identical", is_correct: false, order_index: 20 },
   { id: "dsa.strings.hashing.mc_collision.c", learning_item_id: "dsa.strings.hashing.mc_collision", content: "They are guaranteed to be different", is_correct: false, order_index: 30 },
   { id: "dsa.strings.hashing.mc_collision.d", learning_item_id: "dsa.strings.hashing.mc_collision", content: "Nothing, because hashes are random", is_correct: false, order_index: 40 },
+  {
+    id: "dsa.strings.hashing.mc_double_hash.a",
+    learning_item_id: "dsa.strings.hashing.mc_double_hash",
+    content: "It greatly lowers collision probability, but direct verification is still needed for absolute correctness",
+    is_correct: true,
+    order_index: 10
+  },
+  {
+    id: "dsa.strings.hashing.mc_double_hash.b",
+    learning_item_id: "dsa.strings.hashing.mc_double_hash",
+    content: "It proves equal hash pairs are always equal strings",
+    is_correct: false,
+    order_index: 20
+  },
+  {
+    id: "dsa.strings.hashing.mc_double_hash.c",
+    learning_item_id: "dsa.strings.hashing.mc_double_hash",
+    content: "It changes every substring comparison from O(1) to O(n)",
+    is_correct: false,
+    order_index: 30
+  },
+  {
+    id: "dsa.strings.hashing.mc_double_hash.d",
+    learning_item_id: "dsa.strings.hashing.mc_double_hash",
+    content: "It removes the need to choose a base or modulus carefully",
+    is_correct: false,
+    order_index: 40
+  },
 
   { id: "dsa.strings.z_function.mc_meaning.a", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The length of the longest substring starting at i that is also a prefix of s", is_correct: true, order_index: 10 },
   { id: "dsa.strings.z_function.mc_meaning.b", learning_item_id: "dsa.strings.z_function.mc_meaning", content: "The length of the longest proper suffix of s[0..i] that is also a prefix", is_correct: false, order_index: 20 },

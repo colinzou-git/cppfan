@@ -42,6 +42,19 @@ export const projectLabs: ProjectLab[] = [
     ]
   },
   {
+    id: "dictionary-autocomplete",
+    title: "Dictionary autocomplete",
+    summary: "Build a small word index that answers exact lookup and prefix/autocomplete queries.",
+    difficulty: "intermediate",
+    focus: ["strings", "tries", "prefix queries", "autocomplete"],
+    milestones: [
+      "Normalize and insert dictionary words into a prefix tree.",
+      "Mark terminal nodes so exact matches differ from prefixes.",
+      "Walk to a prefix node and enumerate completions in deterministic order.",
+      "Compare trie memory cost with a hash set when only exact lookup is required."
+    ]
+  },
+  {
     id: "csv-table-summarizer",
     title: "CSV table summarizer",
     summary: "Parse a simple CSV file and print per-column summaries (min, max, average for numeric columns).",

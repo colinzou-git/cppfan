@@ -59,6 +59,13 @@ export const capstoneTracks: CapstoneTrack[] = [
     projectIds: ["text-statistics-analyzer", "csv-table-summarizer"]
   },
   {
+    id: "string_applications",
+    title: "String applications track",
+    summary: "Turn string processing, prefix structures, and hashing choices into small searchable tools.",
+    order_index: 25,
+    projectIds: ["dictionary-autocomplete"]
+  },
+  {
     id: "games_simulation",
     title: "Games and simulation track",
     summary: "Interactive programs using randomness, state, and aggregate statistics.",
@@ -186,6 +193,60 @@ export const capstoneProjects: CapstoneProject[] = [
         verification: "exercise_tests",
         reflectionPrompt: "Why is two-pointer O(n) better than the nested-loop O(n^2) approach here?",
         exerciseId: "dsa-two-sum-sorted"
+      }
+    ]
+  },
+  {
+    id: "dictionary-autocomplete",
+    trackId: "string_applications",
+    prerequisiteSkillIds: ["dsa.strings.char_frequency", "dsa.strings.trie"],
+    milestones: [
+      {
+        id: "dictionary-autocomplete.m1",
+        title: "Normalize dictionary input",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["dsa.strings.case_handling", "dsa.strings.char_frequency"],
+        verification: "manual_checklist",
+        reflectionPrompt: "Which characters did you normalize or reject, and why is that decision visible to users?"
+      },
+      {
+        id: "dictionary-autocomplete.m2",
+        title: "Model trie nodes and terminal words",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["dsa.strings.trie"],
+        verification: "reflection",
+        reflectionPrompt: "How does your node representation distinguish a full word from a prefix?"
+      },
+      {
+        id: "dictionary-autocomplete.m3",
+        title: "Implement prefix suggestions",
+        required: true,
+        estimatedMinutes: 35,
+        practicedSkillIds: ["dsa.strings.trie", "dsa.strings.substring_subsequence"],
+        verification: "exercise_tests",
+        reflectionPrompt: "Why does walking to the prefix node avoid scanning every dictionary word?",
+        exerciseId: "trie-autocomplete"
+      },
+      {
+        id: "dictionary-autocomplete.m4",
+        title: "Compare trie, hash map, and rolling-hash choices",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["dsa.strings.trie", "dsa.strings.hashing"],
+        verification: "reflection",
+        reflectionPrompt: "When would a hash set be enough, and when does prefix enumeration justify trie memory?"
+      },
+      {
+        id: "dictionary-autocomplete.m5",
+        title: "Add search/log parsing import",
+        required: false,
+        estimatedMinutes: 30,
+        practicedSkillIds: ["dsa.strings.parsing_edge_cases", "dsa.strings.searching"],
+        verification: "manual_checklist",
+        reflectionPrompt: "Which delimiter, empty-field, and CRLF cases did your import path preserve?",
+        extensionTask: "Load the dictionary from a log or CSV export, then report rejected rows with line numbers."
       }
     ]
   },
