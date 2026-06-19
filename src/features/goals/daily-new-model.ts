@@ -9,6 +9,10 @@ export type DailyNewAction = {
   goalIds: string[];
   goalTitles: string[];
   targetIds: string[];
+  primaryGoalId: string;
+  revisionId: string;
+  primaryTargetId: string;
+  acquisitionContractVersion: number;
   source: "planned" | "learn_extra";
 };
 
@@ -17,6 +21,11 @@ export type DailyNewPlan = {
   authenticated: boolean;
   activeGoalCount: number;
   dailyCap: number;
+  localPlanDate: string;
+  timezone: string;
+  dailyPlanVersion: number;
   actions: DailyNewAction[];
+  allocatedExtraActions: DailyNewAction[];
+  eligibleActions: DailyNewAction[];
   extraAction: DailyNewAction | null;
 };
