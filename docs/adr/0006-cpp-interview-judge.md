@@ -115,6 +115,12 @@ hash/version, problem/session metadata, queue/result status, visible/hidden pass
 counts, and runtime/memory diagnostics. The table intentionally does not store
 raw source text or hidden fixture inputs/expected outputs.
 
+Server-held test suites for judge-enabled problems live in
+`src/features/interview/judge-test-suites.ts`. That module keeps raw stdin and
+expected stdout in the worker fixture payload only; the web-app request boundary
+receives `JudgeWorkerTest` metadata with fixture hashes, hidden flags, and
+categories.
+
 ## Consequences
 
 - Clear separation: the web app never executes learner code; a dedicated sandbox

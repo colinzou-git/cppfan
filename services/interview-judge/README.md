@@ -60,3 +60,7 @@ The web app persists per-learner submission metadata in
 `src/features/interview/judge-submission-store.ts`; rows are keyed by idempotent
 submission id and contain source hash/version, problem/session metadata, queue or
 result status, visible/hidden pass counts, and diagnostic runtime/memory only.
+Initial server-held suites for selected catalog problems live in
+`src/features/interview/judge-test-suites.ts`: raw fixture values are passed only
+to the worker fixture payload, while enqueue metadata contains hashes and hidden
+test categories.
