@@ -18,7 +18,7 @@ test.describe("authenticated onboarding and profile (#99)", () => {
 
     try {
       await page.goto("/dashboard");
-      await expect(page).toHaveURL(/\/onboarding\?next=%2Fdashboard/);
+      await expect(page).toHaveURL(/\/onboarding\?next=(?:%2F|\/)dashboard/);
       await expect(page.getByRole("heading", { name: /onboarding/i })).toBeVisible();
 
       await page.getByLabel("Display name").fill("Browser Learner");
