@@ -1,7 +1,7 @@
 # Strings: trie autocomplete
 
-**Skills:** tries, string traversal, prefix queries
-* **Difficulty:** advanced * **~35 min**
+**Skills:** tries, string traversal, prefix queries  
+**Difficulty:** advanced · **Estimated time:** 35 min
 
 Build a small autocomplete index backed by prefix operations.
 
