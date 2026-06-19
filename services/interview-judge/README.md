@@ -20,8 +20,9 @@ Production Stage B uses a separate worker process/container or microVM:
 The CI-safe TypeScript modules in this directory define the protocol, policy, and
 worker runner contract. `worker-runner.ts` orchestrates compile/run commands over
 an injected process executor; `docker-executor.ts` wraps those commands in the
-local/Codespaces Docker isolation envelope. Unit tests use fake launchers so
-`pnpm test` never executes learner code.
+local/Codespaces Docker isolation envelope; `process-launcher.ts` supervises the
+Docker CLI with timeout and output caps for local worker wiring. Unit tests use
+fake launchers so `pnpm test` never executes learner code.
 
 ## Local Manifest
 
