@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createAuthenticatedLearner, hasAuthenticatedE2EEnv } from "./helpers/authenticated-learner";
 
 // #177: the timed interview session runner. Signed-out it works locally (saving is
 // a no-op) so the phase progression is exercised end to end without a database.
@@ -63,4 +64,60 @@ test("interview mode exposes duration controls and evidence capture", async ({ p
   await page.getByTestId("session-abandon").click();
   await expect(page.getByTestId("session-runner")).toHaveAttribute("data-status", "abandoned");
   await expect(page.getByTestId("session-status")).toContainText(/abandoned/i);
+});
+
+test.describe("authenticated interview session persistence (#177/#96)", () => {
+  test.skip(!hasAuthenticatedE2EEnv(), "requires disposable local Supabase auth env");
+
+  test("a signed-in learner resumes their session without leaking it to another learner", async ({
+    browser,
+    page,
+    context,
+    baseURL
+  }) => {
+    const origin = baseURL ?? "http://127.0.0.1:3000";
+    const learnerA = await createAuthenticatedLearner(context, origin);
+    const contextB = await browser.newContext();
+    const pageB = await contextB.newPage();
+    const learnerB = await createAuthenticatedLearner(contextB, origin);
+    test.info().annotations.push({ type: "learner-a", description: learnerA.userId });
+    test.info().annotations.push({ type: "learner-b", description: learnerB.userId });
+
+    try {
+      await page.goto("/interview/session");
+      await page.getByTestId("session-mode-interview").click();
+      await page.getByTestId("session-duration-50").click();
+      await page.getByTestId("session-next").click();
+      await expect(page.getByTestId("session-status")).toContainText(/work examples/i);
+
+      await page.getByTestId("session-phase-note").fill("A-only persisted example note");
+      await page.getByTestId("session-phase-note").blur();
+      await page.getByTestId("session-code-draft").fill("int answer = 42;");
+      await page.getByTestId("session-code-draft").blur();
+      await page.getByTestId("session-test-notes").fill("empty and duplicate-heavy cases");
+      await page.getByTestId("session-test-notes").blur();
+      await page.getByTestId("session-assistance-used").check();
+      await page.waitForTimeout(1000);
+
+      await page.reload();
+      await expect(page.getByTestId("session-meta")).toContainText("interview");
+      await expect(page.getByTestId("session-meta")).toContainText("50 min");
+      await expect(page.getByTestId("session-status")).toContainText(/work examples/i);
+      await expect(page.getByTestId("session-phase-note")).toHaveValue("A-only persisted example note");
+      await expect(page.getByTestId("session-code-draft")).toHaveValue("int answer = 42;");
+      await expect(page.getByTestId("session-test-notes")).toHaveValue("empty and duplicate-heavy cases");
+      await expect(page.getByTestId("session-assistance-used")).toBeChecked();
+
+      await pageB.goto(`${origin}/interview/session`);
+      await expect(pageB.getByTestId("session-meta")).toContainText("practice");
+      await expect(pageB.getByTestId("session-meta")).toContainText("45 min");
+      await expect(pageB.getByTestId("session-status")).toContainText(/clarify the problem/i);
+      await expect(pageB.getByTestId("session-phase-note")).not.toHaveValue("A-only persisted example note");
+      await expect(pageB.getByTestId("session-code-draft")).toHaveValue("");
+    } finally {
+      await learnerA.cleanup();
+      await learnerB.cleanup();
+      await contextB.close();
+    }
+  });
 });
