@@ -5,6 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { allocateExtraGoalAction } from "@/app/goals/actions";
 import type { DailyNewAction, DailyNewPlan } from "./daily-new-model";
 
+const NO_MORE_LABELS: Record<NonNullable<DailyNewPlan["noMoreReason"]>, string> = {
+  all_goal_work_complete: "All active-goal acquisition work is complete.",
+  daily_scope_exhausted: "Today’s safe goal-learning scope is exhausted.",
+  content_unavailable: "The remaining goal content is currently unavailable.",
+  only_fsrs_review_remains: "Only FSRS review work remains; check Daily Review.",
+  backend_unavailable: "Goal learning recommendations are temporarily unavailable."
+};
+
 const ACTION_LABELS: Record<DailyNewAction["actionKind"], string> = {
   start_new_skill: "Start this skill",
   continue_acquisition: "Continue learning",
@@ -47,6 +55,7 @@ function ActionTile({ action }: { action: DailyNewAction }) {
           <span className="block text-xs font-medium text-slate-500">
             Completion: {action.completionEvidenceRule}
           </span>
+          <span className="block text-xs font-medium text-slate-500">{action.platformNote}</span>
         </span>
         <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-violet-600" />
       </Link>
@@ -91,7 +100,9 @@ export function DailyNew({ plan }: { plan: DailyNewPlan }) {
             <Button type="submit" variant="secondary">Learn Extra: {plan.extraAction.title}</Button>
           </form>
         ) : plan.activeGoalCount > 0 && !unavailable ? (
-          <p className="text-xs font-semibold text-slate-500">No additional safe unfinished goal action is available today.</p>
+          <p className="text-xs font-semibold text-slate-500">
+            {plan.noMoreReason ? NO_MORE_LABELS[plan.noMoreReason] : "No additional safe unfinished goal action is available today."}
+          </p>
         ) : null}
       </CardContent>
     </Card>

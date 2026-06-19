@@ -2,6 +2,7 @@ import { getLearningItemsForSkill } from "@/features/learning-items/learning-ite
 import type { AcquisitionState } from "./goal-contract";
 
 type LearningItem = ReturnType<typeof getLearningItemsForSkill>[number];
+export type AcquisitionItem = Pick<LearningItem, "id" | "title" | "estimated_minutes">;
 
 export const SKILL_INITIAL_LEARNING_CONTRACT = {
   id: "skill-initial-learning",
@@ -19,7 +20,7 @@ export type DerivedAcquisitionState = {
   state: AcquisitionState;
   requiredItemIds: string[];
   completedItemIds: string[];
-  nextItem: LearningItem | null;
+  nextItem: AcquisitionItem | null;
 };
 
 function qualifiesAfterBaseline(evidence: AcquisitionEvidence, baselineEvidenceAt?: string | null) {
@@ -32,9 +33,10 @@ function qualifiesAfterBaseline(evidence: AcquisitionEvidence, baselineEvidenceA
 export function deriveInitialLearningState(
   skillId: string,
   evidence: AcquisitionEvidence[],
-  baselineEvidenceAt?: string | null
+  baselineEvidenceAt?: string | null,
+  catalogItems?: readonly AcquisitionItem[]
 ): DerivedAcquisitionState {
-  const requiredItems = getLearningItemsForSkill(skillId);
+  const requiredItems = catalogItems ?? getLearningItemsForSkill(skillId);
   if (requiredItems.length === 0) {
     return {
       contractId: SKILL_INITIAL_LEARNING_CONTRACT.id,

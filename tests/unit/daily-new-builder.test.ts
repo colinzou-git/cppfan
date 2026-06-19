@@ -82,6 +82,76 @@ describe("buildDailyNewPlan", () => {
     expect(plan.actions[0].goalIds).toEqual(["one", "two"]);
   });
 
+  it("is deterministic and fairly interleaves multiple goals before a second target", () => {
+    const first = goal("one");
+    first.targets[0] = {
+      ...first.targets[0],
+      referenceId: "test.skill.a",
+      skillId: "test.skill.a",
+      title: "Test skill A"
+    };
+    first.targets.push({
+      ...first.targets[0],
+      id: "target-one-second",
+      referenceId: "test.skill.b",
+      skillId: "test.skill.b",
+      title: "Test skill B",
+      orderIndex: 1
+    });
+    const second = goal("two");
+    second.targets[0] = {
+      ...second.targets[0],
+      id: "target-two",
+      referenceId: "test.skill.c",
+      skillId: "test.skill.c",
+      title: "Test skill C"
+    };
+    const itemsBySkill = new Map([
+      ["test.skill.a", [{ id: "item-a", title: "Item A", estimated_minutes: 3 }]],
+      ["test.skill.b", [{ id: "item-b", title: "Item B", estimated_minutes: 3 }]],
+      ["test.skill.c", [{ id: "item-c", title: "Item C", estimated_minutes: 3 }]]
+    ]);
+    const input = { goals: [first, second], evidencedItemIds: new Set<string>(), dailyCap: 2, itemsBySkill };
+
+    const firstRun = buildDailyNewPlan(input);
+    const secondRun = buildDailyNewPlan(input);
+
+    expect(firstRun).toEqual(secondRun);
+    expect(firstRun.actions.map((action) => action.primaryGoalId)).toEqual(["one", "two"]);
+    expect(firstRun.actions).toHaveLength(2);
+    expect(firstRun.extraAction?.primaryGoalId).toBe("one");
+    expect(firstRun.extraAction?.reasonCodes).toContain("LEARN_EXTRA_REQUESTED");
+  });
+
+  it("uses an injected database catalog item that is absent from the bundled seed", () => {
+    const databaseGoal = goal("database");
+    databaseGoal.targets[0] = {
+      ...databaseGoal.targets[0],
+      referenceId: "database.only.skill",
+      skillId: "database.only.skill",
+      title: "Database-only skill"
+    };
+    const plan = buildDailyNewPlan({
+      goals: [databaseGoal],
+      evidencedItemIds: new Set(),
+      dailyCap: 1,
+      itemsBySkill: new Map([["database.only.skill", [{
+        id: "database.only.item",
+        title: "Database-only item",
+        estimated_minutes: 7
+      }]]])
+    });
+
+    expect(plan.actions[0]).toMatchObject({
+      itemId: "database.only.item",
+      title: "Database-only item",
+      estimatedMinutes: 7,
+      platformSuitability: "all_devices",
+      isFsrsReview: false
+    });
+    expect(plan.noMoreReason).toBe("daily_scope_exhausted");
+  });
+
   it("exposes exactly one additional candidate beyond the daily cap", () => {
     const root = anotherRootSkill();
     expect(root).toBeDefined();
@@ -161,5 +231,6 @@ describe("buildDailyNewPlan", () => {
     expect(plan.actions).toEqual([]);
     expect(plan.eligibleActions).toEqual([]);
     expect(plan.extraAction).toBeNull();
+    expect(plan.noMoreReason).toBe("content_unavailable");
   });
 });

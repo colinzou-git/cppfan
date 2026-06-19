@@ -1,5 +1,5 @@
 import { skillPrerequisitesSeed } from "@/features/skills/skill-seed";
-import { deriveInitialLearningState } from "./acquisition-contracts";
+import { deriveInitialLearningState, type AcquisitionItem } from "./acquisition-contracts";
 import type { StudyGoalView } from "./goal-view-types";
 import type { DailyNewAction, DailyNewPlan, DailyNewReasonCode } from "./daily-new-model";
 
@@ -10,12 +10,19 @@ type Input = {
   localPlanDate?: string;
   timezone?: string;
   dailyPlanVersion?: number;
+  itemsBySkill?: ReadonlyMap<string, readonly AcquisitionItem[]>;
 };
 
-function acquisitionState(skillId: string, done: ReadonlySet<string>) {
+function acquisitionState(
+  skillId: string,
+  done: ReadonlySet<string>,
+  itemsBySkill?: ReadonlyMap<string, readonly AcquisitionItem[]>
+) {
   return deriveInitialLearningState(
     skillId,
-    [...done].map((itemId) => ({ itemId }))
+    [...done].map((itemId) => ({ itemId })),
+    undefined,
+    itemsBySkill?.get(skillId)
   );
 }
 
@@ -29,9 +36,10 @@ function makeAction(
   done: ReadonlySet<string>,
   localPlanDate: string,
   timezone: string,
-  dailyPlanVersion: number
+  dailyPlanVersion: number,
+  itemsBySkill?: ReadonlyMap<string, readonly AcquisitionItem[]>
 ) {
-  const state = acquisitionState(skillId, done);
+  const state = acquisitionState(skillId, done, itemsBySkill);
   if (!state.nextItem || state.state === "initial_learning_complete" || state.state === "unavailable") return null;
   const item = state.nextItem;
   const action: DailyNewAction = {
@@ -61,6 +69,8 @@ function makeAction(
     acquisitionContractId: target.acquisitionContractId,
     acquisitionContractVersion: target.acquisitionContractVersion,
     completionEvidenceRule: "A trusted qualifying learning event for this exact learning item satisfies this acquisition step.",
+    platformSuitability: "all_devices",
+    platformNote: "This learning-item step works on Windows, iPad, and iPhone.",
     source: "planned",
     isFsrsReview: false
   };
@@ -73,9 +83,11 @@ export function buildDailyNewPlan({
   dailyCap,
   localPlanDate = "",
   timezone = "UTC",
-  dailyPlanVersion = 0
+  dailyPlanVersion = 0,
+  itemsBySkill
 }: Input): DailyNewPlan {
   const byItem = new Map<string, DailyNewAction>();
+  let unavailableTargetCount = 0;
   const orderedGoals = goals.slice().sort((a, b) =>
     a.endLocalDate.localeCompare(b.endLocalDate) || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)
   );
@@ -87,8 +99,11 @@ export function buildDailyNewPlan({
       const prerequisites = skillPrerequisitesSeed
         .filter((edge) => edge.skill_id === target.skillId)
         .sort((a, b) => Number(b.relationship_type === "required") - Number(a.relationship_type === "required") || a.prerequisite_skill_id.localeCompare(b.prerequisite_skill_id));
-      const prerequisite = prerequisites.find((edge) => acquisitionState(edge.prerequisite_skill_id, evidencedItemIds).nextItem);
-      const ownState = acquisitionState(target.skillId, evidencedItemIds);
+      const prerequisite = prerequisites.find((edge) =>
+        acquisitionState(edge.prerequisite_skill_id, evidencedItemIds, itemsBySkill).nextItem
+      );
+      const ownState = acquisitionState(target.skillId, evidencedItemIds, itemsBySkill);
+      if (ownState.state === "unavailable") unavailableTargetCount += 1;
       const directActionKind = ownState.state === "not_started" ? "start_new_skill" : "continue_acquisition";
       const directReasonCode = ownState.state === "not_started" ? "START_NEW_GOAL_SKILL" : "CONTINUE_UNFINISHED_SKILL";
       const action = prerequisite
@@ -102,7 +117,8 @@ export function buildDailyNewPlan({
             evidencedItemIds,
             localPlanDate,
             timezone,
-            dailyPlanVersion
+            dailyPlanVersion,
+            itemsBySkill
           )
         : makeAction(
             goal,
@@ -114,7 +130,8 @@ export function buildDailyNewPlan({
             evidencedItemIds,
             localPlanDate,
             timezone,
-            dailyPlanVersion
+            dailyPlanVersion,
+            itemsBySkill
           );
       if (!action) continue;
       const previous = byItem.get(action.itemId);
@@ -127,8 +144,35 @@ export function buildDailyNewPlan({
     }
   }
 
-  const cap = Math.max(0, Math.min(10, Math.floor(dailyCap)));
-  const eligibleActions = [...byItem.values()];
+  const cap = Math.max(0, Math.min(4, Math.floor(dailyCap)));
+  const queues = new Map(
+    orderedGoals.map((goal) => [
+      goal.id,
+      [...byItem.values()]
+        .filter((action) => action.primaryGoalId === goal.id)
+        .sort((a, b) => a.primaryTargetId.localeCompare(b.primaryTargetId) || a.id.localeCompare(b.id))
+    ])
+  );
+  const eligibleActions: DailyNewAction[] = [];
+  for (let index = 0; ; index += 1) {
+    let added = false;
+    for (const goal of orderedGoals) {
+      const action = queues.get(goal.id)?.[index];
+      if (action) {
+        eligibleActions.push(action);
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  const nextExtra = eligibleActions[cap];
+  const noMoreReason = nextExtra
+    ? null
+    : eligibleActions.length > 0
+      ? "daily_scope_exhausted" as const
+      : unavailableTargetCount > 0
+        ? "content_unavailable" as const
+        : "all_goal_work_complete" as const;
   return {
     state: "ready",
     authenticated: true,
@@ -140,6 +184,11 @@ export function buildDailyNewPlan({
     actions: eligibleActions.slice(0, cap),
     allocatedExtraActions: [],
     eligibleActions,
-    extraAction: eligibleActions[cap] ? { ...eligibleActions[cap], source: "learn_extra" } : null
+    extraAction: nextExtra ? {
+      ...nextExtra,
+      source: "learn_extra",
+      reasonCodes: [...nextExtra.reasonCodes, "LEARN_EXTRA_REQUESTED"]
+    } : null,
+    noMoreReason
   };
 }
