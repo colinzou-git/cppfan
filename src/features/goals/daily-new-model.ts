@@ -1,9 +1,21 @@
+import type { AcquisitionState } from "./goal-contract";
+
+export type DailyNewReasonCode =
+  | "CONTINUE_UNFINISHED_SKILL"
+  | "START_NEW_GOAL_SKILL"
+  | "UNFINISHED_PREREQUISITE";
+
 export type DailyNewAction = {
   id: string;
+  algorithmVersion: "daily-new-v1";
+  localPlanDate: string;
+  timezone: string;
+  dailyPlanVersion: number;
   itemId: string;
   skillId: string;
   title: string;
   reason: string;
+  reasonCodes: DailyNewReasonCode[];
   href: string;
   estimatedMinutes: number | null;
   goalIds: string[];
@@ -12,7 +24,14 @@ export type DailyNewAction = {
   primaryGoalId: string;
   revisionId: string;
   primaryTargetId: string;
+  actionKind: "start_new_skill" | "continue_acquisition" | "prerequisite_acquisition";
+  destinationKind: "learning_item";
+  destinationId: string;
+  acquisitionStepId: string;
+  acquisitionState: Exclude<AcquisitionState, "initial_learning_complete" | "unavailable">;
+  acquisitionContractId: string;
   acquisitionContractVersion: number;
+  completionEvidenceRule: string;
   source: "planned" | "learn_extra";
   isFsrsReview: false;
 };

@@ -47,11 +47,32 @@ function anotherRootSkill() {
 
 describe("buildDailyNewPlan", () => {
   it("allocates unfinished initial learning, not review work", () => {
-    const plan = buildDailyNewPlan({ goals: [goal("one")], evidencedItemIds: new Set(), dailyCap: 1 });
+    const plan = buildDailyNewPlan({
+      goals: [goal("one")],
+      evidencedItemIds: new Set(),
+      dailyCap: 1,
+      localPlanDate: "2026-06-19",
+      timezone: "America/Los_Angeles",
+      dailyPlanVersion: 3
+    });
     expect(plan.actions).toHaveLength(1);
     expect(plan.actions[0].href).toMatch(/^\/learn\//);
     expect(plan.actions[0].source).toBe("planned");
     expect(plan.actions[0].isFsrsReview).toBe(false);
+    expect(plan.actions[0]).toMatchObject({
+      algorithmVersion: "daily-new-v1",
+      localPlanDate: "2026-06-19",
+      timezone: "America/Los_Angeles",
+      dailyPlanVersion: 3,
+      actionKind: "start_new_skill",
+      destinationKind: "learning_item",
+      destinationId: plan.actions[0].itemId,
+      acquisitionStepId: plan.actions[0].itemId,
+      acquisitionState: "not_started",
+      acquisitionContractId: "skill-initial-learning",
+      acquisitionContractVersion: 1,
+      reasonCodes: ["START_NEW_GOAL_SKILL"]
+    });
   });
 
   it("deduplicates a shared action and preserves all contributing goals", () => {
@@ -68,5 +89,47 @@ describe("buildDailyNewPlan", () => {
     const plan = buildDailyNewPlan({ goals: [goal("one"), second], evidencedItemIds: new Set(), dailyCap: 1 });
     expect(plan.actions).toHaveLength(1);
     expect(plan.extraAction?.source).toBe("learn_extra");
+  });
+
+  it("continues an in-progress acquisition sequence with the next unfinished item", () => {
+    const firstItem = getLearningItemsForSkill("cpp.program_basics.structure")[0];
+    const plan = buildDailyNewPlan({
+      goals: [goal("one")],
+      evidencedItemIds: new Set([firstItem.id]),
+      dailyCap: 1
+    });
+
+    expect(plan.actions).toHaveLength(1);
+    expect(plan.actions[0].itemId).not.toBe(firstItem.id);
+    expect(plan.actions[0]).toMatchObject({
+      actionKind: "continue_acquisition",
+      acquisitionState: "in_progress",
+      reasonCodes: ["CONTINUE_UNFINISHED_SKILL"]
+    });
+  });
+
+  it("excludes a target whose initial learning contract is already complete", () => {
+    const completed = new Set(getLearningItemsForSkill("cpp.program_basics.structure").map((item) => item.id));
+    const plan = buildDailyNewPlan({ goals: [goal("one")], evidencedItemIds: completed, dailyCap: 1 });
+
+    expect(plan.actions).toEqual([]);
+    expect(plan.eligibleActions).toEqual([]);
+    expect(plan.extraAction).toBeNull();
+  });
+
+  it("excludes a target whose acquisition content is unavailable", () => {
+    const unavailable = goal("one");
+    unavailable.targets[0] = {
+      ...unavailable.targets[0],
+      referenceId: "missing.skill",
+      skillId: "missing.skill",
+      title: "Missing skill"
+    };
+
+    const plan = buildDailyNewPlan({ goals: [unavailable], evidencedItemIds: new Set(), dailyCap: 1 });
+
+    expect(plan.actions).toEqual([]);
+    expect(plan.eligibleActions).toEqual([]);
+    expect(plan.extraAction).toBeNull();
   });
 });

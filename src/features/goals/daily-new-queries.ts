@@ -87,7 +87,9 @@ export async function getDailyNewPlanForGoals(
   const base = buildDailyNewPlan({
     goals: goals.active,
     evidencedItemIds,
-    dailyCap: profile?.daily_new_skills_goal ?? 0
+    dailyCap: profile?.daily_new_skills_goal ?? 0,
+    localPlanDate,
+    timezone
   });
   const allocationRows = (allocationResult.data ?? []).filter((row) => row.status === "allocated");
   const allocatedIds = new Set(allocationRows.map((row) => String(row.action_id)));
@@ -107,9 +109,12 @@ export async function getDailyNewPlanForGoals(
     localPlanDate,
     timezone,
     dailyPlanVersion,
-    actions: base.actions.filter((action) => !allocatedIds.has(action.id)),
-    allocatedExtraActions,
-    extraAction: extraAction ? { ...extraAction, source: "learn_extra" } : null
+    actions: base.actions
+      .filter((action) => !allocatedIds.has(action.id))
+      .map((action) => ({ ...action, dailyPlanVersion })),
+    allocatedExtraActions: allocatedExtraActions.map((action) => ({ ...action, dailyPlanVersion })),
+    eligibleActions: base.eligibleActions.map((action) => ({ ...action, dailyPlanVersion })),
+    extraAction: extraAction ? { ...extraAction, source: "learn_extra", dailyPlanVersion } : null
   };
 }
 
