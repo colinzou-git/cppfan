@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
+import { submitJudgeAttempt } from "./judge-actions";
 import {
   SESSION_DURATIONS,
   advancePhase,
@@ -70,10 +71,12 @@ export function SessionRunner({
 }) {
   const [session, setSession] = useState<SessionState>(initialState);
   const [notice, setNotice] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
+  const [judgeNotice, setJudgeNotice] = useState<string | null>(null);
+  const [, startSaveTransition] = useTransition();
+  const [isJudgePending, startJudgeTransition] = useTransition();
 
   function persist(next: SessionState) {
-    startTransition(async () => {
+    startSaveTransition(async () => {
       const result = await saveSession(next);
       if (result.status === "signed_out") {
         setNotice("Sign in to save this session across refreshes.");
@@ -98,6 +101,37 @@ export function SessionRunner({
         durationMinutes
       })
     );
+  }
+
+  function submitDraftToJudge() {
+    setJudgeNotice(null);
+    startJudgeTransition(async () => {
+      const result = await submitJudgeAttempt({
+        problemId: session.problemId,
+        source: session.codeDraft,
+        mode: session.mode,
+        compiler: "gcc",
+        standard: "c++20",
+        taskKind: "compile_and_run",
+        sourceVersion: 1,
+        assistanceUsed: session.assistanceUsed,
+        priorSolutionExposed: canRevealSolution(session)
+      });
+
+      if (result.status === "queued") {
+        setJudgeNotice(`Submission queued for ${result.visibleTestCount} visible and ${result.hiddenTestCount} hidden tests.`);
+      } else if (result.status === "duplicate") {
+        setJudgeNotice("This submission was already queued.");
+      } else if (result.status === "signed_out") {
+        setJudgeNotice("Sign in to queue this submission for judge feedback.");
+      } else if (result.status === "unsupported_problem") {
+        setJudgeNotice("Judge feedback is not available for this problem yet.");
+      } else if (result.status === "invalid") {
+        setJudgeNotice("Add a non-empty C++ draft before queuing judge feedback.");
+      } else {
+        setJudgeNotice("Could not queue judge feedback just now.");
+      }
+    });
   }
 
   const phase = currentPhase(session);
@@ -195,8 +229,11 @@ export function SessionRunner({
               id="session-phase-note"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
               value={phaseNote}
-              onChange={(event) => setSession((prev) => updatePhaseNote(prev, phase, event.target.value))}
-              onBlur={(event) => apply(updatePhaseNote(session, phase, event.target.value))}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updatePhaseNote(prev, phase, value));
+              }}
+              onBlur={(event) => apply(updatePhaseNote(session, phase, event.currentTarget.value))}
               data-testid="session-phase-note"
             />
           </label>
@@ -206,8 +243,11 @@ export function SessionRunner({
               id="session-code-draft"
               className="min-h-36 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm font-normal text-slate-800"
               value={session.codeDraft}
-              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { codeDraft: event.target.value }))}
-              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.target.value }))}
+              onInput={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updateSessionEvidence(prev, { codeDraft: value }));
+              }}
+              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.currentTarget.value }))}
               data-testid="session-code-draft"
             />
           </label>
@@ -217,8 +257,11 @@ export function SessionRunner({
               id="session-test-notes"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
               value={session.testNotes}
-              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { testNotes: event.target.value }))}
-              onBlur={(event) => apply(updateSessionEvidence(session, { testNotes: event.target.value }))}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updateSessionEvidence(prev, { testNotes: value }));
+              }}
+              onBlur={(event) => apply(updateSessionEvidence(session, { testNotes: event.currentTarget.value }))}
               data-testid="session-test-notes"
             />
           </label>
@@ -231,6 +274,22 @@ export function SessionRunner({
             />
             Interviewer assistance used
           </label>
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={submitDraftToJudge}
+              disabled={isJudgePending || session.codeDraft.trim().length === 0}
+              data-testid="session-submit-judge"
+            >
+              {isJudgePending ? "Queuing..." : "Queue judge run"}
+            </Button>
+            {judgeNotice ? (
+              <p className="text-xs font-semibold text-slate-600" role="status" data-testid="session-judge-notice">
+                {judgeNotice}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 
