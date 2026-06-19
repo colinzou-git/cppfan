@@ -58,3 +58,21 @@ test("Parsons: arranging the lines correctly (keyboard controls) is graded corre
 
   await expect(page.getByTestId("parsons-feedback")).toContainText(/right order/i);
 });
+
+test("Parsons: pointer drag reorders a line in a real browser", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "HTML drag-and-drop is the desktop pointer path");
+
+  await page.goto(ITEM);
+  await expect(page.getByTestId("parsons-exercise")).toBeVisible();
+
+  const before = await currentOrder(page);
+  expect(before).toHaveLength(6);
+
+  const source = page.locator(`[data-block-id="${before[0]}"]`);
+  const target = page.locator(`[data-block-id="${before[2]}"]`);
+  await source.dragTo(target);
+
+  const expected = [before[1], before[0], ...before.slice(2)];
+  await expect.poll(() => currentOrder(page)).toEqual(expected);
+  await expect(page.getByTestId("parsons-announcement")).toContainText(/dragged line before/i);
+});
