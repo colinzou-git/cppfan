@@ -64,3 +64,6 @@ Initial server-held suites for selected catalog problems live in
 `src/features/interview/judge-test-suites.ts`: raw fixture values are passed only
 to the worker fixture payload, while enqueue metadata contains hashes and hidden
 test categories.
+`src/features/interview/judge-actions.ts` is the web-app submission boundary: it
+hashes source and persists a queued row, but does not compile, execute, or import
+worker process APIs.
