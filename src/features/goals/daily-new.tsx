@@ -5,24 +5,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { allocateExtraGoalAction } from "@/app/goals/actions";
 import type { DailyNewAction, DailyNewPlan } from "./daily-new-model";
 
+const ACTION_LABELS: Record<DailyNewAction["actionKind"], string> = {
+  start_new_skill: "Start this skill",
+  continue_acquisition: "Continue learning",
+  prerequisite_acquisition: "Finish prerequisite"
+};
+
+const STATE_LABELS: Record<DailyNewAction["acquisitionState"], string> = {
+  not_started: "Not started",
+  in_progress: "In progress"
+};
+
 function ActionTile({ action }: { action: DailyNewAction }) {
+  const sourceLabel = action.source === "learn_extra" ? "Extra" : "Planned";
+  const effort = action.estimatedMinutes ? `about ${action.estimatedMinutes} min` : "time estimate unavailable";
+
   return (
-    <li>
+    <li data-testid="daily-new-action" data-action-id={action.id}>
       <Link
         href={action.href}
-        className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/70 px-3 py-2 transition hover:border-violet-200 hover:bg-violet-50/60"
+        aria-label={`${sourceLabel}: ${ACTION_LABELS[action.actionKind]} - ${action.title}`}
+        className="flex items-start justify-between gap-3 rounded-2xl border border-slate-100 bg-white/70 px-3 py-2 transition hover:border-violet-200 hover:bg-violet-50/60"
       >
-        <span>
-          <span className="mb-1 inline-flex rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-black uppercase text-violet-800">
-            {action.source === "learn_extra" ? "Extra" : "Planned"}
+        <span className="min-w-0">
+          <span className="mb-1 flex flex-wrap gap-1">
+            <span className="inline-flex rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-black uppercase text-violet-800">
+              {sourceLabel}
+            </span>
+            <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase text-slate-700">
+              {ACTION_LABELS[action.actionKind]}
+            </span>
           </span>
-          <span className="block text-sm font-bold text-slate-950">{action.title}</span>
+          <span className="block break-words text-sm font-bold text-slate-950">{action.title}</span>
           <span className="block text-xs font-medium text-slate-500">{action.reason}</span>
-          <span className="block text-xs font-semibold text-violet-700">
-            {action.goalTitles.join(" · ")}{action.estimatedMinutes ? ` · about ${action.estimatedMinutes} min` : ""}
+          <span className="block break-words text-xs font-semibold text-violet-700">
+            {action.goalTitles.join(" - ")} - {effort}
+          </span>
+          <span className="block text-xs font-medium text-slate-500">
+            {STATE_LABELS[action.acquisitionState]} - learning item - {action.localPlanDate || "today"} - {action.timezone}
+          </span>
+          <span className="block text-xs font-medium text-slate-500">
+            Completion: {action.completionEvidenceRule}
           </span>
         </span>
-        <ArrowRight className="h-4 w-4 shrink-0 text-violet-600" />
+        <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-violet-600" />
       </Link>
     </li>
   );
