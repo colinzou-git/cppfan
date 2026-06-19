@@ -121,6 +121,11 @@ expected stdout in the worker fixture payload only; the web-app request boundary
 receives `JudgeWorkerTest` metadata with fixture hashes, hidden flags, and
 categories.
 
+`src/features/interview/judge-actions.ts` is the app-side submission boundary:
+it hashes learner source, builds the server-side submission draft, and persists a
+queued row. It does not import compiler, Docker, process-launch, or worker-runner
+APIs.
+
 ## Consequences
 
 - Clear separation: the web app never executes learner code; a dedicated sandbox
