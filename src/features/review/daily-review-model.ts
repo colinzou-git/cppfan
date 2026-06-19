@@ -6,6 +6,9 @@ export type DailyReviewItem = {
   href: string;
   dueAt: string;
   overdue: boolean;
+  reason: string;
+  localPlanDate: string;
+  timezone: string;
 };
 
 export type DailyReviewView = {

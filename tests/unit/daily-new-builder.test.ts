@@ -51,6 +51,7 @@ describe("buildDailyNewPlan", () => {
     expect(plan.actions).toHaveLength(1);
     expect(plan.actions[0].href).toMatch(/^\/learn\//);
     expect(plan.actions[0].source).toBe("planned");
+    expect(plan.actions[0].isFsrsReview).toBe(false);
   });
 
   it("deduplicates a shared action and preserves all contributing goals", () => {

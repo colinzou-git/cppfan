@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
 import { nextLocalMidnight } from "@/lib/time/local-day";
-import { getLearningItemById } from "@/features/learning-items/learning-item-seed";
+import { buildDailyReviewItems, type DailyReviewCardRow } from "./daily-review-builder";
 import type { DailyReviewView } from "./daily-review-model";
 
 const empty = (
@@ -34,21 +34,7 @@ export async function getDailyReviewView(
     return empty("error", true, timezone);
   }
 
-  const items = (result.data ?? []).flatMap((row) => {
-    const itemId = String(row.learning_item_id);
-    const details = getLearningItemById(itemId);
-    if (!details) return [];
-    const dueAt = String(row.due_at);
-    return [{
-      cardId: String(row.id),
-      itemId,
-      skillId: String(row.skill_id),
-      title: details.item.title,
-      href: `/review?card=${encodeURIComponent(String(row.id))}`,
-      dueAt,
-      overdue: new Date(dueAt).getTime() < now.getTime()
-    }];
-  });
+  const items = buildDailyReviewItems((result.data ?? []) as DailyReviewCardRow[], timezone, now);
 
   return { state: "ready", authenticated: true, timezone, items };
 }

@@ -14,6 +14,7 @@ export type DailyNewAction = {
   primaryTargetId: string;
   acquisitionContractVersion: number;
   source: "planned" | "learn_extra";
+  isFsrsReview: false;
 };
 
 export type DailyNewPlan = {
