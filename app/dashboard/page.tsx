@@ -10,6 +10,8 @@ async function signOut() {
   redirect("/login?message=signed-out");
 }
 
-export default async function DashboardPage() {
-  return <DashboardSections data={await getDashboardData()} signOut={signOut} />;
+export default async function DashboardPage(props: { searchParams: Promise<{ extra?: string }> }) {
+  const query = await props.searchParams;
+  const data = await getDashboardData();
+  return <DashboardSections data={data} signOut={signOut} extraResult={query.extra} />;
 }
