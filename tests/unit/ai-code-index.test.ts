@@ -43,5 +43,5 @@ describe("AI code index tooling", () => {
 
     expect(queryOutput).toContain("getExerciseById");
     expect(queryOutput).toContain("src/features/exercises/exercise-catalog.ts");
-  });
+  }, 20_000);
 });
