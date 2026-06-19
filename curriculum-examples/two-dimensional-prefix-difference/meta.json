@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.prefix_2d.code_difference_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "rect=28\nupdated=4\n",
+  "note": "2-D prefix sums answer static rectangle queries; 2-D difference arrays batch rectangle updates before a materializing prefix pass."
+}

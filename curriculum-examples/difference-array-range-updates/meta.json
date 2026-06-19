@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.prefix_sums.code_diff_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "0 3 5 5 2\n",
+  "note": "A difference array records each inclusive range update at its endpoints, then one prefix pass materializes final values."
+}

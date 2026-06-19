@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.dp_forms.code_subsequence_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "3\nACE\n",
+  "note": "LCS is a subsequence DP over prefixes; matching characters use the diagonal state."
+}

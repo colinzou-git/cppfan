@@ -386,11 +386,51 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cp-algorithms-fenwick-tree",
+    name: "cp-algorithms: Fenwick tree",
+    url: "https://cp-algorithms.com/data_structures/fenwick.html",
+    kind: "reference",
+    description: "Reference for binary indexed tree operations, lowbit jumps, and O(log n) dynamic prefix sums.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-sparse-table",
+    name: "cp-algorithms: sparse table",
+    url: "https://cp-algorithms.com/data_structures/sparse-table.html",
+    kind: "reference",
+    description: "Reference for immutable idempotent range queries such as range minimum with O(1) lookup.",
+    tags: ["dsa"]
+  },
+  {
     id: "usaco-guide-prefix-sums",
     name: "USACO Guide: prefix sums",
     url: "https://usaco.guide/silver/prefix-sums",
     kind: "guidelines",
     description: "Practice-oriented walkthrough of prefix sums as a time/space tradeoff for repeated range queries.",
+    tags: ["dsa"]
+  },
+  {
+    id: "usaco-guide-dynamic-programming",
+    name: "USACO Guide: dynamic programming",
+    url: "https://usaco.guide/gold/dp",
+    kind: "guidelines",
+    description: "Practice-oriented introduction to DP state design, transitions, and table order.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cses-dynamic-programming",
+    name: "CSES: Dynamic Programming",
+    url: "https://cses.fi/problemset/list/",
+    kind: "practice",
+    description: "Introductory DP practice section with small-state problems suitable after guided examples.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cses-range-queries",
+    name: "CSES: Range Queries",
+    url: "https://cses.fi/problemset/list/",
+    kind: "practice",
+    description: "Range-query practice section for static prefix sums, Fenwick trees, segment trees, and sparse-table style tradeoffs.",
     tags: ["dsa"]
   },
   {

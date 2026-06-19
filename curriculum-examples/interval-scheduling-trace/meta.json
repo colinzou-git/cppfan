@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.interval_scheduling.code_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "[2,3] [3,5] [5,7]\n",
+  "note": "Interval scheduling sorts by finish time, then accepts each compatible interval."
+}

@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.dp_forms.code_knapsack_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "value=100\ntake item\ntake item\n",
+  "note": "0/1 knapsack compares skip vs take transitions and can reconstruct the optimal chosen items by walking backward through the table."
+}

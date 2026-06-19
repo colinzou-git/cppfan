@@ -1,0 +1,7 @@
+{
+  "itemId": "dsa.techniques.range_structures.code_fenwick_trace",
+  "kind": "positive",
+  "standard": "c++20",
+  "expectedOutput": "10\n7\n",
+  "note": "Fenwick trees use lowbit jumps for O(log n) point updates and prefix/range-sum queries."
+}

@@ -3832,6 +3832,32 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.prefix_sums.code_diff_trace",
+    type: "code_reading",
+    title: "Trace a difference array",
+    prompt:
+      "An array of length 5 starts as all zeroes. You apply range additions on inclusive indexes: add 3 to [1, 3], then add 2 to [2, 4]. Using a 1-D difference array with +v at l and -v at r+1, what final array appears after the prefix pass?",
+    explanation:
+      "The diff marks are diff[1]+=3, diff[4]-=3, diff[2]+=2, and the r+1 mark for [2,4] lands just past the array. Prefixing the diff gives final values [0, 3, 5, 5, 2]. Range updates are recorded in O(1) each, then one O(n) prefix pass materializes the array.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 2224,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.prefix_sums.mc_prefix_suffix",
+    type: "multiple_choice",
+    title: "Prefix/suffix aggregate split",
+    prompt:
+      "You need, for every split point i, the sum of values before i and the maximum value after i in a static array. Which preprocessing best supports all split checks in O(n) total?",
+    explanation:
+      "Build a prefix-sum array for the left side and a suffix-maximum array for the right side. Each split can then combine O(1) left and right aggregate values after O(n) preprocessing.",
+    difficulty: "intermediate",
+    estimated_minutes: 2,
+    order_index: 2226,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.sliding_window.lesson",
     type: "lesson",
     title: "Sliding window",
@@ -3932,6 +3958,45 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.range_structures.code_fenwick_trace",
+    type: "code_reading",
+    title: "Trace Fenwick updates and queries",
+    prompt:
+      "A Fenwick tree stores point updates and prefix sums. Start with values [2, 1, 3, 0] using 1-based indexes. After adding 4 to index 3, what is sum(1..3), and what is the asymptotic cost of the point update and prefix query?",
+    explanation:
+      "Index 3 changes from 3 to 7, so sum(1..3) becomes 2 + 1 + 7 = 10. A Fenwick tree walks indexes by lowbit jumps, so both point update and prefix query cost O(log n), with O(n) space.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3824,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.range_structures.mc_sparse_table",
+    type: "multiple_choice",
+    title: "When a sparse table fits",
+    prompt:
+      "You have an immutable array and need many range-minimum queries, with no updates after preprocessing. Which structure gives O(1) queries after preprocessing?",
+    explanation:
+      "A sparse table fits immutable idempotent queries such as min/max/gcd: O(n log n) build and O(1) query. It does not support updates. Prefix sums only handle sums, and Fenwick/segment trees are better when updates exist.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3826,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.range_structures.code_segment_trace",
+    type: "code_reading",
+    title: "Choose a segment tree operation",
+    prompt:
+      "You need range minimum queries while values can be assigned at individual indexes between queries. Why is a segment tree a better fit than a prefix-sum array here, and what are the point-update and range-query costs?",
+    explanation:
+      "A prefix-sum array answers static sum queries, not dynamic range minima. A segment tree stores one aggregate per interval, so a point update refreshes O(log n) nodes and a range minimum query combines O(log n) interval nodes. Space is O(n).",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3828,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.greedy_proof.lesson",
     type: "lesson",
     title: "Greedy proofs and counterexamples",
@@ -3954,6 +4019,19 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 3840,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.greedy_proof.mc_counterexample",
+    type: "multiple_choice",
+    title: "Spot a failed greedy rule",
+    prompt:
+      "For 0/1 knapsack with capacity 10, items are A(value 60, weight 10), B(value 50, weight 6), and C(value 50, weight 4). Which result disproves the greedy rule 'take highest value first'?",
+    explanation:
+      "Highest value first takes A for value 60 and fills the bag. But B+C fits exactly with value 100, so the greedy rule is not safe. A counterexample is enough to reject a greedy rule; then use DP for 0/1 knapsack.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 3844,
     is_active: true
   },
   {
@@ -3982,6 +4060,32 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.dp_design.worked_climbing_stairs",
+    type: "worked_example",
+    title: "Worked example: design a 1-D DP",
+    prompt:
+      "Design a DP for counting ways to climb n stairs when each move is 1 or 2 steps.\n\nStep 1 - state: dp[i] is the number of ways to reach stair i.\n\nStep 2 - base cases: dp[0] = 1 (one empty way) and dp[1] = 1.\n\nStep 3 - transition: the last move to i came from i-1 or i-2, so dp[i] = dp[i-1] + dp[i-2].\n\nStep 4 - order: fill i from 2 up to n so both dependencies are already known.\n\nThe O(n) table can later be space-optimized to two variables because each state only needs the previous two values.",
+    explanation:
+      "A complete DP design names state, transition, base cases, and evaluation order before optimizing space. Here dp[i] depends only on dp[i-1] and dp[i-2], so the simple table is correct first, then a two-variable version is safe.",
+    difficulty: "intermediate",
+    estimated_minutes: 5,
+    order_index: 3864,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_design.code_memo_tab_trace",
+    type: "code_reading",
+    title: "Memoization vs tabulation dependencies",
+    prompt:
+      "A recurrence uses dp[i][j] from dp[i-1][j] and dp[i][j-1]. In bottom-up tabulation, which evaluation order is valid, and why would top-down memoization also work?",
+    explanation:
+      "Fill rows from top to bottom and columns from left to right after setting the first row/column base cases; then dp[i-1][j] and dp[i][j-1] are ready before dp[i][j]. Top-down memoization also works because recursion computes dependencies on demand and caches each state once.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 3866,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.prefix_2d.lesson",
     type: "lesson",
     title: "2-D prefix sums and difference arrays",
@@ -4004,6 +4108,19 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 4600,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.prefix_2d.code_difference_trace",
+    type: "code_reading",
+    title: "Trace a 2-D difference update",
+    prompt:
+      "In a 3x3 zero grid, add 5 to the rectangle with rows [0,1] and columns [1,2]. A 2-D difference array marks +5 at (0,1), -5 at (2,1), -5 at (0,3), and +5 at (2,3), then takes 2-D prefix sums. Which cells end as 5?",
+    explanation:
+      "Only the rectangle rows 0..1 and columns 1..2 receives the update: (0,1), (0,2), (1,1), and (1,2) become 5. Corner marks batch the range update in O(1), and the final prefix pass materializes all cells in O(rows*cols).",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4604,
     is_active: true
   },
   {
@@ -4032,6 +4149,19 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.techniques.interval_scheduling.code_trace",
+    type: "code_reading",
+    title: "Trace interval scheduling",
+    prompt:
+      "Intervals are [1,4], [2,3], [3,5], [0,6], and [5,7]. Sort by finish time and greedily take each interval whose start is at least the last selected finish. Which intervals are chosen?",
+    explanation:
+      "Sorted by finish, the intervals are [2,3], [1,4], [3,5], [0,6], [5,7]. Take [2,3], skip [1,4], take [3,5], skip [0,6], and take [5,7]. The chosen set is [2,3], [3,5], [5,7].",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4624,
+    is_active: true
+  },
+  {
     id: "dsa.techniques.dp_forms.lesson",
     type: "lesson",
     title: "Common DP forms and reconstruction",
@@ -4054,6 +4184,32 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 4640,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_forms.code_knapsack_trace",
+    type: "code_reading",
+    title: "Trace a knapsack transition",
+    prompt:
+      "For 0/1 knapsack, dp[i][w] is the best value using the first i items and capacity w. Item i has value 7 and weight 3. If dp[i-1][5] = 8 and dp[i-1][2] = 4, what is dp[i][5] and which choice produced it?",
+    explanation:
+      "Skip gives dp[i-1][5] = 8. Take gives value 7 + dp[i-1][2] = 11. The max is 11, produced by taking the item. The state is item prefix plus capacity; the transition compares skip vs take; base cases are zero items or zero capacity; evaluation fills increasing i and capacity.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4644,
+    is_active: true
+  },
+  {
+    id: "dsa.techniques.dp_forms.code_subsequence_trace",
+    type: "code_reading",
+    title: "Trace a subsequence DP cell",
+    prompt:
+      "For LCS, the state dp[i][j] is the longest common subsequence length of the first i chars of A and first j chars of B. If A[i-1] == B[j-1], which transition fills dp[i][j], and what order makes dependencies available?",
+    explanation:
+      "When the last characters match, dp[i][j] = 1 + dp[i-1][j-1]; otherwise it is max(dp[i-1][j], dp[i][j-1]). Base cases are dp[0][*] = dp[*][0] = 0. Filling i from 1..n and j from 1..m makes the diagonal, top, and left dependencies available.",
+    difficulty: "advanced",
+    estimated_minutes: 3,
+    order_index: 4646,
     is_active: true
   },
   {
@@ -5970,6 +6126,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.graphs.connectivity_patterns.mc_offline_deletions", skill_id: "dsa.graphs.connectivity_patterns", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.lesson", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_sums.mc_query", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_sums.code_diff_trace", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_sums.mc_prefix_suffix", skill_id: "dsa.techniques.prefix_sums", is_primary: true },
   { learning_item_id: "dsa.techniques.sliding_window.lesson", skill_id: "dsa.techniques.sliding_window", is_primary: true },
   { learning_item_id: "dsa.techniques.sliding_window.mc_complexity", skill_id: "dsa.techniques.sliding_window", is_primary: true },
   { learning_item_id: "dsa.techniques.greedy.lesson", skill_id: "dsa.techniques.greedy", is_primary: true },
@@ -5978,16 +6136,26 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.techniques.dynamic_programming.mc_when", skill_id: "dsa.techniques.dynamic_programming", is_primary: true },
   { learning_item_id: "dsa.techniques.range_structures.lesson", skill_id: "dsa.techniques.range_structures", is_primary: true },
   { learning_item_id: "dsa.techniques.range_structures.mc_dynamic", skill_id: "dsa.techniques.range_structures", is_primary: true },
+  { learning_item_id: "dsa.techniques.range_structures.code_fenwick_trace", skill_id: "dsa.techniques.range_structures", is_primary: true },
+  { learning_item_id: "dsa.techniques.range_structures.mc_sparse_table", skill_id: "dsa.techniques.range_structures", is_primary: true },
+  { learning_item_id: "dsa.techniques.range_structures.code_segment_trace", skill_id: "dsa.techniques.range_structures", is_primary: true },
   { learning_item_id: "dsa.techniques.greedy_proof.lesson", skill_id: "dsa.techniques.greedy_proof", is_primary: true },
   { learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", skill_id: "dsa.techniques.greedy_proof", is_primary: true },
+  { learning_item_id: "dsa.techniques.greedy_proof.mc_counterexample", skill_id: "dsa.techniques.greedy_proof", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_design.lesson", skill_id: "dsa.techniques.dp_design", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_design.mc_order", skill_id: "dsa.techniques.dp_design", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_design.worked_climbing_stairs", skill_id: "dsa.techniques.dp_design", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_design.code_memo_tab_trace", skill_id: "dsa.techniques.dp_design", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_2d.lesson", skill_id: "dsa.techniques.prefix_2d", is_primary: true },
   { learning_item_id: "dsa.techniques.prefix_2d.mc_query", skill_id: "dsa.techniques.prefix_2d", is_primary: true },
+  { learning_item_id: "dsa.techniques.prefix_2d.code_difference_trace", skill_id: "dsa.techniques.prefix_2d", is_primary: true },
   { learning_item_id: "dsa.techniques.interval_scheduling.lesson", skill_id: "dsa.techniques.interval_scheduling", is_primary: true },
   { learning_item_id: "dsa.techniques.interval_scheduling.mc_key", skill_id: "dsa.techniques.interval_scheduling", is_primary: true },
+  { learning_item_id: "dsa.techniques.interval_scheduling.code_trace", skill_id: "dsa.techniques.interval_scheduling", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_forms.lesson", skill_id: "dsa.techniques.dp_forms", is_primary: true },
   { learning_item_id: "dsa.techniques.dp_forms.mc_reconstruct", skill_id: "dsa.techniques.dp_forms", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_forms.code_knapsack_trace", skill_id: "dsa.techniques.dp_forms", is_primary: true },
+  { learning_item_id: "dsa.techniques.dp_forms.code_subsequence_trace", skill_id: "dsa.techniques.dp_forms", is_primary: true },
   { learning_item_id: "dsa.strings.manipulation.lesson", skill_id: "dsa.strings.manipulation", is_primary: true },
   { learning_item_id: "dsa.strings.manipulation.mc_concat", skill_id: "dsa.strings.manipulation", is_primary: true },
   { learning_item_id: "dsa.strings.searching.lesson", skill_id: "dsa.strings.searching", is_primary: true },
@@ -6797,6 +6965,10 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.techniques.prefix_sums.mc_query.b", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(log n)", is_correct: false, order_index: 20 },
   { id: "dsa.techniques.prefix_sums.mc_query.c", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(n)", is_correct: false, order_index: 30 },
   { id: "dsa.techniques.prefix_sums.mc_query.d", learning_item_id: "dsa.techniques.prefix_sums.mc_query", content: "O(n^2)", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.prefix_sums.mc_prefix_suffix.a", learning_item_id: "dsa.techniques.prefix_sums.mc_prefix_suffix", content: "Build prefix sums for the left side and suffix maxima for the right side", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.prefix_sums.mc_prefix_suffix.b", learning_item_id: "dsa.techniques.prefix_sums.mc_prefix_suffix", content: "Sort the array first, then use the sorted indexes as split points", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.prefix_sums.mc_prefix_suffix.c", learning_item_id: "dsa.techniques.prefix_sums.mc_prefix_suffix", content: "Use a queue and rescan the suffix for every split", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.prefix_sums.mc_prefix_suffix.d", learning_item_id: "dsa.techniques.prefix_sums.mc_prefix_suffix", content: "Use Dijkstra because each split has two directions", is_correct: false, order_index: 40 },
 
   { id: "dsa.techniques.sliding_window.mc_complexity.a", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "Each element enters and leaves the window at most once", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.sliding_window.mc_complexity.b", learning_item_id: "dsa.techniques.sliding_window.mc_complexity", content: "It sorts the array first", is_correct: false, order_index: 20 },
@@ -6817,11 +6989,19 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "dsa.techniques.range_structures.mc_dynamic.b", learning_item_id: "dsa.techniques.range_structures.mc_dynamic", content: "A static prefix-sum array", is_correct: false, order_index: 20 },
   { id: "dsa.techniques.range_structures.mc_dynamic.c", learning_item_id: "dsa.techniques.range_structures.mc_dynamic", content: "A sparse table", is_correct: false, order_index: 30 },
   { id: "dsa.techniques.range_structures.mc_dynamic.d", learning_item_id: "dsa.techniques.range_structures.mc_dynamic", content: "A plain unsorted vector", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.range_structures.mc_sparse_table.a", learning_item_id: "dsa.techniques.range_structures.mc_sparse_table", content: "A sparse table for immutable idempotent queries", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.range_structures.mc_sparse_table.b", learning_item_id: "dsa.techniques.range_structures.mc_sparse_table", content: "A prefix-sum array, because minimum is just another sum", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.range_structures.mc_sparse_table.c", learning_item_id: "dsa.techniques.range_structures.mc_sparse_table", content: "A queue, because range minima are FIFO", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.range_structures.mc_sparse_table.d", learning_item_id: "dsa.techniques.range_structures.mc_sparse_table", content: "A Fenwick tree with O(1) range-min updates", is_correct: false, order_index: 40 },
 
   { id: "dsa.techniques.greedy_proof.mc_exchange.a", learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", content: "An exchange argument (swapping in the greedy choice never worsens an optimum)", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.greedy_proof.mc_exchange.b", learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", content: "Running it on a few example inputs", is_correct: false, order_index: 20 },
   { id: "dsa.techniques.greedy_proof.mc_exchange.c", learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", content: "Measuring its runtime", is_correct: false, order_index: 30 },
   { id: "dsa.techniques.greedy_proof.mc_exchange.d", learning_item_id: "dsa.techniques.greedy_proof.mc_exchange", content: "Checking that it compiles without warnings", is_correct: false, order_index: 40 },
+  { id: "dsa.techniques.greedy_proof.mc_counterexample.a", learning_item_id: "dsa.techniques.greedy_proof.mc_counterexample", content: "Greedy takes A for value 60, but B+C fits with value 100", is_correct: true, order_index: 10 },
+  { id: "dsa.techniques.greedy_proof.mc_counterexample.b", learning_item_id: "dsa.techniques.greedy_proof.mc_counterexample", content: "Greedy takes B+C and gets the same value as A", is_correct: false, order_index: 20 },
+  { id: "dsa.techniques.greedy_proof.mc_counterexample.c", learning_item_id: "dsa.techniques.greedy_proof.mc_counterexample", content: "A counterexample is impossible if the highest-value item fits", is_correct: false, order_index: 30 },
+  { id: "dsa.techniques.greedy_proof.mc_counterexample.d", learning_item_id: "dsa.techniques.greedy_proof.mc_counterexample", content: "Sorting by weight proves highest-value-first is optimal", is_correct: false, order_index: 40 },
 
   { id: "dsa.techniques.dp_design.mc_order.a", learning_item_id: "dsa.techniques.dp_design.mc_order", content: "Only after the recurrence is correct", is_correct: true, order_index: 10 },
   { id: "dsa.techniques.dp_design.mc_order.b", learning_item_id: "dsa.techniques.dp_design.mc_order", content: "First, before writing the transition", is_correct: false, order_index: 20 },

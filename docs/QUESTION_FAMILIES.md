@@ -111,6 +111,22 @@ conditions and complexity that make the algorithm valid:
   conditions: unweighted, nonnegative weights, negative edges, all-pairs,
   online/offline updates, and cut-edge/cut-vertex needs.
 
+## Technique progression items
+
+For prefix/range-query/greedy/DP completion coverage (#116), prompts should
+force learners to name the reasoning structure before writing code:
+
+- include trace items for 1-D/2-D prefix sums, difference arrays, Fenwick
+  lowbit updates, segment-tree range aggregation, and sparse-table fit;
+- make range-query choices state whether data is static or dynamic, which
+  operation is needed, and the build/query/update complexity;
+- pair each greedy win with the invariant or exchange intuition, and pair each
+  tempting greedy rule with a small counterexample;
+- every DP item must name state, transition, base case, and evaluation order;
+- use worked examples and faded/completion-style prompts before independent DP
+  state-design questions, then mention space optimization only after the
+  recurrence is correct.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo
