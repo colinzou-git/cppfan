@@ -106,6 +106,33 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "debugging-toolchain-lab"
   },
   {
+    id: "concurrency-task-queue",
+    title: "Concurrency: bounded task queue",
+    skillIds: [
+      "cpp.concurrency.threads",
+      "cpp.concurrency.mutexes",
+      "cpp.concurrency.condition_variables",
+      "cpp.concurrency.deadlock",
+      "cpp.concurrency.shared_state_design"
+    ],
+    difficulty: "advanced",
+    estimatedMinutes: 45,
+    editableFiles: ["bounded_task_queue.hpp"],
+    requiredTests: [
+      "test_fifo_single_thread",
+      "test_close_rejects_new_work_and_drains_existing",
+      "test_blocked_consumer_gets_pushed_task_without_sleep",
+      "test_multiple_producers_consumers_exactly_once"
+    ],
+    hints: [
+      "Protect the queue and closed flag with one mutex.",
+      "Use condition_variable::wait with predicates; no sleeps are needed.",
+      "Notify a producer after pop frees capacity and notify a consumer after push adds work.",
+      "close() should wake all waiting threads and let consumers drain queued work."
+    ],
+    projectLab: "task-queue-lab"
+  },
+  {
     id: "graph-maze-shortest-path",
     title: "Graph: shortest path through a maze",
     skillIds: ["dsa.graphs.bfs", "dsa.graphs.connected_components", "dsa.graphs.shortest_path"],

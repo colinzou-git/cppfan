@@ -77,6 +77,8 @@ report instead of a manual mark.
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `dsa-two-sum-sorted` | two pointers, Big-O | `csv-table-summarizer` |
 | `tooling-status-parser` | debugging method, unit/regression tests, warnings, sanitizers, CMake | `debugging-toolchain-lab` |
+| `concurrency-task-queue` | threads, mutexes, condition variables, shared-state design | `task-queue-lab` |
+| `graph-maze-shortest-path` | graph BFS, connected components, shortest paths | `maze-route-planner` |
 
 ## Maintaining Exercises (CI)
 

@@ -186,6 +186,46 @@ export const externalResources: ExternalResource[] = [
     tags: ["cpp"]
   },
   {
+    id: "cpp-core-guidelines-concurrency",
+    name: "C++ Core Guidelines: concurrency",
+    url: "https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-concurrency",
+    kind: "guidelines",
+    description: "Guidance to avoid data races, minimize shared writable state, and think in tasks.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-condition-variable",
+    name: "cppreference: condition_variable",
+    url: "https://en.cppreference.com/w/cpp/thread/condition_variable",
+    kind: "reference",
+    description: "Reference for condition_variable waiting, notification, and predicate-based producer-consumer coordination.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-jthread",
+    name: "cppreference: jthread",
+    url: "https://en.cppreference.com/w/cpp/thread/jthread",
+    kind: "reference",
+    description: "Reference for auto-joining std::jthread and cooperative stop_token support.",
+    tags: ["cpp"]
+  },
+  {
+    id: "cppreference-atomic",
+    name: "cppreference: atomic",
+    url: "https://en.cppreference.com/w/cpp/atomic/atomic",
+    kind: "reference",
+    description: "Reference for std::atomic operations and their synchronization role.",
+    tags: ["cpp"]
+  },
+  {
+    id: "clang-thread-sanitizer",
+    name: "Clang ThreadSanitizer",
+    url: "https://clang.llvm.org/docs/ThreadSanitizer.html",
+    kind: "reference",
+    description: "Official ThreadSanitizer guide for detecting data races when the toolchain supports it.",
+    tags: ["cpp"]
+  },
+  {
     id: "cppreference-rule-of-three",
     name: "cppreference: rule of three/five/zero",
     url: "https://en.cppreference.com/w/cpp/language/rule_of_three",

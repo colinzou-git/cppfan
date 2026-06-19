@@ -1,0 +1,29 @@
+{
+  "id": "concurrency-task-queue",
+  "title": "Concurrency: bounded task queue",
+  "skill_ids": [
+    "cpp.concurrency.threads",
+    "cpp.concurrency.mutexes",
+    "cpp.concurrency.condition_variables",
+    "cpp.concurrency.deadlock",
+    "cpp.concurrency.shared_state_design"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 45,
+  "editable_files": ["bounded_task_queue.hpp"],
+  "build_command": "cmake -S exercises/concurrency-task-queue -B exercises/concurrency-task-queue/work/build -DCPPFAN_IMPL_DIR=$PWD/exercises/concurrency-task-queue/work -DCPPFAN_ENABLE_SANITIZERS=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build exercises/concurrency-task-queue/work/build",
+  "test_command": "ctest --test-dir exercises/concurrency-task-queue/work/build --output-on-failure",
+  "required_tests": [
+    "test_fifo_single_thread",
+    "test_close_rejects_new_work_and_drains_existing",
+    "test_blocked_consumer_gets_pushed_task_without_sleep",
+    "test_multiple_producers_consumers_exactly_once"
+  ],
+  "hints": [
+    "Protect the queue and closed flag with one mutex.",
+    "Use condition_variable::wait with predicates; no sleeps are needed.",
+    "Notify a producer after pop frees capacity and notify a consumer after push adds work.",
+    "close() should wake all waiting threads and let consumers drain queued work."
+  ],
+  "project_lab": "task-queue-lab"
+}

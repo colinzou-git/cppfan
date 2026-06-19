@@ -127,6 +127,22 @@ force learners to name the reasoning structure before writing code:
   state-design questions, then mention space optimization only after the
   recurrence is correct.
 
+## Concurrency items
+
+For synchronization/communication/atomics completion coverage (#118), prefer
+deterministic reasoning and tests over timing demonstrations:
+
+- include thread-lifetime, RAII ownership, `std::jthread`, and cooperative stop
+  prompts before asking learners to coordinate shared state;
+- make every condition-variable item mention a predicate and spurious wakeups;
+- use producer-consumer/task-queue exercises with exact-count invariants,
+  promises/latches, joins, and close/drain behavior instead of sleep-based
+  assertions;
+- distinguish atomic operations from higher-level correctness, and state that
+  `volatile` is not synchronization;
+- keep memory-ordering coverage introductory: seq_cst defaults, release/acquire
+  publication, and relaxed only for independent counters/flags.
+
 ## Authoring sources
 
 Use external references (see `/resources`) for inspiration only. Because the repo

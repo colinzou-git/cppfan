@@ -71,6 +71,13 @@ export const capstoneTracks: CapstoneTrack[] = [
     summary: "Model graph states, trace traversal, and turn BFS/DFS ideas into small tools.",
     order_index: 40,
     projectIds: ["maze-route-planner"]
+  },
+  {
+    id: "concurrency_practice",
+    title: "Concurrency correctness track",
+    summary: "Practice shared-state design, synchronization, and deterministic concurrent testing.",
+    order_index: 50,
+    projectIds: ["task-queue-lab"]
   }
 ];
 
@@ -233,6 +240,65 @@ export const capstoneProjects: CapstoneProject[] = [
         verification: "reflection",
         reflectionPrompt: "Why is BFS enough for an unweighted maze, and what would change if moves had different costs?",
         extensionTask: "Add weighted terrain costs and switch the route finder to Dijkstra."
+      }
+    ]
+  },
+  {
+    id: "task-queue-lab",
+    trackId: "concurrency_practice",
+    prerequisiteSkillIds: ["cpp.concurrency.threads", "cpp.concurrency.mutexes"],
+    milestones: [
+      {
+        id: "task-queue-lab.m1",
+        title: "Define the queue contract",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["cpp.concurrency.task_selection", "cpp.concurrency.shared_state_design"],
+        verification: "reflection",
+        reflectionPrompt: "Which operations are allowed after close, and how does the contract avoid shared writable state outside the queue?"
+      },
+      {
+        id: "task-queue-lab.m2",
+        title: "Protect queue state with scoped locking",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["cpp.concurrency.mutexes", "cpp.concurrency.lock_granularity"],
+        verification: "manual_checklist",
+        reflectionPrompt: "What exact state is protected by the mutex, and where is the lock released before notifying or returning?"
+      },
+      {
+        id: "task-queue-lab.m3",
+        title: "Coordinate producers and consumers",
+        required: true,
+        estimatedMinutes: 35,
+        practicedSkillIds: ["cpp.concurrency.condition_variables", "cpp.concurrency.deadlock"],
+        verification: "manual_checklist",
+        reflectionPrompt: "Which condition-variable predicates prevent spurious wakeups and deadlock?"
+      },
+      {
+        id: "task-queue-lab.m4",
+        title: "Implement and test the bounded queue",
+        required: true,
+        estimatedMinutes: 45,
+        practicedSkillIds: [
+          "cpp.concurrency.threads",
+          "cpp.concurrency.mutexes",
+          "cpp.concurrency.condition_variables",
+          "cpp.concurrency.shared_state_design"
+        ],
+        verification: "exercise_tests",
+        reflectionPrompt: "Which invariant proves every task is processed exactly once without relying on sleep timing?",
+        exerciseId: "concurrency-task-queue"
+      },
+      {
+        id: "task-queue-lab.m5",
+        title: "Compare shared queue vs task/future alternatives",
+        required: false,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["cpp.concurrency.async", "cpp.concurrency.promise_future", "cpp.concurrency.task_selection"],
+        verification: "reflection",
+        reflectionPrompt: "When would a future, promise, or message-passing design be simpler than a shared queue?",
+        extensionTask: "Add a packaged_task-based producer and compare the ownership and shutdown rules."
       }
     ]
   }

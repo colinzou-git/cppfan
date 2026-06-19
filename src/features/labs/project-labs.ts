@@ -124,6 +124,20 @@ export const projectLabs: ProjectLab[] = [
       "Run BFS from S while storing distance and parent direction.",
       "Reconstruct and print the shortest route to G, or report that no route exists."
     ]
+  },
+  {
+    id: "task-queue-lab",
+    title: "Bounded task queue lab",
+    summary: "Build a small producer-consumer queue that shuts down cleanly and passes deterministic thread tests.",
+    difficulty: "intermediate",
+    focus: ["threads", "mutexes", "condition variables", "producer-consumer"],
+    milestones: [
+      "Define the queue contract: capacity, FIFO order, push, pop, and close.",
+      "Protect the queue and closed flag with one mutex.",
+      "Use condition_variable predicates so producers wait for space and consumers wait for work.",
+      "Close the queue by waking all waiting threads and draining queued tasks.",
+      "Verify exact-once processing with deterministic tests instead of sleeps."
+    ]
   }
 ];
 
