@@ -46,6 +46,10 @@ export function DiagnosticRetakeForm({ sections, initialScores, authenticated, l
   const isRetake = lastCompletedMs !== null;
 
   function save() {
+    if (!authenticated) {
+      setNotice("Sign in to save your diagnostic.");
+      return;
+    }
     startTransition(async () => {
       const result = await saveDiagnostic(scores, `${Date.now()}-${sections.map((section) => ratings[section.id]).join("")}`);
       if (result.status === "ok") {
@@ -65,7 +69,7 @@ export function DiagnosticRetakeForm({ sections, initialScores, authenticated, l
     <div className="grid gap-3" data-testid="diagnostic-form">
       <div>
         <h2 className="text-lg font-black text-slate-900">Rate each area</h2>
-        <p className="text-sm text-slate-600">Complete all four ratings. Saved retakes are spaced at least seven days apart.</p>
+        <p className="text-sm text-slate-600">Complete all four ratings before an authenticated save. Saved retakes are spaced at least seven days apart.</p>
       </div>
       <div className="grid gap-2">
         {sections.map((section) => {
@@ -83,12 +87,12 @@ export function DiagnosticRetakeForm({ sections, initialScores, authenticated, l
         })}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={save} disabled={saving || !complete || (authenticated && !availability.allowed)} data-testid="diagnostic-save">
+        <Button type="button" onClick={save} disabled={saving || (authenticated && (!complete || !availability.allowed))} data-testid="diagnostic-save">
           {saving ? "Saving…" : isRetake ? "Save retake" : "Save baseline"}
         </Button>
         {notice ? <p role="status" className="text-sm font-semibold text-amber-700" data-testid="diagnostic-notice">{notice}</p> : null}
       </div>
-      {!complete ? <p className="text-xs text-slate-600">Rate every area before saving.</p> : null}
+      {!complete ? <p className="text-xs text-slate-600">Rate every area before an authenticated save.</p> : null}
       {authenticated && !availability.allowed && availability.nextAllowedAtMs !== null ? (
         <p className="text-xs text-slate-600" data-testid="diagnostic-retake-date">Next retake available {new Date(availability.nextAllowedAtMs).toLocaleDateString()}.</p>
       ) : null}
