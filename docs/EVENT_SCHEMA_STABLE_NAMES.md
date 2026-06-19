@@ -26,6 +26,10 @@ Use these event names in code:
 - placement_started
 - placement_completed
 - placement_reset
+- goal_evaluation_started
+- goal_evaluation_response_recorded
+- goal_evaluation_completed
+- goal_evaluation_abandoned
 
 Common fields:
 
