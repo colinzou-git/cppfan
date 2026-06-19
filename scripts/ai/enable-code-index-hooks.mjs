@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
 function git(args) {
@@ -15,7 +17,8 @@ if (process.env.CI) {
 }
 
 const worktree = git(["rev-parse", "--is-inside-work-tree"]);
-if (worktree.status !== 0 || worktree.stdout.trim() !== "true") {
+const rootResult = git(["rev-parse", "--show-toplevel"]);
+if (worktree.status !== 0 || worktree.stdout.trim() !== "true" || rootResult.status !== 0) {
   console.log("[code-index] hook setup skipped outside a Git worktree");
   process.exit(0);
 }
@@ -35,3 +38,12 @@ if (configured.status !== 0) {
 }
 
 console.log("[code-index] automatic refresh hooks enabled");
+
+const repositoryRoot = rootResult.stdout.trim();
+const refreshScript = join(repositoryRoot, "scripts", "ai", "refresh-code-index.mjs");
+if (existsSync(refreshScript)) {
+  spawnSync(process.execPath, [refreshScript, "hook-enable"], {
+    cwd: repositoryRoot,
+    stdio: "inherit"
+  });
+}
