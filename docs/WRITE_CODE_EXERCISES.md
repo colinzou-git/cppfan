@@ -78,6 +78,7 @@ report instead of a manual mark.
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |
 | `dsa-two-sum-sorted` | two pointers, Big-O | `csv-table-summarizer` |
 | `tooling-status-parser` | debugging method, unit/regression tests, warnings, sanitizers, CMake | `debugging-toolchain-lab` |
+| `filesystem-inventory` | filesystem, file streams, stream validation | `directory-inventory-reporter` |
 | `concurrency-task-queue` | threads, mutexes, condition variables, shared-state design | `task-queue-lab` |
 | `graph-maze-shortest-path` | graph BFS, connected components, shortest paths | `maze-route-planner` |
 

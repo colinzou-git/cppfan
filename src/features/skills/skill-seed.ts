@@ -1567,6 +1567,18 @@ export const skillSeed: Skill[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.any_caution",
+    domain: "cpp",
+    module_id: "cpp.utilities",
+    title: "std::any as an advanced escape hatch",
+    description: "Understand when std::any is appropriate and why typed alternatives are usually safer.",
+    learner_goal: "Use std::any only for truly open, type-erased storage and prefer optional, variant, templates, or polymorphism when the shape is known.",
+    level: "advanced",
+    item_types: ["lesson", "quiz"],
+    order_index: 773,
+    is_active: true
+  },
+  {
     id: "dsa.complexity.big_o",
     domain: "dsa",
     module_id: "dsa.complexity",
@@ -2694,6 +2706,7 @@ export const skillPrerequisitesSeed: SkillPrerequisite[] = [
   { skill_id: "cpp.utilities.chrono_depth", prerequisite_skill_id: "cpp.utilities.chrono", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.random_quality", prerequisite_skill_id: "cpp.utilities.random", relationship_type: "recommended" },
   { skill_id: "cpp.utilities.getline_input", prerequisite_skill_id: "cpp.utilities.stream_validation", relationship_type: "recommended" },
+  { skill_id: "cpp.utilities.any_caution", prerequisite_skill_id: "cpp.utilities.variant_visit", relationship_type: "recommended" },
   { skill_id: "dsa.arrays.indexing", prerequisite_skill_id: "cpp.stl.vector", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.problem_solving", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },
   { skill_id: "dsa.complexity.growth_rates", prerequisite_skill_id: "dsa.complexity.big_o", relationship_type: "recommended" },

@@ -5129,6 +5129,19 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "cpp.utilities.file_io.code_raii_close",
+    type: "code_reading",
+    title: "Trace file-stream lifetime",
+    prompt:
+      "A function creates `std::ofstream out(path);`, writes a report, checks `if (!out) return false;`, and then returns without calling `out.close()`. Why is the file still closed safely, and when would you call `close()` explicitly?",
+    explanation:
+      "File streams own their file handle and close it in the destructor, so leaving scope closes the file even on early return or exception. Call close() explicitly only when you need to observe close/flush errors or reopen/remove the file before the stream object goes out of scope.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 2625,
+    is_active: true
+  },
+  {
     id: "cpp.utilities.chrono.lesson",
     type: "lesson",
     title: "Time with chrono",
@@ -5226,6 +5239,19 @@ export const learningItems: LearningItem[] = [
     difficulty: "intermediate",
     estimated_minutes: 2,
     order_index: 4000,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.stream_validation.code_state_trace",
+    type: "code_reading",
+    title: "Trace failed formatted extraction",
+    prompt:
+      "`std::istringstream in(\"abc\\n42\\n\"); int n = 0; in >> n; in >> n;` leaves n unchanged both times. What stream state and buffered input explain this, and what recovery steps make the next line readable?",
+    explanation:
+      "The first extraction cannot parse an int, sets failbit, leaves n unchanged, and leaves `abc` buffered. The second extraction sees failbit and does nothing. Recover with clear() to reset flags, ignore(...) through the newline to discard the bad record, then read the next line/token.",
+    difficulty: "intermediate",
+    estimated_minutes: 3,
+    order_index: 4005,
     is_active: true
   },
   {
@@ -5426,6 +5452,32 @@ export const learningItems: LearningItem[] = [
     difficulty: "intermediate",
     estimated_minutes: 2,
     order_index: 4460,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.any_caution.lesson",
+    type: "lesson",
+    title: "std::any as an advanced escape hatch",
+    prompt:
+      "`std::any` can hold one value of almost any copyable type, but it gives up the compile-time knowledge that makes C++ safe and expressive. You read it with `std::any_cast<T>`, which throws `std::bad_any_cast` (or returns null for the pointer form) if the stored type is not T. That makes any useful for truly open plugin metadata, heterogeneous property bags, or boundaries where the set of types is not known to the library author. It is not the first choice for normal program state: use `std::optional<T>` when a value may be absent, `std::variant<A, B>` when the alternatives are a known closed set, templates when the operation is generic but type-preserving, and polymorphism when callers can add new behavior through a stable interface. Rule: reach for any only when type erasure is the requirement, not because designing the type feels inconvenient.",
+    explanation:
+      "std::any is type-erased storage read with any_cast, so mistakes move from compile time to runtime. Prefer optional for absence, variant for a closed known set, templates for generic typed code, and polymorphism for open behavior. Use any only when truly open heterogeneous storage is required.",
+    difficulty: "advanced",
+    estimated_minutes: 5,
+    order_index: 4465,
+    is_active: true
+  },
+  {
+    id: "cpp.utilities.any_caution.mc_choice",
+    type: "multiple_choice",
+    title: "When std::any is the right tool",
+    prompt:
+      "Which situation is the best fit for std::any rather than optional, variant, templates, or virtual polymorphism?",
+    explanation:
+      "A plugin metadata bag has an open set of value types that the core library cannot enumerate. That is genuine type-erased storage. A known set of alternatives is better as variant; absence is optional; open behavior is usually polymorphism.",
+    difficulty: "advanced",
+    estimated_minutes: 2,
+    order_index: 4466,
     is_active: true
   },
   {
@@ -6299,6 +6351,7 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.concurrency.shared_state_design.mc_immutable", skill_id: "cpp.concurrency.shared_state_design", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.lesson", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.file_io.mc_exists", skill_id: "cpp.utilities.file_io", is_primary: true },
+  { learning_item_id: "cpp.utilities.file_io.code_raii_close", skill_id: "cpp.utilities.file_io", is_primary: true },
   { learning_item_id: "cpp.utilities.chrono.lesson", skill_id: "cpp.utilities.chrono", is_primary: true },
   { learning_item_id: "cpp.utilities.chrono.mc_clock", skill_id: "cpp.utilities.chrono", is_primary: true },
   { learning_item_id: "cpp.utilities.random.lesson", skill_id: "cpp.utilities.random", is_primary: true },
@@ -6307,6 +6360,11 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.variant.mc_optional", skill_id: "cpp.utilities.variant", is_primary: true },
   { learning_item_id: "cpp.utilities.stream_validation.lesson", skill_id: "cpp.utilities.stream_validation", is_primary: true },
   { learning_item_id: "cpp.utilities.stream_validation.mc_recover", skill_id: "cpp.utilities.stream_validation", is_primary: true },
+  {
+    learning_item_id: "cpp.utilities.stream_validation.code_state_trace",
+    skill_id: "cpp.utilities.stream_validation",
+    is_primary: true
+  },
   { learning_item_id: "cpp.utilities.tuples.lesson", skill_id: "cpp.utilities.tuples", is_primary: true },
   { learning_item_id: "cpp.utilities.tuples.mc_bind", skill_id: "cpp.utilities.tuples", is_primary: true },
   { learning_item_id: "cpp.utilities.enums.lesson", skill_id: "cpp.utilities.enums", is_primary: true },
@@ -6323,6 +6381,8 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.random_quality.mc_bias", skill_id: "cpp.utilities.random_quality", is_primary: true },
   { learning_item_id: "cpp.utilities.getline_input.lesson", skill_id: "cpp.utilities.getline_input", is_primary: true },
   { learning_item_id: "cpp.utilities.getline_input.mc_mix", skill_id: "cpp.utilities.getline_input", is_primary: true },
+  { learning_item_id: "cpp.utilities.any_caution.lesson", skill_id: "cpp.utilities.any_caution", is_primary: true },
+  { learning_item_id: "cpp.utilities.any_caution.mc_choice", skill_id: "cpp.utilities.any_caution", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
@@ -7374,6 +7434,34 @@ export const learningItemChoices: LearningItemChoice[] = [
   { id: "cpp.utilities.getline_input.mc_mix.b", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "getline is broken after >>; never combine them", is_correct: false, order_index: 20 },
   { id: "cpp.utilities.getline_input.mc_mix.c", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "You must call cin.clear() to reset an error state", is_correct: false, order_index: 30 },
   { id: "cpp.utilities.getline_input.mc_mix.d", learning_item_id: "cpp.utilities.getline_input.mc_mix", content: "n was read incorrectly, so line is skipped", is_correct: false, order_index: 40 },
+  {
+    id: "cpp.utilities.any_caution.mc_choice.a",
+    learning_item_id: "cpp.utilities.any_caution.mc_choice",
+    content: "A plugin metadata bag whose value types are open-ended and not known by the core library",
+    is_correct: true,
+    order_index: 10
+  },
+  {
+    id: "cpp.utilities.any_caution.mc_choice.b",
+    learning_item_id: "cpp.utilities.any_caution.mc_choice",
+    content: "A function that may or may not return one int",
+    is_correct: false,
+    order_index: 20
+  },
+  {
+    id: "cpp.utilities.any_caution.mc_choice.c",
+    learning_item_id: "cpp.utilities.any_caution.mc_choice",
+    content: "A token that is known to be either an int, string, or bool",
+    is_correct: false,
+    order_index: 30
+  },
+  {
+    id: "cpp.utilities.any_caution.mc_choice.d",
+    learning_item_id: "cpp.utilities.any_caution.mc_choice",
+    content: "A family of shapes that share a draw() interface",
+    is_correct: false,
+    order_index: 40
+  },
 
   { id: "dsa.math.bit_manipulation.mc_test_bit.a", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "(x >> i) & 1", is_correct: true, order_index: 10 },
   { id: "dsa.math.bit_manipulation.mc_test_bit.b", learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", content: "x % i", is_correct: false, order_index: 20 },

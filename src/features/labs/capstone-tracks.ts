@@ -56,7 +56,7 @@ export const capstoneTracks: CapstoneTrack[] = [
     title: "Text and data analysis track",
     summary: "Parse and summarize real text and tabular data, applying strings, maps, and parsing care.",
     order_index: 20,
-    projectIds: ["text-statistics-analyzer", "csv-table-summarizer"]
+    projectIds: ["text-statistics-analyzer", "csv-table-summarizer", "directory-inventory-reporter"]
   },
   {
     id: "string_applications",
@@ -247,6 +247,60 @@ export const capstoneProjects: CapstoneProject[] = [
         verification: "manual_checklist",
         reflectionPrompt: "Which delimiter, empty-field, and CRLF cases did your import path preserve?",
         extensionTask: "Load the dictionary from a log or CSV export, then report rejected rows with line numbers."
+      }
+    ]
+  },
+  {
+    id: "directory-inventory-reporter",
+    trackId: "data_analysis",
+    prerequisiteSkillIds: ["cpp.utilities.file_io", "cpp.utilities.filesystem"],
+    milestones: [
+      {
+        id: "directory-inventory-reporter.m1",
+        title: "Accept and compose portable paths",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["cpp.utilities.filesystem"],
+        verification: "manual_checklist",
+        reflectionPrompt: "Where did you use fs::path operator/ instead of manual separators?"
+      },
+      {
+        id: "directory-inventory-reporter.m2",
+        title: "Traverse the directory safely",
+        required: true,
+        estimatedMinutes: 35,
+        practicedSkillIds: ["cpp.utilities.filesystem", "cpp.utilities.stream_validation"],
+        verification: "exercise_tests",
+        reflectionPrompt: "Which missing-root, plain-file, and nested-directory cases did your scan handle?",
+        exerciseId: "filesystem-inventory"
+      },
+      {
+        id: "directory-inventory-reporter.m3",
+        title: "Write and validate the report file",
+        required: true,
+        estimatedMinutes: 25,
+        practicedSkillIds: ["cpp.utilities.file_io", "cpp.utilities.stream_validation"],
+        verification: "manual_checklist",
+        reflectionPrompt: "How did RAII closing help, and where did you check stream state for write failures?"
+      },
+      {
+        id: "directory-inventory-reporter.m4",
+        title: "Measure scan duration",
+        required: true,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["cpp.utilities.chrono_depth"],
+        verification: "reflection",
+        reflectionPrompt: "Why is steady_clock the right clock for elapsed scan duration?"
+      },
+      {
+        id: "directory-inventory-reporter.m5",
+        title: "Model scan state explicitly",
+        required: false,
+        estimatedMinutes: 20,
+        practicedSkillIds: ["cpp.utilities.enums", "cpp.utilities.any_caution"],
+        verification: "reflection",
+        reflectionPrompt: "Why is enum class a better fit than std::any for this closed set of scan states?",
+        extensionTask: "Add a deterministic sample mode that uses <random> with a fixed seed during tests."
       }
     ]
   },

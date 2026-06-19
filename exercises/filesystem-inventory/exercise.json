@@ -1,0 +1,24 @@
+{
+  "id": "filesystem-inventory",
+  "title": "Utilities: filesystem inventory",
+  "skill_ids": ["cpp.utilities.filesystem", "cpp.utilities.file_io", "cpp.utilities.stream_validation"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": ["inventory.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/filesystem-inventory/work exercises/filesystem-inventory/tests/tests.cpp -o exercises/filesystem-inventory/work/run",
+  "test_command": "exercises/filesystem-inventory/work/run",
+  "required_tests": [
+    "test_missing_root_is_empty",
+    "test_rejects_plain_file_root",
+    "test_counts_nested_files_and_directories",
+    "test_counts_extensions_and_no_extension",
+    "test_empty_directory"
+  ],
+  "hints": [
+    "Check exists(root, ec) and is_directory(root, ec) before iterating.",
+    "Use recursive_directory_iterator with directory_options::skip_permission_denied and increment(error_code).",
+    "Use entry.is_regular_file(ec), entry.is_directory(ec), and entry.file_size(ec) instead of parsing path text.",
+    "path.extension().string() is empty for extensionless files; store those as \"(none)\"."
+  ],
+  "project_lab": "directory-inventory-reporter"
+}

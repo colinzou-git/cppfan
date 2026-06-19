@@ -67,6 +67,20 @@ export const projectLabs: ProjectLab[] = [
     ]
   },
   {
+    id: "directory-inventory-reporter",
+    title: "Directory inventory reporter",
+    summary: "Traverse a folder, summarize files by type and size, and save a portable text report.",
+    difficulty: "intermediate",
+    focus: ["file I/O", "filesystem", "chrono", "enum state"],
+    milestones: [
+      "Accept a root path and compose report paths with std::filesystem::path.",
+      "Traverse directories and classify regular files without parsing path strings.",
+      "Write a text report with ofstream and validate stream state before trusting output.",
+      "Measure traversal duration with steady_clock.",
+      "Model scan status with enum class values such as Ready, Scanning, Done, and Error."
+    ]
+  },
+  {
     id: "note-manager",
     title: "Simple note manager",
     summary: "A small CLI to add, list, and delete short notes persisted to a file.",
