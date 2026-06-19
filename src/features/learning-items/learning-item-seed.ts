@@ -10,6 +10,7 @@ import type {
   PublicParsonsBlock
 } from "./learning-item-types";
 import { graphFixtureText } from "./graph-fixtures";
+import { bitFixtureText, coordinateFixtureText } from "./math-fixtures";
 import { stringFixtureText } from "./string-fixtures";
 
 /*
@@ -5506,6 +5507,20 @@ export const learningItems: LearningItem[] = [
     is_active: true
   },
   {
+    id: "dsa.math.bit_manipulation.code_bit_row_trace",
+    type: "code_reading",
+    title: "Trace a bit test row",
+    prompt:
+      `${bitFixtureText("testBit")}\n\n` +
+      "For `int x = 44; int i = 3;`, trace `(x >> i) & 1`. Which bit of `x` is being tested, and what value does the expression produce?",
+    explanation:
+      "Bit index 3 is tested. 44 is 00101100, shifting right by 3 moves that bit to the lowest position, and `& 1` keeps only that lowest bit, so the result is 1. This is O(1). For wider masks, prefer unsigned or 64-bit masks such as `1ULL << i` so a shift does not overflow a signed int.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 2722,
+    is_active: true
+  },
+  {
     id: "dsa.math.number_theory.lesson",
     type: "lesson",
     title: "Number theory",
@@ -5753,6 +5768,20 @@ export const learningItems: LearningItem[] = [
     difficulty: "advanced",
     estimated_minutes: 2,
     order_index: 4360,
+    is_active: true
+  },
+  {
+    id: "dsa.math.vectors_dot_cross.code_coordinate_trace",
+    type: "code_reading",
+    title: "Trace an orientation diagram",
+    prompt:
+      `${coordinateFixtureText("orientation")}\n\n` +
+      "Given points `A(0,0)`, `B(4,1)`, and `C(2,3)`, compute `(B - A) x (C - A)`. Is C a left turn, right turn, or collinear with the directed segment AB?",
+    explanation:
+      "The cross product is `4*3 - 1*2 = 10`, which is positive, so C is a counter-clockwise left turn from AB. This orientation test is O(1), exact for integer coordinates while products fit the integer type, and should use 64-bit intermediates for large coordinate ranges.",
+    difficulty: "advanced",
+    estimated_minutes: 4,
+    order_index: 4362,
     is_active: true
   },
   {
@@ -6385,6 +6414,7 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "cpp.utilities.any_caution.mc_choice", skill_id: "cpp.utilities.any_caution", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.lesson", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.bit_manipulation.mc_test_bit", skill_id: "dsa.math.bit_manipulation", is_primary: true },
+  { learning_item_id: "dsa.math.bit_manipulation.code_bit_row_trace", skill_id: "dsa.math.bit_manipulation", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.lesson", skill_id: "dsa.math.number_theory", is_primary: true },
   { learning_item_id: "dsa.math.number_theory.mc_gcd", skill_id: "dsa.math.number_theory", is_primary: true },
   { learning_item_id: "dsa.math.combinatorics.lesson", skill_id: "dsa.math.combinatorics", is_primary: true },
@@ -6405,6 +6435,7 @@ export const learningItemSkills: LearningItemSkill[] = [
   { learning_item_id: "dsa.math.geometry_area.mc_order", skill_id: "dsa.math.geometry_area", is_primary: true },
   { learning_item_id: "dsa.math.vectors_dot_cross.lesson", skill_id: "dsa.math.vectors_dot_cross", is_primary: true },
   { learning_item_id: "dsa.math.vectors_dot_cross.mc_cross", skill_id: "dsa.math.vectors_dot_cross", is_primary: true },
+  { learning_item_id: "dsa.math.vectors_dot_cross.code_coordinate_trace", skill_id: "dsa.math.vectors_dot_cross", is_primary: true },
   { learning_item_id: "dsa.math.segment_intersection.lesson", skill_id: "dsa.math.segment_intersection", is_primary: true },
   { learning_item_id: "dsa.math.segment_intersection.mc_test", skill_id: "dsa.math.segment_intersection", is_primary: true },
   { learning_item_id: "dsa.math.geometry_precision.lesson", skill_id: "dsa.math.geometry_precision", is_primary: true },

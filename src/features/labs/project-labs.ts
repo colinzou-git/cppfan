@@ -153,6 +153,20 @@ export const projectLabs: ProjectLab[] = [
     ]
   },
   {
+    id: "math-technique-playground",
+    title: "Math technique playground",
+    summary: "Build a small toolkit that traces bit masks, counts combinations, and checks simple geometry primitives.",
+    difficulty: "intermediate",
+    focus: ["bitmasks", "number theory", "combinatorics", "geometry"],
+    milestones: [
+      "Trace bit rows for set, clear, toggle, and test operations.",
+      "Add GCD/LCM helpers that state integer range assumptions.",
+      "Count and generate combinations with backtracking.",
+      "Use orientation and squared-distance checks on small point sets.",
+      "Record which technique fits each sample task and why."
+    ]
+  },
+  {
     id: "task-queue-lab",
     title: "Bounded task queue lab",
     summary: "Build a small producer-consumer queue that shuts down cleanly and passes deterministic thread tests.",

@@ -1,0 +1,29 @@
+{
+  "id": "math-combination-generator",
+  "title": "Math: combination generator",
+  "skill_ids": [
+    "dsa.math.counting_principle",
+    "dsa.math.generate_combinations",
+    "dsa.math.bitmask_techniques"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": ["combination_generator.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/math-combination-generator/work exercises/math-combination-generator/tests/tests.cpp -o exercises/math-combination-generator/work/run",
+  "test_command": "exercises/math-combination-generator/work/run",
+  "required_tests": [
+    "test_count_small_combinations",
+    "test_rejects_impossible_counts",
+    "test_generates_lexicographic_combinations",
+    "test_handles_empty_selection",
+    "test_subset_from_mask_decodes_flags",
+    "test_generated_count_matches_pascal_count"
+  ],
+  "hints": [
+    "For counting, use Pascal's recurrence C(n,k)=C(n-1,k-1)+C(n-1,k) with base cases k=0 and k=n.",
+    "For generation, keep a current vector and recurse from an advancing start index.",
+    "Undo each choice with pop_back before trying the next element.",
+    "For subset_from_mask, include values[i] when bit i of mask is 1."
+  ],
+  "project_lab": "math-technique-playground"
+}
