@@ -14,7 +14,9 @@ import {
   currentPhase,
   goToPreviousPhase,
   isOverBudget,
+  pauseSession,
   remainingSeconds,
+  resumeSession,
   SESSION_PHASES,
   tick,
   updatePhaseNote,
@@ -100,6 +102,7 @@ export function SessionRunner({
 
   const phase = currentPhase(session);
   const inProgress = session.status === "in_progress";
+  const paused = session.status === "paused";
   const atFirstPhase = session.phaseIndex === 0;
 
   // Live timer: while in progress, accrue one second at a time and persist the
@@ -236,7 +239,7 @@ export function SessionRunner({
           <li
             key={p}
             className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-              i === session.phaseIndex && inProgress
+              i === session.phaseIndex && (inProgress || paused)
                 ? "bg-blue-600 text-white"
                 : i < session.phaseIndex || session.status === "completed"
                   ? "bg-emerald-100 text-emerald-800"
@@ -253,7 +256,9 @@ export function SessionRunner({
           ? "Session complete — review your approach and the solution."
           : session.status === "abandoned"
             ? "Session abandoned - keep the evidence for review."
-            : `Current phase: ${PHASE_LABEL[phase]}`}
+            : paused
+              ? `Session paused - current phase: ${PHASE_LABEL[phase]}`
+              : `Current phase: ${PHASE_LABEL[phase]}`}
       </p>
 
       {canRevealSolution(session) ? (
@@ -272,18 +277,50 @@ export function SessionRunner({
         {inProgress ? (
           <>
             {session.mode === "practice" ? (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => apply(goToPreviousPhase(session))}
-                disabled={atFirstPhase}
-                data-testid="session-prev"
-              >
-                Previous phase
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => apply(goToPreviousPhase(session))}
+                  disabled={atFirstPhase}
+                  data-testid="session-prev"
+                >
+                  Previous phase
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => apply(pauseSession(session))}
+                  data-testid="session-pause"
+                >
+                  Pause
+                </Button>
+              </>
             ) : null}
             <Button type="button" onClick={() => apply(advancePhase(session))} data-testid="session-next">
               Next phase
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => apply(completeSession(session))}
+              data-testid="session-complete"
+            >
+              Complete
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => apply(abandonSession(session))}
+              data-testid="session-abandon"
+            >
+              Abandon
+            </Button>
+          </>
+        ) : paused ? (
+          <>
+            <Button type="button" onClick={() => apply(resumeSession(session))} data-testid="session-resume">
+              Resume
             </Button>
             <Button
               type="button"

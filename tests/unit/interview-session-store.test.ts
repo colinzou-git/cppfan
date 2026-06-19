@@ -86,4 +86,15 @@ describe("interview session row mappers (#177)", () => {
     expect(state.durationMinutes).toBe(45);
     expect(state.status).toBe("in_progress");
   });
+
+  it("round-trips a paused practice session", () => {
+    const paused = {
+      ...createSession({ problemId: "iv.x", mode: "practice", durationMinutes: 35 }),
+      elapsedSeconds: 90,
+      status: "paused" as const
+    };
+
+    expect(sessionStateToRow(paused).status).toBe("paused");
+    expect(rowToSessionState(sessionStateToRow(paused)).status).toBe("paused");
+  });
 });

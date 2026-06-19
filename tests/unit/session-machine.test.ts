@@ -10,7 +10,9 @@ import {
   currentPhase,
   goToPreviousPhase,
   isOverBudget,
+  pauseSession,
   remainingSeconds,
+  resumeSession,
   tick,
   updatePhaseNote,
   updateSessionEvidence,
@@ -78,6 +80,30 @@ describe("session timing (#177)", () => {
     const done = completeSession(practice());
     expect(tick(done, 60)).toEqual(done);
     expect(abandonSession(done)).toEqual(done); // already finished
+  });
+
+  it("pauses and resumes practice timing without accruing elapsed time", () => {
+    const active = tick(practice(), 30);
+    const paused = pauseSession(active);
+
+    expect(paused.status).toBe("paused");
+    expect(tick(paused, 60)).toEqual(paused);
+    expect(advancePhase(paused)).toEqual(paused);
+
+    const resumed = resumeSession(paused);
+    expect(resumed.status).toBe("in_progress");
+    expect(tick(resumed, 5).elapsedSeconds).toBe(35);
+  });
+
+  it("does not allow interview sessions to pause", () => {
+    const interview = createSession({ problemId: "x", mode: "interview", durationMinutes: 45 });
+    expect(pauseSession(interview)).toEqual(interview);
+  });
+
+  it("can complete or abandon a paused practice session", () => {
+    const paused = pauseSession(practice());
+    expect(completeSession(paused).status).toBe("completed");
+    expect(abandonSession(paused).status).toBe("abandoned");
   });
 });
 

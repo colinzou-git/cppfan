@@ -18,7 +18,7 @@ export type SessionPhase = (typeof SESSION_PHASES)[number];
 
 export type SessionMode = "practice" | "interview";
 export type SessionDuration = 35 | 45 | 50;
-export type SessionStatus = "in_progress" | "completed" | "abandoned";
+export type SessionStatus = "in_progress" | "paused" | "completed" | "abandoned";
 export type PhaseElapsedSeconds = Record<SessionPhase, number>;
 export type PhaseNotes = Partial<Record<SessionPhase, string>>;
 
@@ -92,6 +92,22 @@ export function goToPreviousPhase(state: SessionState): SessionState {
   return { ...state, phaseIndex: state.phaseIndex - 1 };
 }
 
+/** Pause active practice timing. Interview mode stays fixed-duration and cannot pause. */
+export function pauseSession(state: SessionState): SessionState {
+  if (state.status !== "in_progress" || state.mode !== "practice") {
+    return state;
+  }
+  return { ...state, status: "paused" };
+}
+
+/** Resume a paused practice session without adding elapsed time. */
+export function resumeSession(state: SessionState): SessionState {
+  if (state.status !== "paused") {
+    return state;
+  }
+  return { ...state, status: "in_progress" };
+}
+
 /** Accumulate elapsed time (e.g. from a UI timer); a no-op once finished. */
 export function tick(state: SessionState, seconds: number): SessionState {
   if (state.status !== "in_progress" || seconds <= 0) {
@@ -123,11 +139,11 @@ export function isOverBudget(state: SessionState): boolean {
 }
 
 export function completeSession(state: SessionState): SessionState {
-  return state.status === "in_progress" ? { ...state, status: "completed" } : state;
+  return state.status === "in_progress" || state.status === "paused" ? { ...state, status: "completed" } : state;
 }
 
 export function abandonSession(state: SessionState): SessionState {
-  return state.status === "in_progress"
+  return state.status === "in_progress" || state.status === "paused"
     ? { ...state, status: "abandoned", abandonmentReason: state.abandonmentReason ?? "manual_stop" }
     : state;
 }
