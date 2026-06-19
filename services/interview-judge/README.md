@@ -55,3 +55,8 @@ The worker receives `JudgeWorkerRequest` records with:
 Results return only structured status, visible/hidden counts, runtime/memory
 diagnostics, and sanitized logs. Hidden test names, inputs, and expected outputs
 do not cross the worker/web boundary until a separate catalog policy permits it.
+The web app persists per-learner submission metadata in
+`public.interview_judge_submissions` through
+`src/features/interview/judge-submission-store.ts`; rows are keyed by idempotent
+submission id and contain source hash/version, problem/session metadata, queue or
+result status, visible/hidden pass counts, and diagnostic runtime/memory only.
