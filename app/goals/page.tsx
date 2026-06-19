@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { GoalForm } from "@/features/goals/goal-form";
 import { GoalList } from "@/features/goals/goal-list";
+import { GoalHeaderActions } from "@/features/goals/goal-header-actions";
 import { getStudyGoalReadModel } from "@/features/goals/goal-queries";
 
 export default async function GoalsPage({ searchParams }: { searchParams: Promise<{ result?: string }> }) {
@@ -19,7 +19,7 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
           <h1 className="mt-2 text-3xl font-black text-slate-950">Goals</h1>
           <p className="text-slate-600">Plan unfinished initial learning without mixing it into FSRS review.</p>
         </div>
-        <Button asChild variant="secondary"><Link href="/placement">Run placement</Link></Button>
+        <GoalHeaderActions />
       </header>
 
       {params.result ? (
