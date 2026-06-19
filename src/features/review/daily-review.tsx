@@ -28,7 +28,7 @@ export function DailyReview({ view }: { view: DailyReviewView }) {
         ) : (
           <ol className="grid gap-2">
             {view.items.map((item) => (
-              <li key={item.cardId}>
+              <li key={item.cardId} data-testid="daily-review-item">
                 <Link
                   href={item.href}
                   className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/70 px-3 py-2 transition hover:border-sky-200 hover:bg-sky-50/60"
@@ -37,6 +37,10 @@ export function DailyReview({ view }: { view: DailyReviewView }) {
                     <span className="block text-sm font-bold text-slate-950">{item.title}</span>
                     <span className="block text-xs font-medium text-slate-500">
                       {item.overdue ? "Overdue" : "Due today"}
+                    </span>
+                    <span className="block text-xs font-medium text-slate-500">{item.reason}</span>
+                    <span className="block text-xs font-semibold text-sky-700">
+                      {item.localPlanDate} - {item.timezone}
                     </span>
                   </span>
                   <ArrowRight className="h-4 w-4 shrink-0 text-sky-600" />
