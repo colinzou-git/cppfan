@@ -52,6 +52,17 @@ jobs:
       - name: E2E tests
         run: pnpm test:e2e
 
+      - name: Upload Playwright app diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-app
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   db:
     name: DB migrations
     runs-on: ubuntu-latest
@@ -186,7 +197,21 @@ jobs:
           export NEXT_PUBLIC_SUPABASE_URL="${SUPABASE_URL}"
           export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${SUPABASE_ANON_KEY}"
           export NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
-          pnpm exec playwright test tests/e2e/authenticated-learning-loop.spec.ts --project=chromium --project=iphone
+          pnpm exec playwright test \
+            tests/e2e/authenticated-learning-loop.spec.ts \
+            tests/e2e/authenticated-onboarding.spec.ts \
+            --project=chromium --project=iphone --project=ipad
+
+      - name: Upload Playwright authenticated diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-authenticated
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Stop local Supabase stack
         if: always()
