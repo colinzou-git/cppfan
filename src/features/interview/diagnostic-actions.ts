@@ -5,10 +5,11 @@ import type { DiagnosticActionResult } from "./diagnostic-action-types";
 
 export async function saveDiagnostic(
   scores: Record<string, number>,
-  submissionId: string
+  submissionId?: string
 ): Promise<DiagnosticActionResult> {
-  if (!scores || typeof scores !== "object" || typeof submissionId !== "string" || submissionId.length < 8) {
+  if (!scores || typeof scores !== "object") {
     return { status: "error" };
   }
-  return saveDiagnosticScores(scores, submissionId);
+  const id = submissionId && submissionId.length >= 8 ? submissionId : `legacy-${Date.now()}`;
+  return saveDiagnosticScores(scores, id);
 }
