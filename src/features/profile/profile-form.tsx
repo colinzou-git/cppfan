@@ -30,7 +30,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
   const title = mode === "profile" ? "Profile settings" : "Set up your cppFan profile";
   const description =
     mode === "profile"
-      ? "Update your learning preferences. These settings will drive future review and practice recommendations."
+      ? "Update your learning preferences. These settings influence recommendations without creating dated goals."
       : "Tell cppFan how to start. These settings are suggestions, not hard locks.";
 
   return (
@@ -111,8 +111,10 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
             <div className="flex items-start gap-3">
               <Target className="mt-1 h-5 w-5 text-blue-700" />
               <div>
-                <h2 className="text-base font-black text-slate-950">Learning goals</h2>
-                <p className="text-sm text-slate-600">Choose all that matter right now.</p>
+                <h2 className="text-base font-black text-slate-950">Learning interests</h2>
+                <p className="text-sm text-slate-600">
+                  Choose broad interests for recommendation ranking. These do not create dated Goals.
+                </p>
               </div>
             </div>
 
@@ -177,7 +179,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
             <label className="grid gap-2 text-sm font-bold text-slate-700">
               <span className="flex items-center gap-2">
                 <Target className="h-4 w-4 text-blue-700" />
-                New skills per day
+                Baseline new skills per day
               </span>
               <input
                 className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
@@ -188,6 +190,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                 name="daily_new_skills_goal"
                 type="number"
               />
+              <span className="text-xs font-medium text-slate-500">Learn Extra may exceed this baseline for one day without changing it.</span>
             </label>
 
             <label className="grid gap-2 text-sm font-bold text-slate-700">
@@ -204,6 +207,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                 name="daily_review_minutes"
                 type="number"
               />
+              <span className="text-xs font-medium text-slate-500">This review expectation stays separate from new goal learning.</span>
             </label>
           </section>
 
