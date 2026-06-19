@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
+import { submitJudgeAttempt } from "./judge-actions";
 import {
   SESSION_DURATIONS,
   advancePhase,
@@ -70,10 +71,12 @@ export function SessionRunner({
 }) {
   const [session, setSession] = useState<SessionState>(initialState);
   const [notice, setNotice] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
+  const [judgeNotice, setJudgeNotice] = useState<string | null>(null);
+  const [, startSaveTransition] = useTransition();
+  const [isJudgePending, startJudgeTransition] = useTransition();
 
   function persist(next: SessionState) {
-    startTransition(async () => {
+    startSaveTransition(async () => {
       const result = await saveSession(next);
       if (result.status === "signed_out") {
         setNotice("Sign in to save this session across refreshes.");
@@ -98,6 +101,37 @@ export function SessionRunner({
         durationMinutes
       })
     );
+  }
+
+  function submitDraftToJudge() {
+    setJudgeNotice(null);
+    startJudgeTransition(async () => {
+      const result = await submitJudgeAttempt({
+        problemId: session.problemId,
+        source: session.codeDraft,
+        mode: session.mode,
+        compiler: "gcc",
+        standard: "c++20",
+        taskKind: "compile_and_run",
+        sourceVersion: 1,
+        assistanceUsed: session.assistanceUsed,
+        priorSolutionExposed: canRevealSolution(session)
+      });
+
+      if (result.status === "queued") {
+        setJudgeNotice(`Submission queued for ${result.visibleTestCount} visible and ${result.hiddenTestCount} hidden tests.`);
+      } else if (result.status === "duplicate") {
+        setJudgeNotice("This submission was already queued.");
+      } else if (result.status === "signed_out") {
+        setJudgeNotice("Sign in to queue this submission for judge feedback.");
+      } else if (result.status === "unsupported_problem") {
+        setJudgeNotice("Judge feedback is not available for this problem yet.");
+      } else if (result.status === "invalid") {
+        setJudgeNotice("Add a non-empty C++ draft before queuing judge feedback.");
+      } else {
+        setJudgeNotice("Could not queue judge feedback just now.");
+      }
+    });
   }
 
   const phase = currentPhase(session);
@@ -231,6 +265,22 @@ export function SessionRunner({
             />
             Interviewer assistance used
           </label>
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={submitDraftToJudge}
+              disabled={isJudgePending || session.codeDraft.trim().length === 0}
+              data-testid="session-submit-judge"
+            >
+              {isJudgePending ? "Queuing..." : "Queue judge run"}
+            </Button>
+            {judgeNotice ? (
+              <p className="text-xs font-semibold text-slate-600" role="status" data-testid="session-judge-notice">
+                {judgeNotice}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 

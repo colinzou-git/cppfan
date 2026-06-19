@@ -85,6 +85,14 @@ test("interview mode exposes duration controls and evidence capture", async ({ p
   await expect(page.getByTestId("session-status")).toContainText(/abandoned/i);
 });
 
+test("a code draft can be queued for judge feedback from the session", async ({ page }) => {
+  await page.goto("/interview/session");
+
+  await page.getByTestId("session-code-draft").fill("#include <bits/stdc++.h>\nint main(){ return 0; }\n");
+  await page.getByTestId("session-submit-judge").click();
+  await expect(page.getByTestId("session-judge-notice")).toContainText(/sign in to queue/i);
+});
+
 test.describe("authenticated interview session persistence (#177/#96)", () => {
   test.skip(!hasAuthenticatedE2EEnv(), "requires disposable local Supabase auth env");
 
