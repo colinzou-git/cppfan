@@ -20,4 +20,24 @@ test("the dashboard shows review and goal learning sections or an auth gate", as
   await expect(dailyNew).toBeVisible();
   await expect(dailyNew.getByRole("heading", { name: /daily new for goals/i })).toBeVisible();
   await expect(dailyNew.getByText(/FSRS reviews never appear here/i)).toBeVisible();
+
+  await expect(page.getByTestId("mastery-preview")).toBeVisible();
+  await expect(page.getByTestId("goals-entry")).toBeVisible();
+  await expect(page.getByTestId("skill-map-preview")).toBeVisible();
+
+  const sectionOrder = await page.locator([
+    "[data-testid='daily-review']",
+    "[data-testid='daily-new-for-goals']",
+    "[data-testid='mastery-preview']",
+    "[data-testid='goals-entry']",
+    "[data-testid='skill-map-preview']"
+  ].join(",")).evaluateAll((sections) => sections.map((section) => section.getAttribute("data-testid")));
+
+  expect(sectionOrder).toEqual([
+    "daily-review",
+    "daily-new-for-goals",
+    "mastery-preview",
+    "goals-entry",
+    "skill-map-preview"
+  ]);
 });
