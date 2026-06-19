@@ -11,6 +11,8 @@ import {
   reviseStudyGoal
 } from "@/features/goals/goal-store";
 import type { StudyGoalRevisionInput } from "@/features/goals/goal-contract";
+import { getDailyNewPlan } from "@/features/goals/daily-new-queries";
+import { allocateGoalExtra } from "@/features/goals/daily-new-store";
 
 function value(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
@@ -86,4 +88,22 @@ export async function reopenGoalAction(formData: FormData) {
     crypto.randomUUID(),
     value(formData, "reason") || undefined
   ));
+}
+
+export async function allocateExtraGoalAction(formData: FormData) {
+  const plan = await getDailyNewPlan();
+  const submissionId = value(formData, "submission_id") || crypto.randomUUID();
+  const result = plan.extraAction
+    ? await allocateGoalExtra({
+        submissionId,
+        expectedDailyPlanVersion: plan.dailyPlanVersion,
+        localPlanDate: plan.localPlanDate,
+        timezone: plan.timezone,
+        action: plan.extraAction
+      })
+    : { status: "no_extra" as const };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/goals");
+  redirect(`/dashboard?extra=${encodeURIComponent(result.status)}`);
 }
