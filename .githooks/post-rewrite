@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs after successful rebases and amended commits.
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+node "$repo_root/scripts/ai/refresh-code-index.mjs" post-rewrite
+exit 0

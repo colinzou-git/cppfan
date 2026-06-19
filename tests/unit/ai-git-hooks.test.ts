@@ -55,15 +55,21 @@ describe("code-index Git hooks", () => {
     expect(configuredHookPath(directory)).toBe(".custom-hooks");
   });
 
-  it("ships executable commit and merge hooks", () => {
-    for (const hookName of ["post-commit", "post-merge"]) {
+  it("ships executable commit, merge, checkout, and rewrite hooks", () => {
+    for (const hookName of ["post-commit", "post-merge", "post-checkout", "post-rewrite"]) {
       const hookPath = join(projectRoot, ".githooks", hookName);
       const content = readFileSync(hookPath, "utf8");
-      expect(content).toContain(`refresh-code-index.mjs\" ${hookName}`);
+      expect(content).toContain(`refresh-code-index.mjs" ${hookName}`);
 
       if (process.platform !== "win32") {
         expect(statSync(hookPath).mode & 0o111).not.toBe(0);
       }
     }
+  });
+
+  it("limits post-checkout refreshes to branch switches", () => {
+    const hook = readFileSync(join(projectRoot, ".githooks", "post-checkout"), "utf8");
+    expect(hook).toContain('${3:-0}');
+    expect(hook).toContain('!= "1"');
   });
 });

@@ -15,7 +15,11 @@ The setup is deliberately conservative: if the clone already uses a different `c
 After activation, `.ai/repo-map.code-index.json` is rebuilt automatically after:
 
 - each successful local commit;
-- each successful merge, including the merge step used by a normal `git pull`.
+- each successful merge, including the merge step used by a normal `git pull`;
+- branch switches performed with `git switch` or `git checkout`;
+- successful rebases and amended commits.
+
+The `post-checkout` hook checks Git's branch-checkout flag, so checking out individual files does not trigger a rebuild.
 
 The hooks call `scripts/ai/refresh-code-index.mjs`. They never block the Git operation if dependencies are unavailable or indexing fails. Run a strict manual refresh when needed:
 

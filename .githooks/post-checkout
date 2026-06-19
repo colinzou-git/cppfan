@@ -1,0 +1,10 @@
+#!/bin/sh
+# Git passes: <previous-head> <new-head> <branch-checkout-flag>.
+# Rebuild only for a branch checkout/switch, not when individual files are checked out.
+if [ "${3:-0}" != "1" ]; then
+  exit 0
+fi
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+node "$repo_root/scripts/ai/refresh-code-index.mjs" post-checkout
+exit 0
