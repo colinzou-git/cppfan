@@ -45,6 +45,24 @@ test("the live timer counts down while the session is in progress", async ({ pag
   await expect(page.getByTestId("session-runner")).toHaveAttribute("data-status", "completed");
 });
 
+test("practice mode can pause and resume the timer", async ({ page }) => {
+  await page.goto("/interview/session");
+
+  const value = page.getByTestId("session-timer-value");
+  await page.getByTestId("session-pause").click();
+  await expect(page.getByTestId("session-runner")).toHaveAttribute("data-status", "paused");
+  await expect(page.getByTestId("session-status")).toContainText(/paused/i);
+  await expect(page.getByTestId("session-resume")).toBeVisible();
+
+  const pausedText = (await value.textContent()) ?? "";
+  await page.waitForTimeout(1500);
+  await expect(value).toHaveText(pausedText);
+
+  await page.getByTestId("session-resume").click();
+  await expect(page.getByTestId("session-runner")).toHaveAttribute("data-status", "in_progress");
+  await expect.poll(async () => value.textContent(), { timeout: 4000 }).not.toBe(pausedText);
+});
+
 test("interview mode exposes duration controls and evidence capture", async ({ page }) => {
   await page.goto("/interview/session");
 
@@ -54,6 +72,7 @@ test("interview mode exposes duration controls and evidence capture", async ({ p
   await expect(page.getByTestId("session-meta")).toContainText("interview");
   await expect(page.getByTestId("session-meta")).toContainText("35 min");
   await expect(page.getByTestId("session-prev")).toHaveCount(0);
+  await expect(page.getByTestId("session-pause")).toHaveCount(0);
   await expect(page.getByTestId("session-reveal")).toHaveCount(0);
 
   await page.getByTestId("session-phase-note").fill("Clarify duplicate IDs and ordering.");

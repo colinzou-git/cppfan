@@ -19,7 +19,7 @@ import {
 export type SessionWriteOutcome = "ok" | "signed_out" | "error";
 
 const MODES: SessionMode[] = ["practice", "interview"];
-const STATUSES: SessionStatus[] = ["in_progress", "completed", "abandoned"];
+const STATUSES: SessionStatus[] = ["in_progress", "paused", "completed", "abandoned"];
 const LAST_PHASE_INDEX = SESSION_PHASES.length - 1;
 
 type SessionRow = {
