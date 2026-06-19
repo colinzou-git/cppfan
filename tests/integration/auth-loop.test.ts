@@ -390,14 +390,24 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
       duration_minutes: 45,
       phase_index: 2,
       elapsed_seconds: 60,
+      phase_elapsed_seconds: { clarification: 20, examples: 40 },
+      notes_by_phase: { clarification: "ask about ordering" },
+      code_draft: "int main() { return 0; }",
+      test_notes: "empty input and duplicate-heavy cases",
+      assistance_used: true,
       status: "in_progress"
     };
     const ins = await clientA.from("interview_sessions").upsert(row, { onConflict: "user_id" });
     expect(ins.error).toBeNull();
 
-    const mine = await clientA.from("interview_sessions").select("problem_id,phase_index").eq("user_id", aId);
+    const mine = await clientA
+      .from("interview_sessions")
+      .select("problem_id,phase_index,phase_elapsed_seconds,notes_by_phase,code_draft,test_notes,assistance_used")
+      .eq("user_id", aId);
     expect(mine.error).toBeNull();
     expect((mine.data ?? [])[0]?.phase_index).toBe(2);
+    expect((mine.data ?? [])[0]?.assistance_used).toBe(true);
+    expect((mine.data ?? [])[0]?.code_draft).toContain("main");
 
     const asB = await clientB.from("interview_sessions").select("problem_id").eq("user_id", aId);
     expect((asB.data ?? []).length).toBe(0);

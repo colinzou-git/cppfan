@@ -12,6 +12,8 @@ import {
   isOverBudget,
   remainingSeconds,
   tick,
+  updatePhaseNote,
+  updateSessionEvidence,
   type SessionState
 } from "@/features/interview/session-machine";
 
@@ -62,18 +64,40 @@ describe("session timing (#177)", () => {
     expect(budgetSeconds(s)).toBe(45 * 60);
     s = tick(s, 600);
     expect(s.elapsedSeconds).toBe(600);
+    expect(s.phaseElapsedSeconds.clarification).toBe(600);
     expect(remainingSeconds(s)).toBe(45 * 60 - 600);
     expect(isOverBudget(s)).toBe(false);
 
-    s = tick(s, 45 * 60);
+    s = tick(advancePhase(s), 45 * 60);
     expect(isOverBudget(s)).toBe(true);
     expect(remainingSeconds(s)).toBe(0);
+    expect(s.phaseElapsedSeconds.examples).toBe(45 * 60);
   });
 
   it("ignores ticks once the session is finished", () => {
     const done = completeSession(practice());
     expect(tick(done, 60)).toEqual(done);
     expect(abandonSession(done)).toEqual(done); // already finished
+  });
+});
+
+describe("session evidence (#177)", () => {
+  it("records notes, draft code, test notes, assistance, and abandonment reason", () => {
+    let s = practice();
+    s = updatePhaseNote(s, "clarification", "Ask about duplicate keys.");
+    s = updateSessionEvidence(s, {
+      codeDraft: "int main() { return 0; }",
+      testNotes: "sample, empty, duplicate-heavy",
+      assistanceUsed: true
+    });
+    s = abandonSession(s);
+
+    expect(s.notesByPhase.clarification).toContain("duplicate keys");
+    expect(s.codeDraft).toContain("main");
+    expect(s.testNotes).toContain("empty");
+    expect(s.assistanceUsed).toBe(true);
+    expect(s.status).toBe("abandoned");
+    expect(s.abandonmentReason).toBe("manual_stop");
   });
 });
 

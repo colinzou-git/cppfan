@@ -32,7 +32,7 @@ export default async function InterviewSessionPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
       <header className="grid gap-1">
         <Link href="/interview" className="text-sm font-bold text-blue-700">
           ← Interview practice

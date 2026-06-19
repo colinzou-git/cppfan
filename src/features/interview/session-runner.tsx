@@ -4,7 +4,9 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
 import {
+  SESSION_DURATIONS,
   advancePhase,
+  abandonSession,
   budgetSeconds,
   canRevealSolution,
   completeSession,
@@ -15,6 +17,11 @@ import {
   remainingSeconds,
   SESSION_PHASES,
   tick,
+  updatePhaseNote,
+  updateSessionEvidence,
+  type SessionDuration,
+  type SessionMode,
+  type SessionPhase,
   type SessionState
 } from "./session-machine";
 
@@ -30,7 +37,7 @@ function formatClock(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-const PHASE_LABEL: Record<string, string> = {
+const PHASE_LABEL: Record<SessionPhase, string> = {
   clarification: "Clarify the problem",
   examples: "Work examples",
   baseline: "Baseline approach",
@@ -81,6 +88,16 @@ export function SessionRunner({
     persist(next);
   }
 
+  function startSession(mode: SessionMode, durationMinutes: SessionDuration) {
+    apply(
+      createSession({
+        problemId: session.problemId,
+        mode,
+        durationMinutes
+      })
+    );
+  }
+
   const phase = currentPhase(session);
   const inProgress = session.status === "in_progress";
   const atFirstPhase = session.phaseIndex === 0;
@@ -112,15 +129,44 @@ export function SessionRunner({
   const remaining = remainingSeconds(session);
   const overBudget = isOverBudget(session);
   const overBy = Math.max(0, session.elapsedSeconds - budgetSeconds(session));
+  const phaseNote = session.notesByPhase[phase] ?? "";
 
   return (
-    <div className="grid gap-4" data-testid="session-runner" data-status={session.status}>
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)]" data-testid="session-runner" data-status={session.status}>
       <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm">
         <h2 className="font-bold text-slate-900">{problemTitle}</h2>
         <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{problemPrompt}</p>
-        <p className="mt-2 text-xs font-medium text-slate-500">
+        <p className="mt-2 text-xs font-medium text-slate-500" data-testid="session-meta">
           {session.mode} · {session.durationMinutes} min budget
         </p>
+        <div className="mt-3 flex flex-wrap gap-2" aria-label="Session mode">
+          {(["practice", "interview"] as const).map((mode) => (
+            <Button
+              key={mode}
+              type="button"
+              variant={session.mode === mode ? "default" : "secondary"}
+              aria-pressed={session.mode === mode}
+              onClick={() => startSession(mode, session.durationMinutes)}
+              data-testid={`session-mode-${mode}`}
+            >
+              {mode === "practice" ? "Practice" : "Interview"}
+            </Button>
+          ))}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2" aria-label="Session duration">
+          {SESSION_DURATIONS.map((duration) => (
+            <Button
+              key={duration}
+              type="button"
+              variant={session.durationMinutes === duration ? "default" : "secondary"}
+              aria-pressed={session.durationMinutes === duration}
+              onClick={() => startSession(session.mode, duration)}
+              data-testid={`session-duration-${duration}`}
+            >
+              {duration} min
+            </Button>
+          ))}
+        </div>
         <div className="mt-2 flex items-center gap-2" data-testid="session-timer" data-over-budget={overBudget}>
           <span
             className={`font-mono text-2xl font-black tabular-nums ${overBudget ? "text-rose-700" : "text-slate-900"}`}
@@ -134,6 +180,54 @@ export function SessionRunner({
           <span className="text-xs font-semibold text-slate-500">
             {overBudget ? "over budget" : "remaining"}
           </span>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm lg:row-span-4">
+        <h3 className="text-sm font-black text-slate-900">Session evidence</h3>
+        <div className="mt-3 grid gap-3">
+          <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-phase-note">
+            Current phase notes
+            <textarea
+              id="session-phase-note"
+              className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+              value={phaseNote}
+              onChange={(event) => setSession((prev) => updatePhaseNote(prev, phase, event.target.value))}
+              onBlur={(event) => apply(updatePhaseNote(session, phase, event.target.value))}
+              data-testid="session-phase-note"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-code-draft">
+            C++ draft
+            <textarea
+              id="session-code-draft"
+              className="min-h-36 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm font-normal text-slate-800"
+              value={session.codeDraft}
+              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { codeDraft: event.target.value }))}
+              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.target.value }))}
+              data-testid="session-code-draft"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-test-notes">
+            Test notes
+            <textarea
+              id="session-test-notes"
+              className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
+              value={session.testNotes}
+              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { testNotes: event.target.value }))}
+              onBlur={(event) => apply(updateSessionEvidence(session, { testNotes: event.target.value }))}
+              data-testid="session-test-notes"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <input
+              type="checkbox"
+              checked={session.assistanceUsed}
+              onChange={(event) => apply(updateSessionEvidence(session, { assistanceUsed: event.target.checked }))}
+              data-testid="session-assistance-used"
+            />
+            Interviewer assistance used
+          </label>
         </div>
       </div>
 
@@ -157,7 +251,9 @@ export function SessionRunner({
       <p className="text-sm font-semibold text-slate-800" data-testid="session-status">
         {session.status === "completed"
           ? "Session complete — review your approach and the solution."
-          : `Current phase: ${PHASE_LABEL[phase] ?? phase}`}
+          : session.status === "abandoned"
+            ? "Session abandoned - keep the evidence for review."
+            : `Current phase: ${PHASE_LABEL[phase]}`}
       </p>
 
       {canRevealSolution(session) ? (
@@ -197,19 +293,19 @@ export function SessionRunner({
             >
               Complete
             </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => apply(abandonSession(session))}
+              data-testid="session-abandon"
+            >
+              Abandon
+            </Button>
           </>
         ) : (
           <Button
             type="button"
-            onClick={() =>
-              apply(
-                createSession({
-                  problemId: session.problemId,
-                  mode: session.mode,
-                  durationMinutes: session.durationMinutes
-                })
-              )
-            }
+            onClick={() => startSession(session.mode, session.durationMinutes)}
             data-testid="session-restart"
           >
             Start over
