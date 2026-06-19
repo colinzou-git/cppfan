@@ -24,6 +24,10 @@ type AuthEnv = {
   url: string;
 };
 
+type CreateAuthenticatedLearnerOptions = {
+  completeOnboarding?: boolean;
+};
+
 function maybeLocalAuthEnv(): AuthEnv | null {
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const anonKey =
@@ -90,7 +94,11 @@ function upsertCookie(jar: CookieToSet[], cookie: CookieToSet) {
   jar.push(cookie);
 }
 
-export async function createAuthenticatedLearner(context: BrowserContext, baseURL: string) {
+export async function createAuthenticatedLearner(
+  context: BrowserContext,
+  baseURL: string,
+  options: CreateAuthenticatedLearnerOptions = {}
+) {
   const env = maybeLocalAuthEnv();
   if (!env) {
     throw new Error("Authenticated E2E Supabase env is missing.");
@@ -132,24 +140,26 @@ export async function createAuthenticatedLearner(context: BrowserContext, baseUR
     throw signedIn.error;
   }
 
-  const profile = await browserLikeClient.from("profiles").upsert(
-    {
-      id: userId,
-      email,
-      display_name: "Playwright Learner",
-      experience_level: "some_cpp",
-      daily_new_skills_goal: 2,
-      daily_review_minutes: 15,
-      learning_goals: ["cpp_core", "dsa_patterns"],
-      preferred_platforms: ["windows_pc"],
-      onboarding_completed: true,
-      onboarding_completed_at: new Date().toISOString()
-    },
-    { onConflict: "id" }
-  );
-  if (profile.error) {
-    await service.auth.admin.deleteUser(userId).catch(() => undefined);
-    throw profile.error;
+  if (options.completeOnboarding !== false) {
+    const profile = await browserLikeClient.from("profiles").upsert(
+      {
+        id: userId,
+        email,
+        display_name: "Playwright Learner",
+        experience_level: "some_cpp",
+        daily_new_skills_goal: 2,
+        daily_review_minutes: 15,
+        learning_goals: ["cpp_core", "dsa_patterns"],
+        preferred_platforms: ["windows_pc"],
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString()
+      },
+      { onConflict: "id" }
+    );
+    if (profile.error) {
+      await service.auth.admin.deleteUser(userId).catch(() => undefined);
+      throw profile.error;
+    }
   }
 
   const activeCookies = jar.filter((cookie) => cookie.value && (cookie.options?.maxAge ?? 1) > 0);

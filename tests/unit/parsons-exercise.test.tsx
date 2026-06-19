@@ -79,8 +79,8 @@ describe("ParsonsExercise (#124)", () => {
 
     expect(screen.getAllByTestId("parsons-block").map((row) => row.getAttribute("data-block-id"))).toEqual([
       "b2",
-      "d1",
-      "b1"
+      "b1",
+      "d1"
     ]);
     expect(screen.getByTestId("parsons-announcement")).toHaveTextContent(/dragged line before/i);
   });
