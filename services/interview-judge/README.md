@@ -23,8 +23,10 @@ an injected process executor; `docker-executor.ts` wraps those commands in the
 local/Codespaces Docker isolation envelope; `process-launcher.ts` supervises the
 Docker CLI with timeout and output caps for local worker wiring; and
 `workspace-lifecycle.ts` materializes `submission.cpp` in a per-submission
-temporary directory and cleans it up with `withJudgeWorkspace()`. Unit tests use
-fake launchers so `pnpm test` never executes learner code.
+temporary directory and cleans it up with `withJudgeWorkspace()`.
+`local-worker.ts` composes those pieces into a reproducible local/Codespaces
+worker entry point. Unit tests use fake launchers so `pnpm test` never executes
+learner code.
 
 ## Local Manifest
 
