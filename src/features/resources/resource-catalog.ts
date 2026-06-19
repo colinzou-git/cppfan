@@ -482,6 +482,38 @@ export const externalResources: ExternalResource[] = [
     tags: ["dsa"]
   },
   {
+    id: "cses-string-algorithms",
+    name: "CSES: String Algorithms",
+    url: "https://cses.fi/problemset/list/",
+    kind: "practice",
+    description: "String-algorithm practice section for pattern matching, borders, hashing, and related text-processing tasks.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-prefix-function",
+    name: "cp-algorithms: prefix function",
+    url: "https://cp-algorithms.com/string/prefix-function.html",
+    kind: "reference",
+    description: "Reference for prefix-function construction, KMP-style matching, and border interpretation.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-z-function",
+    name: "cp-algorithms: Z-function",
+    url: "https://cp-algorithms.com/string/z-function.html",
+    kind: "reference",
+    description: "Reference for Z-array meaning, linear Z-box construction, and pattern matching with pattern+separator+text.",
+    tags: ["dsa"]
+  },
+  {
+    id: "cp-algorithms-string-hashing",
+    name: "cp-algorithms: string hashing",
+    url: "https://cp-algorithms.com/string/string-hashing.html",
+    kind: "reference",
+    description: "Reference for polynomial rolling hashes, substring equality, collision risk, and multi-hash safeguards.",
+    tags: ["dsa"]
+  },
+  {
     id: "the-algorithms-cpp",
     name: "TheAlgorithms / C++",
     url: "https://github.com/TheAlgorithms/C-Plus-Plus",
