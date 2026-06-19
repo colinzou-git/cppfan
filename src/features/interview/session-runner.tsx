@@ -229,8 +229,11 @@ export function SessionRunner({
               id="session-phase-note"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
               value={phaseNote}
-              onChange={(event) => setSession((prev) => updatePhaseNote(prev, phase, event.target.value))}
-              onBlur={(event) => apply(updatePhaseNote(session, phase, event.target.value))}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updatePhaseNote(prev, phase, value));
+              }}
+              onBlur={(event) => apply(updatePhaseNote(session, phase, event.currentTarget.value))}
               data-testid="session-phase-note"
             />
           </label>
@@ -240,8 +243,11 @@ export function SessionRunner({
               id="session-code-draft"
               className="min-h-36 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm font-normal text-slate-800"
               value={session.codeDraft}
-              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { codeDraft: event.target.value }))}
-              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.target.value }))}
+              onInput={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updateSessionEvidence(prev, { codeDraft: value }));
+              }}
+              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.currentTarget.value }))}
               data-testid="session-code-draft"
             />
           </label>
@@ -251,8 +257,11 @@ export function SessionRunner({
               id="session-test-notes"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
               value={session.testNotes}
-              onChange={(event) => setSession((prev) => updateSessionEvidence(prev, { testNotes: event.target.value }))}
-              onBlur={(event) => apply(updateSessionEvidence(session, { testNotes: event.target.value }))}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setSession((prev) => updateSessionEvidence(prev, { testNotes: value }));
+              }}
+              onBlur={(event) => apply(updateSessionEvidence(session, { testNotes: event.currentTarget.value }))}
               data-testid="session-test-notes"
             />
           </label>

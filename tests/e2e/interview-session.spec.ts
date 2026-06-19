@@ -88,8 +88,13 @@ test("interview mode exposes duration controls and evidence capture", async ({ p
 test("a code draft can be queued for judge feedback from the session", async ({ page }) => {
   await page.goto("/interview/session");
 
-  await page.getByTestId("session-code-draft").fill("#include <bits/stdc++.h>\nint main(){ return 0; }\n");
-  await page.getByTestId("session-submit-judge").click();
+  const draft = page.getByTestId("session-code-draft");
+  await draft.fill("#include <bits/stdc++.h>\nint main(){ return 0; }\n");
+  await expect(draft).toHaveValue(/int main/);
+
+  const submit = page.getByTestId("session-submit-judge");
+  await expect(submit).toBeEnabled();
+  await submit.click();
   await expect(page.getByTestId("session-judge-notice")).toContainText(/sign in to queue/i);
 });
 
