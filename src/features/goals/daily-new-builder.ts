@@ -27,7 +27,8 @@ function makeAction(goal: StudyGoalView, target: StudyGoalView["targets"][number
     revisionId: goal.revisionId,
     primaryTargetId: target.id,
     acquisitionContractVersion: target.acquisitionContractVersion,
-    source: "planned"
+    source: "planned",
+    isFsrsReview: false
   };
   return action;
 }
