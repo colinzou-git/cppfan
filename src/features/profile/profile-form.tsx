@@ -1,13 +1,17 @@
-import { Target, Timer, UserRound } from "lucide-react";
+import { CalendarDays, Code2, Target, Timer, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DEFAULT_DAILY_NEW_SKILLS_GOAL,
   DEFAULT_DAILY_REVIEW_MINUTES,
   DEFAULT_EXPERIENCE_LEVEL,
+  DEFAULT_INTERVIEW_CPP_STANDARD,
   EXPERIENCE_OPTIONS,
+  INTERVIEW_CPP_STANDARD_OPTIONS,
+  INTERVIEW_TARGET_OPTIONS,
   LEARNING_GOAL_OPTIONS,
-  PLATFORM_OPTIONS
+  PLATFORM_OPTIONS,
+  RECENT_INTERVIEW_PRACTICE_OPTIONS
 } from "./profile-constants";
 import { saveProfileAction } from "./profile-actions";
 import type { Profile } from "./profile-types";
@@ -24,6 +28,9 @@ type ProfileFormProps = {
 function hasSelected(values: readonly string[] | undefined, value: string) {
   return values?.includes(value) ?? false;
 }
+
+const fieldClass =
+  "h-12 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:opacity-60";
 
 export function ProfileForm({ disabled = false, email, error, mode, nextPath, profile }: ProfileFormProps) {
   const title = mode === "profile" ? "Profile settings" : "Set up your cppFan profile";
@@ -67,7 +74,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             Display name
             <input
-              className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+              className={fieldClass}
               defaultValue={profile?.display_name ?? ""}
               disabled={disabled}
               maxLength={80}
@@ -104,6 +111,100 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                 </label>
               ))}
             </div>
+          </section>
+
+          <section className="grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
+            <div className="flex items-start gap-3">
+              <Code2 className="mt-1 h-5 w-5 text-blue-700" />
+              <div>
+                <h2 className="text-base font-black text-slate-950">Interview target (optional)</h2>
+                <p className="text-sm text-slate-600">
+                  This is separate from experience level. It changes interview recommendations only and never grants mastery.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              <label className="flex cursor-pointer gap-3 rounded-2xl border border-blue-100 bg-white p-4">
+                <input
+                  defaultChecked={!profile?.interview_target_profile}
+                  disabled={disabled}
+                  name="interview_target_profile"
+                  type="radio"
+                  value=""
+                />
+                <span>
+                  <span className="block font-black text-slate-900">No focused interview target</span>
+                  <span className="block text-sm text-slate-600">Keep ordinary cppFan learning preferences unchanged.</span>
+                </span>
+              </label>
+              {INTERVIEW_TARGET_OPTIONS.map((option) => (
+                <label className="flex cursor-pointer gap-3 rounded-2xl border border-blue-100 bg-white p-4" key={option.value}>
+                  <input
+                    defaultChecked={profile?.interview_target_profile === option.value}
+                    disabled={disabled}
+                    name="interview_target_profile"
+                    type="radio"
+                    value={option.value}
+                  />
+                  <span>
+                    <span className="block font-black text-slate-900">{option.label}</span>
+                    <span className="block text-sm text-slate-600">{option.description}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className="grid gap-2 text-sm font-bold text-slate-700">
+                Preferred interview C++
+                <select
+                  className={fieldClass}
+                  defaultValue={profile?.preferred_interview_cpp_standard ?? DEFAULT_INTERVIEW_CPP_STANDARD}
+                  disabled={disabled}
+                  name="preferred_interview_cpp_standard"
+                >
+                  {INTERVIEW_CPP_STANDARD_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-2 text-sm font-bold text-slate-700">
+                <span className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-blue-700" />
+                  Target date
+                </span>
+                <input
+                  className={fieldClass}
+                  defaultValue={profile?.interview_target_date ?? ""}
+                  disabled={disabled}
+                  name="interview_target_date"
+                  type="date"
+                />
+              </label>
+
+              <label className="grid gap-2 text-sm font-bold text-slate-700">
+                Recent interview practice
+                <select
+                  className={fieldClass}
+                  defaultValue={profile?.recent_interview_practice ?? "none"}
+                  disabled={disabled}
+                  name="recent_interview_practice"
+                >
+                  {RECENT_INTERVIEW_PRACTICE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <p className="text-xs font-medium text-slate-600">
+              Recent-practice information is self-reported routing context. It is never written as mastery or FSRS evidence.
+            </p>
           </section>
 
           <section className="grid gap-3">
@@ -160,7 +261,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                 New skills per day
               </span>
               <input
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                className={fieldClass}
                 defaultValue={profile?.daily_new_skills_goal ?? DEFAULT_DAILY_NEW_SKILLS_GOAL}
                 disabled={disabled}
                 max={10}
@@ -176,7 +277,7 @@ export function ProfileForm({ disabled = false, email, error, mode, nextPath, pr
                 Review minutes per day
               </span>
               <input
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                className={fieldClass}
                 defaultValue={profile?.daily_review_minutes ?? DEFAULT_DAILY_REVIEW_MINUTES}
                 disabled={disabled}
                 max={120}
