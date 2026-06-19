@@ -5,6 +5,7 @@ import { getProfileForUser } from "@/features/profile/profile-queries";
 import { buildDailyNewPlan } from "./daily-new-builder";
 import type { DailyNewPlan } from "./daily-new-model";
 import { getStudyGoalReadModel } from "./goal-queries";
+import type { StudyGoalReadModel } from "./goal-view-types";
 
 const QUALIFYING_EVENTS = new Set([
   "lesson_started", "concept_seen", "quiz_correct", "review_completed",
@@ -27,8 +28,10 @@ function emptyPlan(state: DailyNewPlan["state"], authenticated: boolean, activeG
   };
 }
 
-export async function getDailyNewPlan(now: Date = new Date()): Promise<DailyNewPlan> {
-  const goals = await getStudyGoalReadModel();
+export async function getDailyNewPlanForGoals(
+  goals: StudyGoalReadModel,
+  now: Date = new Date()
+): Promise<DailyNewPlan> {
   if (goals.state !== "ready") return emptyPlan(goals.state, goals.authenticated);
   if (!goals.authenticated) return emptyPlan("signed_out", false);
 
@@ -108,4 +111,8 @@ export async function getDailyNewPlan(now: Date = new Date()): Promise<DailyNewP
     allocatedExtraActions,
     extraAction: extraAction ? { ...extraAction, source: "learn_extra" } : null
   };
+}
+
+export async function getDailyNewPlan(now: Date = new Date()): Promise<DailyNewPlan> {
+  return getDailyNewPlanForGoals(await getStudyGoalReadModel(), now);
 }

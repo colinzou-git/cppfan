@@ -6,7 +6,7 @@ import { getSkillMapPreview } from "@/features/skills/skill-queries";
 import { getItemLinksBySkill } from "@/features/learning-items/learning-item-queries";
 import { getMasterySummary } from "@/features/mastery/mastery-queries";
 import { getStudyGoalReadModel } from "@/features/goals/goal-queries";
-import { getDailyNewPlan } from "@/features/goals/daily-new-queries";
+import { getDailyNewPlanForGoals } from "@/features/goals/daily-new-queries";
 import { getDailyReviewView } from "@/features/review/daily-review-queries";
 
 export async function getDashboardData() {
@@ -27,13 +27,15 @@ export async function getDashboardData() {
     };
   }
 
-  const [skillMap, itemLinks, mastery, goals, dailyNew] = await Promise.all([
+  const [skillMap, itemLinks, mastery, goals] = await Promise.all([
     getSkillMapPreview(),
     getItemLinksBySkill(),
     getMasterySummary(),
-    getStudyGoalReadModel(),
-    getDailyNewPlan()
+    getStudyGoalReadModel()
   ]);
-  const dailyReview = await getDailyReviewView(goals.active[0]?.timezone ?? "UTC");
+  const [dailyNew, dailyReview] = await Promise.all([
+    getDailyNewPlanForGoals(goals),
+    getDailyReviewView(goals.active[0]?.timezone ?? "UTC")
+  ]);
   return { configured, account, skillMap, itemLinks, mastery, goals, dailyNew, dailyReview };
 }
