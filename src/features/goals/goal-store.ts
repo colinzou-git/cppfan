@@ -5,7 +5,17 @@ import { validateStudyGoalRevision, type StudyGoalRevisionInput } from "./goal-c
 export type GoalMutationResult =
   | { status: "ok"; goalId: string; revisionNumber: number; replayed: boolean }
   | { status: "invalid"; errors: string[] }
-  | { status: "signed_out" | "unconfigured" | "unavailable" | "error" | "stale" | "conflict" | "not_active" };
+  | {
+      status:
+        | "signed_out"
+        | "unconfigured"
+        | "unavailable"
+        | "error"
+        | "stale"
+        | "conflict"
+        | "not_active"
+        | "already_active";
+    };
 
 type RpcResult = {
   data: unknown;
@@ -19,6 +29,7 @@ export function classifyGoalMutationRpc(result: RpcResult): GoalMutationResult {
     if (message.includes("stale_goal_revision")) return { status: "stale" };
     if (message.includes("idempotency_conflict")) return { status: "conflict" };
     if (message.includes("goal_not_active")) return { status: "not_active" };
+    if (message.includes("goal_already_active")) return { status: "already_active" };
     return { status: "error" };
   }
 
@@ -133,4 +144,40 @@ export async function cancelStudyGoal(
     p_reason: reason ?? null
   });
   return classifyGoalMutationRpc(result);
+}
+
+async function mutateLifecycle(
+  rpc: "complete_study_goal" | "reopen_study_goal",
+  goalId: string,
+  expectedRevision: number,
+  submissionId: string,
+  reason?: string
+): Promise<GoalMutationResult> {
+  const client = await clientForMutation();
+  if (client.status !== "ready") return { status: client.status };
+  const result = await client.supabase.rpc(rpc, {
+    p_goal_id: goalId,
+    p_expected_revision: expectedRevision,
+    p_submission_id: submissionId,
+    p_reason: reason ?? null
+  });
+  return classifyGoalMutationRpc(result);
+}
+
+export function completeStudyGoal(
+  goalId: string,
+  expectedRevision: number,
+  submissionId: string,
+  reason?: string
+) {
+  return mutateLifecycle("complete_study_goal", goalId, expectedRevision, submissionId, reason);
+}
+
+export function reopenStudyGoal(
+  goalId: string,
+  expectedRevision: number,
+  submissionId: string,
+  reason?: string
+) {
+  return mutateLifecycle("reopen_study_goal", goalId, expectedRevision, submissionId, reason);
 }
