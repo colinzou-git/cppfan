@@ -5,6 +5,18 @@ import { monitorBrowserErrors } from "./helpers/browser-errors";
 test.describe("authenticated onboarding and profile (#99)", () => {
   test.skip(!hasAuthenticatedE2EEnv(), "requires disposable local Supabase auth env");
 
+  test("Goals preserves the intended route for an incomplete profile", async ({ page, context, baseURL }) => {
+    const learner = await createAuthenticatedLearner(context, baseURL ?? "http://127.0.0.1:3000", {
+      completeOnboarding: false
+    });
+    try {
+      await page.goto("/goals");
+      await expect(page).toHaveURL(/\/onboarding\?next=(?:%2F|\/)goals/);
+    } finally {
+      await learner.cleanup();
+    }
+  });
+
   test("a new learner completes onboarding, edits the profile, and keeps the saved values", async ({
     page,
     context,

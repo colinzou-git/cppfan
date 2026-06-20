@@ -10,10 +10,18 @@ import { getGoalEvaluationCatalog } from "@/features/goals/evaluation-catalog";
 import { buildGoalEvaluationRecommendations } from "@/features/goals/evaluation-engine";
 import { EvaluationResults } from "@/features/goals/evaluation-results";
 import { EvaluationRecommendationTelemetry } from "@/features/goals/evaluation-recommendation-telemetry";
+import { getStudyGoalHistoryPage } from "@/features/goals/goal-history-queries";
+import { requireGoalsOnboarding } from "@/features/goals/goal-route-guard";
+import { GoalDraftCleanup } from "@/features/goals/goal-draft-cleanup";
 
-export default async function GoalsPage({ searchParams }: { searchParams: Promise<{ result?: string }> }) {
+export default async function GoalsPage({ searchParams }: { searchParams: Promise<{ result?: string; history?: string }> }) {
   const params = await searchParams;
-  const [goals, evaluation] = await Promise.all([getStudyGoalReadModel(), getGoalEvaluationView()]);
+  await requireGoalsOnboarding("/goals");
+  const [goals, evaluation, history] = await Promise.all([
+    getStudyGoalReadModel(),
+    getGoalEvaluationView(),
+    getStudyGoalHistoryPage({ cursor: params.history, pageSize: 10 })
+  ]);
   if (isSupabaseConfigured() && goals.state === "signed_out") redirect("/login?next=/goals");
   const evaluationIsCurrent = evaluation.expiresAt
     ? new Date(evaluation.expiresAt).getTime() > Date.now()
@@ -37,7 +45,11 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
       </header>
 
       {params.result ? (
-        <p className="rounded-2xl bg-blue-50 p-4 text-sm font-bold text-blue-900">Goal action result: {params.result}</p>
+        <div className="rounded-2xl bg-blue-50 p-4 text-sm font-bold text-blue-900">
+          {params.result === "ok" ? <GoalDraftCleanup /> : null}
+          <p>Goal action result: {params.result}</p>
+          {params.result === "stale" ? <Link href="/goals" className="underline">Reload latest and review changes</Link> : null}
+        </div>
       ) : null}
       {goals.state === "unavailable" || goals.state === "error" ? (
         <p className="rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-900">
@@ -60,7 +72,12 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
         recommendationReason={recommendationReason}
       />
       <GoalList title="Current" goals={goals.active} active />
-      <GoalList title="History" goals={goals.history} />
+      <GoalList title="History" goals={history.items} />
+      {history.nextCursor ? (
+        <Link href={`/goals?history=${history.nextCursor}`} className="justify-self-start rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-800">
+          Load older history
+        </Link>
+      ) : null}
     </main>
   );
 }

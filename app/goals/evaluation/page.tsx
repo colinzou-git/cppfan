@@ -2,10 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GoalEvaluation } from "@/features/goals/goal-evaluation";
 import { getGoalEvaluationView } from "@/features/goals/evaluation-session-query";
+import { requireGoalsOnboarding } from "@/features/goals/goal-route-guard";
 
 export const metadata = { title: "Goal Evaluation — cppFan" };
 
 export default async function GoalEvaluationPage() {
+  await requireGoalsOnboarding("/goals/evaluation");
   const view = await getGoalEvaluationView();
   if (view.state === "signed_out") redirect("/login?next=/goals/evaluation");
 

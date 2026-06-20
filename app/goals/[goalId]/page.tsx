@@ -5,16 +5,20 @@ import { getStudyGoalReadModel } from "@/features/goals/goal-queries";
 import { getDailyNewPlan } from "@/features/goals/daily-new-queries";
 import { getDailyReviewView } from "@/features/review/daily-review-queries";
 import { GoalEditForm } from "@/features/goals/goal-edit-form";
+import { getStudyGoalRevisionTimeline } from "@/features/goals/goal-history-queries";
+import { requireGoalsOnboarding } from "@/features/goals/goal-route-guard";
 
 export default async function GoalDetailPage({ params }: { params: Promise<{ goalId: string }> }) {
   const { goalId } = await params;
+  await requireGoalsOnboarding(`/goals/${goalId}`);
   const model = await getStudyGoalReadModel();
   const goal = [...model.active, ...model.history].find((candidate) => candidate.id === goalId);
   if (!goal) notFound();
 
-  const [dailyNew, dailyReview] = await Promise.all([
+  const [dailyNew, dailyReview, revisions] = await Promise.all([
     getDailyNewPlan(),
-    getDailyReviewView(goal.timezone)
+    getDailyReviewView(goal.timezone),
+    getStudyGoalRevisionTimeline(goal.id)
   ]);
   const goalActions = [...dailyNew.actions, ...dailyNew.allocatedExtraActions]
     .filter((action) => action.goalIds.includes(goal.id));
@@ -42,6 +46,17 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ goa
             <h3 className="font-black text-slate-950">{target.title}</h3>
             <p className="text-sm text-slate-600">Baseline state: {target.baselineAcquisitionState.replaceAll("_", " ")}</p>
             <p className="text-xs font-semibold text-slate-500">Contract {target.acquisitionContractId} v{target.acquisitionContractVersion}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-3 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
+        <h2 className="text-xl font-black text-slate-950">Revision timeline</h2>
+        {revisions.map((revision) => (
+          <article key={revision.id} className="rounded-2xl border border-slate-200 p-3 text-sm">
+            <p className="font-black">Revision {revision.revisionNumber}: {revision.startLocalDate} through {revision.endLocalDate}</p>
+            <p>{revision.timezone} · {revision.recommendationSource.replaceAll("_", " ")}</p>
+            {revision.recommendationReason ? <p className="text-slate-600">{revision.recommendationReason}</p> : null}
           </article>
         ))}
       </section>

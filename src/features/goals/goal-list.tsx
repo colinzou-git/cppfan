@@ -28,6 +28,11 @@ function LifecycleForm({
 }
 
 function GoalCard({ goal, active }: { goal: StudyGoalView; active: boolean }) {
+  const completed = goal.targets.filter((target) => target.baselineAcquisitionState === "initial_learning_complete").length;
+  const remaining = goal.targets.length - completed;
+  const end = Date.parse(`${goal.endLocalDate}T00:00:00Z`);
+  const daysRemaining = Math.max(0, Math.ceil((end - Date.now()) / 86_400_000) + 1);
+  const pace = goal.status === "completed" ? "complete" : remaining === 0 ? "ahead" : daysRemaining <= 1 ? "at risk" : "on track";
   return (
     <article className="grid gap-3 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -36,8 +41,12 @@ function GoalCard({ goal, active }: { goal: StudyGoalView; active: boolean }) {
           <p className="text-sm text-slate-600">{goal.startLocalDate} through {goal.endLocalDate} · {goal.timezone}</p>
           <p className="text-xs font-semibold text-slate-500">Revision {goal.currentRevision} · {goal.targets.length} acquisition target{goal.targets.length === 1 ? "" : "s"}</p>
         </div>
-        <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-black uppercase text-indigo-800">{goal.status}</span>
+        <div className="text-right">
+          <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-black uppercase text-indigo-800">{goal.status}</span>
+          <p className="mt-2 text-xs font-bold text-slate-600">{daysRemaining} day{daysRemaining === 1 ? "" : "s"} remaining · {pace}</p>
+        </div>
       </div>
+      <p className="text-sm text-slate-700"><strong>{completed}</strong> baseline-complete · <strong>{remaining}</strong> remaining acquisition target{remaining === 1 ? "" : "s"}. FSRS review is tracked separately.</p>
       <div className="flex flex-wrap gap-2">
         {goal.targets.map((target) => (
           <span key={target.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
