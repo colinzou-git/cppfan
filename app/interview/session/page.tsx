@@ -3,7 +3,11 @@ import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
 import { getInterviewProblem, getInterviewProblems } from "@/features/interview/problem-catalog";
 import { getCurrentSession } from "@/features/interview/interview-session-store";
-import { createSession, type SessionState } from "@/features/interview/session-machine";
+import {
+  createSession,
+  currentPhase,
+  type SessionState
+} from "@/features/interview/session-machine";
 import { SessionRunner } from "@/features/interview/session-runner";
 import { FollowUpDrill } from "@/features/interview/follow-up-drill";
 
@@ -67,7 +71,7 @@ export default async function InterviewSessionPage() {
               metadata: {
                 difficulty: problem.difficulty,
                 sessionMode: state.mode,
-                sessionStatus: state.phase,
+                sessionStatus: `${state.status}:${currentPhase(state)}`,
                 durationMinutes: state.durationMinutes
               }
             }}
