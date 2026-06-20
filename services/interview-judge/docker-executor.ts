@@ -5,6 +5,7 @@ export type DockerExecutorOptions = {
   workspacePath: string;
   containerWorkspace?: string;
   cpus?: number;
+  signal?: AbortSignal;
 };
 
 export type DockerInvocation = {
@@ -12,6 +13,7 @@ export type DockerInvocation = {
   stdin?: string;
   timeoutMs: number;
   outputLimitBytes: number;
+  signal?: AbortSignal;
 };
 
 export type DockerLauncher = (invocation: DockerInvocation) => Promise<WorkerProcessResult>;
@@ -39,6 +41,10 @@ export function buildDockerRunArgs(command: WorkerProcessCommand, options: Docke
     "--security-opt=no-new-privileges",
     "--pids-limit",
     String(command.pidsLimit),
+    "--ulimit",
+    `cpu=${command.cpuSeconds}:${command.cpuSeconds}`,
+    "--ulimit",
+    `fsize=${command.fileSizeBytes}:${command.fileSizeBytes}`,
     "--memory",
     `${command.memoryMb}m`,
     "--cpus",
@@ -54,6 +60,7 @@ export function createDockerExecutor(options: DockerExecutorOptions, launch: Doc
       args: buildDockerRunArgs(command, options),
       stdin: command.stdin,
       timeoutMs: command.timeoutMs,
-      outputLimitBytes: command.outputLimitBytes
+      outputLimitBytes: command.outputLimitBytes,
+      signal: options.signal
     });
 }

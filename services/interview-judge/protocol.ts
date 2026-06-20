@@ -1,4 +1,10 @@
-import type { JudgeLimits, JudgeResult, JudgeSubmission, JudgeCompiler, CppStandard } from "@/features/interview/judge-contract";
+import type {
+  JudgeLimits,
+  JudgeResult,
+  JudgeSubmission,
+  JudgeCompiler,
+  CppStandard
+} from "@/features/interview/judge-contract";
 
 export type JudgeTaskKind = "compile_only" | "compile_and_run";
 
@@ -22,6 +28,7 @@ export type JudgeQueueState = "queued" | "running" | "completed" | "canceled";
 
 export type JudgeQueueRecord = {
   submissionId: string;
+  ownerId: string;
   request: JudgeWorkerRequest;
   state: JudgeQueueState;
   enqueuedAtMs: number;

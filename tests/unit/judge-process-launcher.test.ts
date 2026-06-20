@@ -1,7 +1,11 @@
 import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
 import { describe, expect, it } from "vitest";
-import { createDockerCliLauncher, type JudgeProcess, type JudgeProcessSpawner } from "../../services/interview-judge/process-launcher";
+import {
+  createDockerCliLauncher,
+  type JudgeProcess,
+  type JudgeProcessSpawner
+} from "../../services/interview-judge/process-launcher";
 
 class FakeJudgeProcess extends EventEmitter implements JudgeProcess {
   stdout = new PassThrough();
@@ -117,5 +121,23 @@ describe("Docker CLI process launcher (#178)", () => {
       exitCode: 137,
       memoryExceeded: true
     });
+  });
+
+  it("kills a running sandbox when its queue job is canceled", async () => {
+    const controller = new AbortController();
+    const { launcher, processes } = setup(() => 1000);
+    const promise = launcher({
+      args: ["run"],
+      timeoutMs: 5000,
+      outputLimitBytes: 1024,
+      signal: controller.signal
+    });
+
+    controller.abort();
+    const process = processes[0];
+    expect(process.killed).toBe(true);
+    expect(process.killedSignal).toBe("SIGKILL");
+    process.close(null, "SIGKILL");
+    await expect(promise).resolves.toMatchObject({ exitCode: null, signal: "SIGKILL" });
   });
 });

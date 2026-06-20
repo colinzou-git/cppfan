@@ -12,11 +12,7 @@ import {
 import type { JudgeTaskKind } from "../../../services/interview-judge/protocol";
 import type { SessionMode } from "./session-machine";
 
-export type JudgeSubmissionStatus =
-  | "queued"
-  | "running"
-  | "canceled"
-  | JudgeResult["status"];
+export type JudgeSubmissionStatus = "queued" | "running" | "canceled" | JudgeResult["status"];
 
 export type JudgeSubmissionContext = {
   mode: SessionMode;
@@ -60,7 +56,14 @@ export type JudgeSubmissionRow = {
 
 export type JudgeResultPatch = Pick<
   JudgeSubmissionRow,
-  "status" | "compiled" | "visible_passed" | "visible_total" | "hidden_passed" | "hidden_total" | "runtime_ms" | "memory_mb"
+  | "status"
+  | "compiled"
+  | "visible_passed"
+  | "visible_total"
+  | "hidden_passed"
+  | "hidden_total"
+  | "runtime_ms"
+  | "memory_mb"
 >;
 
 export type JudgeSubmissionWriteOutcome =
@@ -81,7 +84,9 @@ function positiveInteger(value: number, fallback: number): number {
   return parsed > 0 ? parsed : fallback;
 }
 
-export function validateJudgeSubmissionDraft(input: JudgeSubmissionDraft): { ok: true } | { ok: false; reason: string } {
+export function validateJudgeSubmissionDraft(
+  input: JudgeSubmissionDraft
+): { ok: true } | { ok: false; reason: string } {
   const testCount = input.visibleTestCount + input.hiddenTestCount;
   if (!UUID_RE.test(input.submission.submissionId)) {
     return { ok: false, reason: "invalid_submission_id" };
@@ -161,48 +166,15 @@ export async function saveQueuedJudgeSubmission(input: JudgeSubmissionDraft): Pr
     return { status: "duplicate", submissionId };
   }
 
-  const { error } = await supabase
-    .from("interview_judge_submissions")
-    .insert({ user_id: user.id, ...judgeSubmissionToRow(input), updated_at: new Date().toISOString() });
-  if (!error) {
+  const { data, error } = await supabase.rpc("enqueue_interview_judge_submission", {
+    p_submission: judgeSubmissionToRow(input)
+  });
+  if (!error && data === "queued") {
     return { status: "ok", submissionId };
   }
-
-  // Retry-safe idempotency: if a racing insert created the same owned row, treat
-  // the duplicate as success instead of queuing work twice.
-  if (error.code === "23505") {
-    const retry = await supabase
-      .from("interview_judge_submissions")
-      .select("submission_id")
-      .eq("submission_id", submissionId)
-      .maybeSingle();
-    if (retry.data) {
-      return { status: "duplicate", submissionId };
-    }
+  if (!error && data === "duplicate") {
+    return { status: "duplicate", submissionId };
   }
 
-  return { status: "error", reason: error.message };
-}
-
-export async function saveJudgeResult(result: JudgeResult): Promise<JudgeSubmissionWriteOutcome> {
-  const supabase = await createClient();
-  if (!supabase) {
-    return { status: "signed_out" };
-  }
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { status: "signed_out" };
-  }
-
-  const { error, count } = await supabase
-    .from("interview_judge_submissions")
-    .update({ ...judgeResultToPatch(result), updated_at: new Date().toISOString() }, { count: "exact" })
-    .eq("submission_id", result.submissionId);
-
-  if (error) {
-    return { status: "error", reason: error.message };
-  }
-  return count && count > 0 ? { status: "ok", submissionId: result.submissionId } : { status: "error", reason: "not_found" };
+  return { status: "error", reason: error?.message ?? String(data ?? "enqueue_failed") };
 }

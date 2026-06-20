@@ -26,6 +26,8 @@ export type JudgeIsolationProfile = {
 };
 
 export type JudgeRateLimitPolicy = {
+  perUserSubmissionsPerMinute: number;
+  globalSubmissionsPerMinute: number;
   perUserQueued: number;
   perUserRunning: number;
   globalRunning: number;
@@ -55,6 +57,8 @@ export const JUDGE_SANDBOX_POLICY: JudgeSandboxPolicy = {
     cleanup: "always"
   },
   rateLimits: {
+    perUserSubmissionsPerMinute: 20,
+    globalSubmissionsPerMinute: 240,
     perUserQueued: 5,
     perUserRunning: 1,
     globalRunning: 16
@@ -69,6 +73,8 @@ export type SandboxRunManifest = {
   timeoutMs: number;
   memoryMb: number;
   pidsLimit: number;
+  cpuSeconds: number;
+  fileSizeBytes: number;
   outputKb: number;
   cleanup: "rm";
 };
@@ -98,6 +104,10 @@ export function buildSandboxRunManifest(
       "--security-opt=no-new-privileges",
       "--pids-limit",
       String(request.limits.maxProcesses),
+      "--ulimit",
+      `cpu=${Math.max(1, Math.ceil(request.limits.cpuMs / 1000))}:${Math.max(1, Math.ceil(request.limits.cpuMs / 1000))}`,
+      "--ulimit",
+      `fsize=${request.limits.maxFileKb * 1024}:${request.limits.maxFileKb * 1024}`,
       "--memory",
       `${request.limits.memoryMb}m`,
       image
@@ -105,6 +115,8 @@ export function buildSandboxRunManifest(
     timeoutMs: request.limits.wallMs,
     memoryMb: request.limits.memoryMb,
     pidsLimit: request.limits.maxProcesses,
+    cpuSeconds: Math.max(1, Math.ceil(request.limits.cpuMs / 1000)),
+    fileSizeBytes: request.limits.maxFileKb * 1024,
     outputKb: request.limits.outputKb,
     cleanup: "rm"
   };
@@ -168,11 +180,30 @@ export function infrastructureFailureResult(submissionId: string): JudgeResult {
   };
 }
 
-export function createJudgeQueue(nowMs = () => Date.now()) {
+export function createJudgeQueue(
+  nowMs = () => Date.now(),
+  rateLimits: JudgeRateLimitPolicy = JUDGE_SANDBOX_POLICY.rateLimits
+) {
   const records = new Map<string, JudgeQueueRecord>();
+  const acceptedEnqueues: { ownerId: string; atMs: number }[] = [];
+
+  function activeCount(ownerId: string | null, state: "queued" | "running"): number {
+    return [...records.values()].filter(
+      (record) => record.state === state && (ownerId === null || record.ownerId === ownerId)
+    ).length;
+  }
+
+  function recentEnqueues(ownerId: string | null, now: number): number {
+    const cutoff = now - 60_000;
+    return acceptedEnqueues.filter((entry) => entry.atMs > cutoff && (ownerId === null || entry.ownerId === ownerId))
+      .length;
+  }
 
   return {
-    enqueue(request: JudgeWorkerRequest): { status: "queued" | "duplicate" | "rejected"; record?: JudgeQueueRecord; reason?: string } {
+    enqueue(
+      request: JudgeWorkerRequest,
+      ownerId: string
+    ): { status: "queued" | "duplicate" | "rejected"; record?: JudgeQueueRecord; reason?: string } {
       const validation = validateWorkerRequest(request);
       if (!validation.ok) {
         return { status: "rejected", reason: validation.reason };
@@ -184,8 +215,19 @@ export function createJudgeQueue(nowMs = () => Date.now()) {
       }
 
       const now = nowMs();
+      if (!ownerId) return { status: "rejected", reason: "missing_owner" };
+      if (activeCount(ownerId, "queued") >= rateLimits.perUserQueued) {
+        return { status: "rejected", reason: "per_user_queue_limit" };
+      }
+      if (recentEnqueues(ownerId, now) >= rateLimits.perUserSubmissionsPerMinute) {
+        return { status: "rejected", reason: "per_user_rate_limit" };
+      }
+      if (recentEnqueues(null, now) >= rateLimits.globalSubmissionsPerMinute) {
+        return { status: "rejected", reason: "global_rate_limit" };
+      }
       const record: JudgeQueueRecord = {
         submissionId: request.submission.submissionId,
+        ownerId,
         request,
         state: "queued",
         enqueuedAtMs: now,
@@ -193,7 +235,22 @@ export function createJudgeQueue(nowMs = () => Date.now()) {
         result: null
       };
       records.set(record.submissionId, record);
+      acceptedEnqueues.push({ ownerId, atMs: now });
       return { status: "queued", record };
+    },
+
+    start(submissionId: string): { status: "running" | "rejected"; reason?: string } {
+      const record = records.get(submissionId);
+      if (!record || record.state !== "queued") return { status: "rejected", reason: "not_queued" };
+      if (activeCount(record.ownerId, "running") >= rateLimits.perUserRunning) {
+        return { status: "rejected", reason: "per_user_concurrency_limit" };
+      }
+      if (activeCount(null, "running") >= rateLimits.globalRunning) {
+        return { status: "rejected", reason: "global_concurrency_limit" };
+      }
+      record.state = "running";
+      record.updatedAtMs = nowMs();
+      return { status: "running" };
     },
 
     cancel(submissionId: string): boolean {

@@ -25,8 +25,16 @@ Docker CLI with timeout and output caps for local worker wiring; and
 `workspace-lifecycle.ts` materializes `submission.cpp` in a per-submission
 temporary directory and cleans it up with `withJudgeWorkspace()`.
 `local-worker.ts` composes those pieces into a reproducible local/Codespaces
-worker entry point. Unit tests use fake launchers so `pnpm test` never executes
-learner code.
+worker entry point. Its `AbortSignal` kills an active Docker process on queue
+cancellation, while the workspace `finally` cleanup covers cancellation,
+timeouts, launcher failure, and worker loss. Unit tests use fake launchers so
+`pnpm test` never executes learner code.
+
+Build the reproducible local image from the repository root:
+
+```bash
+docker build -f services/interview-judge/Dockerfile -t cppfan/interview-judge:local .
+```
 
 ## Local Manifest
 
@@ -39,7 +47,9 @@ docker run --rm --network=none --read-only \
   --workdir /workspace \
   --user=65532:65532 --cap-drop=ALL \
   --security-opt=no-new-privileges \
-  --pids-limit 32 --memory 256m cppfan/interview-judge:local
+  --pids-limit 32 --memory 256m \
+  --ulimit cpu=2:2 --ulimit fsize=1048576:1048576 \
+  cppfan/interview-judge:local
 ```
 
 The worker receives `JudgeWorkerRequest` records with:
@@ -49,6 +59,11 @@ The worker receives `JudgeWorkerRequest` records with:
 - visible and hidden test metadata
 - hashes for server-held fixtures, never raw hidden inputs or expected outputs
 - idempotent submission id
+
+The durable enqueue RPC permits at most 20 submissions per learner per minute,
+240 globally per minute, and five active queued/running submissions per learner.
+The worker queue separately permits one running submission per learner and 16
+globally. Idempotent replays do not consume either allowance.
 
 ## Evidence Contract
 

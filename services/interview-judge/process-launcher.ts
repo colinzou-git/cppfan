@@ -12,11 +12,7 @@ export type JudgeProcess = {
   on(event: "error", listener: (error: Error) => void): JudgeProcess;
 };
 
-export type JudgeProcessSpawner = (
-  command: string,
-  args: string[],
-  options: SpawnOptionsWithoutStdio
-) => JudgeProcess;
+export type JudgeProcessSpawner = (command: string, args: string[], options: SpawnOptionsWithoutStdio) => JudgeProcess;
 
 export type DockerCliLauncherOptions = {
   command?: string;
@@ -30,7 +26,11 @@ type OutputCapture = {
   text(): string;
 };
 
-function createBoundedCapture(limit: () => number, consume: (bytes: number) => void, onExceeded: () => void): OutputCapture {
+function createBoundedCapture(
+  limit: () => number,
+  consume: (bytes: number) => void,
+  onExceeded: () => void
+): OutputCapture {
   const chunks: Buffer[] = [];
 
   return {
@@ -77,6 +77,7 @@ export function createDockerCliLauncher(options: DockerCliLauncherOptions = {}):
       let outputExceeded = false;
       let usedOutputBytes = 0;
       let processRef: JudgeProcess | null = null;
+      const cancel = () => processRef?.kill(killSignal);
 
       const remainingOutputBytes = () => invocation.outputLimitBytes - usedOutputBytes;
       const markOutputExceeded = () => {
@@ -85,17 +86,26 @@ export function createDockerCliLauncher(options: DockerCliLauncherOptions = {}):
         processRef?.kill(killSignal);
       };
 
-      const stdout = createBoundedCapture(remainingOutputBytes, (bytes) => {
-        usedOutputBytes += bytes;
-      }, markOutputExceeded);
-      const stderr = createBoundedCapture(remainingOutputBytes, (bytes) => {
-        usedOutputBytes += bytes;
-      }, markOutputExceeded);
+      const stdout = createBoundedCapture(
+        remainingOutputBytes,
+        (bytes) => {
+          usedOutputBytes += bytes;
+        },
+        markOutputExceeded
+      );
+      const stderr = createBoundedCapture(
+        remainingOutputBytes,
+        (bytes) => {
+          usedOutputBytes += bytes;
+        },
+        markOutputExceeded
+      );
 
       const finish = (partial: Omit<WorkerProcessResult, "stdout" | "stderr" | "runtimeMs">) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        invocation.signal?.removeEventListener("abort", cancel);
         const stderrText = stderr.text();
         resolve({
           ...partial,
@@ -104,7 +114,8 @@ export function createDockerCliLauncher(options: DockerCliLauncherOptions = {}):
           timedOut,
           outputExceeded,
           memoryExceeded:
-            partial.memoryExceeded ?? (!timedOut && isLikelyMemoryLimit(partial.exitCode, partial.signal ?? null, stderrText)),
+            partial.memoryExceeded ??
+            (!timedOut && isLikelyMemoryLimit(partial.exitCode, partial.signal ?? null, stderrText)),
           runtimeMs: Math.max(0, nowMs() - startMs)
         });
       };
@@ -121,6 +132,9 @@ export function createDockerCliLauncher(options: DockerCliLauncherOptions = {}):
         finish({ exitCode: null, signal: null });
         return;
       }
+
+      invocation.signal?.addEventListener("abort", cancel, { once: true });
+      if (invocation.signal?.aborted) cancel();
 
       processRef.stdout?.on("data", (chunk: string | Buffer) => stdout.append(chunk));
       processRef.stderr?.on("data", (chunk: string | Buffer) => stderr.append(chunk));

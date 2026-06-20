@@ -59,7 +59,9 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
   }
 
   beforeAll(async () => {
-    service = createClient(url!, serviceKey!, { auth: { persistSession: false, autoRefreshToken: false } });
+    service = createClient(url!, serviceKey!, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
 
     const stamp = Date.now();
     const emailA = `learner-a-${stamp}@example.test`;
@@ -210,10 +212,7 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect(replay.error).toBeNull();
     expect(replay.data?.[0]?.status).toBe("already_processed");
 
-    const attempts = await clientA
-      .from("learning_item_attempts")
-      .select("id")
-      .eq("learning_item_id", ITEM_ID);
+    const attempts = await clientA.from("learning_item_attempts").select("id").eq("learning_item_id", ITEM_ID);
     expect((attempts.data ?? []).length).toBe(1);
   });
 
@@ -290,11 +289,7 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     }
 
     // B cannot mutate A's attempt rows (RLS scopes UPDATE/DELETE to the owner).
-    const update = await clientB
-      .from("review_cards")
-      .update({ reps: 999 })
-      .eq("user_id", aId)
-      .select("id");
+    const update = await clientB.from("review_cards").update({ reps: 999 }).eq("user_id", aId).select("id");
     expect((update.data ?? []).length).toBe(0);
 
     // B cannot read A's profile.
@@ -303,16 +298,19 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((profile.data ?? []).length).toBe(0);
 
     // Existing per-user project table.
-    const capstone = await clientB
-      .from("capstone_milestone_progress")
-      .select("user_id")
-      .eq("user_id", aId);
+    const capstone = await clientB.from("capstone_milestone_progress").select("user_id").eq("user_id", aId);
     expect(capstone.error).toBeNull();
     expect((capstone.data ?? []).length).toBe(0);
   });
 
   it("persists placement results per-user, isolates them, and resets (#125)", async () => {
-    const row = { user_id: aId, module_id: "cpp.values_types", level: "start_here", correct: 0, total: 1 };
+    const row = {
+      user_id: aId,
+      module_id: "cpp.values_types",
+      level: "start_here",
+      correct: 0,
+      total: 1
+    };
     const ins = await clientA.from("placement_results").upsert(row, { onConflict: "user_id,module_id" });
     expect(ins.error).toBeNull();
 
@@ -343,15 +341,10 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
       reflection: "done",
       completed_at: new Date().toISOString()
     };
-    const ins = await clientA
-      .from("capstone_milestone_progress")
-      .upsert(row, { onConflict: "user_id,milestone_id" });
+    const ins = await clientA.from("capstone_milestone_progress").upsert(row, { onConflict: "user_id,milestone_id" });
     expect(ins.error).toBeNull();
 
-    const mine = await clientA
-      .from("capstone_milestone_progress")
-      .select("milestone_id,status")
-      .eq("user_id", aId);
+    const mine = await clientA.from("capstone_milestone_progress").select("milestone_id,status").eq("user_id", aId);
     expect(mine.error).toBeNull();
     expect((mine.data ?? []).some((r) => r.milestone_id === "note-manager.m1")).toBe(true);
 
@@ -435,6 +428,50 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     expect((asAnon.data ?? []).length).toBe(0);
   });
 
+  it("enqueues judge metadata idempotently while preventing forged results and cross-user reads (#178)", async () => {
+    const judgeSubmissionId = crypto.randomUUID();
+    const payload = {
+      submission_id: judgeSubmissionId,
+      interview_session_id: null,
+      problem_id: "iv.prefix.balance-returns-to-zero",
+      problem_version: 1,
+      mode: "interview",
+      task_kind: "compile_and_run",
+      compiler: "gcc",
+      standard: "c++20",
+      source_hash: "a".repeat(64),
+      source_bytes: 128,
+      source_version: 1,
+      assistance_used: false,
+      prior_solution_exposed: false,
+      visible_total: 2,
+      hidden_total: 2
+    };
+
+    const queued = await clientA.rpc("enqueue_interview_judge_submission", {
+      p_submission: payload
+    });
+    expect(queued.error).toBeNull();
+    expect(queued.data).toBe("queued");
+    const replay = await clientA.rpc("enqueue_interview_judge_submission", {
+      p_submission: payload
+    });
+    expect(replay.error).toBeNull();
+    expect(replay.data).toBe("duplicate");
+
+    const forgedResult = await clientA
+      .from("interview_judge_submissions")
+      .update({ status: "accepted", compiled: true, hidden_passed: 2 })
+      .eq("submission_id", judgeSubmissionId);
+    expect(forgedResult.error).not.toBeNull();
+    const hiddenFromB = await clientB
+      .from("interview_judge_submissions")
+      .select("submission_id,status")
+      .eq("submission_id", judgeSubmissionId);
+    expect(hiddenFromB.error).toBeNull();
+    expect(hiddenFromB.data).toEqual([]);
+  });
+
   it("persists interview practice evidence per-user and isolates it (#180)", async () => {
     const row = {
       user_id: aId,
@@ -494,7 +531,13 @@ suite("authenticated learning loop + RLS isolation (#96)", () => {
     const cases: { table: string; row: Record<string, unknown>; patch: Record<string, unknown> }[] = [
       {
         table: "placement_results",
-        row: { user_id: aId, module_id: "cpp.values_types", level: "start_here", correct: 0, total: 1 },
+        row: {
+          user_id: aId,
+          module_id: "cpp.values_types",
+          level: "start_here",
+          correct: 0,
+          total: 1
+        },
         patch: { total: 2 }
       },
       {

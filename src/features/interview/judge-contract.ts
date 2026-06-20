@@ -21,6 +21,7 @@ export type JudgeLimits = {
   wallMs: number;
   memoryMb: number;
   maxProcesses: number;
+  maxFileKb: number;
   outputKb: number;
   maxSourceBytes: number;
   maxTests: number;
@@ -31,6 +32,7 @@ export const DEFAULT_JUDGE_LIMITS: JudgeLimits = {
   wallMs: 5000,
   memoryMb: 256,
   maxProcesses: 32,
+  maxFileKb: 1024,
   outputKb: 256,
   maxSourceBytes: 64 * 1024,
   maxTests: 200
@@ -82,7 +84,10 @@ export function isSubmissionWithinLimits(
 }
 
 /** Visible/hidden pass counts from outcomes — counts only, never inputs. */
-export function summarizeOutcomes(outcomes: TestOutcome[]): { visible: TestSummary; hidden: TestSummary } {
+export function summarizeOutcomes(outcomes: TestOutcome[]): {
+  visible: TestSummary;
+  hidden: TestSummary;
+} {
   const visible: TestSummary = { passed: 0, total: 0 };
   const hidden: TestSummary = { passed: 0, total: 0 };
   for (const o of outcomes) {
@@ -116,7 +121,10 @@ export function deriveExecutionStatus(compiled: boolean, outcomes: TestOutcome[]
  * of failed hidden tests (names of hidden tests may hint at the case, so they are
  * withheld until the catalog policy permits disclosure).
  */
-export function learnerFacingResult(result: JudgeResult, outcomes: TestOutcome[]): {
+export function learnerFacingResult(
+  result: JudgeResult,
+  outcomes: TestOutcome[]
+): {
   status: JudgeStatus;
   failedVisibleTests: string[];
   failedHiddenCount: number;

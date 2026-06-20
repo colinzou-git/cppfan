@@ -33,7 +33,7 @@ function mountSource(args: string[]): string {
   return mount.replace(/^type=bind,source=/, "").replace(/,target=\/workspace$/, "");
 }
 
-const source = "#include <iostream>\nint main(){ std::cout << \"ok\"; }\n";
+const source = '#include <iostream>\nint main(){ std::cout << "ok"; }\n';
 
 const submission: JudgeSubmission = {
   submissionId: "00000000-0000-4000-8000-000000000378",
@@ -76,6 +76,7 @@ function request(overrides: Partial<JudgeWorkerRequest> = {}): JudgeWorkerReques
       wallMs: 5000,
       memoryMb: 256,
       maxProcesses: 8,
+      maxFileKb: 1024,
       outputKb: 64,
       maxSourceBytes: 64 * 1024,
       maxTests: 20
@@ -108,7 +109,13 @@ describe("local Docker judge worker composition (#178)", () => {
       return ok("ok\n");
     };
 
-    const result = await runLocalDockerJudge({ request: request(), source, fixtures, workspaceRootDir, launch });
+    const result = await runLocalDockerJudge({
+      request: request(),
+      source,
+      fixtures,
+      workspaceRootDir,
+      launch
+    });
 
     expect(result).toMatchObject({
       status: "accepted",
@@ -119,7 +126,11 @@ describe("local Docker judge worker composition (#178)", () => {
     expect(invocations).toHaveLength(3);
     expect(sourceDuringCompile).toBe(source);
     expect(invocations.every((invocation) => invocation.args.includes("--network=none"))).toBe(true);
-    expect(invocations.map((invocation) => invocation.stdin)).toEqual([undefined, "visible input\n", "SECRET hidden input\n"]);
+    expect(invocations.map((invocation) => invocation.stdin)).toEqual([
+      undefined,
+      "visible input\n",
+      "SECRET hidden input\n"
+    ]);
     expect(invocations.map((invocation) => invocation.args.join(" ")).join("\n")).not.toContain("SECRET hidden input");
     await expect(exists(workspacePath)).resolves.toBe(false);
   });
@@ -132,9 +143,9 @@ describe("local Docker judge worker composition (#178)", () => {
       throw new Error("docker unavailable");
     };
 
-    await expect(runLocalDockerJudge({ request: request(), source, fixtures, workspaceRootDir, launch })).rejects.toThrow(
-      "docker unavailable"
-    );
+    await expect(
+      runLocalDockerJudge({ request: request(), source, fixtures, workspaceRootDir, launch })
+    ).rejects.toThrow("docker unavailable");
     expect(workspacePath).not.toBe("");
     await expect(exists(workspacePath)).resolves.toBe(false);
   });
