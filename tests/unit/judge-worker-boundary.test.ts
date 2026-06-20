@@ -255,6 +255,30 @@ describe("judge worker boundary (#178)", () => {
     });
   });
 
+  it("sustains the documented 16-worker load and rejects worker 17", () => {
+    const queue = createJudgeQueue(() => 1_000);
+    const target = JUDGE_SANDBOX_POLICY.rateLimits.globalRunning;
+    const requests = Array.from({ length: target + 1 }, (_, index) =>
+      request({
+        submission: {
+          ...submission,
+          submissionId: `00000000-0000-4000-8001-${String(index + 1).padStart(12, "0")}`
+        }
+      })
+    );
+
+    requests.forEach((workerRequest, index) => {
+      expect(queue.enqueue(workerRequest, `load-learner-${index}`).status).toBe("queued");
+    });
+    requests.slice(0, target).forEach((workerRequest) => {
+      expect(queue.start(workerRequest.submission.submissionId).status).toBe("running");
+    });
+    expect(queue.start(requests.at(target)!.submission.submissionId)).toEqual({
+      status: "rejected",
+      reason: "global_concurrency_limit"
+    });
+  });
+
   it("tracks every required security and reliability regression category", () => {
     expect(new Set(securityRegressionCases())).toEqual(
       new Set([
