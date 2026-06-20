@@ -14,7 +14,7 @@ The browser cannot be trusted with answer keys, correctness, model updates, or n
 
 Goal Evaluation uses separate user-owned session and response tables. A completed session contains exactly 30 unique choice-gradable learning items. It never writes normal learning attempts, review cards/logs, or mastery-bearing skill events.
 
-The first algorithm is `goal-evaluation-v1`, an interpretable bounded Beta-style model. A neutral prior contributes two correct-equivalent and two incorrect-equivalent weight units per module, so new responses can overcome stale priors. Each committed answer updates a versioned per-module state snapshot containing evidence count, weighted estimate band, and uncertainty. Findings expire seven days after session start.
+The first algorithm is `goal-evaluation-v1`, an interpretable bounded Beta-style model. Recent trusted attempts/reviews, placement, and older attempts with reduced weight initialize each module; prior evidence is capped at two total weight units per module. A neutral prior contributes two correct-equivalent and two incorrect-equivalent weight units, so 30 new responses can overcome stale evidence. The prior sources and timestamps are snapshotted, and each committed answer updates a versioned per-module state containing evidence count, weighted estimate band, and uncertainty. Findings expire seven days after session start.
 
 The opening seven questions are moderate-difficulty broad-coverage anchors. Later candidates are ranked by module uncertainty, difficulty fit, diagnostic weight, coverage deficit, item-type diversity, recent repetition, and whether the prior answer calls for a harder or easier probe. Stable module/item identifiers break ties. Selection excludes used and retired items and prevents three consecutive questions on one skill.
 
@@ -28,7 +28,7 @@ At completion, per-module findings use named bands and reason codes rather than 
 
 The pool must contain at least 30 active, unique, metadata-complete items with protected choices. Build-time catalog validation and the trusted start gate both reject an insufficient pool. One active session is allowed per learner. A start resumes it, an explicit abandon ends it, and an expired session is abandoned before a new one starts. An unanswered item retired during a pause is replaced transactionally and recorded in model state; answered history remains immutable.
 
-Session timestamps and response rows provide stable lifecycle/exposure telemetry for `started`, `answered`, `resumed`, `abandoned`, and `completed` analysis without adding these events to the mastery event union. Response outcomes are available only to trusted aggregate/calibration work.
+`goal_evaluation_events` stores the stable `started`, `answered`, `resumed`, `abandoned`, `completed`, and `recommendations_viewed` lifecycle contract without adding these events to the mastery event union. Answer events reference the immutable response row for exposure/outcome calibration; outcomes remain available only to trusted aggregate work.
 
 ## Consequences
 
