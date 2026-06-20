@@ -21,6 +21,8 @@ describe("AI chat item controls", () => {
     const history = screen.getByRole("link", { name: "Chat history" });
     expect(chat.parentElement).toBe(history.parentElement);
     expect(chat).toHaveAttribute("target", "_blank");
-    expect(chat.getAttribute("href")).toContain("%2Ftutor%3F");
+    expect(chat.getAttribute("href")).toContain("/tutor?mode=conversation");
+    expect(chat.getAttribute("href")).toContain("sourceId%22%3A%22lesson.raii");
+    expect(history.getAttribute("href")).toContain("mode=history");
   });
 });
