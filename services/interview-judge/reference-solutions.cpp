@@ -1,5 +1,0 @@
-#include "reference-solutions-common.inc"
-#include "reference-solutions-a.inc"
-#include "reference-solutions-b.inc"
-#include "reference-solutions-c.inc"
-#include "reference-solutions-main.inc"
