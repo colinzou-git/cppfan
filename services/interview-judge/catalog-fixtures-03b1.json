@@ -1,0 +1,14 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.bst.validate",
+      "version": 1,
+      "ioDescription": "stdin: token count n, then level-order tokens. stdout: true iff strict BST ordering holds globally.",
+      "cases": [
+        {"id":"visible.1","name":"valid","hidden":false,"category":"normal","stdin":"7\n5 3 7 2 4 6 8\n","expectedStdout":"true\n"},
+        {"id":"hidden.2","name":"global violation","hidden":true,"category":"adversarial","stdin":"7\n5 1 7 null null 4 8\n","expectedStdout":"false\n"},
+        {"id":"hidden.3","name":"duplicate invalid","hidden":true,"category":"boundary","stdin":"3\n2 2 3\n","expectedStdout":"false\n"}
+      ]
+    }
+  ]
+}
