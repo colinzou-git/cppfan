@@ -10,6 +10,42 @@ export type StudyGoalHistoryPage = {
   nextCursor: string | null;
 };
 
+export type StudyGoalRevisionTimelineItem = {
+  id: string;
+  revisionNumber: number;
+  startLocalDate: string;
+  endLocalDate: string;
+  timezone: string;
+  recommendationSource: string;
+  recommendationReason: string | null;
+};
+
+export async function getStudyGoalRevisionTimeline(goalId: string, limit = 20) {
+  const supabase = await createClient();
+  if (!supabase) return [] as StudyGoalRevisionTimelineItem[];
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return [] as StudyGoalRevisionTimelineItem[];
+  const result = await supabase.from("study_goal_revisions")
+    .select("id,revision_number,start_local_date,end_local_date,timezone,recommendation_source,recommendation_reason")
+    .eq("user_id", auth.user.id)
+    .eq("goal_id", goalId)
+    .order("revision_number", { ascending: false })
+    .limit(Math.max(1, Math.min(50, limit)));
+  if (result.error) {
+    logConfiguredFailure("study-goal-revision-timeline", result.error);
+    return [] as StudyGoalRevisionTimelineItem[];
+  }
+  return (result.data ?? []).map((row) => ({
+    id: String(row.id),
+    revisionNumber: Number(row.revision_number),
+    startLocalDate: String(row.start_local_date),
+    endLocalDate: String(row.end_local_date),
+    timezone: String(row.timezone),
+    recommendationSource: String(row.recommendation_source),
+    recommendationReason: row.recommendation_reason ? String(row.recommendation_reason) : null
+  }));
+}
+
 const emptyPage = (
   state: StudyGoalHistoryPage["state"],
   authenticated: boolean

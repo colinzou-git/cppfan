@@ -9,6 +9,8 @@ const ROUTES = [
   "/labs",
   "/review",
   "/placement",
+  "/goals",
+  "/goals/evaluation",
   "/exercises",
   "/interview",
   "/interview/diagnostic",

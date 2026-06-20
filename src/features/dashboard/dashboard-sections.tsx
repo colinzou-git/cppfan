@@ -32,7 +32,7 @@ export function DashboardSections({
       <DailyReview view={data.dailyReview} />
       <DailyNew plan={data.dailyNew} />
       <MasteryPreview summary={data.mastery} />
-      <GoalDashboardCard model={data.goals} />
+      <GoalDashboardCard model={data.goals} dailyNew={data.dailyNew} />
       <SkillMapPreview data={data.skillMap} itemLinksBySkill={data.itemLinks} />
     </main>
   );

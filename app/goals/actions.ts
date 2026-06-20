@@ -20,7 +20,9 @@ function value(formData: FormData, name: string) {
 
 function revisionInput(formData: FormData): StudyGoalRevisionInput {
   const requestedSource = value(formData, "recommendation_source");
-  const recommendationSource = requestedSource === "evaluation" ? "evaluation" : "manual";
+  const recommendationSource = requestedSource === "evaluation" || requestedSource === "history_recommendation"
+    ? requestedSource
+    : "manual";
   const skillIds = [...new Set(formData.getAll("skill_ids").map(String))];
   const skills = skillIds
     .map((id) => skillSeed.find((skill) => skill.id === id && skill.is_active))
