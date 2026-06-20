@@ -38,7 +38,12 @@ jobs:
         run: pnpm lint
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: |
+          set +e
+          pnpm typecheck > typecheck.log 2>&1
+          status=$?
+          cat typecheck.log
+          exit $status
 
       - name: Unit tests
         run: pnpm test
@@ -58,6 +63,7 @@ jobs:
         with:
           name: playwright-app
           path: |
+            typecheck.log
             playwright-report/
             test-results/
           if-no-files-found: ignore
