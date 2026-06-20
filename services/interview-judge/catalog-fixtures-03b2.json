@@ -1,0 +1,14 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.bst.lowest-common-ancestor",
+      "version": 1,
+      "ioDescription": "stdin: token count n, values p q, then level-order BST tokens with unique values. stdout: LCA value.",
+      "cases": [
+        {"id":"visible.1","name":"split at root","hidden":false,"category":"normal","stdin":"11 2 8\n6 2 8 0 4 7 9 null null 3 5\n","expectedStdout":"6\n"},
+        {"id":"hidden.2","name":"ancestor is target","hidden":true,"category":"boundary","stdin":"11 2 4\n6 2 8 0 4 7 9 null null 3 5\n","expectedStdout":"2\n"},
+        {"id":"hidden.3","name":"same branch","hidden":true,"category":"normal","stdin":"7 6 8\n5 3 7 2 4 6 8\n","expectedStdout":"7\n"}
+      ]
+    }
+  ]
+}
