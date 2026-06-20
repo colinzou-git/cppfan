@@ -5,6 +5,7 @@ import { ItemHelpLinks } from "@/components/item-help-links";
 import { projectLabs } from "@/features/labs/project-labs";
 import { createClient } from "@/lib/supabase/server";
 import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
+import { CapstoneHelp } from "@/features/labs/capstone-help";
 import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
 import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
 
@@ -38,6 +39,7 @@ export default async function LabsPage() {
       </header>
 
       <CapstoneTracksView tracks={tracks} initialProgress={milestoneProgress} authenticated={authenticated} />
+      <CapstoneHelp tracks={tracks} />
 
       <div className="grid gap-4">
         {projectLabs.map((lab) => (
