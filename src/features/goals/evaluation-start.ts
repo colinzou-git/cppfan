@@ -9,7 +9,10 @@ import { getGoalEvaluationView } from "./evaluation-session-query";
 import { classifyEvaluationError, getEvaluationClient } from "./evaluation-service-core";
 import type { EvaluationMutationResult } from "./evaluation-service-types";
 
-export async function startGoalEvaluation(submissionId: string): Promise<EvaluationMutationResult> {
+export async function startGoalEvaluation(
+  submissionId: string,
+  context: { requestedGoalDuration: number; timezone: string }
+): Promise<EvaluationMutationResult> {
   const client = await getEvaluationClient();
   if (client.status !== "ready") return { status: client.status };
   const validated = validateGoalEvaluationCatalog();
@@ -22,7 +25,9 @@ export async function startGoalEvaluation(submissionId: string): Promise<Evaluat
   const result = await client.supabase.rpc("start_goal_evaluation", {
     p_submission_id: submissionId,
     p_algorithm_version: GOAL_EVALUATION_ALGORITHM_VERSION,
-    p_item_pool_version: GOAL_EVALUATION_ITEM_POOL_VERSION
+    p_item_pool_version: GOAL_EVALUATION_ITEM_POOL_VERSION,
+    p_timezone: context.timezone,
+    p_requested_goal_duration: context.requestedGoalDuration
   });
   if (result.error) return classifyEvaluationError(result.error);
   return { status: "ok", view: await getGoalEvaluationView() };

@@ -48,11 +48,21 @@ suite("trusted adaptive Goal Evaluation (#267)", () => {
   });
 
   it("starts one resumable session through a database-selected first item", async () => {
+    const placement = await learner.from("placement_results").upsert({
+      user_id: learnerId,
+      module_id: "cpp.values_types",
+      level: "probably_familiar",
+      correct: 6,
+      total: 7
+    }, { onConflict: "user_id,module_id" });
+    expect(placement.error).toBeNull();
     const submissionId = crypto.randomUUID();
     const started = await learner.rpc("start_goal_evaluation", {
       p_submission_id: submissionId,
       p_algorithm_version: "goal-evaluation-v1",
-      p_item_pool_version: 1
+      p_item_pool_version: 1,
+      p_timezone: "America/Los_Angeles",
+      p_requested_goal_duration: 7
     });
     expect(started.error).toBeNull();
     expect(started.data?.[0]?.replayed).toBe(false);
@@ -63,7 +73,9 @@ suite("trusted adaptive Goal Evaluation (#267)", () => {
     const replay = await learner.rpc("start_goal_evaluation", {
       p_submission_id: submissionId,
       p_algorithm_version: "goal-evaluation-v1",
-      p_item_pool_version: 1
+      p_item_pool_version: 1,
+      p_timezone: "America/Los_Angeles",
+      p_requested_goal_duration: 7
     });
     expect(replay.error).toBeNull();
     expect(replay.data?.[0]).toMatchObject({
@@ -74,10 +86,14 @@ suite("trusted adaptive Goal Evaluation (#267)", () => {
 
     const refreshed = await learner
       .from("goal_evaluation_sessions")
-      .select("current_item_id,question_index,answer_count,algorithm_version,item_pool_version")
+      .select("current_item_id,question_index,answer_count,algorithm_version,item_pool_version,timezone,requested_goal_duration,prior_sources,model_state")
       .eq("id", sessionId)
       .single();
     expect(refreshed.data).toMatchObject({ current_item_id: firstItem, question_index: 1, answer_count: 0 });
+    expect(refreshed.data).toMatchObject({ timezone: "America/Los_Angeles", requested_goal_duration: 7 });
+    expect(refreshed.data?.prior_sources).toMatchObject({ policy: "bounded-prior-v1", fallback: "evidence" });
+    expect(JSON.stringify(refreshed.data?.prior_sources)).toContain("cpp.values_types");
+    expect(refreshed.data?.model_state).toMatchObject({ priorPolicy: "bounded-prior-v1" });
   });
 
   it("prevents cross-user access, direct writes, hidden correctness reads, and the retired caller-driven RPC", async () => {
@@ -99,6 +115,13 @@ suite("trusted adaptive Goal Evaluation (#267)", () => {
       item_type: "multiple_choice"
     });
     expect(forged.error).not.toBeNull();
+
+    const forgedEvent = await learner.from("goal_evaluation_events").insert({
+      user_id: learnerId,
+      session_id: sessionId,
+      event_name: "goal_evaluation_completed"
+    });
+    expect(forgedEvent.error).not.toBeNull();
 
     const correctness = await learner.from("goal_evaluation_responses").select("is_correct").limit(1);
     expect(correctness.error).not.toBeNull();
@@ -182,6 +205,24 @@ suite("trusted adaptive Goal Evaluation (#267)", () => {
     expect(completed.data?.answer_count).toBe(30);
     expect(Array.isArray(completed.data?.findings)).toBe(true);
     expect((completed.data?.findings as unknown[]).length).toBeGreaterThan(0);
+
+    const events = await learner
+      .from("goal_evaluation_events")
+      .select("event_name")
+      .eq("session_id", sessionId);
+    expect(events.error).toBeNull();
+    expect(events.data?.filter((event) => event.event_name === "goal_evaluation_answered")).toHaveLength(30);
+    expect(events.data?.some((event) => event.event_name === "goal_evaluation_started")).toBe(true);
+    expect(events.data?.some((event) => event.event_name === "goal_evaluation_resumed")).toBe(true);
+    expect(events.data?.some((event) => event.event_name === "goal_evaluation_completed")).toBe(true);
+
+    const viewed = await learner.rpc("record_goal_evaluation_recommendations_viewed", { p_session_id: sessionId });
+    const viewedReplay = await learner.rpc("record_goal_evaluation_recommendations_viewed", { p_session_id: sessionId });
+    expect(viewed.error).toBeNull();
+    expect(viewedReplay.error).toBeNull();
+    const viewedEvents = await learner.from("goal_evaluation_events").select("id")
+      .eq("session_id", sessionId).eq("event_name", "goal_evaluation_recommendations_viewed");
+    expect(viewedEvents.data).toHaveLength(1);
 
     for (const table of ["learning_item_attempts", "review_cards", "review_logs", "skill_events"]) {
       const rows = await learner.from(table).select("*").eq("user_id", learnerId);

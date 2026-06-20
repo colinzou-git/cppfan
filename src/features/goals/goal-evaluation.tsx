@@ -16,13 +16,17 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
   const [view, setView] = useState(initialView);
   const [choiceId, setChoiceId] = useState("");
   const [submissionId, setSubmissionId] = useState(() => crypto.randomUUID());
+  const [requestedGoalDuration, setRequestedGoalDuration] = useState(7);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function start() {
     setMessage(null);
     startTransition(async () => {
-      const result = await startGoalEvaluationAction();
+      const result = await startGoalEvaluationAction({
+        requestedGoalDuration,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+      });
       if (result.status !== "ok") {
         setMessage(`Evaluation could not start: ${result.status.replaceAll("_", " ")}.`);
         return;
@@ -102,6 +106,17 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
         <p className="text-sm text-slate-600">
           Each next question is chosen after the previous response. It refreshes goal suggestions only and never locks content, changes mastery, or enrolls unseen review cards.
         </p>
+        <label className="grid max-w-xs gap-2 text-sm font-bold text-slate-700">
+          Goal duration (days)
+          <input
+            type="number"
+            min={1}
+            max={30}
+            value={requestedGoalDuration}
+            onChange={(event) => setRequestedGoalDuration(Number(event.target.value))}
+            className="h-12 rounded-2xl border border-slate-200 px-4"
+          />
+        </label>
         {message ? <p className="text-sm font-semibold text-slate-700" role="status">{message}</p> : null}
         <Button type="button" onClick={start} disabled={isPending} data-testid="goal-evaluation-start">
           {isPending ? "Starting…" : view.status === "abandoned" ? "Start a new Evaluation" : "Start Evaluation"}

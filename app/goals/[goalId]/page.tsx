@@ -55,7 +55,12 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ goa
         ))}
       </section>
 
-      {goal.status === "active" ? <GoalEditForm goal={goal} /> : (
+      {goal.status === "active" ? (
+        <div className="grid gap-4">
+          <Button asChild variant="secondary"><Link href="/goals/evaluation">Refresh suggestions with Evaluation</Link></Button>
+          <GoalEditForm goal={goal} />
+        </div>
+      ) : (
         <p className="rounded-3xl bg-slate-100 p-5 text-sm font-semibold text-slate-700">Historical goals are read-only until reopened.</p>
       )}
     </main>

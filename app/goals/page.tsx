@@ -9,6 +9,7 @@ import { getGoalEvaluationView } from "@/features/goals/evaluation-session-query
 import { getGoalEvaluationCatalog } from "@/features/goals/evaluation-catalog";
 import { buildGoalEvaluationRecommendations } from "@/features/goals/evaluation-engine";
 import { EvaluationResults } from "@/features/goals/evaluation-results";
+import { EvaluationRecommendationTelemetry } from "@/features/goals/evaluation-recommendation-telemetry";
 
 export default async function GoalsPage({ searchParams }: { searchParams: Promise<{ result?: string }> }) {
   const params = await searchParams;
@@ -46,6 +47,7 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
 
       {recommendations.length > 0 ? (
         <section className="grid gap-4 rounded-3xl border border-indigo-200 bg-indigo-50/80 p-5">
+          {evaluation.sessionId ? <EvaluationRecommendationTelemetry sessionId={evaluation.sessionId} /> : null}
           <div>
             <h2 className="text-xl font-black text-indigo-950">Evaluation-informed suggestions</h2>
             <p className="text-sm text-indigo-900">These transparent priors preselect goal skills. Modify or ignore them freely.</p>
