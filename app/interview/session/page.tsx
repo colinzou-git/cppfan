@@ -3,6 +3,7 @@ import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
 import { getInterviewProblem, getInterviewProblems } from "@/features/interview/problem-catalog";
 import { getCurrentSession } from "@/features/interview/interview-session-store";
+import { getJudgeIoDescription } from "@/features/interview/judge-test-suites";
 import {
   createSession,
   currentPhase,
@@ -26,6 +27,7 @@ export default async function InterviewSessionPage() {
     saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes: 45 });
 
   const problem = getInterviewProblem(state.problemId) ?? problems[0] ?? null;
+  const judgeIoDescription = problem ? getJudgeIoDescription(problem.id) : null;
 
   let authenticated = false;
   const supabase = await createClient();
@@ -63,6 +65,7 @@ export default async function InterviewSessionPage() {
               instructions: [
                 `Constraints: ${problem.constraints}`,
                 `Target complexity: ${problem.targetComplexity}`,
+                ...(judgeIoDescription ? [`Executable contract: ${judgeIoDescription}`] : []),
                 ...problem.requiredEdgeCases.map((edgeCase) => `Edge case to consider: ${edgeCase}`),
                 ...problem.visibleExamples.map((example) => `Visible example: ${example.input} → ${example.output}`)
               ],
@@ -76,6 +79,20 @@ export default async function InterviewSessionPage() {
               }
             }}
           />
+          {judgeIoDescription ? (
+            <section
+              className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4"
+              aria-labelledby="judge-io-heading"
+              data-testid="judge-io-contract"
+            >
+              <h2 id="judge-io-heading" className="text-sm font-black text-blue-950">
+                Executable input/output contract
+              </h2>
+              <p className="mt-1 whitespace-pre-wrap font-mono text-xs leading-5 text-blue-950">
+                {judgeIoDescription}
+              </p>
+            </section>
+          ) : null}
           <SessionRunner
             initialState={state}
             problemTitle={problem.title}

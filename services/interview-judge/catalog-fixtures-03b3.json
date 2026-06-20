@@ -1,0 +1,14 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.list.reverse",
+      "version": 1,
+      "ioDescription": "stdin: n, then n values. stdout: values in reversed linked-list order.",
+      "cases": [
+        {"id":"visible.1","name":"normal","hidden":false,"category":"normal","stdin":"5\n1 2 3 4 5\n","expectedStdout":"5 4 3 2 1\n"},
+        {"id":"hidden.2","name":"empty","hidden":true,"category":"boundary","stdin":"0\n","expectedStdout":"\n"},
+        {"id":"hidden.3","name":"single","hidden":true,"category":"boundary","stdin":"1\n9\n","expectedStdout":"9\n"}
+      ]
+    }
+  ]
+}
