@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Target } from "lucide-react";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { groupInterviewProblems } from "@/features/interview/interview-catalog-view";
 
 export const metadata = { title: "Interview practice — cppFan" };
@@ -70,6 +71,30 @@ export default function InterviewPage() {
                       ))}
                     </ul>
                   ) : null}
+
+                  <ItemHelpLinks
+                    context={{
+                      schemaVersion: 1,
+                      sourceKind: "interview_question",
+                      sourceId: problem.id,
+                      sourceVersion: String(problem.version),
+                      title: problem.title,
+                      prompt: problem.prompt,
+                      topic: problem.patternTags.join(", "),
+                      instructions: [
+                        `Constraints: ${problem.constraints}`,
+                        `Target complexity: ${problem.targetComplexity}`,
+                        ...problem.requiredEdgeCases.map((edgeCase) => `Edge case to consider: ${edgeCase}`),
+                        ...problem.visibleExamples.map((example) => `Visible example: ${example.input} → ${example.output}`)
+                      ],
+                      assessmentState: "unanswered",
+                      revealPolicy: "hint_only",
+                      metadata: {
+                        difficulty: problem.difficulty,
+                        sessionMode: "practice"
+                      }
+                    }}
+                  />
 
                   {problem.hintLadder.length > 0 ? (
                     <details>
