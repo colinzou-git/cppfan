@@ -15,6 +15,7 @@ import type { GoalEvaluationView } from "./evaluation-view";
 export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationView }) {
   const [view, setView] = useState(initialView);
   const [choiceId, setChoiceId] = useState("");
+  const [submissionId, setSubmissionId] = useState(() => crypto.randomUUID());
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -38,6 +39,7 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
       const result = await submitGoalEvaluationAction({
         sessionId: view.sessionId!,
         expectedQuestionIndex: view.questionIndex,
+        submissionId,
         choiceId
       });
       if (result.status !== "ok") {
@@ -48,6 +50,7 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
       }
       setMessage("Response recorded. Next question selected.");
       setChoiceId("");
+      setSubmissionId(crypto.randomUUID());
       setView(result.view);
     });
   }

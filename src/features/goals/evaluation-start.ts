@@ -4,7 +4,6 @@ import {
   GOAL_EVALUATION_QUESTION_COUNT,
   validateGoalEvaluationCatalog
 } from "./evaluation-catalog";
-import { selectNextGoalEvaluationItem } from "./evaluation-engine";
 import { loadPersistedEvaluationCatalog } from "./evaluation-queries";
 import { getGoalEvaluationView } from "./evaluation-session-query";
 import { classifyEvaluationError, getEvaluationClient } from "./evaluation-service-core";
@@ -20,11 +19,8 @@ export async function startGoalEvaluation(submissionId: string): Promise<Evaluat
     return { status: "pool_invalid" };
   }
 
-  const first = selectNextGoalEvaluationItem({ catalog: persisted.catalog, responses: [] });
-  if (!first) return { status: "pool_invalid" };
   const result = await client.supabase.rpc("start_goal_evaluation", {
     p_submission_id: submissionId,
-    p_initial_item_id: first.itemId,
     p_algorithm_version: GOAL_EVALUATION_ALGORITHM_VERSION,
     p_item_pool_version: GOAL_EVALUATION_ITEM_POOL_VERSION
   });

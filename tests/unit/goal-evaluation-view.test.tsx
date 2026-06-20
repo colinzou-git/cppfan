@@ -21,6 +21,7 @@ function activeView(overrides: Partial<GoalEvaluationView> = {}): GoalEvaluation
     answerCount: 7,
     algorithmVersion: "goal-evaluation-v1",
     itemPoolVersion: 1,
+    expiresAt: "2099-01-01T00:00:00.000Z",
     currentQuestion: {
       itemId: "item-8",
       moduleId: "program-basics",
@@ -41,7 +42,6 @@ describe("GoalEvaluation", () => {
   it("does not reveal correctness feedback while the 30-question run is active", async () => {
     submitGoalEvaluationAction.mockResolvedValue({
       status: "ok",
-      lastAnswerCorrect: false,
       view: activeView({
         questionIndex: 9,
         answerCount: 8,

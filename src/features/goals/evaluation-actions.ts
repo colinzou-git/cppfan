@@ -10,9 +10,10 @@ export async function startGoalEvaluationAction() {
 export async function submitGoalEvaluationAction(input: {
   sessionId: string;
   expectedQuestionIndex: number;
+  submissionId: string;
   choiceId: string;
 }) {
-  if (!input?.sessionId || !input.choiceId || !Number.isInteger(input.expectedQuestionIndex)) {
+  if (!input?.sessionId || !input.submissionId || !input.choiceId || !Number.isInteger(input.expectedQuestionIndex)) {
     return { status: "invalid" as const };
   }
   return submitGoalEvaluationChoice(input);
