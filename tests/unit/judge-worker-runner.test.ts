@@ -51,6 +51,7 @@ function request(overrides: Partial<JudgeWorkerRequest> = {}): JudgeWorkerReques
       wallMs: 5000,
       memoryMb: 256,
       maxProcesses: 8,
+      maxFileKb: 1024,
       outputKb: 64,
       maxSourceBytes: 64 * 1024,
       maxTests: 20
@@ -84,16 +85,18 @@ describe("worker runner command contract (#178)", () => {
     expect(gcc.argv).toContain("g++");
     expect(gcc.argv).toContain("-std=c++20");
 
-    const clang = buildCompileCommand(
-      request({ submission: { ...submission, compiler: "clang", standard: "c++17" } })
-    );
+    const clang = buildCompileCommand(request({ submission: { ...submission, compiler: "clang", standard: "c++17" } }));
     expect(clang.argv).toContain("clang++");
     expect(clang.argv).toContain("-std=c++17");
   });
 
   it("accepts compile-only submissions without running tests", async () => {
     const { commands, executor } = executorFor({ compile: ok("") });
-    const result = await runJudgeRequest({ request: request({ taskKind: "compile_only", tests: [] }), fixtures: [], executor });
+    const result = await runJudgeRequest({
+      request: request({ taskKind: "compile_only", tests: [] }),
+      fixtures: [],
+      executor
+    });
 
     expect(result.status).toBe("accepted");
     expect(result.compiled).toBe(true);
@@ -149,7 +152,10 @@ describe("worker runner command contract (#178)", () => {
       runJudgeRequest({
         request: request(),
         fixtures,
-        executor: executorFor({ compile: ok(""), "visible input\n": { exitCode: 1, stdout: "", stderr: "crash" } }).executor
+        executor: executorFor({
+          compile: ok(""),
+          "visible input\n": { exitCode: 1, stdout: "", stderr: "crash" }
+        }).executor
       })
     ).resolves.toMatchObject({ status: "runtime_error", compiled: true });
 
@@ -157,7 +163,10 @@ describe("worker runner command contract (#178)", () => {
       runJudgeRequest({
         request: request(),
         fixtures,
-        executor: executorFor({ compile: ok(""), "visible input\n": { exitCode: null, stdout: "", stderr: "", timedOut: true } }).executor
+        executor: executorFor({
+          compile: ok(""),
+          "visible input\n": { exitCode: null, stdout: "", stderr: "", timedOut: true }
+        }).executor
       })
     ).resolves.toMatchObject({ status: "timeout", compiled: true });
 

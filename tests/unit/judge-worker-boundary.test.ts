@@ -57,6 +57,14 @@ describe("judge worker boundary (#178)", () => {
     expect(source).not.toMatch(/child_process|spawn|exec|docker|clang|g\+\+/);
   });
 
+  it("ships a reproducible rootless GCC/Clang worker image", () => {
+    const dockerfile = readFileSync("services/interview-judge/Dockerfile", "utf8");
+    expect(dockerfile).toMatch(/FROM ubuntu:24\.04/);
+    expect(dockerfile).toMatch(/clang/);
+    expect(dockerfile).toMatch(/g\+\+/);
+    expect(dockerfile).toMatch(/USER 65532:65532/);
+  });
+
   it("supports GCC/Clang, C++17/C++20, compile-only, and compile+run tasks", () => {
     expect(WORKER_CAPABILITIES.compilers).toEqual(["gcc", "clang"]);
     expect(WORKER_CAPABILITIES.standards).toEqual(["c++17", "c++20"]);
@@ -88,6 +96,8 @@ describe("judge worker boundary (#178)", () => {
     expect(manifest.pidsLimit).toBe(DEFAULT_JUDGE_LIMITS.maxProcesses);
     expect(manifest.timeoutMs).toBe(DEFAULT_JUDGE_LIMITS.wallMs);
     expect(manifest.memoryMb).toBe(DEFAULT_JUDGE_LIMITS.memoryMb);
+    expect(manifest.cpuSeconds).toBe(2);
+    expect(manifest.fileSizeBytes).toBe(DEFAULT_JUDGE_LIMITS.maxFileKb * 1024);
     expect(manifest.outputKb).toBe(DEFAULT_JUDGE_LIMITS.outputKb);
     expect(manifest.cleanup).toBe("rm");
   });
@@ -102,11 +112,26 @@ describe("judge worker boundary (#178)", () => {
       ok: false,
       reason: "unsupported_standard"
     });
-    expect(validateWorkerRequest(request({ submission: { ...submission, sourceBytes: DEFAULT_JUDGE_LIMITS.maxSourceBytes + 1 } }))).toEqual({
+    expect(
+      validateWorkerRequest(
+        request({
+          submission: { ...submission, sourceBytes: DEFAULT_JUDGE_LIMITS.maxSourceBytes + 1 }
+        })
+      )
+    ).toEqual({
       ok: false,
       reason: "source_size_limit"
     });
-    expect(validateWorkerRequest(request({ tests: Array.from({ length: DEFAULT_JUDGE_LIMITS.maxTests + 1 }, (_, i) => ({ ...visible, id: `t${i}` })) }))).toEqual({
+    expect(
+      validateWorkerRequest(
+        request({
+          tests: Array.from({ length: DEFAULT_JUDGE_LIMITS.maxTests + 1 }, (_, i) => ({
+            ...visible,
+            id: `t${i}`
+          }))
+        })
+      )
+    ).toEqual({
       ok: false,
       reason: "test_count_limit"
     });
@@ -125,7 +150,14 @@ describe("judge worker boundary (#178)", () => {
       }
     });
 
-    await expect(client.enqueue({ submission, taskKind: "compile_only", visibleTests: [visible], hiddenTests: [hidden] })).resolves.toEqual({
+    await expect(
+      client.enqueue({
+        submission,
+        taskKind: "compile_only",
+        visibleTests: [visible],
+        hiddenTests: [hidden]
+      })
+    ).resolves.toEqual({
       status: "queued",
       submissionId: submission.submissionId
     });
@@ -156,23 +188,71 @@ describe("judge worker boundary (#178)", () => {
 
   it("provides idempotent queue records, cancellation, and worker-loss failure mapping", () => {
     const queue = createJudgeQueue(() => 1000);
-    const first = queue.enqueue(request());
-    const replay = queue.enqueue(request());
+    const first = queue.enqueue(request(), "learner-a");
+    const replay = queue.enqueue(request(), "learner-a");
     expect(first.status).toBe("queued");
     expect(replay.status).toBe("duplicate");
     expect(first.record?.submissionId).toBe(replay.record?.submissionId);
 
     expect(queue.cancel(submission.submissionId)).toBe(true);
     expect(queue.get(submission.submissionId)?.state).toBe("canceled");
-    expect(queue.complete(submission.submissionId, resultFromOutcomes(submission.submissionId, "accepted", true, [
-      { name: "sample_1", hidden: false, passed: true }
-    ]))).toBe(false);
+    expect(
+      queue.complete(
+        submission.submissionId,
+        resultFromOutcomes(submission.submissionId, "accepted", true, [
+          { name: "sample_1", hidden: false, passed: true }
+        ])
+      )
+    ).toBe(false);
 
     const lostId = "00000000-0000-4000-8000-000000000179";
-    queue.enqueue(request({ submission: { ...submission, submissionId: lostId } }));
+    queue.enqueue(request({ submission: { ...submission, submissionId: lostId } }), "learner-b");
     const lost = queue.markWorkerLost(lostId);
     expect(lost?.status).toBe("infrastructure_error");
     expect(queue.get(lostId)?.state).toBe("completed");
+  });
+
+  it("enforces per-user and global queue, rate, and concurrency limits", () => {
+    let now = 1_000;
+    const queue = createJudgeQueue(() => now, {
+      perUserSubmissionsPerMinute: 2,
+      globalSubmissionsPerMinute: 3,
+      perUserQueued: 2,
+      perUserRunning: 1,
+      globalRunning: 2
+    });
+    const withId = (suffix: number) =>
+      request({
+        submission: {
+          ...submission,
+          submissionId: `00000000-0000-4000-8000-${String(suffix).padStart(12, "0")}`
+        }
+      });
+
+    expect(queue.enqueue(withId(1), "learner-a").status).toBe("queued");
+    expect(queue.enqueue(withId(2), "learner-a").status).toBe("queued");
+    expect(queue.enqueue(withId(3), "learner-a")).toMatchObject({
+      status: "rejected",
+      reason: "per_user_queue_limit"
+    });
+    expect(queue.start(withId(1).submission.submissionId).status).toBe("running");
+    expect(queue.start(withId(2).submission.submissionId)).toMatchObject({
+      status: "rejected",
+      reason: "per_user_concurrency_limit"
+    });
+    expect(queue.enqueue(withId(3), "learner-b").status).toBe("queued");
+    expect(queue.start(withId(3).submission.submissionId).status).toBe("running");
+    expect(queue.enqueue(withId(4), "learner-c")).toMatchObject({
+      status: "rejected",
+      reason: "global_rate_limit"
+    });
+
+    now += 60_001;
+    expect(queue.enqueue(withId(4), "learner-c").status).toBe("queued");
+    expect(queue.start(withId(4).submission.submissionId)).toMatchObject({
+      status: "rejected",
+      reason: "global_concurrency_limit"
+    });
   });
 
   it("tracks every required security and reliability regression category", () => {
@@ -196,7 +276,12 @@ describe("judge worker boundary (#178)", () => {
   });
 
   it("builds a bounded request without raw hidden fixture values", () => {
-    const built = buildJudgeRequest({ submission, taskKind: "compile_and_run", visibleTests: [visible], hiddenTests: [hidden] });
+    const built = buildJudgeRequest({
+      submission,
+      taskKind: "compile_and_run",
+      visibleTests: [visible],
+      hiddenTests: [hidden]
+    });
     expect("error" in built).toBe(false);
     expect(JSON.stringify(built)).not.toContain("expected");
     expect(JSON.stringify(built)).not.toContain("stdin");

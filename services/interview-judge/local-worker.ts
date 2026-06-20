@@ -12,6 +12,7 @@ export type RunLocalDockerJudgeInput = {
   workspaceRootDir?: string;
   image?: string;
   cpus?: number;
+  signal?: AbortSignal;
   launch?: DockerLauncher;
   cli?: DockerCliLauncherOptions;
 };
@@ -31,7 +32,8 @@ export async function runLocalDockerJudge(input: RunLocalDockerJudgeInput): Prom
         {
           image: input.image,
           workspacePath: workspace.hostPath,
-          cpus: input.cpus
+          cpus: input.cpus,
+          signal: input.signal
         },
         launch
       );

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildDockerRunArgs, createDockerExecutor, type DockerInvocation } from "../../services/interview-judge/docker-executor";
+import {
+  buildDockerRunArgs,
+  createDockerExecutor,
+  type DockerInvocation
+} from "../../services/interview-judge/docker-executor";
 import type { WorkerProcessCommand } from "../../services/interview-judge/worker-runner";
 
 const command: WorkerProcessCommand = {
@@ -8,6 +12,8 @@ const command: WorkerProcessCommand = {
   stdin: "hidden fixture input\n",
   timeoutMs: 5000,
   outputLimitBytes: 64 * 1024,
+  cpuSeconds: 2,
+  fileSizeBytes: 1024 * 1024,
   memoryMb: 256,
   pidsLimit: 8
 };
@@ -31,6 +37,8 @@ describe("local Docker executor boundary (#178)", () => {
     expect(args).toContain("8");
     expect(args).toContain("--memory");
     expect(args).toContain("256m");
+    expect(args).toContain("cpu=2:2");
+    expect(args).toContain("fsize=1048576:1048576");
     expect(args).toContain("--cpus");
     expect(args).toContain("1");
     expect(args).toContain("cppfan/interview-judge:local");

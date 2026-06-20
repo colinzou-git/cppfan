@@ -23,6 +23,8 @@ export type WorkerProcessCommand = {
   stdin?: string;
   timeoutMs: number;
   outputLimitBytes: number;
+  cpuSeconds: number;
+  fileSizeBytes: number;
   memoryMb: number;
   pidsLimit: number;
 };
@@ -53,6 +55,8 @@ function commandLimits(limits: JudgeLimits = DEFAULT_JUDGE_LIMITS) {
   return {
     timeoutMs: limits.wallMs,
     outputLimitBytes: limits.outputKb * 1024,
+    cpuSeconds: Math.max(1, Math.ceil(limits.cpuMs / 1000)),
+    fileSizeBytes: limits.maxFileKb * 1024,
     memoryMb: limits.memoryMb,
     pidsLimit: limits.maxProcesses
   };
@@ -121,17 +125,45 @@ export async function runJudgeRequest({ request, fixtures, executor }: RunJudgeI
 
   const compile = await executor(buildCompileCommand(request));
   if (compile.timedOut) {
-    return resultFromOutcomes(request.submission.submissionId, "timeout", false, [], compile.runtimeMs ?? null, compile.memoryMb ?? null);
+    return resultFromOutcomes(
+      request.submission.submissionId,
+      "timeout",
+      false,
+      [],
+      compile.runtimeMs ?? null,
+      compile.memoryMb ?? null
+    );
   }
   if (compile.memoryExceeded) {
-    return resultFromOutcomes(request.submission.submissionId, "memory_limit", false, [], compile.runtimeMs ?? null, compile.memoryMb ?? null);
+    return resultFromOutcomes(
+      request.submission.submissionId,
+      "memory_limit",
+      false,
+      [],
+      compile.runtimeMs ?? null,
+      compile.memoryMb ?? null
+    );
   }
   if (compile.exitCode !== 0) {
-    return resultFromOutcomes(request.submission.submissionId, "compile_error", false, [], compile.runtimeMs ?? null, compile.memoryMb ?? null);
+    return resultFromOutcomes(
+      request.submission.submissionId,
+      "compile_error",
+      false,
+      [],
+      compile.runtimeMs ?? null,
+      compile.memoryMb ?? null
+    );
   }
 
   if (request.taskKind === "compile_only") {
-    return resultFromOutcomes(request.submission.submissionId, "accepted", true, [], compile.runtimeMs ?? null, compile.memoryMb ?? null);
+    return resultFromOutcomes(
+      request.submission.submissionId,
+      "accepted",
+      true,
+      [],
+      compile.runtimeMs ?? null,
+      compile.memoryMb ?? null
+    );
   }
 
   const outcomes: TestOutcome[] = [];
@@ -168,5 +200,12 @@ export async function runJudgeRequest({ request, fixtures, executor }: RunJudgeI
   }
 
   const status = outcomes.every((outcome) => outcome.passed) ? "accepted" : "wrong_answer";
-  return resultFromOutcomes(request.submission.submissionId, status, true, outcomes, maxMetric(runtimeSamples), maxMetric(memorySamples));
+  return resultFromOutcomes(
+    request.submission.submissionId,
+    status,
+    true,
+    outcomes,
+    maxMetric(runtimeSamples),
+    maxMetric(memorySamples)
+  );
 }

@@ -21,7 +21,7 @@ inputs/outputs must stay server-side and never leak through logs or results.
 1. **Codespaces / local exercise packages** — the learner runs the package's
    tests in their own Codespace/local toolchain (today's #81 model, compiled in CI
    via `verify-all.sh`, #98). Strong isolation (it is the learner's own machine),
-   zero server execution, but it is honor-system for *hidden* tests and produces
+   zero server execution, but it is honor-system for _hidden_ tests and produces
    no server-trusted result.
 2. **Self-hosted isolated worker** — a separate service that compiles and runs
    submissions in a locked-down sandbox (rootless container with seccomp/landlock,
@@ -59,24 +59,24 @@ and integrated with sessions (#177).
 
 Untrusted submissions are assumed hostile. Each attack maps to a control:
 
-| Threat | Mitigation |
-| --- | --- |
-| Infinite loop / CPU burn | CPU + wall-time limits; kill on exceed -> `timeout` |
-| Fork bomb / extra processes | process/thread cap (rlimit/cgroup) |
-| Memory exhaustion | memory limit -> `memory_limit` |
-| Disk fill / huge output | file-size + output byte caps (truncate) |
-| Filesystem escape / tamper | read-only rootfs + ephemeral per-submission workspace; non-root; mount namespace |
-| Network exfiltration | no outbound network (network namespace with no interfaces) |
-| Crash / UB / signals | run under a supervisor; map to `runtime_error` |
-| Hidden-test disclosure | tests live server-side; results expose only pass/fail categories + counts, never inputs/expected; logs are truncated/sanitized |
-| Cross-user leakage | per-submission ephemeral workspace; results keyed to the owning user (RLS); idempotent submission ids |
-| Resource abuse | per-user + global rate/concurrency limits; bounded source size + test count |
+| Threat                      | Mitigation                                                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Infinite loop / CPU burn    | CPU + wall-time limits; kill on exceed -> `timeout`                                                                            |
+| Fork bomb / extra processes | process/thread cap (rlimit/cgroup)                                                                                             |
+| Memory exhaustion           | memory limit -> `memory_limit`                                                                                                 |
+| Disk fill / huge output     | file-size + output byte caps (truncate)                                                                                        |
+| Filesystem escape / tamper  | read-only rootfs + ephemeral per-submission workspace; non-root; mount namespace                                               |
+| Network exfiltration        | no outbound network (network namespace with no interfaces)                                                                     |
+| Crash / UB / signals        | run under a supervisor; map to `runtime_error`                                                                                 |
+| Hidden-test disclosure      | tests live server-side; results expose only pass/fail categories + counts, never inputs/expected; logs are truncated/sanitized |
+| Cross-user leakage          | per-submission ephemeral workspace; results keyed to the owning user (RLS); idempotent submission ids                          |
+| Resource abuse              | per-user + global rate/concurrency limits; bounded source size + test count                                                    |
 
 ## Default limits (Stage B)
 
-CPU ~2s, wall ~5s, memory ~256 MB, ≤32 processes, output ≤256 KB, source ≤64 KB,
-≤200 tests per submission. These are the documented starting points; the worker
-treats them as configuration.
+CPU ~2s, wall ~5s, memory ~256 MB, ≤32 processes, file output ≤1 MB,
+captured output ≤256 KB, source ≤64 KB, and ≤200 tests per submission. These are
+the documented starting points; the worker treats them as configuration.
 
 ## Statuses
 
@@ -95,7 +95,7 @@ inside the worker-side hidden-test store.
 
 ## Local development
 
-A reproducible local/Codespaces worker mode runs the *same* protocol and limits
+A reproducible local/Codespaces worker mode runs the _same_ protocol and limits
 where practical. CI validates reference solutions and intentionally-failing
 submissions (Stage A, #98) **without** production credentials and without running
 untrusted code in CI.
@@ -130,14 +130,14 @@ APIs.
 
 - Clear separation: the web app never executes learner code; a dedicated sandbox
   worker does. Hidden tests and results are server-authoritative.
-- Cost/ops for the Stage B worker are deferred until that slice; Stage A already
-  gives compile evidence today.
+- Deploying and operating the Stage B service remains an environment concern;
+  the repository includes its protocol, rootless Docker image, local runner,
+  durable queue boundary, and regression-tested isolation controls.
 
 ## Non-goals
 
 - No execution of learner code in the Next.js/Vercel process, ever.
 - No percentile/ranking noise from runtime measurements.
 - No reliance on an external judge for the primary path.
-- This ADR does not stand up the worker; it fixes the design + threat model that
-  the worker and the typed judge contract (`src/features/interview/judge-contract.ts`)
-  implement in later slices.
+- This ADR does not deploy production infrastructure; deployment consumes the
+  repository-owned worker boundary without moving execution into Next.js.

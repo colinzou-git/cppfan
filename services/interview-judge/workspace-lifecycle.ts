@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { DEFAULT_JUDGE_LIMITS } from "@/features/interview/judge-contract";
@@ -58,6 +58,10 @@ export async function createJudgeWorkspace(input: CreateJudgeWorkspaceInput): Pr
   await mkdir(rootDir, { recursive: true });
 
   const hostPath = await mkdtemp(join(rootDir, `cppfan-judge-${safeWorkspaceId(input.submissionId)}-`));
+  // The rootless container uid must be able to create the compiled binary in
+  // this single-use directory. The directory is random, contains no secrets,
+  // and is removed in withJudgeWorkspace's finally block.
+  await chmod(hostPath, 0o777);
   const hostSubmissionPath = join(hostPath, JUDGE_SUBMISSION_FILENAME);
   await writeFile(hostSubmissionPath, input.source, { encoding: "utf8", flag: "wx" });
 
