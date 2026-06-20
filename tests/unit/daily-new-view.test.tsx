@@ -1,7 +1,14 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { DailyNew } from "@/features/goals/daily-new";
 import type { DailyNewAction, DailyNewPlan } from "@/features/goals/daily-new-model";
+
+const allocateExtra = vi.fn();
+const refresh = vi.fn();
+vi.mock("@/app/goals/actions", () => ({
+  allocateExtraGoalInlineAction: (...args: unknown[]) => allocateExtra(...args)
+}));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
 function action(overrides: Partial<DailyNewAction> = {}): DailyNewAction {
   return {
@@ -104,5 +111,20 @@ describe("DailyNew", () => {
     rerender(<DailyNew plan={plan({ state: "unavailable", actions: [], eligibleActions: [] })} />);
     expect(screen.getByText("Goal learning recommendations are temporarily unavailable.")).toBeVisible();
     expect(screen.queryByText(/planned acquisition work is complete/i)).not.toBeInTheDocument();
+
+    rerender(<DailyNew plan={plan({ state: "unconfigured", activeGoalCount: 0, actions: [], eligibleActions: [] })} />);
+    expect(screen.getByText(/Demo mode: Daily New for Goals is not personalized or saved/i)).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Set a learning goal" })).not.toBeInTheDocument();
+  });
+
+  it("announces one-at-a-time Learn Extra allocation and refreshes the plan", async () => {
+    allocateExtra.mockResolvedValue({ status: "ok", allocationId: "allocation-1", dailyPlanVersion: 3, replayed: false });
+    render(<DailyNew plan={plan({ extraAction: action({ id: "extra-candidate", source: "learn_extra" }) })} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Learn Extra:/i }));
+    expect(screen.getByRole("button", { name: /Finding the next goal skill/i })).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Extra action added."));
+    expect(allocateExtra).toHaveBeenCalledTimes(1);
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 });
