@@ -24,6 +24,30 @@ AI_PROVIDER=fake
 
 Optional bounded-usage settings are documented in `.env.example`.
 
+## Production rollout checklist
+
+A successful code deployment is not enough by itself. Before enabling AI Chat in production:
+
+1. Apply the latest Supabase migrations so `ai_chat_conversations`, `ai_chat_messages`, `ai_chat_usage_events`, and the quota helper function exist:
+
+   ```bash
+   pnpm db:migrate
+   ```
+
+2. In the production hosting environment, add these server-side variables:
+
+   ```text
+   AI_CHAT_ENABLED=true
+   AI_PROVIDER=groq
+   AI_MODEL=openai/gpt-oss-120b
+   GROQ_API_KEY=<your Groq API key>
+   ```
+
+3. Redeploy the production app after changing environment variables.
+4. Sign in, open an item, send a short prompt, and verify that the response streams and appears in **Chat history**.
+
+Do not use `AI_PROVIDER=fake` in production. If production shows a setup or storage error, confirm both the hosting variables and the Supabase migration state before investigating provider behavior.
+
 ## Data and privacy
 
 AI Chat requires an authenticated Supabase session. Conversations and messages are stored under the authenticated learner ID and stable item identity. Row-level security limits reads, writes, updates, and deletion to the owner.
@@ -54,7 +78,7 @@ Manual verification matrix:
 
 ## Failure behavior
 
-The server returns structured errors for authentication, invalid context, app quotas, provider quotas, timeouts, unsupported configuration, and provider failures. Streaming can be stopped by the learner. Completed requests are idempotent by request ID, and partial stopped/failed assistant output is saved with its status.
+The server returns structured errors for authentication, invalid context, app quotas, provider quotas, timeouts, unsupported configuration, and provider failures. The client displays the server-provided safe error message instead of collapsing every deployment or quota problem into a generic failure. Streaming can be stopped by the learner. Completed requests are idempotent by request ID, and partial stopped/failed assistant output is saved with its status.
 
 ## Validation
 
