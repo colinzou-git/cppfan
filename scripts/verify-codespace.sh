@@ -29,6 +29,11 @@ section "Run CI-equivalent app checks"
 pnpm lint
 pnpm typecheck
 pnpm test
+
+section "Compile and execute the complete interview catalog"
+pnpm verify:interview-catalog
+
+section "Build the application"
 pnpm build
 
 section "Optional Supabase migration"
