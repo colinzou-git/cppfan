@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FlaskConical } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { projectLabs } from "@/features/labs/project-labs";
 import { createClient } from "@/lib/supabase/server";
 import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
@@ -65,6 +66,24 @@ export default async function LabsPage() {
                   <li key={milestone}>{milestone}</li>
                 ))}
               </ol>
+              <ItemHelpLinks
+                context={{
+                  schemaVersion: 1,
+                  sourceKind: "lab_item",
+                  sourceId: lab.id,
+                  sourceVersion: "1",
+                  title: lab.title,
+                  prompt: lab.summary,
+                  topic: lab.focus.join(", "),
+                  instructions: lab.milestones,
+                  assessmentState: "instructional",
+                  revealPolicy: "normal",
+                  metadata: {
+                    difficulty: lab.difficulty,
+                    milestoneCount: lab.milestones.length
+                  }
+                }}
+              />
             </CardContent>
           </Card>
         ))}
