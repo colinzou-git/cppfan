@@ -95,6 +95,11 @@ export async function reopenGoalAction(formData: FormData) {
 }
 
 export async function allocateExtraGoalAction(formData: FormData) {
+  const result = await allocateExtraGoal(formData);
+  redirect(`/dashboard?extra=${encodeURIComponent(result.status)}`);
+}
+
+async function allocateExtraGoal(formData: FormData) {
   const plan = await getDailyNewPlan();
   const submissionId = value(formData, "submission_id") || crypto.randomUUID();
   const result = plan.extraAction
@@ -109,5 +114,9 @@ export async function allocateExtraGoalAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/goals");
-  redirect(`/dashboard?extra=${encodeURIComponent(result.status)}`);
+  return result;
+}
+
+export async function allocateExtraGoalInlineAction(formData: FormData) {
+  return allocateExtraGoal(formData);
 }

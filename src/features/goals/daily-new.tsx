@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { allocateExtraGoalAction } from "@/app/goals/actions";
 import type { DailyNewAction, DailyNewPlan } from "./daily-new-model";
+import { LearnExtraButton } from "./learn-extra-button";
 
 const NO_MORE_LABELS: Record<NonNullable<DailyNewPlan["noMoreReason"]>, string> = {
   all_goal_work_complete: "All active-goal acquisition work is complete.",
@@ -29,7 +29,7 @@ function ActionTile({ action }: { action: DailyNewAction }) {
   const effort = action.estimatedMinutes ? `about ${action.estimatedMinutes} min` : "time estimate unavailable";
 
   return (
-    <li data-testid="daily-new-action" data-action-id={action.id}>
+    <li data-testid="daily-new-action" data-action-id={action.id} data-source={action.source}>
       <Link
         href={action.href}
         aria-label={`${sourceLabel}: ${ACTION_LABELS[action.actionKind]} - ${action.title}`}
@@ -65,6 +65,7 @@ function ActionTile({ action }: { action: DailyNewAction }) {
 
 export function DailyNew({ plan }: { plan: DailyNewPlan }) {
   const unavailable = plan.state === "unavailable" || plan.state === "error";
+  const demo = plan.state === "unconfigured";
   const displayed = [...plan.actions, ...plan.allocatedExtraActions];
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="daily-new-for-goals">
@@ -78,7 +79,11 @@ export function DailyNew({ plan }: { plan: DailyNewPlan }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
-        {unavailable ? (
+        {demo ? (
+          <p className="rounded-2xl bg-slate-100 p-4 text-sm font-semibold text-slate-700">
+            Demo mode: Daily New for Goals is not personalized or saved until Supabase is configured.
+          </p>
+        ) : unavailable ? (
           <p className="rounded-2xl bg-amber-50 p-4 text-sm font-semibold text-amber-900">
             Goal learning recommendations are temporarily unavailable.
           </p>
@@ -94,12 +99,9 @@ export function DailyNew({ plan }: { plan: DailyNewPlan }) {
         ) : (
           <ol className="grid gap-2">{displayed.map((action) => <ActionTile key={action.id} action={action} />)}</ol>
         )}
-        {plan.extraAction ? (
-          <form action={allocateExtraGoalAction}>
-            <input type="hidden" name="submission_id" value={crypto.randomUUID()} />
-            <Button type="submit" variant="secondary">Learn Extra: {plan.extraAction.title}</Button>
-          </form>
-        ) : plan.activeGoalCount > 0 && !unavailable ? (
+        {!demo && plan.extraAction ? (
+          <LearnExtraButton title={plan.extraAction.title} />
+        ) : !demo && plan.activeGoalCount > 0 && !unavailable ? (
           <p className="text-xs font-semibold text-slate-500">
             {plan.noMoreReason ? NO_MORE_LABELS[plan.noMoreReason] : "No additional safe unfinished goal action is available today."}
           </p>
