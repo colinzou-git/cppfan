@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { rateReview } from "./review-actions";
@@ -77,6 +78,27 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
         >
           {current.prompt}
         </div>
+
+        <ItemHelpLinks
+          key={`${current.itemId}:${revealed ? "revealed" : "hidden"}`}
+          context={{
+            schemaVersion: 1,
+            sourceKind: "review_question",
+            sourceId: current.itemId,
+            sourceVersion: "1",
+            title: current.title,
+            prompt: current.prompt,
+            topic: current.skillId,
+            visibleChoices: revealed ? current.choices.map((choice) => choice.content) : undefined,
+            visibleFeedback: revealed ? current.explanation ?? undefined : undefined,
+            assessmentState: revealed ? "revealed" : "unanswered",
+            revealPolicy: revealed ? "normal" : "hint_only",
+            metadata: {
+              itemType: current.type,
+              reviewCardId: current.cardId
+            }
+          }}
+        />
 
         {error ? (
           <p className="text-sm font-semibold text-rose-700" role="alert">

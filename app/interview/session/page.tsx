@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
 import { getInterviewProblem, getInterviewProblems } from "@/features/interview/problem-catalog";
 import { getCurrentSession } from "@/features/interview/interview-session-store";
-import { createSession, type SessionState } from "@/features/interview/session-machine";
+import {
+  createSession,
+  currentPhase,
+  type SessionState
+} from "@/features/interview/session-machine";
 import { SessionRunner } from "@/features/interview/session-runner";
 import { FollowUpDrill } from "@/features/interview/follow-up-drill";
 
@@ -46,6 +51,31 @@ export default async function InterviewSessionPage() {
 
       {problem ? (
         <>
+          <ItemHelpLinks
+            context={{
+              schemaVersion: 1,
+              sourceKind: "timed_interview_question",
+              sourceId: problem.id,
+              sourceVersion: String(problem.version),
+              title: problem.title,
+              prompt: problem.prompt,
+              topic: problem.patternTags.join(", "),
+              instructions: [
+                `Constraints: ${problem.constraints}`,
+                `Target complexity: ${problem.targetComplexity}`,
+                ...problem.requiredEdgeCases.map((edgeCase) => `Edge case to consider: ${edgeCase}`),
+                ...problem.visibleExamples.map((example) => `Visible example: ${example.input} → ${example.output}`)
+              ],
+              assessmentState: "timed",
+              revealPolicy: "interviewer",
+              metadata: {
+                difficulty: problem.difficulty,
+                sessionMode: state.mode,
+                sessionStatus: `${state.status}:${currentPhase(state)}`,
+                durationMinutes: state.durationMinutes
+              }
+            }}
+          />
           <SessionRunner
             initialState={state}
             problemTitle={problem.title}

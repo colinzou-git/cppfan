@@ -152,6 +152,7 @@ pnpm exec playwright install
 This README is the canonical setup and operations entry point. Focused docs:
 
 - Auth setup: [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md)
+- AI Chat setup, privacy, dictation, and operations: [docs/AI_CHAT.md](docs/AI_CHAT.md)
 - Database migrations: "Database setup" below (`pnpm db:migrate`)
 - Codespaces / iPhone workflow: "Develop from a browser" above
 - Write-code exercises: [docs/WRITE_CODE_EXERCISES.md](docs/WRITE_CODE_EXERCISES.md)

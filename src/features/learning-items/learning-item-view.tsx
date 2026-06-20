@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
 import { FormattedContent } from "./formatted-content";
@@ -31,7 +32,7 @@ const TYPE_LABELS: Record<LearningItemType, string> = {
  * options statically; interactive answering and grading arrive in issue #3.
  */
 export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
-  const { item, choices } = data;
+  const { item, choices, skills } = data;
   const hasChoices = choices.length > 0;
   // Lessons show their explanation as lesson content. For graded/retrieval item
   // types the explanation often reveals the answer, so it is gated until after a
@@ -88,7 +89,34 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
           <RevealExplanation explanation={item.explanation} />
         ) : null}
 
-        {isReviewEligibleType(item.type) ? <AddToReviewButton itemId={item.id} /> : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <ItemHelpLinks
+            context={{
+              schemaVersion: 1,
+              sourceKind: isParsons || isCompletion ? "guided_exercise" : isLesson ? "learning_item" : "quiz_question",
+              sourceId: item.id,
+              sourceVersion: item.updated_at ?? "1",
+              title: item.title,
+              prompt: item.prompt,
+              topic: skills.map((skill) => skill.skill_id).join(", ") || undefined,
+              instructions: isParsons
+                ? parsonsBlocks.map((block) => `Available code line: ${block.content}`)
+                : isCompletion
+                  ? completionBlanks.map((blank) => `Fill blank ${blank.position}.`)
+                  : undefined,
+              visibleChoices: choices.map((choice) => choice.content),
+              visibleFeedback: isLesson ? item.explanation ?? undefined : undefined,
+              assessmentState: isLesson ? "instructional" : "unanswered",
+              revealPolicy: isLesson ? "normal" : "hint_only",
+              metadata: {
+                itemType: item.type,
+                difficulty: item.difficulty,
+                estimatedMinutes: item.estimated_minutes
+              }
+            }}
+          />
+          {isReviewEligibleType(item.type) ? <AddToReviewButton itemId={item.id} /> : null}
+        </div>
       </CardContent>
     </Card>
   );

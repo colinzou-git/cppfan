@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ItemHelpLinks } from "@/components/item-help-links";
 import { Button } from "@/components/ui/button";
 import { setExercise } from "./exercise-actions";
 import type { ExerciseStatus } from "./exercise-evidence";
@@ -72,6 +73,7 @@ export function ExerciseCatalogView({
         const status: ExerciseStatus | "none" = entry ? entry.status : "none";
         const isPending = pendingId === exercise.id;
         const isOpen = openId === exercise.id;
+        const reflection = draftFor(exercise.id);
         return (
           <article
             key={exercise.id}
@@ -107,7 +109,7 @@ export function ExerciseCatalogView({
               ))}
             </div>
 
-            <div>
+            <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="secondary"
@@ -117,6 +119,31 @@ export function ExerciseCatalogView({
               >
                 {isOpen ? "Hide instructions" : "Open instructions"}
               </Button>
+              <ItemHelpLinks
+                context={{
+                  schemaVersion: 1,
+                  sourceKind: "write_code_exercise",
+                  sourceId: exercise.id,
+                  sourceVersion: "1",
+                  title: exercise.title,
+                  prompt: `Complete the ${exercise.title} C++ exercise and pass its repository tests.`,
+                  topic: exercise.skillTitles.join(", "),
+                  instructions: [
+                    `Prepare a working copy with scripts/exercises/prepare.sh ${exercise.id}.`,
+                    `Edit ${exercise.editableFiles.join(", ")}.`,
+                    `Run scripts/exercises/test.sh ${exercise.id}.`,
+                    ...exercise.hints.map((hint) => `Hint available to the learner: ${hint}`)
+                  ],
+                  learnerDraft: reflection || undefined,
+                  assessmentState:
+                    status === "completed" ? "completed" : status === "started" ? "answered" : "unanswered",
+                  revealPolicy: "normal",
+                  metadata: {
+                    difficulty: exercise.difficulty,
+                    estimatedMinutes: exercise.estimatedMinutes
+                  }
+                }}
+              />
             </div>
 
             {isOpen ? (
@@ -158,7 +185,7 @@ export function ExerciseCatalogView({
                 className="min-h-[3rem] rounded-lg border border-slate-200 px-2 py-1 text-sm"
                 placeholder="Your reflection (optional)"
                 aria-label={`Reflection for ${exercise.title}`}
-                value={draftFor(exercise.id)}
+                value={reflection}
                 readOnly={status === "completed"}
                 onChange={(e) => setDrafts((prev) => ({ ...prev, [exercise.id]: e.target.value }))}
                 data-testid="exercise-reflection"
@@ -179,7 +206,7 @@ export function ExerciseCatalogView({
               {status === "started" ? (
                 <Button
                   type="button"
-                  onClick={() => apply(exercise.id, "completed", draftFor(exercise.id) || null)}
+                  onClick={() => apply(exercise.id, "completed", reflection || null)}
                   disabled={isPending}
                   data-testid="exercise-complete"
                 >
