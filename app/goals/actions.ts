@@ -19,6 +19,8 @@ function value(formData: FormData, name: string) {
 }
 
 function revisionInput(formData: FormData): StudyGoalRevisionInput {
+  const requestedSource = value(formData, "recommendation_source");
+  const recommendationSource = requestedSource === "evaluation" ? "evaluation" : "manual";
   const skillIds = [...new Set(formData.getAll("skill_ids").map(String))];
   const skills = skillIds
     .map((id) => skillSeed.find((skill) => skill.id === id && skill.is_active))
@@ -29,7 +31,7 @@ function revisionInput(formData: FormData): StudyGoalRevisionInput {
     startLocalDate: value(formData, "start_local_date"),
     endLocalDate: value(formData, "end_local_date"),
     timezone: value(formData, "timezone"),
-    recommendationSource: "manual",
+    recommendationSource,
     recommendationReason: value(formData, "recommendation_reason") || undefined,
     learnerNote: value(formData, "learner_note") || undefined,
     targets: skills.map((skill, index) => ({
@@ -38,7 +40,7 @@ function revisionInput(formData: FormData): StudyGoalRevisionInput {
       titleSnapshot: skill.title,
       acquisitionContractId: "skill-initial-learning",
       acquisitionContractVersion: 1,
-      source: "manual",
+      source: recommendationSource,
       orderIndex: index
     }))
   };

@@ -8,9 +8,17 @@ function day(offset: number) {
   return date.toISOString().slice(0, 10);
 }
 
-export function GoalForm() {
+export function GoalForm({
+  recommendedSkillIds = [],
+  recommendationReason
+}: {
+  recommendedSkillIds?: string[];
+  recommendationReason?: string;
+}) {
   return (
     <form action={createGoalAction} className="grid gap-5 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
+      <input type="hidden" name="recommendation_source" value={recommendedSkillIds.length > 0 ? "evaluation" : "manual"} />
+      <input type="hidden" name="recommendation_reason" value={recommendationReason ?? ""} />
       <div>
         <h2 className="text-xl font-black text-slate-950">Add Goal</h2>
         <p className="text-sm text-slate-600">Choose a 1–30 day initial-learning target. FSRS review stays separate.</p>
@@ -31,8 +39,10 @@ export function GoalForm() {
         </label>
       </div>
       <label className="grid gap-2 text-sm font-bold text-slate-700">Skills
-        <select name="skill_ids" multiple required size={12} className="rounded-2xl border border-slate-200 bg-white p-3 font-medium">
-          {goalSkillOptions.map((skill) => <option key={skill.id} value={skill.id}>{skill.label}</option>)}
+        <select name="skill_ids" multiple required size={12} defaultValue={recommendedSkillIds} className="rounded-2xl border border-slate-200 bg-white p-3 font-medium">
+          {goalSkillOptions.map((skill) => (
+            <option key={skill.id} value={skill.id}>{skill.label}</option>
+          ))}
         </select>
         <span className="text-xs font-medium text-slate-500">Use Ctrl/Command-click for multiple skills.</span>
       </label>

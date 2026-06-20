@@ -20,6 +20,7 @@ export type GoalEvaluationView = {
   answerCount: number;
   algorithmVersion: string;
   itemPoolVersion: number;
+  expiresAt: string | null;
   currentQuestion: GoalEvaluationQuestion | null;
   responses: GoalEvaluationResponse[];
   findings: GoalEvaluationFinding[];

@@ -21,6 +21,13 @@ export type GoalEvaluationFinding = {
   reasonCodes: string[];
 };
 
+export type GoalEvaluationRecommendation = {
+  skillId: string;
+  moduleId: string;
+  reason: string;
+  reasonCodes: string[];
+};
+
 export type GoalEvaluationSelectionInput = {
   catalog: GoalEvaluationDiagnosticItem[];
   responses: GoalEvaluationResponse[];
@@ -151,4 +158,42 @@ export function buildGoalEvaluationFindings(
       ]
     };
   });
+}
+
+export function buildGoalEvaluationRecommendations(
+  catalog: GoalEvaluationDiagnosticItem[],
+  findings: GoalEvaluationFinding[],
+  limit = 4
+): GoalEvaluationRecommendation[] {
+  const priority: Record<GoalEvaluationFinding["status"], number> = {
+    needs_prerequisite_support: 0,
+    developing: 1,
+    evidence_uncertain: 2,
+    probably_familiar: 3,
+    ready_to_advance: 4
+  };
+  const byModule = new Map<string, GoalEvaluationDiagnosticItem[]>();
+  for (const item of catalog) {
+    byModule.set(item.moduleId, [...(byModule.get(item.moduleId) ?? []), item]);
+  }
+
+  const seen = new Set<string>();
+  return findings
+    .slice()
+    .sort((a, b) => priority[a.status] - priority[b.status] || a.moduleId.localeCompare(b.moduleId))
+    .flatMap((finding) => {
+      const item = (byModule.get(finding.moduleId) ?? [])
+        .slice()
+        .sort((a, b) => a.prerequisiteLevel - b.prerequisiteLevel || a.itemId.localeCompare(b.itemId))
+        .find((candidate) => !seen.has(candidate.primarySkillId));
+      if (!item) return [];
+      seen.add(item.primarySkillId);
+      return [{
+        skillId: item.primarySkillId,
+        moduleId: finding.moduleId,
+        reason: `${finding.status.replaceAll("_", " ")} (band ${finding.estimateBand}, ${finding.confidence} confidence).`,
+        reasonCodes: finding.reasonCodes
+      }];
+    })
+    .slice(0, Math.max(0, limit));
 }
