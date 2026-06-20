@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { buildAiChatStarterPrompt } from "./ai-chat-context";
+import { DictationControl } from "./dictation-control";
 import { listThreads, runTutor } from "./tutor-transport";
 import { tutorUrl } from "./tutor-url";
 import type { AiChatContext, AiChatMessageView, AiChatStreamEvent } from "./ai-chat-types";
@@ -98,8 +99,14 @@ export function TutorConversation({
             setMessages((current) => {
               const found = current.find((entry) => entry.role === "assistant" && entry.requestId === requestId);
               const content = `${found?.content ?? ""}${event.text}`;
-              const rest = current.filter((entry) => !(entry.role === "assistant" && entry.requestId === requestId));
-              return [...rest, { ...localEntry("assistant", requestId, content), conversationId: conversationId ?? "", status: "streaming" }];
+              if (found) {
+                return current.map((entry) =>
+                  entry.role === "assistant" && entry.requestId === requestId
+                    ? { ...entry, content, status: "streaming" }
+                    : entry
+                );
+              }
+              return [...current, { ...localEntry("assistant", requestId, content), conversationId: conversationId ?? "", status: "streaming" }];
             });
           } else if (event.type === "done") {
             patchAssistant(requestId, { status: event.status });
@@ -157,9 +164,9 @@ export function TutorConversation({
         <form onSubmit={submit} className="border-t border-slate-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <label htmlFor="tutor-prompt" className="sr-only">AI Chat prompt</label>
           <textarea ref={textareaRef} id="tutor-prompt" value={draft} onChange={(event) => setDraft(event.target.value)} rows={7} disabled={oldVersion} className="w-full resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100" />
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex gap-2">
-              <input type="button" value="Dictate" onClick={() => { textareaRef.current?.focus(); setNotice("Use your phone or tablet keyboard microphone, or your computer voice-typing shortcut. Dictated text stays editable and is not sent automatically."); }} className="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold" />
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-2">
+            <div className="flex flex-wrap items-start gap-2">
+              <DictationControl textareaRef={textareaRef} value={draft} onChange={setDraft} disabled={oldVersion || busy} />
               {retry ? <input type="button" value="Retry" onClick={() => void send(retry.text, retry.id, false)} className="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold" /> : null}
             </div>
             {busy ? <input type="button" value="Stop" onClick={() => abortRef.current?.abort()} className="cursor-pointer rounded-lg bg-rose-700 px-4 py-2 text-sm font-bold text-white" /> : <input type="submit" value="Send" disabled={!draft.trim() || oldVersion} className="cursor-pointer rounded-lg bg-blue-700 px-4 py-2 text-sm font-bold text-white disabled:bg-slate-300" />}
