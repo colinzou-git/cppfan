@@ -31,6 +31,8 @@ function action(overrides: Partial<DailyNewAction> = {}): DailyNewAction {
     acquisitionContractId: "skill-initial-learning",
     acquisitionContractVersion: 1,
     completionEvidenceRule: "A trusted qualifying learning event for this exact learning item satisfies this acquisition step.",
+    platformSuitability: "all_devices",
+    platformNote: "This learning-item step works on Windows, iPad, and iPhone.",
     source: "planned",
     isFsrsReview: false,
     ...overrides
@@ -50,6 +52,7 @@ function plan(overrides: Partial<DailyNewPlan> = {}): DailyNewPlan {
     allocatedExtraActions: [],
     eligibleActions: [action()],
     extraAction: null,
+    noMoreReason: null,
     ...overrides
   };
 }
@@ -67,6 +70,7 @@ describe("DailyNew", () => {
     expect(within(item).getByText("C++ foundations - about 3 min")).toBeVisible();
     expect(within(item).getByText("Not started - learning item - 2026-06-19 - America/Los_Angeles")).toBeVisible();
     expect(within(item).getByText(/Completion: A trusted qualifying learning event/)).toBeVisible();
+    expect(within(item).getByText(/works on Windows, iPad, and iPhone/)).toBeVisible();
   });
 
   it("renders allocated extra actions with an Extra label and continuation context", () => {
@@ -93,8 +97,9 @@ describe("DailyNew", () => {
     expect(screen.getByText("Set a dated goal to receive unfinished-learning steps.")).toBeVisible();
     expect(screen.getByRole("link", { name: "Set a learning goal" })).toHaveAttribute("href", "/goals");
 
-    rerender(<DailyNew plan={plan({ actions: [], eligibleActions: [] })} />);
+    rerender(<DailyNew plan={plan({ actions: [], eligibleActions: [], noMoreReason: "all_goal_work_complete" })} />);
     expect(screen.getByText(/planned acquisition work is complete/i)).toBeVisible();
+    expect(screen.getByText(/All active-goal acquisition work is complete/i)).toBeVisible();
 
     rerender(<DailyNew plan={plan({ state: "unavailable", actions: [], eligibleActions: [] })} />);
     expect(screen.getByText("Goal learning recommendations are temporarily unavailable.")).toBeVisible();

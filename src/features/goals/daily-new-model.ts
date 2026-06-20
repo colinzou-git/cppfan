@@ -3,7 +3,16 @@ import type { AcquisitionState } from "./goal-contract";
 export type DailyNewReasonCode =
   | "CONTINUE_UNFINISHED_SKILL"
   | "START_NEW_GOAL_SKILL"
-  | "UNFINISHED_PREREQUISITE";
+  | "UNFINISHED_PREREQUISITE"
+  | "GOAL_DEADLINE_PRIORITY"
+  | "LEARN_EXTRA_REQUESTED";
+
+export type DailyNewNoMoreReason =
+  | "all_goal_work_complete"
+  | "daily_scope_exhausted"
+  | "content_unavailable"
+  | "only_fsrs_review_remains"
+  | "backend_unavailable";
 
 export type DailyNewAction = {
   id: string;
@@ -32,6 +41,8 @@ export type DailyNewAction = {
   acquisitionContractId: string;
   acquisitionContractVersion: number;
   completionEvidenceRule: string;
+  platformSuitability: "all_devices";
+  platformNote: string;
   source: "planned" | "learn_extra";
   isFsrsReview: false;
 };
@@ -48,4 +59,5 @@ export type DailyNewPlan = {
   allocatedExtraActions: DailyNewAction[];
   eligibleActions: DailyNewAction[];
   extraAction: DailyNewAction | null;
+  noMoreReason: DailyNewNoMoreReason | null;
 };
