@@ -3,6 +3,7 @@ import type {
   CodeRunResult,
   CodeTestResult
 } from "./code-lab-types";
+import type { CodeTraceResult } from "./code-trace-types";
 
 /**
  * Browser fetch wrappers for the Code Lab API (#407). These run client-side and
@@ -51,4 +52,19 @@ export function reviewCodeRequest(
   signal?: AbortSignal
 ): Promise<CodeReviewResult> {
   return postJson<CodeReviewResult>("/api/code/review", input, signal);
+}
+
+export function traceCodeRequest(
+  input: {
+    itemId: string;
+    source: string;
+    selectedTestName?: string;
+    selectedInput?: string;
+    selectedActualOutput?: string;
+    lastRunResult?: CodeRunResult | null;
+    lastTestResult?: CodeTestResult | null;
+  },
+  signal?: AbortSignal
+): Promise<CodeTraceResult> {
+  return postJson<CodeTraceResult>("/api/code/trace", input, signal);
 }

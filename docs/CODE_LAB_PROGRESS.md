@@ -14,12 +14,29 @@ _Last updated: 2026-06-21 — by the /loop driver._
 
 ## Issue order
 
-1. **#407 — Phase 1 Code Lab** (editor, runner, tests, AI review) — _in review_.
-2. **#408 — Phase 2 AI trace** — _blocked on #407 merging_.
+1. **#407 — Phase 1 Code Lab** (editor, runner, tests, AI review) — **DONE**:
+   PR #409 squash-merged to `main` (`e95cad6`); #407 closed with final audit.
+2. **#408 — Phase 2 AI trace** — **IN PROGRESS** on `feat/code-lab-phase2`.
 
 ## Current state
 
-- **PR #409** (`feat/code-lab-phase1`) implements all of #407 Phase 1.
+- **#408 Phase 2 (AI trace)** — implemented on `feat/code-lab-phase2`; PR opened.
+  - Added: `code-trace-types.ts`, `code-trace-prompts.ts`, `code-trace-service.ts`,
+    `trace-controls.tsx`, `ai-trace-panel.tsx`, `app/api/code/trace/route.ts`.
+  - Updated: `code-lab.tsx` (Trace control + input selector + panel),
+    `code-lab-client.ts` (`traceCodeRequest`). Trace shows unless
+    `traceEnabled: false`; degrades to unavailable when no AI provider.
+  - Reuses `completeAiResponse`; compile errors explained as blockers (no fake
+    runtime steps); disclaimer on every successful trace; route resolves only
+    VISIBLE test data so hidden I/O never reaches the prompt/response.
+  - Local: lint/typecheck/build green; **812 unit tests pass**; e2e green —
+    phase 1 9/9 and trace 3/3 across chromium/iphone/ipad.
+  - Next: wait for App checks green on the #408 PR, then auto-merge and close
+    #408 with a final audit.
+
+### (history) PR #409 / #407 — merged
+
+- **PR #409** (`feat/code-lab-phase1`) implemented all of #407 Phase 1.
   - Green: pr-declaration-check, DB migrations, Authenticated integration,
     C++ exercises, Vercel.
   - **Was red:** App checks → e2e `code-lab.spec.ts` "editing" test. Monaco
