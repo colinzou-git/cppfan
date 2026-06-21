@@ -216,7 +216,7 @@ export function CodeLab({
   }
 
   return (
-    <Card className="border-slate-200 bg-white shadow-sm" data-testid="code-lab">
+    <Card id="code-lab" className="scroll-mt-24 border-slate-200 bg-white shadow-sm" data-testid="code-lab">
       <CardHeader>
         <span className="w-fit rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-700">
           Code Lab

@@ -16,6 +16,8 @@ export function ScaffoldRecommendationCard({
 }) {
   if (!recommendation) return null;
 
+  const levelLabel = SCAFFOLD_LEVEL_LABELS[recommendation.level];
+
   return (
     <section
       className="flex flex-col gap-1.5 rounded-xl border border-sky-200 bg-sky-50 p-3"
@@ -25,16 +27,16 @@ export function ScaffoldRecommendationCard({
     >
       <p className="flex items-center gap-2 text-sm font-bold text-sky-900">
         <GraduationCap className="h-4 w-4" aria-hidden="true" />
-        Recommended next practice: {SCAFFOLD_LEVEL_LABELS[recommendation.level]}
+        Recommended next practice: {levelLabel}
       </p>
       <p className="text-xs text-sky-900">{recommendation.reason}</p>
       {recommendation.itemId ? (
         <Link
-          href={`/learn/${recommendation.itemId}`}
+          href={`/learn/${recommendation.itemId}#code-lab`}
           className="w-fit rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
           data-testid="scaffold-recommendation-link"
         >
-          Open {SCAFFOLD_LEVEL_LABELS[recommendation.level]}
+          Open {levelLabel}
         </Link>
       ) : null}
       <p className="text-xs text-sky-700">This is a suggestion — you can practice anything you like.</p>

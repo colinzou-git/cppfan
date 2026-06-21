@@ -1,6 +1,7 @@
 import type { CodeRunResult } from "./code-lab-types";
 import { runnerMemoryMb, runnerTimeoutMs } from "./code-lab-defaults";
 import {
+  DEFAULT_PISTON_CPP_VERSION,
   MockRunner,
   PistonRunner,
   type CodeRunnerAdapter,
@@ -26,7 +27,11 @@ export function selectRunner(): RunnerSelection {
 
   if (provider === "piston") {
     const baseUrl = process.env.CODE_RUNNER_BASE_URL?.trim() || "https://emkc.org/api/v2/piston";
-    return { kind: "ready", adapter: new PistonRunner(baseUrl, process.env.CODE_RUNNER_API_KEY?.trim()) };
+    const cppVersion = process.env.CODE_RUNNER_CPP_VERSION?.trim() || DEFAULT_PISTON_CPP_VERSION;
+    return {
+      kind: "ready",
+      adapter: new PistonRunner(baseUrl, process.env.CODE_RUNNER_API_KEY?.trim(), cppVersion)
+    };
   }
 
   if (provider === "judge0") {
