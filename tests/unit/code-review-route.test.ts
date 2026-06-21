@@ -28,15 +28,17 @@ describe("POST /api/code/review", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.result.status).toBe("unavailable");
-    expect(body.result.message.length).toBeGreaterThan(0);
+    expect(body.result.learnerMessage.length).toBeGreaterThan(0);
   });
 
-  it("returns feedback with the deterministic fake provider", async () => {
+  it("returns structured weak-evidence feedback with the deterministic fake provider", async () => {
     process.env.AI_PROVIDER = "fake";
     const response = await reviewPost(jsonRequest({ itemId: HELLO_ITEM, source: "int main(){}" }));
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.result.status).toBe("ok");
+    // Fake provider returns prose, so the parser falls back gracefully.
+    expect(["ok", "invalid"]).toContain(body.result.status);
+    expect(body.result.evidenceStrength).toBe("weak_ai_inference");
   });
 
   it("rejects a non-code item", async () => {

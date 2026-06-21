@@ -4,11 +4,11 @@ import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedContent } from "@/features/learning-items/formatted-content";
 import type {
-  CodeReviewResult,
   CodeRunResult,
   CodeTestResult,
   LearningItemCodeLab
 } from "./code-lab-types";
+import type { StructuredCodeFeedback } from "./code-feedback-types";
 import { CodeEditor } from "./code-editor";
 import { CodeRunControls, type CodeAction } from "./code-run-controls";
 import { CodeOutputPanel } from "./code-output-panel";
@@ -35,7 +35,7 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
   const [busy, setBusy] = useState<CodeAction | null>(null);
   const [runResult, setRunResult] = useState<CodeRunResult | null>(null);
   const [testResult, setTestResult] = useState<CodeTestResult | null>(null);
-  const [review, setReview] = useState<CodeReviewResult | null>(null);
+  const [review, setReview] = useState<StructuredCodeFeedback | null>(null);
   const [trace, setTrace] = useState<CodeTraceResult | null>(null);
   const [tracePending, setTracePending] = useState(false);
   const [traceSource, setTraceSource] = useState<TraceSource>({ kind: "stdin" });

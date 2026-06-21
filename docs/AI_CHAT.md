@@ -62,6 +62,8 @@ Before deterministic grading, quiz and review contexts use a hint-only policy. T
 
 AI output may be incorrect. The UI states that cppFan grading and evidence remain authoritative.
 
+Code Lab AI Review and AI Trace return a machine-validated `StructuredCodeFeedback` shape (summary, error tags from a fixed list, related skills, next action, confidence) marked `weak_ai_inference`. It is advisory only and never overrides deterministic compile/test results. See [CODE_LAB.md](CODE_LAB.md) "Structured AI feedback".
+
 ## Dictation
 
 The composer uses the browser or device speech-recognition capability when available. Listening starts only after the learner activates **Start dictation**. Final transcript text is inserted at the current selection, remains editable, and is never submitted automatically.

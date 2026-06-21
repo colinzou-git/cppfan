@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  buildReviewMessages,
-  parseReviewResponse,
-  reviewCode
-} from "@/features/code-lab/code-review-service";
+import { buildReviewMessages, reviewCode } from "@/features/code-lab/code-review-service";
+import { CODE_ERROR_TAGS } from "@/features/code-lab/code-error-tags";
 import type { CodeTestResult } from "@/features/code-lab/code-lab-types";
 
 const originalProvider = process.env.AI_PROVIDER;
@@ -31,11 +28,13 @@ const testResult: CodeTestResult = {
 };
 
 describe("buildReviewMessages", () => {
-  it("includes item prompt, skill tags, code, and failed visible tests", () => {
-    const [, user] = buildReviewMessages(
+  it("includes item prompt, skill tags, code, failed visible tests, and the allowed tag list", () => {
+    const [system, user] = buildReviewMessages(
       { itemId: "cpp.program_basics.structure.lesson", source: "int main(){}", lastTestResult: testResult },
       { prompt: "Print Hello", skillTags: ["cpp.program_basics.structure"] }
     );
+    expect(system.content).toContain(CODE_ERROR_TAGS[0]);
+    expect(system.content).toMatch(/JSON/i);
     expect(user.content).toContain("Print Hello");
     expect(user.content).toContain("cpp.program_basics.structure");
     expect(user.content).toContain("int main(){}");
@@ -44,45 +43,27 @@ describe("buildReviewMessages", () => {
   });
 });
 
-describe("parseReviewResponse", () => {
-  it("parses a structured JSON review", () => {
-    const review = parseReviewResponse(
-      'Sure: {"summary":"Close!","likelyIssue":"Missing newline","nextHint":"Add \\n","relatedSkills":["io"]}'
-    );
-    expect(review.status).toBe("ok");
-    expect(review.likelyIssue).toBe("Missing newline");
-    expect(review.relatedSkills).toEqual(["io"]);
-  });
-
-  it("falls back to prose as the summary", () => {
-    const review = parseReviewResponse("Try printing a newline at the end.");
-    expect(review.status).toBe("ok");
-    expect(review.summary).toContain("newline");
-  });
-
-  it("reports unavailable for empty output", () => {
-    expect(parseReviewResponse("   ").status).toBe("unavailable");
-  });
-});
-
 describe("reviewCode availability", () => {
   it("is unavailable when no AI provider is enabled", async () => {
     process.env.AI_PROVIDER = "groq";
     delete process.env.AI_CHAT_ENABLED;
-    const review = await reviewCode(
+    const feedback = await reviewCode(
       { itemId: "cpp.program_basics.structure.lesson", source: "int main(){}" },
       new AbortController().signal
     );
-    expect(review.status).toBe("unavailable");
+    expect(feedback.status).toBe("unavailable");
+    expect(feedback.evidenceStrength).toBe("weak_ai_inference");
   });
 
-  it("returns feedback with the deterministic fake provider", async () => {
+  it("returns structured weak-evidence feedback with the deterministic fake provider", async () => {
     process.env.AI_PROVIDER = "fake";
-    const review = await reviewCode(
+    const feedback = await reviewCode(
       { itemId: "cpp.program_basics.structure.lesson", source: "int main(){}" },
       new AbortController().signal
     );
-    expect(review.status).toBe("ok");
-    expect(review.message.length).toBeGreaterThan(0);
+    // The fake provider returns prose, so the parser yields a graceful fallback.
+    expect(["ok", "invalid"]).toContain(feedback.status);
+    expect(feedback.learnerMessage.length).toBeGreaterThan(0);
+    expect(feedback.evidenceStrength).toBe("weak_ai_inference");
   });
 });

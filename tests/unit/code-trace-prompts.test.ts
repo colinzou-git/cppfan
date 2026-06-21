@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildTraceMessages, TRACE_SYSTEM_PROMPT } from "@/features/code-lab/code-trace-prompts";
+import { buildTraceMessages } from "@/features/code-lab/code-trace-prompts";
+import { CODE_ERROR_TAGS } from "@/features/code-lab/code-error-tags";
 import type { CodeTraceRequest } from "@/features/code-lab/code-trace-types";
 
 const base: CodeTraceRequest = {
@@ -18,7 +19,8 @@ describe("buildTraceMessages", () => {
       prompt: "Echo the input",
       skillTags: ["cpp.program_basics.io"]
     });
-    expect(system.content).toBe(TRACE_SYSTEM_PROMPT);
+    expect(system.content).toMatch(/approximate/i);
+    expect(system.content).toContain(CODE_ERROR_TAGS[0]);
     expect(user.content).toContain("Echo the input");
     expect(user.content).toContain("cpp.program_basics.io");
     expect(user.content).toContain("int main(){ return 0; }");
@@ -28,8 +30,9 @@ describe("buildTraceMessages", () => {
   });
 
   it("instructs the model to be explicit that the trace is approximate and not a debugger", () => {
-    expect(TRACE_SYSTEM_PROMPT).toMatch(/approximate/i);
-    expect(TRACE_SYSTEM_PROMPT).toMatch(/not real runtime inspection|not a debugger|NOT a debugger/i);
+    const [system] = buildTraceMessages(base, { prompt: "p", skillTags: [] });
+    expect(system.content).toMatch(/approximate/i);
+    expect(system.content).toMatch(/not a debugger|NOT a debugger|not real runtime inspection/i);
   });
 
   it("only carries the visible data it is given (no hidden fields invented)", () => {

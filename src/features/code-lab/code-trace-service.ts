@@ -7,6 +7,12 @@ import type { CodeTraceRequest, CodeTraceResult, CodeTraceStep } from "./code-tr
 import { CODE_TRACE_DISCLAIMER } from "./code-trace-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { buildTraceMessages } from "./code-trace-prompts";
+import { normalizeCodeErrorTags } from "./code-feedback-parser";
+import {
+  CODE_FEEDBACK_NEXT_ACTIONS,
+  CODE_FEEDBACK_SCHEMA_VERSION,
+  type CodeFeedbackNextAction
+} from "./code-feedback-types";
 
 /**
  * Server-only orchestration for the AI trace (#408). Reads item config, builds
@@ -102,17 +108,40 @@ export function parseTraceResponse(raw: string): CodeTraceResult {
     };
   }
 
+  const codeSummary = asString(parsed.codeSummary) || undefined;
+  const likelyIssue = asString(parsed.likelyIssue) || undefined;
+  const relatedSkills = asStringArray(parsed.relatedSkills);
+  const confidence = asConfidence(parsed.confidence);
+
   return {
     status: "ok",
-    codeSummary: asString(parsed.codeSummary) || undefined,
+    codeSummary,
     inputSummary: asString(parsed.inputSummary) || undefined,
     steps: parseSteps(parsed.steps),
-    likelyIssue: asString(parsed.likelyIssue) || undefined,
+    likelyIssue,
     nextHint: asString(parsed.nextHint) || undefined,
-    relatedSkills: asStringArray(parsed.relatedSkills),
-    confidence: asConfidence(parsed.confidence),
-    disclaimer: CODE_TRACE_DISCLAIMER
+    relatedSkills,
+    confidence,
+    disclaimer: CODE_TRACE_DISCLAIMER,
+    feedback: {
+      schemaVersion: CODE_FEEDBACK_SCHEMA_VERSION,
+      status: "ok",
+      summary: codeSummary ?? "",
+      likelyIssue,
+      errorTags: normalizeCodeErrorTags(parsed.errorTags),
+      relatedSkills: relatedSkills ?? [],
+      nextAction: clampNextAction(parsed.nextAction),
+      confidence,
+      learnerMessage: codeSummary || likelyIssue || CODE_TRACE_DISCLAIMER,
+      evidenceStrength: "weak_ai_inference"
+    }
   };
+}
+
+function clampNextAction(value: unknown): CodeFeedbackNextAction | undefined {
+  return CODE_FEEDBACK_NEXT_ACTIONS.includes(value as CodeFeedbackNextAction)
+    ? (value as CodeFeedbackNextAction)
+    : undefined;
 }
 
 function parseSteps(value: unknown): CodeTraceStep[] {
