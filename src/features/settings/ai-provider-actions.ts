@@ -13,7 +13,7 @@ function field(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
 }
 
-function redirectWith(messageKind: "message" | "error", message: string) {
+function redirectWith(messageKind: "message" | "error", message: string): never {
   redirect(`/settings?${messageKind}=${encodeURIComponent(message)}`);
 }
 
