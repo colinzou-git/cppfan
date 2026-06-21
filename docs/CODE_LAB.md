@@ -77,6 +77,24 @@ disclaimer that compiler output and test results are the source of truth.
 - Server route: `app/api/code/trace/route.ts`; logic in `code-trace-service.ts`
   and `code-trace-prompts.ts`; UI in `trace-controls.tsx` / `ai-trace-panel.tsx`.
 
+## Structured AI feedback (Phase 3.1)
+
+AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
+(`code-feedback-types.ts`), not just prose: `summary`, `likelyIssue`,
+`errorTags` (from the fixed `CODE_ERROR_TAGS` list), `relatedSkills`,
+`nextAction`, `confidence`, and a `learnerMessage`. It is rendered by the shared
+`CodeFeedbackPanel`.
+
+- **Advisory only.** Every structured result is `evidenceStrength:
+  "weak_ai_inference"` and the panel always shows that compiler output and test
+  results are authoritative. `mergeRunAndAiFeedback` derives the authoritative
+  outcome from run/test results alone — AI output can never change it.
+- **Unknown error tags are discarded**; `confidence`/`nextAction` are clamped to
+  the allowed vocabularies. Malformed/prose model output degrades to a readable
+  `invalid` fallback and never throws to the route.
+- The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
+  so later remediation/mastery phases can consume it; never renumber a tag.
+
 ## Hidden tests
 
 Visible tests may show their stdin/expected output. Hidden tests live in the

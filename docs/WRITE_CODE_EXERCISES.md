@@ -69,6 +69,11 @@ from FSRS review scheduling (ADR 0003).
 A later iteration may verify a GitHub Actions result or a signed exercise
 report instead of a manual mark.
 
+The in-app Code Lab (separate from these local exercises) emits structured AI
+feedback with a stable error-tag schema (`weak_ai_inference`) that future
+remediation/mastery work can consume; it remains advisory and never overrides
+deterministic compile/test results. See [CODE_LAB.md](CODE_LAB.md).
+
 ## Current Exercises
 
 | id | skills | lab |

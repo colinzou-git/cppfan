@@ -267,7 +267,10 @@ Recommended types:
 Any item type can additionally opt into an in-app **Code Lab** (#407) by carrying
 Code Lab metadata (starter code, mode, visible/hidden tests, skill tags). The
 shared `MaybeCodeLab` mount renders the editor/runner only for items that opt in;
-no debugger is involved in Phase 1. See [CODE_LAB.md](CODE_LAB.md).
+no debugger is involved. See [CODE_LAB.md](CODE_LAB.md). Code Lab AI Review/Trace
+emit a stable, machine-validated error-tag schema marked `weak_ai_inference` —
+future remediation/mastery work may consume these tags as **weak evidence only**,
+never overriding deterministic compile/test outcomes.
 
 Each learning item should link to one or more skills.
 

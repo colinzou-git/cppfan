@@ -1,6 +1,7 @@
 "use client";
 
 import type { CodeTraceResult } from "./code-trace-types";
+import { CodeFeedbackPanel } from "./code-feedback-panel";
 
 /**
  * Renders the AI execution trace (#408). Every successful trace shows the
@@ -100,7 +101,11 @@ export function AiTracePanel({
           {trace.nextHint}
         </p>
       ) : null}
-      {trace.relatedSkills && trace.relatedSkills.length > 0 ? (
+      {trace.feedback && trace.feedback.status === "ok" ? (
+        <div className="rounded-lg border border-violet-100 bg-white p-2">
+          <CodeFeedbackPanel feedback={trace.feedback} tone="trace" />
+        </div>
+      ) : trace.relatedSkills && trace.relatedSkills.length > 0 ? (
         <p className="text-xs text-violet-800">
           <span className="font-bold">Related skills: </span>
           {trace.relatedSkills.join(", ")}

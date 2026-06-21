@@ -1,23 +1,11 @@
 import type { AiProviderMessage } from "@/features/ai-chat/ai-chat-policy";
 import type { CodeTraceRequest } from "./code-trace-types";
+import { buildStructuredCodeTracePrompt } from "./code-feedback-prompts";
 
 /**
  * Prompt construction for the AI trace (#408). Kept separate so the exact model
  * instructions are unit-testable and never accidentally include hidden test I/O.
  */
-
-export const TRACE_SYSTEM_PROMPT = [
-  "You are cppFan's C++ tutor producing an APPROXIMATE educational execution trace for a beginner.",
-  "This is NOT real runtime inspection or a debugger — be explicit that the trace is approximate.",
-  "Focus only on the selected input/test case. Prefer compact steps over a long essay.",
-  "Show only the variables that matter for understanding, not every variable.",
-  "Use line hints only when the line mapping is reasonably clear.",
-  "Never invent compiler or runtime output; use only what is provided.",
-  "If the code does not compile, explain the compile blocker instead of pretending the program ran.",
-  "If the code has undefined behavior, say the trace may be unreliable and explain why.",
-  "Give hints before full solutions. Map the issue to related cppFan skills when possible.",
-  'Respond ONLY with JSON: {"codeSummary": string, "inputSummary": string, "steps": [{"step": number, "lineHint": string, "variables": {"name":"value"}, "explanation": string}], "likelyIssue": string, "nextHint": string, "relatedSkills": string[], "confidence": "low"|"medium"|"high"}.'
-].join(" ");
 
 /**
  * Build the trace messages from item context and the learner's selection. Only
@@ -64,7 +52,10 @@ export function buildTraceMessages(
   );
 
   return [
-    { role: "system", content: TRACE_SYSTEM_PROMPT },
+    {
+      role: "system",
+      content: buildStructuredCodeTracePrompt({ hasSelectedTest: Boolean(request.selectedTestName) })
+    },
     { role: "user", content: parts.join("\n\n") }
   ];
 }

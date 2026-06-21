@@ -4,28 +4,39 @@ import {
   completeAiResponse,
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
-import type { CodeReviewRequest, CodeReviewResult } from "./code-lab-types";
+import type { CodeReviewRequest } from "./code-lab-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { buildStructuredCodeReviewPrompt } from "./code-feedback-prompts";
+import { parseStructuredCodeFeedback } from "./code-feedback-parser";
+import {
+  CODE_FEEDBACK_SCHEMA_VERSION,
+  type StructuredCodeFeedback
+} from "./code-feedback-types";
 
 /**
- * Build the AI review of a learner's C++ submission (#407). Server-only: it
- * reads the item config, the learner code, and run/test summaries, then asks the
- * provider for short, hint-first feedback. Hidden test inputs/outputs are never
- * included. Distinguishes provider output/test output from inference and never
- * fabricates results.
+ * Build structured AI review of a learner's C++ submission (#407, structured in
+ * #410). Server-only: reads item config, learner code, and run/test summaries,
+ * then asks the provider for hint-first, JSON-structured feedback. Hidden test
+ * inputs/outputs are never included (only aggregate pass/fail counts). Returns
+ * StructuredCodeFeedback — advisory weak evidence that never overrides the
+ * deterministic compile/test outcome.
  */
 
 const UNAVAILABLE_MESSAGE =
   "AI review is not available right now. You can still run your code and the visible tests.";
 
-const REVIEW_SYSTEM = [
-  "You are cppFan's C++ tutor reviewing a beginner's code submission.",
-  "Give short, encouraging, hint-first feedback — do not paste a full corrected solution unless explicitly asked.",
-  "Use only the supplied code, prompt, skill tags, and compiler/runtime/test summaries.",
-  "Clearly separate observed compiler/test output from your own inference; never invent test results or hidden tests.",
-  "Respond ONLY with a JSON object: {\"summary\": string, \"likelyIssue\": string, \"nextHint\": string, \"relatedSkills\": string[]}.",
-  "Keep each field to one or two sentences."
-].join(" ");
+function unavailableFeedback(): StructuredCodeFeedback {
+  return {
+    schemaVersion: CODE_FEEDBACK_SCHEMA_VERSION,
+    status: "unavailable",
+    summary: "",
+    errorTags: [],
+    relatedSkills: [],
+    confidence: "low",
+    learnerMessage: UNAVAILABLE_MESSAGE,
+    evidenceStrength: "weak_ai_inference"
+  };
+}
 
 export function buildReviewMessages(
   request: CodeReviewRequest,
@@ -49,6 +60,7 @@ export function buildReviewMessages(
   }
 
   const tests = request.lastTestResult;
+  let hasFailingTests = false;
   if (tests) {
     const failedVisible = tests.visible
       .filter((test) => !test.passed)
@@ -58,6 +70,7 @@ export function buildReviewMessages(
             test.actualStdout ?? ""
           )}`
       );
+    hasFailingTests = failedVisible.length > 0 || tests.passed < tests.total;
     parts.push(
       `Tests: ${tests.passed}/${tests.total} passed (${tests.hiddenPassed}/${tests.hiddenTotal} hidden).` +
         (failedVisible.length > 0
@@ -71,40 +84,17 @@ export function buildReviewMessages(
   }
 
   return [
-    { role: "system", content: REVIEW_SYSTEM },
+    { role: "system", content: buildStructuredCodeReviewPrompt({ hasFailingTests }) },
     { role: "user", content: parts.join("\n\n") }
   ];
-}
-
-export function parseReviewResponse(raw: string): CodeReviewResult {
-  const parsed = extractJson(raw);
-  if (parsed) {
-    const summary = asString(parsed.summary);
-    return {
-      status: "ok",
-      summary,
-      likelyIssue: asString(parsed.likelyIssue) || undefined,
-      nextHint: asString(parsed.nextHint) || undefined,
-      relatedSkills: asStringArray(parsed.relatedSkills),
-      message: summary || "Review ready."
-    };
-  }
-
-  const text = raw.trim();
-  if (!text) {
-    return { status: "unavailable", message: UNAVAILABLE_MESSAGE };
-  }
-  // Provider returned prose rather than JSON (e.g. the fake provider). Treat the
-  // whole response as the summary so the learner still gets readable feedback.
-  return { status: "ok", summary: text, message: text };
 }
 
 export async function reviewCode(
   request: CodeReviewRequest,
   signal: AbortSignal
-): Promise<CodeReviewResult> {
+): Promise<StructuredCodeFeedback> {
   if (!isAiChatEnabled()) {
-    return { status: "unavailable", message: UNAVAILABLE_MESSAGE };
+    return unavailableFeedback();
   }
 
   const config = getCodeLabConfigForItem(request.itemId);
@@ -115,10 +105,10 @@ export async function reviewCode(
 
   try {
     const raw = await completeAiResponse({ messages, signal });
-    return parseReviewResponse(raw);
+    return parseStructuredCodeFeedback(raw);
   } catch (error) {
     if (error instanceof AiProviderError) {
-      return { status: "unavailable", message: UNAVAILABLE_MESSAGE };
+      return unavailableFeedback();
     }
     throw error;
   }
@@ -127,26 +117,4 @@ export async function reviewCode(
 function truncate(value: string, max = 2_000): string {
   if (!value) return "(none)";
   return value.length > max ? `${value.slice(0, max)}…` : value;
-}
-
-function extractJson(raw: string): Record<string, unknown> | null {
-  const start = raw.indexOf("{");
-  const end = raw.lastIndexOf("}");
-  if (start === -1 || end <= start) return null;
-  try {
-    const parsed = JSON.parse(raw.slice(start, end + 1));
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function asString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function asStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const list = value.filter((entry): entry is string => typeof entry === "string");
-  return list.length > 0 ? list : undefined;
 }

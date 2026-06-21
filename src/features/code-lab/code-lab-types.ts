@@ -109,15 +109,8 @@ export type CodeReviewRequest = {
   userQuestion?: string;
 };
 
-export type CodeReviewResult = {
-  status: "ok" | "unavailable" | "invalid";
-  summary?: string;
-  likelyIssue?: string;
-  nextHint?: string;
-  relatedSkills?: string[];
-  /** Always present, including the unavailable state, for a friendly UI. */
-  message: string;
-};
+// Structured AI review output now lives in StructuredCodeFeedback
+// (code-feedback-types.ts, #410); the legacy CodeReviewResult was removed.
 
 export type CodeAttemptSummary = {
   itemId: string;

@@ -1,4 +1,5 @@
 import type { CodeRunResult, CodeTestResult } from "./code-lab-types";
+import type { StructuredCodeFeedback } from "./code-feedback-types";
 
 /**
  * Types for the Phase 2 AI execution trace (#408). The trace is an AI-generated
@@ -44,6 +45,8 @@ export type CodeTraceResult = {
   disclaimer: string;
   /** Friendly message for unavailable/invalid states. */
   message?: string;
+  /** Structured weak-evidence feedback derived from the trace (#410). */
+  feedback?: StructuredCodeFeedback;
 };
 
 export const CODE_TRACE_DISCLAIMER =

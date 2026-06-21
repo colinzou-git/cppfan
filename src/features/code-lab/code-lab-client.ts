@@ -1,9 +1,6 @@
-import type {
-  CodeReviewResult,
-  CodeRunResult,
-  CodeTestResult
-} from "./code-lab-types";
+import type { CodeRunResult, CodeTestResult } from "./code-lab-types";
 import type { CodeTraceResult } from "./code-trace-types";
+import type { StructuredCodeFeedback } from "./code-feedback-types";
 
 /**
  * Browser fetch wrappers for the Code Lab API (#407). These run client-side and
@@ -50,8 +47,8 @@ export function reviewCodeRequest(
     userQuestion?: string;
   },
   signal?: AbortSignal
-): Promise<CodeReviewResult> {
-  return postJson<CodeReviewResult>("/api/code/review", input, signal);
+): Promise<StructuredCodeFeedback> {
+  return postJson<StructuredCodeFeedback>("/api/code/review", input, signal);
 }
 
 export function traceCodeRequest(

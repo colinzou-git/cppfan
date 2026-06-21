@@ -14,9 +14,24 @@ _Last updated: 2026-06-21 — by the /loop driver._
 
 ## Issue order
 
-1. **#407 — Phase 1 Code Lab** (editor, runner, tests, AI review) — **DONE**:
-   PR #409 squash-merged to `main` (`e95cad6`); #407 closed with final audit.
-2. **#408 — Phase 2 AI trace** — **IN PROGRESS** on `feat/code-lab-phase2`.
+1. **#407 — Phase 1 Code Lab** — **DONE**: PR #409 → `e95cad6`; closed w/ audit.
+2. **#408 — Phase 2 AI trace** — **DONE**: PR #419 → `ca5a191`; closed w/ audit.
+3. **Phase 3 wave (#410–#418)** — new; work in phase order. #410 (structured AI
+   feedback + stable error-tag schema) is the foundation many others build on:
+   - #410 Phase 3.1 Structured Code Lab AI feedback + error-tag schema — **PR OPEN**
+     (`feat/code-lab-phase3-1`): new `code-error-tags`, `code-feedback-{types,
+     prompts,parser,evidence,panel}`; Review + Trace now return
+     `StructuredCodeFeedback` (weak evidence, stable tags, graceful fallback).
+     Local: 826 unit tests pass, build/lint/typecheck green, e2e chromium 4/4.
+   - #411 3.2 Boundary-case checklist
+   - #412 3.3 Deterministic error tagging MVP (depends on #410 schema)
+   - #413 3.4 Prediction-before-run mode
+   - #414 3.5 Error-pattern remediation recommendations (depends on tagging)
+   - #415 3.6 Adaptive scaffold selector
+   - #416 3.7 Debugging skill lane
+   - #417 3.8 Cross-context mastery rules
+   - #418 3.9 Code Lab in capstone milestones
+   Read each issue body before starting; respect stated dependencies.
 
 ## Current state
 
