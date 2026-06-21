@@ -56,6 +56,15 @@ export default defineConfig({
     {
       name: "ipad",
       use: { ...devices["iPad Pro 11"] }
+    },
+    {
+      // 27-inch-monitor-sized viewport to catch wide desktop layout regressions
+      // (#433). The wide-layout smoke suite only asserts geometry in this project.
+      name: "wide-desktop",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 }
+      }
     }
   ]
 });
