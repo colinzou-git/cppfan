@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getEligibleReviewItems, getLearningItemById } from "@/features/learning-items/learning-item-seed";
+import { orderPublicChoices } from "@/features/learning-items/choice-ordering";
 import type { DueReviewEntry, ReviewCard, ReviewPreviewEntry, ReviewQueueView } from "./review-types";
 
 const CARD_COLUMNS =
@@ -28,8 +29,9 @@ function toDueEntry(card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id
     type: details.item.type,
     prompt: details.item.prompt,
     explanation: details.item.explanation,
-    // getLearningItemById returns answer-key-free public choices.
-    choices: details.choices
+    // getLearningItemById returns answer-key-free public choices. Shuffle the
+    // revealed reference list so review cards do not preserve authoring order.
+    choices: orderPublicChoices(details.choices, `review:${card.id}:${card.learning_item_id}`)
   };
 }
 
