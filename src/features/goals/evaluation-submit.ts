@@ -1,4 +1,8 @@
 import { getGoalEvaluationView } from "./evaluation-session-query";
+import {
+  isLocalGoalEvaluationSessionId,
+  submitLocalGoalEvaluationChoice
+} from "./evaluation-local-session";
 import { classifyEvaluationError, getEvaluationClient } from "./evaluation-service-core";
 import type { EvaluationMutationResult } from "./evaluation-service-types";
 
@@ -8,6 +12,14 @@ export async function submitGoalEvaluationChoice(input: {
   submissionId: string;
   choiceId: string;
 }): Promise<EvaluationMutationResult> {
+  if (isLocalGoalEvaluationSessionId(input.sessionId)) {
+    return submitLocalGoalEvaluationChoice({
+      sessionId: input.sessionId,
+      expectedQuestionIndex: input.expectedQuestionIndex,
+      choiceId: input.choiceId
+    });
+  }
+
   const client = await getEvaluationClient();
   if (client.status !== "ready") return { status: client.status };
   const view = await getGoalEvaluationView();
