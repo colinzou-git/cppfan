@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { setMilestone } from "./capstone-actions";
 import type { CapstoneTrackView } from "./capstone-view";
 import type { MilestoneProgress, MilestoneStatus } from "./milestone-progress";
+import { CodeLabMilestone } from "./code-lab-milestone";
+import { canRunMilestoneInApp } from "./milestone-code-lab-adapter";
+import { canMarkMilestoneComplete } from "./code-lab-milestone-service";
+import type { CodeRunResult, CodeTestResult } from "@/features/code-lab/code-lab-types";
 
 type ProgressEntry = { status: MilestoneStatus; reflection: string | null };
 
@@ -33,6 +37,9 @@ export function CapstoneTracksView({
     )
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [labResults, setLabResults] = useState<
+    Record<string, { run?: CodeRunResult | null; test?: CodeTestResult | null }>
+  >({});
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -120,6 +127,12 @@ export function CapstoneTracksView({
                   const entry = progress[milestone.id] as ProgressEntry | undefined;
                   const status: MilestoneStatus | "none" = entry ? entry.status : "none";
                   const isPending = pendingId === milestone.id;
+                  const inAppLab = canRunMilestoneInApp(milestone);
+                  const completionGate = canMarkMilestoneComplete({
+                    milestone,
+                    testResult: labResults[milestone.id]?.test ?? null,
+                    reflection: draftFor(milestone.id)
+                  });
                   return (
                     <li
                       key={milestone.id}
@@ -154,6 +167,15 @@ export function CapstoneTracksView({
                         <p className="text-xs font-medium text-slate-500">Stretch: {milestone.extensionTask}</p>
                       ) : null}
 
+                      {inAppLab ? (
+                        <CodeLabMilestone
+                          milestone={milestone}
+                          onResult={(result) =>
+                            setLabResults((prev) => ({ ...prev, [milestone.id]: result }))
+                          }
+                        />
+                      ) : null}
+
                       {status !== "none" ? (
                         <textarea
                           className="min-h-[3rem] rounded-lg border border-slate-200 px-2 py-1 text-sm"
@@ -181,7 +203,7 @@ export function CapstoneTracksView({
                           <Button
                             type="button"
                             onClick={() => apply(milestone.id, "completed", draftFor(milestone.id) || null)}
-                            disabled={isPending}
+                            disabled={isPending || !completionGate.ok}
                             data-testid="capstone-milestone-complete"
                           >
                             Mark complete
@@ -199,6 +221,11 @@ export function CapstoneTracksView({
                           </Button>
                         ) : null}
                       </div>
+                      {status === "started" && !completionGate.ok && completionGate.reason ? (
+                        <p className="text-xs font-medium text-amber-700" data-testid="capstone-milestone-gate">
+                          {completionGate.reason}
+                        </p>
+                      ) : null}
                     </li>
                   );
                 })}

@@ -148,6 +148,42 @@ int main() {
 `,
     visibleTests: [{ name: "Prints the last element", expectedStdout: "3\n", matcher: "exact" }],
     skillTags: ["cpp.tooling.sanitizers"]
+  },
+  // #418 capstone milestones practiced in-app via the Code Lab. Keyed by the
+  // milestone id so the existing /api/code/* routes resolve them unchanged.
+  "csv-table-summarizer.m1": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt:
+      "Split the line `a,b,c` on commas and print each field on its own line (a, then b, then c).",
+    starterCode: `#include <iostream>
+
+int main() {
+  std::cout << "a" << "\\n";
+  std::cout << "b" << "\\n";
+  std::cout << "c" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [{ name: "Prints each field", expectedStdout: "a\nb\nc\n", matcher: "exact" }],
+    skillTags: ["dsa.strings.parsing"]
+  },
+  "maze-route-planner.m2": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt:
+      "For the line graph 0—1—2 starting at 0, print the BFS visit order on one line: `0 1 2`.",
+    starterCode: `#include <iostream>
+
+int main() {
+  std::cout << "0 1 2" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [{ name: "BFS visit order", expectedStdout: "0 1 2\n", matcher: "exact" }],
+    skillTags: ["dsa.graphs.bfs"]
   }
 };
 

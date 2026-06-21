@@ -73,8 +73,10 @@ The in-app Code Lab (separate from these local exercises) emits structured AI
 feedback with a stable error-tag schema (`weak_ai_inference`) that future
 remediation/mastery work can consume; it remains advisory and never overrides
 deterministic compile/test results. It can also show skill-resolved boundary-case
-checklists (#411) as strategy hints (no mastery impact). See
-[CODE_LAB.md](CODE_LAB.md).
+checklists (#411) as strategy hints (no mastery impact). Selected single-file
+capstone milestones (#418) are practiced directly in the Code Lab, with
+completion gated on passing the visible tests; larger work stays in Codespaces.
+See [CODE_LAB.md](CODE_LAB.md).
 
 ## Current Exercises
 
