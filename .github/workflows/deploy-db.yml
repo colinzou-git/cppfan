@@ -1,0 +1,44 @@
+name: Deploy database migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - supabase/migrations/**
+      - scripts/apply-migrations.sh
+      - scripts/verify-goal-evaluation-db.sh
+      - .github/workflows/deploy-db.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-db-migrations
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Apply production Supabase migrations
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check database secret
+        run: |
+          if [ -z "${SUPABASE_DB_URL}" ]; then
+            echo "SUPABASE_DB_URL repository secret is missing." >&2
+            echo "Add the Supabase Session pooler connection string as a GitHub Actions secret named SUPABASE_DB_URL." >&2
+            exit 1
+          fi
+
+      - name: Apply all migrations to production Supabase
+        run: bash scripts/apply-migrations.sh
+
+      - name: Verify Goal Evaluation database objects
+        run: bash scripts/verify-goal-evaluation-db.sh
