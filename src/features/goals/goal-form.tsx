@@ -1,17 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createGoalAction } from "@/app/goals/actions";
+import { localDateKey } from "@/lib/time/local-day";
 import { goalSkillOptions } from "./goal-skill-options";
 
 const DRAFT_KEY = "cppfan:goal-wizard:v1";
+const DEFAULT_TIMEZONE = "America/Los_Angeles";
 
-function day(offset: number) {
-  const date = new Date();
-  date.setUTCDate(date.getUTCDate() + offset);
-  return date.toISOString().slice(0, 10);
+function localToday(timezone: string) {
+  return localDateKey(new Date(), timezone);
 }
 
 function addDays(localDate: string, count: number) {
@@ -29,6 +29,33 @@ type Draft = {
   skillIds: string[];
 };
 
+function defaultDraft(recommendedSkillIds: string[]): Draft {
+  return {
+    step: 1,
+    duration: 7,
+    start: localToday(DEFAULT_TIMEZONE),
+    timezone: DEFAULT_TIMEZONE,
+    title: "",
+    note: "",
+    skillIds: [...recommendedSkillIds]
+  };
+}
+
+function normalizeDraft(value: unknown, fallback: Draft): Draft {
+  const record = typeof value === "object" && value !== null ? value as Partial<Draft> : {};
+  return {
+    step: Number.isInteger(record.step) && record.step >= 1 && record.step <= 4 ? record.step : fallback.step,
+    duration: Number.isInteger(record.duration) && record.duration >= 1 && record.duration <= 30 ? record.duration : fallback.duration,
+    start: typeof record.start === "string" && /^\d{4}-\d{2}-\d{2}$/.test(record.start) ? record.start : fallback.start,
+    timezone: typeof record.timezone === "string" && record.timezone ? record.timezone : fallback.timezone,
+    title: typeof record.title === "string" ? record.title : fallback.title,
+    note: typeof record.note === "string" ? record.note : fallback.note,
+    skillIds: Array.isArray(record.skillIds) && record.skillIds.every((skillId) => typeof skillId === "string")
+      ? record.skillIds
+      : fallback.skillIds
+  };
+}
+
 export function GoalForm({
   recommendedSkillIds = [],
   recommendationReason
@@ -36,15 +63,9 @@ export function GoalForm({
   recommendedSkillIds?: string[];
   recommendationReason?: string;
 }) {
-  const [draft, setDraft] = useState<Draft>({
-    step: 1,
-    duration: 7,
-    start: day(0),
-    timezone: "America/Los_Angeles",
-    title: "",
-    note: "",
-    skillIds: recommendedSkillIds
-  });
+  const initialRecommendedSkillIds = useRef(recommendedSkillIds);
+  const [draft, setDraft] = useState<Draft>(() => defaultDraft(recommendedSkillIds));
+  const [hydrated, setHydrated] = useState(false);
   const [restored, setRestored] = useState(false);
   const end = useMemo(() => addDays(draft.start, draft.duration - 1), [draft.start, draft.duration]);
   const suggested = recommendedSkillIds.length > 0
@@ -52,26 +73,37 @@ export function GoalForm({
     : goalSkillOptions.slice(0, 4);
 
   useEffect(() => {
+    const fallback = defaultDraft(initialRecommendedSkillIds.current);
     const saved = window.localStorage.getItem(DRAFT_KEY);
     if (saved) {
-      try { setDraft(JSON.parse(saved) as Draft); } catch { window.localStorage.removeItem(DRAFT_KEY); }
+      try {
+        setDraft(normalizeDraft(JSON.parse(saved), fallback));
+        setRestored(true);
+      } catch {
+        window.localStorage.removeItem(DRAFT_KEY);
+        setRestored(false);
+      }
     } else {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || fallback.timezone;
       setDraft((current) => ({
         ...current,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || current.timezone
+        timezone,
+        start: localToday(timezone)
       }));
+      setRestored(false);
     }
-    setRestored(Boolean(saved));
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     const warn = (event: BeforeUnloadEvent) => {
       if (draft.title || draft.skillIds.length > 0 || draft.step > 1) event.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [draft]);
+  }, [draft, hydrated]);
 
   function patch(values: Partial<Draft>) {
     setDraft((current) => ({ ...current, ...values }));
