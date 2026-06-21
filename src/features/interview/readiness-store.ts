@@ -5,7 +5,7 @@
 // sessions are counted as distinct days carrying mock-context evidence — a
 // conservative proxy that never over-counts a single session's problems. The pure
 // mappers are exported for unit tests.
-import { getSelfRubricScores } from "./rubric-store";
+import { getAllRubricScores, getSelfRubricScores } from "./rubric-store";
 import { getRecentInterviewEvidence, getRecentTimingSamples } from "./interview-evidence-store";
 import { readinessFacets, type ReadinessFacet } from "./readiness-facets";
 import { summarizeTiming, type TimingSummary } from "./interview-timing";
@@ -25,6 +25,48 @@ export function qualityFromSelfScores(scores: RubricScore[]): QualityAverages {
   const testing = self("testing");
   const complexity = self("complexity");
   const communication = self("communication");
+  if (testing !== undefined) {
+    quality.testing = testing;
+  }
+  if (complexity !== undefined) {
+    quality.complexity = complexity;
+  }
+  if (communication !== undefined) {
+    quality.communication = communication;
+  }
+  return quality;
+}
+
+// Trust order for source-separated rubric evidence: server-verified automated
+// evidence (#178 judge/session) outweighs a peer interviewer's score, which in
+// turn outweighs the learner's self-assessment. Readiness uses the most-trusted
+// score available per dimension so passing code with thin testing or silent
+// communication cannot be self-reported into readiness.
+const SOURCE_PRIORITY: RubricScore["source"][] = ["automated", "peer", "self"];
+
+/** Most-trusted available score for one criterion, or undefined when unrated. Pure. */
+export function preferredScoreForCriterion(
+  scores: RubricScore[],
+  criterion: RubricScore["criterion"]
+): number | undefined {
+  for (const source of SOURCE_PRIORITY) {
+    const match = scores.find((s) => s.source === source && s.criterion === criterion);
+    if (match) {
+      return Math.min(4, Math.max(0, match.score));
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Map source-separated rubric scores to readiness quality averages, preferring
+ * trusted automated/peer evidence over self per dimension (#179). Pure.
+ */
+export function qualityFromScores(scores: RubricScore[]): QualityAverages {
+  const quality: QualityAverages = {};
+  const testing = preferredScoreForCriterion(scores, "testing");
+  const complexity = preferredScoreForCriterion(scores, "complexity");
+  const communication = preferredScoreForCriterion(scores, "communication");
   if (testing !== undefined) {
     quality.testing = testing;
   }
@@ -64,11 +106,11 @@ export type ReadinessInputs = {
  * the model renders as an explicit not-enough-evidence state (never invented).
  */
 export async function getReadinessInputs(now: number = Date.now()): Promise<ReadinessInputs> {
-  const [rubric, evidence] = await Promise.all([getSelfRubricScores(), getRecentInterviewEvidence(now)]);
+  const [rubric, evidence] = await Promise.all([getAllRubricScores(), getRecentInterviewEvidence(now)]);
   return {
     evidence,
     mocksCompleted: mocksCompletedFromEvidence(evidence),
-    quality: qualityFromSelfScores(rubric)
+    quality: qualityFromScores(rubric)
   };
 }
 

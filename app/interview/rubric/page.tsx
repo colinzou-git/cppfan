@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { ClipboardCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getSelfRubricScores } from "@/features/interview/rubric-store";
+import { getAllRubricScores } from "@/features/interview/rubric-store";
 import { RubricReview } from "@/features/interview/rubric-review";
 
 export const metadata = {
-  title: "Interview rubric self-review — cppFan"
+  title: "Interview rubric review — cppFan"
 };
 
 export default async function InterviewRubricPage() {
-  const initialScores = await getSelfRubricScores();
+  const initialScores = await getAllRubricScores();
 
   let authenticated = false;
   const supabase = await createClient();
@@ -28,12 +28,12 @@ export default async function InterviewRubricPage() {
         </Link>
         <h1 className="mt-2 flex items-center gap-2 text-3xl font-black tracking-tight text-slate-950">
           <ClipboardCheck className="h-7 w-7 text-blue-700" />
-          Rubric self-review
+          Rubric review
         </h1>
         <p className="mt-1 text-slate-600">
-          After a session, score each interview dimension separately (0-4). You get a per-dimension heat
-          map, category averages, and focused remediation — not a single pass/fail. It is a reflection
-          tool; nothing is locked.
+          After a session, score each interview dimension separately (0-4) as yourself or a peer
+          interviewer. Automated judge/session evidence is shown read-only alongside. You get a
+          per-dimension heat map, category averages, and focused remediation — not a single pass/fail.
         </p>
       </header>
 
