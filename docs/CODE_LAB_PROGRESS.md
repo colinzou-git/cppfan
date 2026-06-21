@@ -28,7 +28,12 @@ _Last updated: 2026-06-21 — by the /loop driver._
   - **Fix:** expose the Monaco editor ref on mount (`__cppfanCodeLabEditor`) and
     drive the edit via `setValue` in the e2e. Verified locally: **9/9 pass**
     across chromium + iphone + ipad.
-  - Next: push, wait for App checks green, then auto-merge #409.
+  - **Then App checks failed on a unit test** (`ai-chat-runtime.test.ts`): `main`
+    advanced (richer AI provider config: credential/credentialSource) and left
+    that test asserting the old 2-field shape — `main` itself was red. Merged
+    `main` into the branch and updated the assertion. Local full suite: **795
+    pass**; lint/typecheck/build green.
+  - Next: wait for App checks green on commit `e742736`, then auto-merge #409.
 
 ## On merge of #409
 
