@@ -1,5 +1,6 @@
 import { getLearningItemById } from "@/features/learning-items/learning-item-seed";
 import type { LearningItemType, PublicLearningItemChoice } from "@/features/learning-items/learning-item-types";
+import { orderPublicChoices } from "@/features/learning-items/choice-ordering";
 import { getPlacementModules } from "@/features/placement/placement-seed";
 
 export const GOAL_EVALUATION_QUESTION_COUNT = 30;
@@ -51,7 +52,7 @@ export function getGoalEvaluationCatalog(): GoalEvaluationDiagnosticItem[] {
         itemType: details.item.type,
         estimatedMinutes: details.item.estimated_minutes,
         prompt: details.item.prompt,
-        choices: details.choices,
+        choices: orderPublicChoices(details.choices, `goal-evaluation:${itemId}`),
         version: GOAL_EVALUATION_ITEM_POOL_VERSION,
         retired: false
       });
