@@ -1,14 +1,23 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildJudgeSubmissionDraftFromSource } from "@/features/interview/judge-submission-builder";
+import { getJudgeProblemSuite } from "@/features/interview/judge-test-suites";
 
 const SOURCE = "#include <bits/stdc++.h>\nint main(){ std::cout << 0 << '\\n'; }\n";
 
 describe("judge submission builder (#178)", () => {
   it("builds a validated draft from source without storing the raw source", () => {
+    // Derive the expected suite metadata from the catalog so the builder
+    // contract (it forwards the joined suite's counts and version) stays
+    // verified as the catalog is rebalanced over time.
+    const problemId = "iv.prefix.balance-returns-to-zero";
+    const suite = getJudgeProblemSuite(problemId);
+    expect(suite).not.toBeNull();
+    if (!suite) return;
+
     const built = buildJudgeSubmissionDraftFromSource({
       submissionId: "00000000-0000-4000-8000-000000000678",
-      problemId: "iv.prefix.balance-returns-to-zero",
+      problemId,
       source: SOURCE,
       compiler: "gcc",
       standard: "c++20",
@@ -22,11 +31,11 @@ describe("judge submission builder (#178)", () => {
 
     expect(built.status).toBe("ok");
     if (built.status !== "ok") return;
-    expect(built.visibleTestCount).toBe(2);
-    expect(built.hiddenTestCount).toBe(2);
+    expect(built.visibleTestCount).toBe(suite.visibleTests.length);
+    expect(built.hiddenTestCount).toBe(suite.hiddenTests.length);
     expect(built.draft.submission).toMatchObject({
-      problemId: "iv.prefix.balance-returns-to-zero",
-      problemVersion: 1,
+      problemId,
+      problemVersion: suite.version,
       compiler: "gcc",
       standard: "c++20",
       sourceBytes: Buffer.byteLength(SOURCE, "utf8")
@@ -39,7 +48,7 @@ describe("judge submission builder (#178)", () => {
     expect(
       buildJudgeSubmissionDraftFromSource({
         submissionId: "00000000-0000-4000-8000-000000000679",
-        problemId: "iv.graph.service-init-order",
+        problemId: "iv.does-not-exist.unsupported",
         source: SOURCE,
         compiler: "gcc",
         standard: "c++20",
