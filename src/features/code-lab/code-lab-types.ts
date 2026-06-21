@@ -4,6 +4,8 @@
  * server-only or browser-only imports.
  */
 
+import type { CodeTagClassification } from "./code-error-tags";
+
 export type CodeLabLanguage = "cpp";
 
 export type CodeLabMode = "stdin" | "function" | "unit-test";
@@ -79,6 +81,8 @@ export type CodeRunResult = {
   simulated: boolean;
   /** Human-readable note, e.g. why a runner is unavailable. */
   note?: string;
+  /** Deterministic error-tag classifications for this run (#412). */
+  classifications?: CodeTagClassification[];
 };
 
 export type CodeTestCaseResult = {
@@ -103,6 +107,8 @@ export type CodeTestResult = {
   provider: string;
   simulated: boolean;
   note?: string;
+  /** Deterministic error-tag classifications for this test run (#412). */
+  classifications?: CodeTagClassification[];
 };
 
 export type CodeReviewRequest = {

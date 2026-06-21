@@ -8,6 +8,8 @@ import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { getHiddenTestsForItem } from "./code-lab-hidden-tests";
 import { buildRunnerInput, executeRun } from "./code-runner";
+import { classifyCodeAttempt } from "./code-error-classifier";
+import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
 
 /**
  * Server-side orchestration for Code Lab run/test (#407). Runner calls stay
@@ -42,13 +44,18 @@ export async function runCode(input: {
   compilerFlags?: string[];
 }): Promise<CodeRunResult> {
   const config = getCodeLabConfigForItem(input.itemId);
-  return executeRun(
+  const result = await executeRun(
     buildRunnerInput({
       source: input.source,
       stdin: input.stdin ?? "",
       compilerFlags: resolvedFlags(input.compilerFlags ?? config?.compilerFlags)
     })
   );
+  const { classifications } = classifyCodeAttempt({
+    runResult: result,
+    skillTags: config?.skillTags ?? []
+  });
+  return classifications.length > 0 ? { ...result, classifications } : result;
 }
 
 /**
@@ -83,7 +90,7 @@ export async function runTests(input: {
     provider = run.provider;
     simulated = run.simulated;
     if (run.status === "compile_error") {
-      return {
+      const compileResult: CodeTestResult = {
         status: "compile_error",
         passed: 0,
         total: visibleCases.length + hiddenCases.length,
@@ -95,6 +102,7 @@ export async function runTests(input: {
         simulated: run.simulated,
         note: "Tests did not run because the code did not compile."
       };
+      return withClassifications(compileResult, config.skillTags ?? [], input.itemId);
     }
     const passed = run.status === "success" && compareOutput(run.stdout, test.expectedStdout ?? "", test.matcher);
     visible.push({
@@ -119,7 +127,7 @@ export async function runTests(input: {
   }
 
   const visiblePassed = visible.filter((result) => result.passed).length;
-  return {
+  const result: CodeTestResult = {
     status: "ok",
     passed: visiblePassed + hiddenPassed,
     total: visible.length + hiddenCases.length,
@@ -130,6 +138,21 @@ export async function runTests(input: {
     provider,
     simulated
   };
+  return withClassifications(result, config.skillTags ?? [], input.itemId);
+}
+
+function withClassifications(
+  result: CodeTestResult,
+  skillTags: string[],
+  itemId: string
+): CodeTestResult {
+  const config = getCodeLabConfigForItem(itemId);
+  const { classifications } = classifyCodeAttempt({
+    testResult: result,
+    skillTags,
+    boundaryChecklists: config ? getBoundaryChecklistsForCodeLab(config) : []
+  });
+  return classifications.length > 0 ? { ...result, classifications } : result;
 }
 
 function emptyTestResult(note: string): CodeTestResult {

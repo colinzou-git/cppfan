@@ -2,6 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import type { CodeTestResult } from "./code-lab-types";
+import { CodeErrorTagPanel } from "./code-error-tag-panel";
 
 export function TestResultsPanel({ result }: { result: CodeTestResult | null }) {
   if (!result) return null;
@@ -19,6 +20,7 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
             {result.compileOutput}
           </pre>
         ) : null}
+        <CodeErrorTagPanel classifications={result.classifications} />
       </section>
     );
   }
@@ -77,6 +79,8 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
           outputs are not shown.
         </p>
       ) : null}
+
+      <CodeErrorTagPanel classifications={result.classifications} />
     </section>
   );
 }
