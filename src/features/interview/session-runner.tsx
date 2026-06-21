@@ -32,6 +32,20 @@ import {
 // time without writing to the database every second.
 const PERSIST_EVERY_SECONDS = 20;
 
+function newClientSessionId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+}
+
+function ensureClientSessionIdentity(state: SessionState): SessionState {
+  return state.sessionId
+    ? state
+    : {
+        ...state,
+        sessionId: newClientSessionId(),
+        startedAt: state.startedAt ?? new Date().toISOString()
+      };
+}
+
 /** mm:ss for a non-negative seconds count (used for the live remaining-time clock). */
 function formatClock(seconds: number): string {
   const safe = Math.max(0, Math.trunc(seconds));
@@ -69,15 +83,16 @@ export function SessionRunner({
   problemPrompt: string;
   authenticated: boolean;
 }) {
-  const [session, setSession] = useState<SessionState>(initialState);
+  const [session, setSession] = useState<SessionState>(() => ensureClientSessionIdentity(initialState));
   const [notice, setNotice] = useState<string | null>(null);
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null);
   const [, startSaveTransition] = useTransition();
   const [isJudgePending, startJudgeTransition] = useTransition();
 
   function persist(next: SessionState) {
+    const withIdentity = ensureClientSessionIdentity(next);
     startSaveTransition(async () => {
-      const result = await saveSession(next);
+      const result = await saveSession(withIdentity);
       if (result.status === "signed_out") {
         setNotice("Sign in to save this session across refreshes.");
       } else if (result.status === "error") {
@@ -89,8 +104,9 @@ export function SessionRunner({
   }
 
   function apply(next: SessionState) {
-    setSession(next);
-    persist(next);
+    const withIdentity = ensureClientSessionIdentity(next);
+    setSession(withIdentity);
+    persist(withIdentity);
   }
 
   function startSession(mode: SessionMode, durationMinutes: SessionDuration) {
@@ -98,7 +114,9 @@ export function SessionRunner({
       createSession({
         problemId: session.problemId,
         mode,
-        durationMinutes
+        durationMinutes,
+        sessionId: newClientSessionId(),
+        startedAt: new Date().toISOString()
       })
     );
   }
@@ -106,16 +124,22 @@ export function SessionRunner({
   function submitDraftToJudge() {
     setJudgeNotice(null);
     startJudgeTransition(async () => {
+      const stableSession = ensureClientSessionIdentity(session);
+      if (stableSession !== session) {
+        setSession(stableSession);
+        persist(stableSession);
+      }
       const result = await submitJudgeAttempt({
-        problemId: session.problemId,
-        source: session.codeDraft,
-        mode: session.mode,
+        problemId: stableSession.problemId,
+        source: stableSession.codeDraft,
+        mode: stableSession.mode,
         compiler: "gcc",
         standard: "c++20",
         taskKind: "compile_and_run",
+        interviewSessionId: stableSession.sessionId,
         sourceVersion: 1,
-        assistanceUsed: session.assistanceUsed,
-        priorSolutionExposed: canRevealSolution(session)
+        assistanceUsed: stableSession.assistanceUsed,
+        priorSolutionExposed: canRevealSolution(stableSession)
       });
 
       if (result.status === "queued") {
@@ -174,7 +198,7 @@ export function SessionRunner({
         <h2 className="font-bold text-slate-900">{problemTitle}</h2>
         <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{problemPrompt}</p>
         <p className="mt-2 text-xs font-medium text-slate-500" data-testid="session-meta">
-          {session.mode} · {session.durationMinutes} min budget
+          {session.mode} · {session.durationMinutes} min budget · session {session.sessionId?.slice(0, 8)}
         </p>
         <div className="mt-3 flex flex-wrap gap-2" aria-label="Session mode">
           {(["practice", "interview"] as const).map((mode) => (
@@ -337,21 +361,10 @@ export function SessionRunner({
           <>
             {session.mode === "practice" ? (
               <>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => apply(goToPreviousPhase(session))}
-                  disabled={atFirstPhase}
-                  data-testid="session-prev"
-                >
+                <Button type="button" variant="secondary" onClick={() => apply(goToPreviousPhase(session))} disabled={atFirstPhase} data-testid="session-prev">
                   Previous phase
                 </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => apply(pauseSession(session))}
-                  data-testid="session-pause"
-                >
+                <Button type="button" variant="secondary" onClick={() => apply(pauseSession(session))} data-testid="session-pause">
                   Pause
                 </Button>
               </>
@@ -359,20 +372,10 @@ export function SessionRunner({
             <Button type="button" onClick={() => apply(advancePhase(session))} data-testid="session-next">
               Next phase
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => apply(completeSession(session))}
-              data-testid="session-complete"
-            >
+            <Button type="button" variant="secondary" onClick={() => apply(completeSession(session))} data-testid="session-complete">
               Complete
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => apply(abandonSession(session))}
-              data-testid="session-abandon"
-            >
+            <Button type="button" variant="secondary" onClick={() => apply(abandonSession(session))} data-testid="session-abandon">
               Abandon
             </Button>
           </>
@@ -381,29 +384,15 @@ export function SessionRunner({
             <Button type="button" onClick={() => apply(resumeSession(session))} data-testid="session-resume">
               Resume
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => apply(completeSession(session))}
-              data-testid="session-complete"
-            >
+            <Button type="button" variant="secondary" onClick={() => apply(completeSession(session))} data-testid="session-complete">
               Complete
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => apply(abandonSession(session))}
-              data-testid="session-abandon"
-            >
+            <Button type="button" variant="secondary" onClick={() => apply(abandonSession(session))} data-testid="session-abandon">
               Abandon
             </Button>
           </>
         ) : (
-          <Button
-            type="button"
-            onClick={() => startSession(session.mode, session.durationMinutes)}
-            data-testid="session-restart"
-          >
+          <Button type="button" onClick={() => startSession(session.mode, session.durationMinutes)} data-testid="session-restart">
             Start over
           </Button>
         )}
