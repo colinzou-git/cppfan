@@ -45,14 +45,15 @@ describe("PistonRunner", () => {
   });
 
   it("sends an exact C++ runtime version instead of a wildcard", async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          compile: { stderr: "", code: 0 },
-          run: { stdout: "Hello\n", stderr: "", code: 0 }
-        }),
-        { status: 200, headers: { "content-type": "application/json" } }
-      )
+    const fetchMock = vi.fn(
+      async (_url: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) =>
+        new Response(
+          JSON.stringify({
+            compile: { stderr: "", code: 0 },
+            run: { stdout: "Hello\n", stderr: "", code: 0 }
+          }),
+          { status: 200, headers: { "content-type": "application/json" } }
+        )
     );
     vi.stubGlobal("fetch", fetchMock);
 
@@ -66,8 +67,14 @@ describe("PistonRunner", () => {
 
     expect(result.status).toBe("success");
     expect(result.simulated).toBe(false);
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    const body = JSON.parse(init.body as string) as { language: string; version: string };
+
+    const firstCall = fetchMock.mock.calls[0];
+    if (!firstCall) throw new Error("Expected PistonRunner to call fetch.");
+
+    const requestInit = firstCall[1];
+    if (!requestInit) throw new Error("Expected PistonRunner to pass fetch options.");
+
+    const body = JSON.parse(String(requestInit.body)) as { language: string; version: string };
     expect(body.language).toBe("c++");
     expect(body.version).toBe(DEFAULT_PISTON_CPP_VERSION);
     expect(body.version).not.toBe("*");
