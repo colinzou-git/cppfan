@@ -74,7 +74,7 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
             : "grid gap-5"
         }
       >
-        <section className="grid min-w-0 gap-5">
+        <section className="grid min-w-0 gap-5" data-testid="learning-item-primary">
           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-800">
             <FormattedContent content={item.prompt} />
           </div>
@@ -134,7 +134,7 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         {/* MaybeCodeLab renders once. On xl it sits in a sticky right pane next to
             the lesson; on mobile it stacks below. Non-code items render nothing. */}
         {hasCodeLab ? (
-          <aside className="min-w-0 xl:sticky xl:top-6">
+          <aside className="min-w-0 xl:sticky xl:top-6" data-testid="learning-item-code-lab-pane">
             <MaybeCodeLab itemId={item.id} />
           </aside>
         ) : (

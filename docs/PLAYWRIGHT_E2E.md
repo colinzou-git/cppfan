@@ -5,6 +5,13 @@ The E2E suite is a small smoke suite that verifies cppFan works on:
 - desktop Chromium
 - iPhone viewport
 - iPad viewport
+- wide desktop (27-inch-like) viewport
+
+The `wide-desktop` project uses a 1920x1080 viewport to catch regressions in
+27-inch-monitor layouts (#433). The `tests/e2e/wide-layout.spec.ts` smoke suite
+runs only in that project and asserts stable bounding-box relationships (e.g. the
+right rail is to the right of the main column, cards share a row), not
+pixel-perfect screenshots.
 
 ## Why the runner is conservative
 
