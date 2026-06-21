@@ -14,7 +14,15 @@ import { CodeRunControls, type CodeAction } from "./code-run-controls";
 import { CodeOutputPanel } from "./code-output-panel";
 import { TestResultsPanel } from "./test-results-panel";
 import { AiCodeReviewPanel } from "./ai-code-review-panel";
-import { reviewCodeRequest, runCodeRequest, runTestsRequest } from "./code-lab-client";
+import { TraceControls, type TraceSource } from "./trace-controls";
+import { AiTracePanel } from "./ai-trace-panel";
+import type { CodeTraceResult } from "./code-trace-types";
+import {
+  reviewCodeRequest,
+  runCodeRequest,
+  runTestsRequest,
+  traceCodeRequest
+} from "./code-lab-client";
 
 /**
  * Main Code Lab client component (#407). Composes the editor, run/test controls,
@@ -28,14 +36,39 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
   const [runResult, setRunResult] = useState<CodeRunResult | null>(null);
   const [testResult, setTestResult] = useState<CodeTestResult | null>(null);
   const [review, setReview] = useState<CodeReviewResult | null>(null);
+  const [trace, setTrace] = useState<CodeTraceResult | null>(null);
+  const [tracePending, setTracePending] = useState(false);
+  const [traceSource, setTraceSource] = useState<TraceSource>({ kind: "stdin" });
   const [error, setError] = useState<string | null>(null);
   const runResultRef = useRef<CodeRunResult | null>(null);
   const testResultRef = useRef<CodeTestResult | null>(null);
 
+  const traceEnabled = config.traceEnabled !== false;
   const hasRunError =
     runResult !== null &&
     runResult.status !== "success" &&
     runResult.status !== "runner_unconfigured";
+
+  async function handleTrace() {
+    setTracePending(true);
+    setError(null);
+    try {
+      const result = await traceCodeRequest({
+        itemId,
+        source,
+        selectedTestName: traceSource.kind === "visible-test" ? traceSource.name : undefined,
+        selectedInput: traceSource.kind === "stdin" ? stdin : undefined,
+        selectedActualOutput: runResultRef.current?.stdout,
+        lastRunResult: runResultRef.current,
+        lastTestResult: testResultRef.current
+      });
+      setTrace(result);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Something went wrong. Try again.");
+    } finally {
+      setTracePending(false);
+    }
+  }
 
   async function handleAction(action: CodeAction) {
     setBusy(action);
@@ -111,9 +144,21 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
           </p>
         ) : null}
 
+        {traceEnabled ? (
+          <TraceControls
+            visibleTests={config.visibleTests}
+            selected={traceSource}
+            onSelect={setTraceSource}
+            onTrace={handleTrace}
+            busy={tracePending}
+            disabled={busy !== null || source.trim().length === 0}
+          />
+        ) : null}
+
         <CodeOutputPanel result={runResult} />
         <TestResultsPanel result={testResult} />
         <AiCodeReviewPanel review={review} pending={busy === "review" || busy === "explain"} />
+        {traceEnabled ? <AiTracePanel trace={trace} pending={tracePending} /> : null}
       </CardContent>
     </Card>
   );

@@ -20,15 +20,19 @@ _Last updated: 2026-06-21 — by the /loop driver._
 
 ## Current state
 
-- **#408 Phase 2 (AI trace)** — building on `feat/code-lab-phase2`.
-  - New: `code-trace-types.ts`, `code-trace-prompts.ts`, `code-trace-service.ts`,
+- **#408 Phase 2 (AI trace)** — implemented on `feat/code-lab-phase2`; PR opened.
+  - Added: `code-trace-types.ts`, `code-trace-prompts.ts`, `code-trace-service.ts`,
     `trace-controls.tsx`, `ai-trace-panel.tsx`, `app/api/code/trace/route.ts`.
-  - Update: `code-lab.tsx` (Trace button + input selector), `code-lab-client.ts`,
-    `maybe-code-lab.tsx`/catalog (`traceEnabled`, default true when AI configured).
-  - Reuse `completeAiResponse`; never leak hidden test I/O; compile errors are
-    explained as blockers (no fake runtime steps); disclaimer on every trace.
-  - Tests: trace types/service/prompts/route + `ai-trace-panel` + e2e
-    `code-lab-ai-trace.spec.ts`. Docs: extend `docs/CODE_LAB.md`.
+  - Updated: `code-lab.tsx` (Trace control + input selector + panel),
+    `code-lab-client.ts` (`traceCodeRequest`). Trace shows unless
+    `traceEnabled: false`; degrades to unavailable when no AI provider.
+  - Reuses `completeAiResponse`; compile errors explained as blockers (no fake
+    runtime steps); disclaimer on every successful trace; route resolves only
+    VISIBLE test data so hidden I/O never reaches the prompt/response.
+  - Local: lint/typecheck/build green; **812 unit tests pass**; e2e green —
+    phase 1 9/9 and trace 3/3 across chromium/iphone/ipad.
+  - Next: wait for App checks green on the #408 PR, then auto-merge and close
+    #408 with a final audit.
 
 ### (history) PR #409 / #407 — merged
 

@@ -3,8 +3,9 @@
 The Code Lab (#407) lets learners write C++ inside cppFan, run it, run visible
 tests, and ask the AI to review the result — without leaving the learning flow.
 
-This is **Phase 1**: Run/Test + AI review. There is no breakpoint/step debugger.
-Phase 2 (#408) adds an AI-generated educational trace.
+**Phase 1** is Run/Test + AI review. **Phase 2 (#408)** adds an AI-generated
+educational **trace**. Neither phase has a real breakpoint/step debugger — there
+are no breakpoints, step controls, variable watches, or GDB/LLDB/DAP integration.
 
 ## How it appears
 
@@ -56,6 +57,25 @@ learner's code, and compiler/run/test summaries, then returns short hint-first
 feedback. When no provider is configured the panel shows a friendly unavailable
 state and Run/Test keep working. AI feedback is always labelled; compiler output
 and test results are the source of truth.
+
+## AI trace (Phase 2)
+
+"Trace with AI" produces an **approximate, AI-generated** educational walkthrough
+of how the code likely executed for a selected input or visible test case — a
+step/variable/explanation table, likely-issue, and next hint. It is **not** a
+debugger and not real runtime inspection; every successful trace carries a
+disclaimer that compiler output and test results are the source of truth.
+
+- It appears wherever a Code Lab is mounted, unless the item sets
+  `traceEnabled: false`. Default is on (the trace endpoint degrades to a friendly
+  unavailable state when no AI provider is configured).
+- Compile errors are explained as blockers — the model is not asked to fabricate
+  runtime steps for code that never ran.
+- The learner can trace the current stdin or a visible test case. Hidden test
+  inputs/expected outputs are resolved server-side and never reach the prompt or
+  response: the route only honours visible test names.
+- Server route: `app/api/code/trace/route.ts`; logic in `code-trace-service.ts`
+  and `code-trace-prompts.ts`; UI in `trace-controls.tsx` / `ai-trace-panel.tsx`.
 
 ## Hidden tests
 
