@@ -40,13 +40,15 @@ test("editing the code changes the run output", async ({ page }) => {
   await page.goto(CODE_ITEM);
   await expect(page.getByTestId("code-editor")).toBeVisible();
 
-  // Replace the source with a different literal-printing program.
-  const editor = page.getByTestId("code-editor");
-  await editor.click();
-  await page.keyboard.press("ControlOrMeta+A");
-  await page.keyboard.type(
-    '#include <iostream>\nint main() { std::cout << "Edited output" << "\\n"; }'
-  );
+  // Drive the edit through Monaco's own API (setValue fires the same change
+  // handler a keystroke would). Monaco keyboard automation drops/reorders
+  // characters across chromium/webkit, so this is the deterministic path.
+  await page.waitForFunction(() => Boolean((window as Window & { __cppfanCodeLabEditor?: unknown }).__cppfanCodeLabEditor));
+  await page.evaluate((source) => {
+    (window as Window & { __cppfanCodeLabEditor?: { setValue(value: string): void } }).__cppfanCodeLabEditor!.setValue(
+      source
+    );
+  }, '#include <iostream>\nint main() { std::cout << "Edited output" << "\\n"; }');
 
   await page.getByRole("button", { name: "Run", exact: true }).click();
   await expect(page.getByTestId("code-output")).toContainText("Edited output");

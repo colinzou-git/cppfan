@@ -36,6 +36,13 @@ export default function MonacoCodeEditor({ value, onChange, label, readOnly = fa
       theme="vs"
       value={value}
       onChange={(next) => onChange(next ?? "")}
+      onMount={(editor) => {
+        // Expose the editor instance so end-to-end tests can drive edits through
+        // Monaco's own API (setValue), which fires the same change handler a
+        // keystroke would. Monaco keyboard automation drops/reorders characters
+        // across browsers; this ref is deterministic. Harmless, non-sensitive.
+        (window as unknown as { __cppfanCodeLabEditor?: unknown }).__cppfanCodeLabEditor = editor;
+      }}
       options={{
         readOnly,
         minimap: { enabled: false },
