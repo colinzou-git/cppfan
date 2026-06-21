@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   abandonGoalEvaluationAction,
@@ -18,6 +18,8 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
   const [submissionId, setSubmissionId] = useState(() => crypto.randomUUID());
   const [requestedGoalDuration, setRequestedGoalDuration] = useState(7);
   const [message, setMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
   const [isPending, startTransition] = useTransition();
 
   function start() {
@@ -37,25 +39,33 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
   }
 
   function submit() {
-    if (!choiceId || !view.sessionId) return;
+    if (!choiceId || !view.sessionId || submitInFlightRef.current) return;
+    const pendingSubmission = {
+      sessionId: view.sessionId,
+      expectedQuestionIndex: view.questionIndex,
+      submissionId,
+      choiceId
+    };
+    submitInFlightRef.current = true;
+    setIsSubmitting(true);
     setMessage(null);
     startTransition(async () => {
-      const result = await submitGoalEvaluationAction({
-        sessionId: view.sessionId!,
-        expectedQuestionIndex: view.questionIndex,
-        submissionId,
-        choiceId
-      });
-      if (result.status !== "ok") {
-        setMessage(result.status === "stale"
-          ? "This question changed in another tab. Refresh before continuing."
-          : `Evaluation could not save this response: ${result.status.replaceAll("_", " ")}.`);
-        return;
+      try {
+        const result = await submitGoalEvaluationAction(pendingSubmission);
+        if (result.status !== "ok") {
+          setMessage(result.status === "stale"
+            ? "This question was already updated. Refresh before continuing."
+            : `Evaluation could not save this response: ${result.status.replaceAll("_", " ")}.`);
+          return;
+        }
+        setMessage("Response recorded. Next question selected.");
+        setChoiceId("");
+        setSubmissionId(crypto.randomUUID());
+        setView(result.view);
+      } finally {
+        submitInFlightRef.current = false;
+        setIsSubmitting(false);
       }
-      setMessage("Response recorded. Next question selected.");
-      setChoiceId("");
-      setSubmissionId(crypto.randomUUID());
-      setView(result.view);
     });
   }
 
@@ -126,6 +136,7 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
   }
 
   const question = view.currentQuestion;
+  const isBusy = isPending || isSubmitting;
   return (
     <div className="grid gap-5" data-testid="goal-evaluation-active">
       <div className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
@@ -133,7 +144,7 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
           Question {view.questionIndex} of {GOAL_EVALUATION_QUESTION_COUNT}
         </p>
         <p className="mt-1 text-xs font-semibold text-slate-500">{question.moduleTitle}</p>
-        <fieldset className="mt-4 grid gap-3">
+        <fieldset className="mt-4 grid gap-3" disabled={isBusy}>
           <legend className="text-lg font-black text-slate-950">{question.prompt}</legend>
           {question.choices.map((choice) => (
             <label key={choice.id} className={`flex cursor-pointer gap-3 rounded-2xl border p-4 text-sm font-semibold ${choiceId === choice.id ? "border-indigo-300 bg-indigo-50" : "border-slate-200 bg-white"}`}>
@@ -152,11 +163,11 @@ export function GoalEvaluation({ initialView }: { initialView: GoalEvaluationVie
 
       {message ? <p className="rounded-2xl bg-slate-100 p-3 text-sm font-semibold text-slate-700" role="status">{message}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={submit} disabled={!choiceId || isPending} data-testid="goal-evaluation-submit">
-          {isPending ? "Saving…" : "Submit and choose next"}
+        <Button type="button" onClick={submit} disabled={!choiceId || isBusy} data-testid="goal-evaluation-submit">
+          {isBusy ? "Saving…" : "Submit and choose next"}
         </Button>
         <Button asChild variant="secondary"><Link href="/goals">Pause and return later</Link></Button>
-        <Button type="button" variant="ghost" onClick={abandon} disabled={isPending}>Abandon</Button>
+        <Button type="button" variant="ghost" onClick={abandon} disabled={isBusy}>Abandon</Button>
       </div>
     </div>
   );
