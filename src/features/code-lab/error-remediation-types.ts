@@ -36,10 +36,12 @@ export type CodeRemediationRecommendation = {
   checklistId?: string;
 };
 
-/** Minimal learning-item shape needed to pick a remediation target. */
+/** Minimal learning-item shape needed to pick a remediation/scaffold target. */
 export type LearningItemSummary = {
   id: string;
   type: string;
   skillIds: string[];
   title?: string;
+  /** True when the item carries Code Lab metadata (#415 scaffold availability). */
+  hasCodeLab?: boolean;
 };

@@ -95,6 +95,17 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Adaptive scaffold selector (Phase 3.6)
+
+A deterministic selector (`src/features/recommendations/scaffold-selector.ts`)
+recommends the next practice **level** (worked example → completion → Parsons →
+code reading → bug spotting → Code Lab → review → project milestone) from mastery
+status, recent error tags (#412), and item availability. Due FSRS reviews still
+rank first; the selector only orders non-review next practice. Every
+recommendation explains *why* and never hard-locks (falls back to the nearest
+available level). The Code Lab shows it after a run/test when no error-pattern
+remediation is present; see ADR 0004.
+
 ## Error-pattern remediation (Phase 3.5)
 
 After a failing run/test, the Code Lab can show **one** explainable, **dismissible**

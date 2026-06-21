@@ -23,11 +23,11 @@ _Last updated: 2026-06-21 — by the /loop driver._
    - #411 3.2 Boundary-case checklist — **DONE**: PR #421 → `5692da6`; closed.
    - #412 3.3 Deterministic error tagging MVP — **DONE**: PR #422 → `4d3b517`.
    - #413 3.4 Prediction-before-run mode — **DONE**: PR #423 → `a5d5924`.
-   - #414 3.5 Error-pattern remediation recommendations — **PR OPEN**
-     (`feat/code-lab-phase3-5`): rules/service/panel + daily-plan merge; one
-     explainable dismissible rec from deterministic tags; repeated→high priority;
-     never displaces due reviews; no hard lock. 895 unit tests pass; e2e chromium green.
-   - #415 3.6 Adaptive scaffold selector
+   - #414 3.5 Error-pattern remediation recommendations — **DONE**: PR #424 → `2a321e7`.
+   - #415 3.6 Adaptive scaffold selector — **PR OPEN** (`feat/code-lab-phase3-6`):
+     selector/availability/reasons + card in recommendations; deterministic level
+     choice; due reviews still first; no hard lock; Code Lab shows it on pass.
+     912 unit tests pass; e2e chromium green. ADR 0004 updated.
    - #416 3.7 Debugging skill lane
    - #417 3.8 Cross-context mastery rules
    - #418 3.9 Code Lab in capstone milestones

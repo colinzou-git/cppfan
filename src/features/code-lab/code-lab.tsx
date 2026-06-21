@@ -27,6 +27,9 @@ import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { buildCodeRemediationRecommendation } from "./error-remediation-service";
 import type { CodeRemediationRecommendation } from "./error-remediation-types";
 import type { CodeTagClassification } from "./code-error-tags";
+import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
+import { selectScaffoldLevel } from "@/features/recommendations/scaffold-selector";
+import type { ScaffoldRecommendation } from "@/features/recommendations/scaffold-selector-types";
 import type { CodeTraceResult } from "./code-trace-types";
 import {
   reviewCodeRequest,
@@ -76,6 +79,23 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
   const checklists = useMemo(() => getBoundaryChecklistsForCodeLab(config), [config]);
   const [recentClassifications, setRecentClassifications] = useState<CodeTagClassification[]>([]);
   const [remediation, setRemediation] = useState<CodeRemediationRecommendation | null>(null);
+  const [scaffold, setScaffold] = useState<ScaffoldRecommendation | null>(null);
+
+  function updateScaffold(latest: CodeTagClassification[], correctness: number | undefined) {
+    setScaffold(
+      selectScaffoldLevel({
+        skillId: config.skillTags?.[0] ?? "",
+        masteryStatus: "learning",
+        recentCorrectness: correctness,
+        recentCodeErrorTags: latest.map((c) => c.tag),
+        // The client only knows about the current code-capable item; richer
+        // availability is resolved server-side on the dashboard.
+        availableItems: [
+          { id: itemId, type: "code_lab", skillIds: config.skillTags ?? [], hasCodeLab: true }
+        ]
+      })
+    );
+  }
   const suggestChecklist =
     review?.nextAction === "try_boundary_case_checklist" ||
     trace?.feedback?.nextAction === "try_boundary_case_checklist" ||
@@ -152,6 +172,7 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         runResultRef.current = result;
         updatePredictionComparisons();
         applyClassifications(result.classifications ?? []);
+        updateScaffold(result.classifications ?? [], undefined);
       } else if (action === "test") {
         setReview(null);
         const result = await runTestsRequest({ itemId, source });
@@ -159,6 +180,10 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         testResultRef.current = result;
         updatePredictionComparisons();
         applyClassifications(result.classifications ?? []);
+        updateScaffold(
+          result.classifications ?? [],
+          result.total > 0 ? result.passed / result.total : undefined
+        );
       } else {
         const result = await reviewCodeRequest({
           itemId,
@@ -259,6 +284,9 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         <CodeOutputPanel result={runResult} />
         <TestResultsPanel result={testResult} />
         <ErrorRemediationPanel recommendation={remediation} onAction={handleRemediationAction} />
+        {/* Avoid competing cards: show the scaffold suggestion only when there is
+            no error-pattern remediation to act on. */}
+        {remediation ? null : <ScaffoldRecommendationCard recommendation={scaffold} />}
         <AiCodeReviewPanel review={review} pending={busy === "review" || busy === "explain"} />
         {traceEnabled ? <AiTracePanel trace={trace} pending={tracePending} /> : null}
       </CardContent>
