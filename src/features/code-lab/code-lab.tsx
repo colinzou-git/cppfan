@@ -43,7 +43,16 @@ import {
  * output, visible test results, and AI review. All execution and AI work happens
  * server-side via the route handlers; this component only orchestrates state.
  */
-export function CodeLab({ itemId, config }: { itemId: string; config: LearningItemCodeLab }) {
+export function CodeLab({
+  itemId,
+  config,
+  onResult
+}: {
+  itemId: string;
+  config: LearningItemCodeLab;
+  /** Phase 3.9 (#418): notify a host (e.g. a capstone milestone) of run/test results. */
+  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
+}) {
   const [source, setSource] = useState(config.starterCode);
   const [stdin, setStdin] = useState(config.stdin ?? "");
   const [busy, setBusy] = useState<CodeAction | null>(null);
@@ -173,6 +182,7 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         updatePredictionComparisons();
         applyClassifications(result.classifications ?? []);
         updateScaffold(result.classifications ?? [], undefined);
+        onResult?.({ run: result, test: testResultRef.current });
       } else if (action === "test") {
         setReview(null);
         const result = await runTestsRequest({ itemId, source });
@@ -184,6 +194,7 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
           result.classifications ?? [],
           result.total > 0 ? result.passed / result.total : undefined
         );
+        onResult?.({ run: runResultRef.current, test: result });
       } else {
         const result = await reviewCodeRequest({
           itemId,

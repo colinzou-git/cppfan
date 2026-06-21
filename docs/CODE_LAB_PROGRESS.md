@@ -26,11 +26,12 @@ _Last updated: 2026-06-21 — by the /loop driver._
    - #414 3.5 Error-pattern remediation recommendations — **DONE**: PR #424 → `2a321e7`.
    - #415 3.6 Adaptive scaffold selector — **DONE**: PR #425 → `7ea6d35`.
    - #416 3.7 Debugging skill lane — **DONE**: PR #426 → `2921dfb`.
-   - #417 3.8 Cross-context mastery rules — **PR OPEN** (`feat/code-lab-phase3-8`):
-     context-coverage types/rules/explanations/panel; holds premature `mastered`
-     at `strong` until multi-context evidence; only mastered adjusted, never a
-     hard lock; integrated into mastery-queries. 932 unit tests pass.
-   - #418 3.9 Code Lab in capstone milestones
+   - #417 3.8 Cross-context mastery rules — **DONE**: PR #427 → `f280452`.
+   - #418 3.9 Code Lab in capstone milestones — **PR OPEN (final issue)**
+     (`feat/code-lab-phase3-9`): 2 milestones (csv.m1, maze.m2) in-app via Code
+     Lab keyed by milestone id; adapter + completion-gating service + CodeLabMilestone;
+     completion requires passing tests; Codespaces/manual unchanged. 943 unit
+     tests pass; e2e chromium green.
    Read each issue body before starting; respect stated dependencies.
 
 ## Current state

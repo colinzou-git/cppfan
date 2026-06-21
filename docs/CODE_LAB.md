@@ -95,6 +95,22 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Code Lab in capstone milestones (Phase 3.9)
+
+Selected single-file capstone milestones can be practiced in-app via the Code Lab
+(#418) instead of only a description or Codespaces instructions. A milestone opts
+in with `executionMode: "in_app_code_lab"`; its runnable config lives in the
+code-lab catalog keyed by the milestone id, so all `/api/code/*` routes work
+unchanged. Two milestones use this initially: `csv-table-summarizer.m1` (strings)
+and `maze-route-planner.m2` (BFS).
+
+- The capstone view renders the Code Lab plus an execution-mode label and a note
+  about switching to Codespaces for larger, multi-file work.
+- `canMarkMilestoneComplete` gates completion: an in-app milestone needs its
+  visible tests passing (with a clear reason when blocked); a reflection-verified
+  milestone needs a saved reflection. Codespaces/manual milestones keep their
+  existing behavior. No multi-file in-browser project support.
+
 ## Debugging skill lane (Phase 3.7)
 
 The existing `cpp.tooling.*` skills (debugging, debugging_method, sanitizers,

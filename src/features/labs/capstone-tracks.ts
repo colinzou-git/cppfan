@@ -23,6 +23,12 @@ export type CapstoneMilestone = {
   extensionTask?: string;
   /** Optional linked write-code exercise package (#81). */
   exerciseId?: string;
+  /**
+   * Phase 3.9 (#418) where the milestone is practiced. "in_app_code_lab" renders
+   * the Code Lab (config lives in the code-lab catalog, keyed by milestone id);
+   * "codespaces" keeps the existing external/manual flow; default is manual.
+   */
+  executionMode?: "in_app_code_lab" | "codespaces" | "reflection_only";
 };
 
 export type CapstoneProject = {
@@ -161,8 +167,9 @@ export const capstoneProjects: CapstoneProject[] = [
         required: true,
         estimatedMinutes: 25,
         practicedSkillIds: ["dsa.strings.parsing"],
-        verification: "manual_checklist",
-        reflectionPrompt: "How did you split on commas, and what did you do with whitespace around fields?"
+        verification: "exercise_tests",
+        reflectionPrompt: "How did you split on commas, and what did you do with whitespace around fields?",
+        executionMode: "in_app_code_lab"
       },
       {
         id: "csv-table-summarizer.m2",
@@ -331,8 +338,9 @@ export const capstoneProjects: CapstoneProject[] = [
         required: true,
         estimatedMinutes: 25,
         practicedSkillIds: ["dsa.graphs.bfs"],
-        verification: "manual_checklist",
-        reflectionPrompt: "What invariant tells you that the first time BFS reaches a cell, its distance is shortest?"
+        verification: "exercise_tests",
+        reflectionPrompt: "What invariant tells you that the first time BFS reaches a cell, its distance is shortest?",
+        executionMode: "in_app_code_lab"
       },
       {
         id: "maze-route-planner.m3",
