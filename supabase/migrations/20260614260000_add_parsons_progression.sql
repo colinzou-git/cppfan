@@ -9,9 +9,12 @@
 
 -- 1. Allow the new item type. The original CHECK is the unnamed column check
 -- (default name learning_items_type_check); replace it with the extended list.
+-- Include later additive item types too so re-running the full migration folder
+-- against an already-migrated production database does not temporarily narrow
+-- the constraint and fail on existing worked_example/completion rows.
 alter table public.learning_items drop constraint if exists learning_items_type_check;
 alter table public.learning_items add constraint learning_items_type_check
-  check (type in ('lesson', 'concept_check', 'multiple_choice', 'code_reading', 'bug_spotting', 'parsons'));
+  check (type in ('lesson', 'concept_check', 'multiple_choice', 'code_reading', 'bug_spotting', 'parsons', 'worked_example', 'completion'));
 
 -- 2. Parsons block bank. content is learner-facing; correct_order and
 -- is_distractor are the answer key.
