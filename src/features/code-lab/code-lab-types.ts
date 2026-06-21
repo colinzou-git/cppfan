@@ -5,6 +5,7 @@
  */
 
 import type { CodeTagClassification } from "./code-error-tags";
+import type { CodePredictionPrompt, PredictionMode } from "./prediction-types";
 
 export type CodeLabLanguage = "cpp";
 
@@ -47,6 +48,10 @@ export type LearningItemCodeLab = {
   boundaryChecklistIds?: string[];
   /** Phase 3.2 (#411) opt out of boundary checklists for this item. */
   boundaryChecklistsEnabled?: boolean;
+  /** Phase 3.4 (#413) prediction-before-run mode; defaults to "off". */
+  predictionMode?: PredictionMode;
+  /** Phase 3.4 (#413) explicit prediction prompts; defaults are derived if omitted. */
+  predictionPrompts?: CodePredictionPrompt[];
 };
 
 export type CodeRunRequest = {

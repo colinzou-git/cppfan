@@ -8,16 +8,24 @@ export type CodeAction = "run" | "test" | "review" | "explain";
 export function CodeRunControls({
   busy,
   onAction,
-  hasError
+  hasError,
+  runDisabled = false
 }: {
   busy: CodeAction | null;
   onAction: (action: CodeAction) => void;
   hasError: boolean;
+  /** Phase 3.4 (#413): gate Run/Run Tests until required predictions are filled. */
+  runDisabled?: boolean;
 }) {
   const disabled = busy !== null;
   return (
     <div className="flex flex-wrap gap-2" data-testid="code-controls">
-      <Button type="button" size="sm" onClick={() => onAction("run")} disabled={disabled}>
+      <Button
+        type="button"
+        size="sm"
+        onClick={() => onAction("run")}
+        disabled={disabled || runDisabled}
+      >
         <Play className="mr-1.5 h-4 w-4" aria-hidden="true" />
         {busy === "run" ? "Running…" : "Run"}
       </Button>
@@ -26,7 +34,7 @@ export function CodeRunControls({
         size="sm"
         variant="secondary"
         onClick={() => onAction("test")}
-        disabled={disabled}
+        disabled={disabled || runDisabled}
       >
         <ListChecks className="mr-1.5 h-4 w-4" aria-hidden="true" />
         {busy === "test" ? "Testing…" : "Run Tests"}

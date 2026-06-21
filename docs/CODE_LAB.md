@@ -95,6 +95,22 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Prediction-before-run (Phase 3.4)
+
+A Code Lab item can ask the learner to **predict before running** (form a mental
+model first). It is **AI-free** and **off by default** — normal Run/Test is
+unaffected unless an item sets `predictionMode`:
+
+- `"off"` (default), `"optional"` (prompts shown, never blocks), or
+  `"required_before_run"` (Run/Test disabled until required prompts are filled).
+- Prompts default from item shape/skills (`getDefaultPredictionPrompts`) or can be
+  set explicitly via `predictionPrompts`.
+- After Run/Test, **stdout** and **failing-test** predictions are compared to the
+  actual result (`prediction-comparison.ts`); other kinds (loop invariant,
+  complexity, first variable change) show reflective feedback.
+- `prediction-evidence.ts` produces skill-event *drafts* (`code_prediction_*`) for
+  later phases — **no mastery-scoring change** and no event wiring in this phase.
+
 ## Deterministic error tagging (Phase 3.3)
 
 Run/Test results carry **deterministic** error-tag classifications (#412) derived

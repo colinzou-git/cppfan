@@ -65,7 +65,9 @@ int main() {
       }
     ],
     hiddenTestCount: 1,
-    skillTags: ["cpp.program_basics.io"]
+    skillTags: ["cpp.program_basics.io"],
+    // Demonstrates optional prediction-before-run (#413) without blocking Run.
+    predictionMode: "optional"
   },
   "cpp.program_basics.statements_comments.lesson": {
     enabled: true,
