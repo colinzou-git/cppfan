@@ -21,11 +21,11 @@ _Last updated: 2026-06-21 — by the /loop driver._
    - #410 Phase 3.1 Structured Code Lab AI feedback + error-tag schema — **DONE**:
      PR #420 → `c1520a5`; closed with final audit.
    - #411 3.2 Boundary-case checklist — **DONE**: PR #421 → `5692da6`; closed.
-   - #412 3.3 Deterministic error tagging MVP — **PR OPEN** (`feat/code-lab-phase3-3`):
-     compiler/runtime/test classifiers + orchestrator + `CodeErrorTagPanel`;
-     attached to run/test results; AI-free; no persistence/migration (deferred,
-     not in acceptance). 866 unit tests pass; e2e chromium green.
-   - #413 3.4 Prediction-before-run mode
+   - #412 3.3 Deterministic error tagging MVP — **DONE**: PR #422 → `4d3b517`.
+   - #413 3.4 Prediction-before-run mode — **PR OPEN** (`feat/code-lab-phase3-4`):
+     prediction types/prompts/service/comparison/evidence + panel; off by default,
+     optional/required modes; stdout & failing-test comparison. 880 unit tests
+     pass; e2e chromium green.
    - #414 3.5 Error-pattern remediation recommendations (depends on tagging)
    - #415 3.6 Adaptive scaffold selector
    - #416 3.7 Debugging skill lane

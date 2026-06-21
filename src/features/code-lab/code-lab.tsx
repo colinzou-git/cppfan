@@ -18,6 +18,11 @@ import { TraceControls, type TraceSource } from "./trace-controls";
 import { AiTracePanel } from "./ai-trace-panel";
 import { BoundaryChecklistPanel } from "./boundary-checklist";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
+import { PredictionBeforeRun } from "./prediction-before-run";
+import { getDefaultPredictionPrompts } from "./prediction-prompts";
+import { hasRequiredPredictions, isPredictionEnabled, shouldRequirePredictionBeforeRun } from "./prediction-service";
+import { comparePredictionsToRunResult } from "./prediction-comparison";
+import type { CodePredictionComparison, CodePredictionSubmission } from "./prediction-types";
 import type { CodeTraceResult } from "./code-trace-types";
 import {
   reviewCodeRequest,
@@ -46,6 +51,24 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
   const testResultRef = useRef<CodeTestResult | null>(null);
 
   const traceEnabled = config.traceEnabled !== false;
+  const predictionEnabled = isPredictionEnabled(config);
+  const predictionPrompts = useMemo(
+    () => (predictionEnabled ? getDefaultPredictionPrompts(config) : []),
+    [predictionEnabled, config]
+  );
+  const [predictions, setPredictions] = useState<Record<string, string>>({});
+  const [comparisons, setComparisons] = useState<CodePredictionComparison[] | null>(null);
+  const submissions = useMemo<CodePredictionSubmission[]>(
+    () =>
+      Object.entries(predictions)
+        .filter(([, value]) => value.trim().length > 0)
+        .map(([promptId, value]) => ({ promptId, value, createdAt: "" })),
+    [predictions]
+  );
+  const requireBeforeRun = shouldRequirePredictionBeforeRun(config);
+  const missingRequired =
+    requireBeforeRun && !hasRequiredPredictions({ prompts: predictionPrompts, submissions });
+
   const checklists = useMemo(() => getBoundaryChecklistsForCodeLab(config), [config]);
   const suggestChecklist =
     review?.nextAction === "try_boundary_case_checklist" ||
@@ -76,7 +99,20 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
     }
   }
 
+  function updatePredictionComparisons() {
+    if (!predictionEnabled) return;
+    setComparisons(
+      comparePredictionsToRunResult({
+        prompts: predictionPrompts,
+        submissions,
+        runResult: runResultRef.current ?? undefined,
+        testResult: testResultRef.current ?? undefined
+      })
+    );
+  }
+
   async function handleAction(action: CodeAction) {
+    if ((action === "run" || action === "test") && missingRequired) return;
     setBusy(action);
     setError(null);
     try {
@@ -85,11 +121,13 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         const result = await runCodeRequest({ itemId, source, stdin });
         setRunResult(result);
         runResultRef.current = result;
+        updatePredictionComparisons();
       } else if (action === "test") {
         setReview(null);
         const result = await runTestsRequest({ itemId, source });
         setTestResult(result);
         testResultRef.current = result;
+        updatePredictionComparisons();
       } else {
         const result = await reviewCodeRequest({
           itemId,
@@ -142,7 +180,25 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
           </label>
         ) : null}
 
-        <CodeRunControls busy={busy} onAction={handleAction} hasError={hasRunError} />
+        {predictionEnabled ? (
+          <PredictionBeforeRun
+            prompts={predictionPrompts}
+            values={predictions}
+            onChange={(promptId, value) =>
+              setPredictions((prev) => ({ ...prev, [promptId]: value }))
+            }
+            comparisons={comparisons}
+            required={requireBeforeRun}
+            missingRequired={missingRequired}
+          />
+        ) : null}
+
+        <CodeRunControls
+          busy={busy}
+          onAction={handleAction}
+          hasError={hasRunError}
+          runDisabled={missingRequired}
+        />
 
         {error ? (
           <p className="text-xs font-bold text-amber-700" role="alert">

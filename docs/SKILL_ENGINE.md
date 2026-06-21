@@ -272,7 +272,10 @@ emit a stable, machine-validated error-tag schema marked `weak_ai_inference` —
 future remediation/mastery work may consume these tags as **weak evidence only**,
 never overriding deterministic compile/test outcomes. Code Lab items can also show
 skill-resolved **boundary-case checklists** (#411) — strategy hints that do not
-affect mastery scoring.
+affect mastery scoring. An optional **prediction-before-run** mode (#413) lets
+items ask learners to predict stdout / failing tests before running; predictions
+are compared to actual results and emit skill-event *drafts* only (no mastery
+change yet).
 
 Each learning item should link to one or more skills.
 
