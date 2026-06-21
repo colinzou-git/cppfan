@@ -132,3 +132,25 @@ TS types, grading, seed, and UI must change together (one slice, not a big bang)
 - No arbitrary server-side C++ execution (that is ADR for #81).
 - No automatic LLM content generation without validation.
 - No conversion of every existing item in the first PR.
+
+## Update — adaptive scaffold selector (#415)
+
+A deterministic scaffold selector (`src/features/recommendations/scaffold-selector.ts`)
+now chooses the next practice **level** — worked example → completion → Parsons →
+code reading → bug spotting → Code Lab → review → project milestone — from the
+learner's mastery status, recent Code Lab error tags (#412), and which item types
+are actually available for the skill.
+
+Key properties:
+
+- **Due FSRS reviews still win globally.** The selector only ranks *non-review*
+  next practice; the daily plan keeps due reviews first.
+- **Transparent, not opaque.** Every recommendation carries a human-readable
+  reason (`scaffold-reasons.ts`); there is no ML model and no mastery-scoring
+  change — mastery status is read, never rewritten.
+- **Never a hard lock.** Recommendations are suggestions rendered as a dismissible/
+  optional card (`scaffold-recommendation-card.tsx`); the learner can practice
+  anything. If the preferred level has no available item, it falls back to the
+  nearest available level rather than blocking.
+- Surfaced in the Code Lab after a run/test (when no error-pattern remediation is
+  shown) and available to the dashboard daily plan.
