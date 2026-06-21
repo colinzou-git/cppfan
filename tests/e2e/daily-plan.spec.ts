@@ -33,11 +33,14 @@ test("the dashboard shows review and goal learning sections or an auth gate", as
     "[data-testid='skill-map-preview']"
   ].join(",")).evaluateAll((sections) => sections.map((section) => section.getAttribute("data-testid")));
 
+  // #430 desktop layout: the main left column is Daily Review, Daily New, and the
+  // Skill Map; mastery and goals move to the right-side panel (which renders after
+  // the left column in the DOM). Mobile stacks the same source order.
   expect(sectionOrder).toEqual([
     "daily-review",
     "daily-new-for-goals",
+    "skill-map-preview",
     "mastery-preview",
-    "goals-entry",
-    "skill-map-preview"
+    "goals-entry"
   ]);
 });

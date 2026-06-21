@@ -6,7 +6,18 @@ closure audits. No open Code Lab issues or PRs remain.
 
 _Last updated: 2026-06-21 — by the /loop driver._
 
-## Status: COMPLETE ✅
+## Active track: Desktop responsive layout (#430–#433)
+
+A new wave after the Code Lab roadmap. Dependency order:
+
+1. **#430** shared `PageShell` + dashboard two-column at `xl` — **PR OPEN** (`feat/desktop-layout-shell`).
+2. **#431** split learning item + Code Lab on wide screens — next.
+3. **#432** widen exercises/labs/goals/resources/review pages — uses `PageShell`.
+4. **#433** wide-screen Playwright coverage + visual smoke assertions.
+
+Layout-only; mobile-first preserved, wide layout additive at `xl`/`2xl`.
+
+## Status: Code Lab roadmap COMPLETE ✅
 
 | Issue | Phase | PR | Merge commit |
 |---|---|---|---|

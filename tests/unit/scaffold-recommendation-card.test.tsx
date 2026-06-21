@@ -18,7 +18,10 @@ describe("ScaffoldRecommendationCard", () => {
     expect(card).toHaveAttribute("data-level", "completion");
     expect(card).toHaveTextContent(/Completion exercise/i);
     expect(card).toHaveTextContent(/guided completion/i);
-    expect(screen.getByTestId("scaffold-recommendation-link")).toHaveAttribute("href", "/learn/comp.1");
+    expect(screen.getByTestId("scaffold-recommendation-link")).toHaveAttribute(
+      "href",
+      "/learn/comp.1#code-lab"
+    );
     expect(card).toHaveTextContent(/practice anything you like/i);
   });
 
