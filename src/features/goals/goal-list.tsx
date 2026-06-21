@@ -1,7 +1,22 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cancelGoalAction, completeGoalAction, reopenGoalAction } from "@/app/goals/actions";
+import { inclusiveGoalDurationDays } from "./goal-contract";
 import type { StudyGoalView } from "./goal-view-types";
+import { localDateKey } from "@/lib/time/local-day";
+
+export function remainingGoalDays(
+  goal: Pick<StudyGoalView, "endLocalDate" | "timezone">,
+  now: Date = new Date()
+): number {
+  let today: string;
+  try {
+    today = localDateKey(now, goal.timezone);
+  } catch {
+    today = localDateKey(now, "UTC");
+  }
+  return Math.max(0, inclusiveGoalDurationDays(today, goal.endLocalDate) ?? 0);
+}
 
 function LifecycleForm({
   goal,
@@ -30,8 +45,7 @@ function LifecycleForm({
 function GoalCard({ goal, active }: { goal: StudyGoalView; active: boolean }) {
   const completed = goal.targets.filter((target) => target.baselineAcquisitionState === "initial_learning_complete").length;
   const remaining = goal.targets.length - completed;
-  const end = Date.parse(`${goal.endLocalDate}T00:00:00Z`);
-  const daysRemaining = Math.max(0, Math.ceil((end - Date.now()) / 86_400_000) + 1);
+  const daysRemaining = remainingGoalDays(goal);
   const pace = goal.status === "completed" ? "complete" : remaining === 0 ? "ahead" : daysRemaining <= 1 ? "at risk" : "on track";
   return (
     <article className="grid gap-3 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm">
