@@ -49,6 +49,14 @@ export type InterviewProblem = {
   hintLadder: string[];
   visibleExamples: VisibleExample[];
   externalLinks: ExternalLink[];
+  /**
+   * Reviewed importance flag (#176): whether this problem belongs to the curated
+   * high-signal interview-core set. Importance is stated explicitly here, never
+   * derived from how many skills/items reference it. Omitted defaults to core,
+   * since the whole catalog is the deliberately small core set; the field exists
+   * to mark any future supplementary problem as non-core.
+   */
+  interviewCore?: boolean;
 };
 
 const CSES: ExternalLink = { url: "https://cses.fi/problemset/", annotation: "CSES: extra practice on this pattern." };
@@ -1693,4 +1701,18 @@ export function getInterviewProblem(id: string): InterviewProblem | null {
 
 export function getInterviewProblemsByGroup(group: ProblemGroup): InterviewProblem[] {
   return interviewProblems.filter((problem) => problem.group === group);
+}
+
+/**
+ * Whether a problem is in the reviewed interview-core set (#176). Reads the
+ * explicit flag, defaulting to core — importance is never inferred from item
+ * count or skill references.
+ */
+export function isInterviewCoreProblem(problem: InterviewProblem): boolean {
+  return problem.interviewCore ?? true;
+}
+
+/** The reviewed interview-core problems (#176). */
+export function getInterviewCoreProblems(): InterviewProblem[] {
+  return interviewProblems.filter(isInterviewCoreProblem);
 }
