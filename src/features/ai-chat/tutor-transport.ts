@@ -77,6 +77,9 @@ export async function runTutor(args: {
     const lines = buffer.split(/\r?\n/);
     buffer = lines.pop() ?? "";
     for (const line of lines) if (line.trim()) args.onEvent(JSON.parse(line) as AiChatStreamEvent);
-    if (done) break;
+    if (done) {
+      if (buffer.trim()) args.onEvent(JSON.parse(buffer) as AiChatStreamEvent);
+      break;
+    }
   }
 }

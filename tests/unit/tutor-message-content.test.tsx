@@ -26,4 +26,35 @@ describe("TutorMessageContent", () => {
     expect(screen.queryByText("| Category | Type | Remarks |")).not.toBeInTheDocument();
     expect(screen.getByText("Use suffixes when you need a different literal type.")).toBeInTheDocument();
   });
+
+  it("renders Gemini-style headings and fenced C++ snippets without raw markdown fences", () => {
+    render(
+      <TutorMessageContent
+        content={[
+          "### The Core Idea",
+          "",
+          "A reference is an alias for another object.",
+          "",
+          "```cpp",
+          "int x = 5;",
+          "int& r = x;",
+          "r = 10;",
+          "```",
+          "",
+          "---",
+          "",
+          "Use `r` after binding."
+        ].join("\n")}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "The Core Idea", level: 3 })).toBeInTheDocument();
+    expect(screen.getByText("cpp")).toBeInTheDocument();
+    expect(screen.getByText(/int& r = x;/).tagName).toBe("CODE");
+    expect(screen.getByText("r").tagName).toBe("CODE");
+    expect(screen.queryByText("### The Core Idea")).not.toBeInTheDocument();
+    expect(screen.queryByText("```cpp")).not.toBeInTheDocument();
+    expect(screen.queryByText("```")).not.toBeInTheDocument();
+    expect(screen.queryByText("---")).not.toBeInTheDocument();
+  });
 });
