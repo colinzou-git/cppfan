@@ -4,6 +4,8 @@ import { GoalForm } from "@/features/goals/goal-form";
 
 vi.mock("@/app/goals/actions", () => ({ createGoalAction: vi.fn() }));
 
+const DRAFT_KEY = "cppfan:goal-wizard:v1";
+
 describe("GoalForm wizard", () => {
   beforeEach(() => window.localStorage.clear());
 
@@ -15,7 +17,26 @@ describe("GoalForm wizard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("link", { name: /30-question Evaluation/i })).toHaveAttribute("href", "/goals/evaluation");
 
-    await waitFor(() => expect(window.localStorage.getItem("cppfan:goal-wizard:v1")).toContain('"step":2'));
+    await waitFor(() => expect(window.localStorage.getItem(DRAFT_KEY)).toContain('"step":2'));
+  });
+
+  it("restores a saved draft without overwriting it during hydration", async () => {
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      step: 3,
+      duration: 10,
+      start: "2026-06-20",
+      timezone: "America/Los_Angeles",
+      title: "Saved foundations plan",
+      note: "Keep the exact draft.",
+      skillIds: ["cpp.program_basics.structure"]
+    }));
+
+    render(<GoalForm recommendedSkillIds={["cpp.ownership.raii"]} />);
+
+    await waitFor(() => expect(screen.getByLabelText("Goal title")).toHaveValue("Saved foundations plan"));
+    expect(screen.getByRole("status")).toHaveTextContent("Your saved draft was restored.");
+    expect(window.localStorage.getItem(DRAFT_KEY)).toContain("Saved foundations plan");
+    expect(window.localStorage.getItem(DRAFT_KEY)).toContain("cpp.program_basics.structure");
   });
 
   it("reviews a customized target before enabling save", () => {
