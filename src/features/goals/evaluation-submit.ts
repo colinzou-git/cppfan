@@ -22,12 +22,10 @@ export async function submitGoalEvaluationChoice(input: {
 
   const client = await getEvaluationClient();
   if (client.status !== "ready") return { status: client.status };
-  const view = await getGoalEvaluationView();
-  if (
-    view.state !== "ready" || view.status !== "active" || !view.currentQuestion ||
-    view.sessionId !== input.sessionId || view.questionIndex !== input.expectedQuestionIndex
-  ) return { status: "stale" };
 
+  // Let the trusted RPC validate freshness and replay duplicate submission IDs.
+  // A pre-read can race with a duplicated browser/server-action request and
+  // falsely report "stale" after the first request already advanced the session.
   const result = await client.supabase.rpc("submit_goal_evaluation_answer", {
     p_session_id: input.sessionId,
     p_expected_question_index: input.expectedQuestionIndex,
