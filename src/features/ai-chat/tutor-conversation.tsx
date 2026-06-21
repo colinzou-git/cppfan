@@ -8,8 +8,14 @@ import { listThreads, runTutor } from "./tutor-transport";
 import { tutorUrl } from "./tutor-url";
 import type { AiChatContext, AiChatMessageView, AiChatStreamEvent } from "./ai-chat-types";
 
+type TutorHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
 type TutorMessageBlock =
+  | { type: "heading"; level: TutorHeadingLevel; text: string }
   | { type: "paragraph"; lines: string[] }
+  | { type: "code"; language: string | null; code: string }
+  | { type: "list"; ordered: boolean; items: string[] }
+  | { type: "rule" }
   | { type: "table"; header: string[]; rows: string[][] };
 
 function localEntry(role: "user" | "assistant", requestId: string, content: string): AiChatMessageView {
@@ -56,6 +62,26 @@ function normalizeTableCells(cells: string[], expected: number) {
   return normalized;
 }
 
+function codeFenceMatch(line: string) {
+  return line.trim().match(/^```\s*([A-Za-z0-9_+#.-]*)\s*$/);
+}
+
+function headingMatch(line: string) {
+  return line.trim().match(/^(#{1,6})\s+(.+)$/);
+}
+
+function isRule(line: string) {
+  return /^-{3,}$/.test(line.trim());
+}
+
+function listItemMatch(line: string) {
+  return line.match(/^\s*(?:[-*+]\s+|\d+\.\s+)(.+)$/);
+}
+
+function isOrderedListItem(line: string) {
+  return /^\s*\d+\.\s+/.test(line);
+}
+
 function parseTutorMessageBlocks(content: string): TutorMessageBlock[] {
   const lines = content.replace(/\r\n/g, "\n").split("\n");
   const blocks: TutorMessageBlock[] = [];
@@ -69,7 +95,20 @@ function parseTutorMessageBlocks(content: string): TutorMessageBlock[] {
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
-    if (isTableStart(lines, index)) {
+    const fence = codeFenceMatch(line);
+    const heading = headingMatch(line);
+    const listItem = listItemMatch(line);
+
+    if (fence) {
+      flushParagraph();
+      const codeLines: string[] = [];
+      index += 1;
+      while (index < lines.length && !lines[index].trim().startsWith("```")) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      blocks.push({ type: "code", language: fence[1] || null, code: codeLines.join("\n") });
+    } else if (isTableStart(lines, index)) {
       flushParagraph();
       const header = splitTableCells(line);
       const rows: string[][] = [];
@@ -80,6 +119,28 @@ function parseTutorMessageBlocks(content: string): TutorMessageBlock[] {
       }
       index -= 1;
       blocks.push({ type: "table", header, rows });
+    } else if (heading) {
+      flushParagraph();
+      blocks.push({
+        type: "heading",
+        level: Math.min(heading[1].length, 6) as TutorHeadingLevel,
+        text: heading[2].trim()
+      });
+    } else if (isRule(line)) {
+      flushParagraph();
+      blocks.push({ type: "rule" });
+    } else if (listItem) {
+      flushParagraph();
+      const ordered = isOrderedListItem(line);
+      const items: string[] = [];
+      while (index < lines.length) {
+        const current = listItemMatch(lines[index]);
+        if (!current || isOrderedListItem(lines[index]) !== ordered) break;
+        items.push(current[1].trim());
+        index += 1;
+      }
+      index -= 1;
+      blocks.push({ type: "list", ordered, items });
     } else if (line.trim()) {
       paragraph.push(line);
     } else {
@@ -93,7 +154,7 @@ function parseTutorMessageBlocks(content: string): TutorMessageBlock[] {
 
 function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  const tokenPattern = /(`[^`]+`|\*\*[^*]+\*\*)/g;
+  const tokenPattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*)/g;
   let lastIndex = 0;
   let tokenIndex = 0;
 
@@ -122,6 +183,28 @@ function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
   return nodes;
 }
 
+function TutorHeading({ level, text, blockIndex }: { level: TutorHeadingLevel; text: string; blockIndex: number }) {
+  const className = level <= 2
+    ? "text-lg font-black leading-7 text-slate-950"
+    : "text-base font-black leading-6 text-slate-950";
+  const children = renderInlineMarkdown(text, `heading-${blockIndex}`);
+
+  switch (level) {
+    case 1:
+      return <h1 className={className}>{children}</h1>;
+    case 2:
+      return <h2 className={className}>{children}</h2>;
+    case 3:
+      return <h3 className={className}>{children}</h3>;
+    case 4:
+      return <h4 className={className}>{children}</h4>;
+    case 5:
+      return <h5 className={className}>{children}</h5>;
+    case 6:
+      return <h6 className={className}>{children}</h6>;
+  }
+}
+
 function TutorParagraph({ lines, blockIndex }: { lines: string[]; blockIndex: number }) {
   return (
     <p className="whitespace-pre-wrap break-words leading-6">
@@ -132,6 +215,28 @@ function TutorParagraph({ lines, blockIndex }: { lines: string[]; blockIndex: nu
         </Fragment>
       ))}
     </p>
+  );
+}
+
+function TutorCodeBlock({ language, code }: { language: string | null; code: string }) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-300 bg-slate-950 shadow-sm">
+      {language ? <div className="border-b border-slate-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-300">{language}</div> : null}
+      <pre className="overflow-x-auto whitespace-pre p-3 text-sm leading-6 text-slate-50">
+        <code className="font-mono">{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+function TutorList({ ordered, items, blockIndex }: { ordered: boolean; items: string[]; blockIndex: number }) {
+  const Tag = ordered ? "ol" : "ul";
+  return (
+    <Tag className={`space-y-1 pl-5 leading-6 ${ordered ? "list-decimal" : "list-disc"}`}>
+      {items.map((item, itemIndex) => (
+        <li key={`list-${blockIndex}-${itemIndex}`}>{renderInlineMarkdown(item, `list-${blockIndex}-${itemIndex}`)}</li>
+      ))}
+    </Tag>
   );
 }
 
@@ -176,13 +281,22 @@ export function TutorMessageContent({ content }: { content: string }) {
 
   return (
     <div className="space-y-3">
-      {blocks.map((block, blockIndex) =>
-        block.type === "table" ? (
-          <TutorMarkdownTable key={blockIndex} header={block.header} rows={block.rows} blockIndex={blockIndex} />
-        ) : (
-          <TutorParagraph key={blockIndex} lines={block.lines} blockIndex={blockIndex} />
-        )
-      )}
+      {blocks.map((block, blockIndex) => {
+        switch (block.type) {
+          case "heading":
+            return <TutorHeading key={blockIndex} level={block.level} text={block.text} blockIndex={blockIndex} />;
+          case "table":
+            return <TutorMarkdownTable key={blockIndex} header={block.header} rows={block.rows} blockIndex={blockIndex} />;
+          case "code":
+            return <TutorCodeBlock key={blockIndex} language={block.language} code={block.code} />;
+          case "list":
+            return <TutorList key={blockIndex} ordered={block.ordered} items={block.items} blockIndex={blockIndex} />;
+          case "rule":
+            return <hr key={blockIndex} className="border-slate-300" />;
+          case "paragraph":
+            return <TutorParagraph key={blockIndex} lines={block.lines} blockIndex={blockIndex} />;
+        }
+      })}
     </div>
   );
 }
