@@ -10,8 +10,10 @@ import {
   AiProviderError,
   getAiProviderConfig,
   isAiChatEnabled,
-  streamAiTutorResponse
+  streamAiTutorResponse,
+  validateAiProviderConfig
 } from "@/features/ai-chat/ai-chat-provider";
+import { getAiProviderPreferenceOverride } from "@/features/ai-chat/provider-preferences";
 import {
   appendMessage,
   consumeAiChatQuota,
@@ -179,16 +181,17 @@ export async function DELETE(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!isAiChatEnabled()) {
-    return apiError("ai_unavailable", "Free AI Chat is not enabled yet.", 503);
-  }
-
   const auth = await authenticatedClient();
   if (auth.status === "unconfigured") {
     return apiError("supabase_unconfigured", "Sign-in storage is not configured.", 503);
   }
   if (auth.status === "signed_out") {
     return apiError("authentication_required", "Sign in to use AI Chat.", 401);
+  }
+
+  const providerOverride = await getAiProviderPreferenceOverride();
+  if (!isAiChatEnabled(providerOverride)) {
+    return apiError("ai_unavailable", "Free AI Chat is not enabled yet.", 503);
   }
 
   let body: Record<string, unknown> | null = null;
@@ -223,7 +226,16 @@ export async function POST(request: Request) {
   }
 
   const context = parsedContext.value;
-  const config = getAiProviderConfig();
+  const config = getAiProviderConfig(providerOverride);
+  const configError = validateAiProviderConfig(config);
+  if (configError) {
+    return apiError(
+      configError.code,
+      configError.message,
+      configError.status,
+      configError.retryAfterSeconds
+    );
+  }
   const contextFingerprint = fingerprintAiChatContext(context);
 
   try {
@@ -368,7 +380,8 @@ export async function POST(request: Request) {
           try {
             for await (const chunk of streamAiTutorResponse({
               messages: providerMessages,
-              signal: abortController.signal
+              signal: abortController.signal,
+              override: providerOverride
             })) {
               output += chunk;
               if (!send({ type: "delta", text: chunk })) abortController.abort();
