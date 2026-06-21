@@ -22,11 +22,11 @@ _Last updated: 2026-06-21 — by the /loop driver._
      PR #420 → `c1520a5`; closed with final audit.
    - #411 3.2 Boundary-case checklist — **DONE**: PR #421 → `5692da6`; closed.
    - #412 3.3 Deterministic error tagging MVP — **DONE**: PR #422 → `4d3b517`.
-   - #413 3.4 Prediction-before-run mode — **PR OPEN** (`feat/code-lab-phase3-4`):
-     prediction types/prompts/service/comparison/evidence + panel; off by default,
-     optional/required modes; stdout & failing-test comparison. 880 unit tests
-     pass; e2e chromium green.
-   - #414 3.5 Error-pattern remediation recommendations (depends on tagging)
+   - #413 3.4 Prediction-before-run mode — **DONE**: PR #423 → `a5d5924`.
+   - #414 3.5 Error-pattern remediation recommendations — **PR OPEN**
+     (`feat/code-lab-phase3-5`): rules/service/panel + daily-plan merge; one
+     explainable dismissible rec from deterministic tags; repeated→high priority;
+     never displaces due reviews; no hard lock. 895 unit tests pass; e2e chromium green.
    - #415 3.6 Adaptive scaffold selector
    - #416 3.7 Debugging skill lane
    - #417 3.8 Cross-context mastery rules

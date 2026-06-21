@@ -95,6 +95,23 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Error-pattern remediation (Phase 3.5)
+
+After a failing run/test, the Code Lab can show **one** explainable, **dismissible**
+remediation recommendation (#414) built from the deterministic error tags (#412):
+
+- Transparent rules (`error-remediation-rules.ts`) map a tag to an action
+  (boundary checklist, AI trace, completion/Parsons item, review, or retry) with a
+  learner-facing title/reason.
+- **Priority** comes from the evidence: a repeated deterministic medium/high tag →
+  high; one high-confidence deterministic tag on the current attempt → medium;
+  an AI-only weak tag → low. Unknown/noisy tags produce **no** recommendation.
+- It **never hard-locks** — always dismissible — and `use_boundary_checklist`
+  auto-expands the checklist.
+- `mergeCodeRemediationIntoDailyPlan` can fold the suggestion into the daily plan
+  as a `remediation` card **after** due FSRS reviews (never displacing them).
+- No mastery-scoring change and no opaque ML; no AI-generated items.
+
 ## Prediction-before-run (Phase 3.4)
 
 A Code Lab item can ask the learner to **predict before running** (form a mental

@@ -23,6 +23,10 @@ import { getDefaultPredictionPrompts } from "./prediction-prompts";
 import { hasRequiredPredictions, isPredictionEnabled, shouldRequirePredictionBeforeRun } from "./prediction-service";
 import { comparePredictionsToRunResult } from "./prediction-comparison";
 import type { CodePredictionComparison, CodePredictionSubmission } from "./prediction-types";
+import { ErrorRemediationPanel } from "./error-remediation-panel";
+import { buildCodeRemediationRecommendation } from "./error-remediation-service";
+import type { CodeRemediationRecommendation } from "./error-remediation-types";
+import type { CodeTagClassification } from "./code-error-tags";
 import type { CodeTraceResult } from "./code-trace-types";
 import {
   reviewCodeRequest,
@@ -70,9 +74,34 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
     requireBeforeRun && !hasRequiredPredictions({ prompts: predictionPrompts, submissions });
 
   const checklists = useMemo(() => getBoundaryChecklistsForCodeLab(config), [config]);
+  const [recentClassifications, setRecentClassifications] = useState<CodeTagClassification[]>([]);
+  const [remediation, setRemediation] = useState<CodeRemediationRecommendation | null>(null);
   const suggestChecklist =
     review?.nextAction === "try_boundary_case_checklist" ||
-    trace?.feedback?.nextAction === "try_boundary_case_checklist";
+    trace?.feedback?.nextAction === "try_boundary_case_checklist" ||
+    remediation?.action === "use_boundary_checklist";
+
+  function applyClassifications(latest: CodeTagClassification[]) {
+    const next = [...recentClassifications, ...latest].slice(-20);
+    setRecentClassifications(next);
+    setRemediation(
+      buildCodeRemediationRecommendation({
+        itemId,
+        skillIds: config.skillTags ?? [],
+        classifications: latest,
+        recentClassifications: next,
+        boundaryChecklists: checklists
+      })
+    );
+  }
+
+  function handleRemediationAction(rec: CodeRemediationRecommendation) {
+    if (rec.action === "trace_with_ai" && traceEnabled) {
+      void handleTrace();
+    }
+    // Other actions (checklist/completion/parsons/review/retry) surface their
+    // target inline; the checklist auto-expands via suggestChecklist.
+  }
   const hasRunError =
     runResult !== null &&
     runResult.status !== "success" &&
@@ -122,12 +151,14 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
         setRunResult(result);
         runResultRef.current = result;
         updatePredictionComparisons();
+        applyClassifications(result.classifications ?? []);
       } else if (action === "test") {
         setReview(null);
         const result = await runTestsRequest({ itemId, source });
         setTestResult(result);
         testResultRef.current = result;
         updatePredictionComparisons();
+        applyClassifications(result.classifications ?? []);
       } else {
         const result = await reviewCodeRequest({
           itemId,
@@ -227,6 +258,7 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
 
         <CodeOutputPanel result={runResult} />
         <TestResultsPanel result={testResult} />
+        <ErrorRemediationPanel recommendation={remediation} onAction={handleRemediationAction} />
         <AiCodeReviewPanel review={review} pending={busy === "review" || busy === "explain"} />
         {traceEnabled ? <AiTracePanel trace={trace} pending={tracePending} /> : null}
       </CardContent>
