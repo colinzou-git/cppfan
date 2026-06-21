@@ -508,7 +508,7 @@ export const externalResources: ExternalResource[] = [
   {
     id: "usaco-guide-dynamic-programming",
     name: "USACO Guide: dynamic programming",
-    url: "https://usaco.guide/gold/dp",
+    url: "https://usaco.guide/gold/intro-dp",
     kind: "guidelines",
     description: "Practice-oriented introduction to DP state design, transitions, and table order.",
     tags: ["dsa"]
