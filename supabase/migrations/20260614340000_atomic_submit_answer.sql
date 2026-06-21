@@ -17,7 +17,13 @@ create unique index if not exists learning_item_attempts_user_submission_idx
   on public.learning_item_attempts (user_id, submission_id)
   where submission_id is not null;
 
-create or replace function public.submit_learning_item_answer(
+-- Replaying the full migration folder against production can encounter a newer
+-- version of this RPC from a later migration. PostgreSQL cannot CREATE OR
+-- REPLACE a function when OUT parameters / return row type change, so drop the
+-- same signature first and let later migrations recreate their newer shape.
+drop function if exists public.submit_learning_item_answer(text, text, uuid);
+
+create function public.submit_learning_item_answer(
   p_item_id text,
   p_choice_id text,
   p_submission_id uuid
