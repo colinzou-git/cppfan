@@ -54,6 +54,13 @@ their stdin/expected output; hidden tests are summarised as a count only. See
 [CODE_LAB.md](CODE_LAB.md). The mock runner is deterministic and offline; real
 execution uses a Piston provider.
 
+## Boundary-case checklists
+
+Code Lab items can surface a curated **boundary-case checklist** (#411) resolved
+from skill ids / Code Lab metadata — empty input, one element, search boundaries,
+graph cycles, DP base cases, etc. These are AI-free strategy hints, not grading
+criteria, and do not change mastery. See [CODE_LAB.md](CODE_LAB.md).
+
 ## DSA complexity and pattern-selection items
 
 For complexity/problem-solving coverage (#110), prefer prompts that force a

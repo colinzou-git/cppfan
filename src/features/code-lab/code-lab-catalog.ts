@@ -29,7 +29,9 @@ int main() {
       }
     ],
     hiddenTestCount: 1,
-    skillTags: ["cpp.program_basics.structure"]
+    skillTags: ["cpp.program_basics.structure"],
+    // Supplements the skill-mapped io_basics checklist to demonstrate explicit ids.
+    boundaryChecklistIds: ["binary_search"]
   },
   "cpp.program_basics.io.lesson": {
     enabled: true,

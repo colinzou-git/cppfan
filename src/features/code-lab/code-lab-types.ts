@@ -41,6 +41,10 @@ export type LearningItemCodeLab = {
   skillTags?: string[];
   /** Phase 2 (#408) trace control; defaults to enabled when AI is configured. */
   traceEnabled?: boolean;
+  /** Phase 3.2 (#411) explicit boundary-case checklist ids to show/supplement. */
+  boundaryChecklistIds?: string[];
+  /** Phase 3.2 (#411) opt out of boundary checklists for this item. */
+  boundaryChecklistsEnabled?: boolean;
 };
 
 export type CodeRunRequest = {
