@@ -9,6 +9,7 @@ const links = [
   ["/exercises", "Exercises", Code2],
   ["/interview", "Interview", Target],
   ["/profile", "Profile", UserCircle],
+  ["/settings", "Settings", Settings],
   ["/login", "Auth setup", Settings]
 ] as const;
 
