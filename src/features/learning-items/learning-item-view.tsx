@@ -8,6 +8,7 @@ import { RevealExplanation } from "./reveal-explanation";
 import { ParsonsExercise } from "./parsons-exercise";
 import { CompletionExercise } from "./completion-exercise";
 import { MathVisualization } from "./math-visualization";
+import { MaybeCodeLab } from "@/features/code-lab/maybe-code-lab";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
 import {
   getPublicCompletionBlanksForItem,
@@ -68,6 +69,8 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         </div>
 
         <MathVisualization itemId={item.id} />
+
+        <MaybeCodeLab itemId={item.id} />
 
         {hasChoices ? (
           <div data-testid="learning-item-choices">

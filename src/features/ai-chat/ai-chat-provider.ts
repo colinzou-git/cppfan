@@ -181,3 +181,23 @@ export async function* streamAiTutorResponse({
   }
   yield* groqStream({ messages, signal, model });
 }
+
+/**
+ * Collect a full (non-streamed) provider response. Used by features that need a
+ * single structured answer (e.g. Code Lab AI review/trace) rather than an
+ * incremental stream. Reuses the same provider selection, gating, and fake
+ * fallback as the streaming path so behaviour stays consistent.
+ */
+export async function completeAiResponse({
+  messages,
+  signal
+}: {
+  messages: AiProviderMessage[];
+  signal: AbortSignal;
+}): Promise<string> {
+  let output = "";
+  for await (const chunk of streamAiTutorResponse({ messages, signal })) {
+    output += chunk;
+  }
+  return output;
+}

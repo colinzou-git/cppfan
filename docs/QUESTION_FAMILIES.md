@@ -43,6 +43,17 @@ constructors, RAII, and smart-pointer modules), then deepen high-value skills wi
 more of the family above. Keep each expansion to **one module/skill-group per PR**
 so reviews stay small.
 
+## Code Lab items
+
+Any item can become **code-capable** by attaching Code Lab metadata (#407)
+instead of adding a new question type. The learner gets an in-page C++ editor,
+Run, Run Tests, and AI review. Authoring lives in
+`src/features/code-lab/code-lab-catalog.ts` (visible config + tests) and
+`code-lab-hidden-tests.ts` (server-only hidden cases). Visible tests may expose
+their stdin/expected output; hidden tests are summarised as a count only. See
+[CODE_LAB.md](CODE_LAB.md). The mock runner is deterministic and offline; real
+execution uses a Piston provider.
+
 ## DSA complexity and pattern-selection items
 
 For complexity/problem-solving coverage (#110), prefer prompts that force a
