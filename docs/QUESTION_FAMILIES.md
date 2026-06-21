@@ -43,6 +43,14 @@ constructors, RAII, and smart-pointer modules), then deepen high-value skills wi
 more of the family above. Keep each expansion to **one module/skill-group per PR**
 so reviews stay small.
 
+## Debugging lane items
+
+The `cpp.tooling.*` debugging lane (#416) teaches reading the first compiler
+diagnostic, sanitizer reports, and failing tests. Two items are code-capable
+(Code Lab) with intentionally-buggy starter code that ties to the deterministic
+error tags (#412) — reusing existing stable skill IDs, no new migration. See
+[CODE_LAB.md](CODE_LAB.md).
+
 ## Code Lab items
 
 Any item can become **code-capable** by attaching Code Lab metadata (#407)

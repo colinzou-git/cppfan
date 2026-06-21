@@ -95,6 +95,22 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Debugging skill lane (Phase 3.7)
+
+The existing `cpp.tooling.*` skills (debugging, debugging_method, sanitizers,
+warnings, testing) form a debugging/tooling lane that teaches reading the **first**
+compiler diagnostic, ignoring cascades, fixing includes/declarations/types,
+interpreting failing tests, and reading sanitizer reports — **not** a real
+debugger. Two of its items are code-capable via Code Lab metadata:
+
+- `cpp.tooling.debugging_method.code_first_diagnostic` — starter has a missing
+  semicolon; on the real runner the #412 classifier tags `cpp.compile.syntax`.
+- `cpp.tooling.sanitizers.code_asan_report` — starter reads out of bounds; the
+  runtime classifier tags `cpp.vector.out_of_bounds` from the ASan report.
+
+These reuse existing stable skill IDs and add **no** new skills/migrations, so the
+TS seed and DB stay in parity. See ADR 0004.
+
 ## Adaptive scaffold selector (Phase 3.6)
 
 A deterministic selector (`src/features/recommendations/scaffold-selector.ts`)

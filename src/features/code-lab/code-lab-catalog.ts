@@ -111,6 +111,43 @@ int main() {
       { name: "First and last element boundary", expectedStdout: "1\n2\n3\n", matcher: "exact" }
     ],
     skillTags: ["dsa.arrays.traversal"]
+  },
+  // #416 debugging lane: code-capable items whose starter intentionally has the
+  // bug the lesson teaches. On the real (Piston) runner the #412 classifier tags
+  // the compiler/sanitizer output; the mock still lets the editor run.
+  "cpp.tooling.debugging_method.code_first_diagnostic": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt:
+      "This program does not compile. Read the FIRST diagnostic, fix the missing semicolon at its line, rebuild, and make it print `ok`.",
+    starterCode: `#include <iostream>
+
+int main() {
+  std::cout << "ok" << "\\n"
+  return 0;
+}
+`,
+    visibleTests: [{ name: "Prints ok after the fix", expectedStdout: "ok\n", matcher: "exact" }],
+    skillTags: ["cpp.tooling.debugging_method"]
+  },
+  "cpp.tooling.sanitizers.code_asan_report": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt:
+      "AddressSanitizer reports a heap-buffer-overflow. Find the out-of-bounds index and fix it so the program prints the last element (3).",
+    starterCode: `#include <iostream>
+#include <vector>
+
+int main() {
+  std::vector<int> v = {1, 2, 3};
+  std::cout << v[3] << "\\n"; // out of bounds — read the ASan report
+  return 0;
+}
+`,
+    visibleTests: [{ name: "Prints the last element", expectedStdout: "3\n", matcher: "exact" }],
+    skillTags: ["cpp.tooling.sanitizers"]
   }
 };
 
