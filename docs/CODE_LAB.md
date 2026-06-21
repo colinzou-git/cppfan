@@ -41,13 +41,16 @@ needs no API key:
 CODE_RUNNER_PROVIDER=piston
 CODE_RUNNER_BASE_URL=https://emkc.org/api/v2/piston   # default when unset
 CODE_RUNNER_API_KEY=                                  # only for protected instances
+CODE_RUNNER_CPP_VERSION=10.2.0                        # Piston requires an exact runtime version
 CODE_RUNNER_TIMEOUT_MS=5000
 CODE_RUNNER_MEMORY_MB=128
 ```
 
-C++ defaults to `g++ -std=c++20 -Wall -Wextra -Wpedantic -O0`. Untrusted C++ is
-**never** executed in the Next.js process — all runs go through the runner
-adapter behind the `/api/code/*` routes.
+C++ defaults to `g++ -std=c++20 -Wall -Wextra -Wpedantic -O0`. Piston's
+`/execute` endpoint rejects wildcard runtime versions, so the app sends the exact
+C++ runtime version from `CODE_RUNNER_CPP_VERSION` and defaults to `10.2.0` for
+the public emkc.org runner. Untrusted C++ is **never** executed in the Next.js
+process — all runs go through the runner adapter behind the `/api/code/*` routes.
 
 ## AI review
 
@@ -218,15 +221,3 @@ insert only their own rows). Run/Test still work signed-out and pre-migration.
 ## Adding a code-capable item
 
 1. Add an entry to `codeLabConfigs` keyed by the learning-item id with
-   `enabled`, `starterCode`, `mode`, optional `prompt`, `visibleTests`, and an
-   optional `hiddenTestCount`.
-2. Add any hidden cases for that id to `code-lab-hidden-tests.ts`.
-3. The item now renders a Code Lab automatically.
-
-## Files
-
-- `src/features/code-lab/` — types, defaults, runner adapter/selection, services
-  (run/test, review, attempts), client fetch wrappers, and UI components.
-- `app/api/code/{run,test,review}/route.ts` — server route handlers.
-- `supabase/migrations/20260621120000_create_code_lab_attempts.sql` — attempt
-  table + RLS.
