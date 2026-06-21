@@ -19,6 +19,9 @@ export interface CodeRunnerAdapter {
   run(input: RunnerInput): Promise<CodeRunResult>;
 }
 
+/** Current public Piston C++ runtime. Piston /execute rejects wildcard versions. */
+export const DEFAULT_PISTON_CPP_VERSION = "10.2.0";
+
 /**
  * Deterministic offline runner for local dev, unit tests, and CI. It does not
  * compile C++ — it simulates output for the simple shapes the seed examples use
@@ -145,7 +148,8 @@ export class PistonRunner implements CodeRunnerAdapter {
 
   constructor(
     private readonly baseUrl: string,
-    private readonly apiKey?: string
+    private readonly apiKey?: string,
+    private readonly cppVersion: string = DEFAULT_PISTON_CPP_VERSION
   ) {}
 
   async run(input: RunnerInput): Promise<CodeRunResult> {
@@ -162,7 +166,7 @@ export class PistonRunner implements CodeRunnerAdapter {
         signal: AbortSignal.timeout(input.timeoutMs + 10_000),
         body: JSON.stringify({
           language: "c++",
-          version: "*",
+          version: this.cppVersion,
           files: [{ name: "main.cpp", content: input.source }],
           stdin: input.stdin,
           compile_timeout: 10_000,
@@ -175,11 +179,13 @@ export class PistonRunner implements CodeRunnerAdapter {
     }
 
     if (!response.ok) {
+      const detail = await readShortResponseBody(response);
+      const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
       return runnerError(
         this.name,
         response.status === 429
-          ? "The code runner is busy. Try again in a moment."
-          : "The code runner could not run this submission.",
+          ? `The code runner is busy (${statusDetail}). Try again in a moment.`
+          : `The code runner rejected this submission (${statusDetail}).`,
         start
       );
     }
@@ -200,13 +206,17 @@ export function interpretPistonResponse(
   provider: string,
   durationMs: number
 ): CodeRunResult {
-  const compileStderr = payload.compile?.stderr?.trim() ?? "";
-  const compileFailed = (payload.compile?.code ?? 0) !== 0 && compileStderr.length > 0;
+  if (!payload.run && payload.message) {
+    return runnerErrorFromDuration(provider, `The code runner returned: ${payload.message}`, durationMs);
+  }
+
+  const compileOutput = payload.compile?.stderr ?? payload.compile?.output ?? "";
+  const compileFailed = (payload.compile?.code ?? 0) !== 0;
 
   if (compileFailed) {
     return {
       status: "compile_error",
-      compileOutput: payload.compile?.stderr ?? compileStderr,
+      compileOutput,
       stdout: "",
       stderr: "",
       exitCode: payload.compile?.code ?? null,
@@ -230,9 +240,9 @@ export function interpretPistonResponse(
 
   return {
     status,
-    compileOutput: payload.compile?.stderr ?? "",
+    compileOutput,
     stdout: run.stdout ?? "",
-    stderr: run.stderr ?? "",
+    stderr: run.stderr ?? run.output ?? "",
     exitCode,
     timedOut,
     durationMs,
@@ -243,7 +253,20 @@ export function interpretPistonResponse(
   };
 }
 
+async function readShortResponseBody(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    return text.replace(/\s+/g, " ").trim().slice(0, 300);
+  } catch {
+    return "";
+  }
+}
+
 function runnerError(provider: string, note: string, start: number): CodeRunResult {
+  return runnerErrorFromDuration(provider, note, Date.now() - start);
+}
+
+function runnerErrorFromDuration(provider: string, note: string, durationMs: number): CodeRunResult {
   return {
     status: "runner_error",
     compileOutput: "",
@@ -251,7 +274,7 @@ function runnerError(provider: string, note: string, start: number): CodeRunResu
     stderr: "",
     exitCode: null,
     timedOut: false,
-    durationMs: Date.now() - start,
+    durationMs,
     memoryKb: null,
     provider,
     simulated: false,
