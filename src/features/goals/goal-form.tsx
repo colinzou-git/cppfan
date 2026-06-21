@@ -15,7 +15,10 @@ function localToday(timezone: string) {
 }
 
 function addDays(localDate: string, count: number) {
-  const [year, month, date] = localDate.split("-").map(Number);
+  const [yearText, monthText, dateText] = localDate.split("-");
+  const year = Number(yearText ?? 0);
+  const month = Number(monthText ?? 1);
+  const date = Number(dateText ?? 1);
   return new Date(Date.UTC(year, month - 1, date + count)).toISOString().slice(0, 10);
 }
 
@@ -43,16 +46,24 @@ function defaultDraft(recommendedSkillIds: string[]): Draft {
 
 function normalizeDraft(value: unknown, fallback: Draft): Draft {
   const record = typeof value === "object" && value !== null ? value as Partial<Draft> : {};
+  const step = typeof record.step === "number" && Number.isInteger(record.step) && record.step >= 1 && record.step <= 4
+    ? record.step
+    : fallback.step;
+  const duration = typeof record.duration === "number" && Number.isInteger(record.duration) && record.duration >= 1 && record.duration <= 30
+    ? record.duration
+    : fallback.duration;
+  const skillIds = Array.isArray(record.skillIds) && record.skillIds.every((skillId) => typeof skillId === "string")
+    ? record.skillIds
+    : fallback.skillIds;
+
   return {
-    step: Number.isInteger(record.step) && record.step >= 1 && record.step <= 4 ? record.step : fallback.step,
-    duration: Number.isInteger(record.duration) && record.duration >= 1 && record.duration <= 30 ? record.duration : fallback.duration,
+    step,
+    duration,
     start: typeof record.start === "string" && /^\d{4}-\d{2}-\d{2}$/.test(record.start) ? record.start : fallback.start,
     timezone: typeof record.timezone === "string" && record.timezone ? record.timezone : fallback.timezone,
     title: typeof record.title === "string" ? record.title : fallback.title,
     note: typeof record.note === "string" ? record.note : fallback.note,
-    skillIds: Array.isArray(record.skillIds) && record.skillIds.every((skillId) => typeof skillId === "string")
-      ? record.skillIds
-      : fallback.skillIds
+    skillIds
   };
 }
 
