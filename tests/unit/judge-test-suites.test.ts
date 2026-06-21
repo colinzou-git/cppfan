@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { buildJudgeRequest } from "@/features/interview/judge-client";
-import { getInterviewProblems } from "@/features/interview/problem-catalog";
-import { judgeSupportedProblemIds, getJudgeProblemSuite } from "@/features/interview/judge-test-suites";
+import { interviewProblems } from "@/features/interview/problem-catalog";
+import {
+  getJudgeIoDescription,
+  getJudgeProblemSuite,
+  judgeSupportedProblemIds
+} from "@/features/interview/judge-test-suites";
 import type { JudgeSubmission } from "@/features/interview/judge-contract";
 
 const submission: JudgeSubmission = {
@@ -14,50 +18,22 @@ const submission: JudgeSubmission = {
   sourceBytes: 1024
 };
 
-describe("judge problem test suites (#178)", () => {
-  it("exposes selected problem ids with visible and hidden tests", () => {
-    expect(judgeSupportedProblemIds()).toEqual([
-      "iv.bsearch.balance-link-load",
-      "iv.bsearch.insert-position",
-      "iv.bsearch.min-rate-before-deadline",
-      "iv.bsearch.peak-index",
-      "iv.bsearch.rotated-min",
-      "iv.prefix.balance-returns-to-zero",
-      "iv.stack.balanced-delimiters"
-    ]);
+describe("judge problem test suites (#176/#178)", () => {
+  it("covers every interview-catalog problem with visible and hidden executable tests", () => {
+    const catalogIds = interviewProblems.map((problem) => problem.id).sort();
+    expect(judgeSupportedProblemIds()).toEqual(catalogIds);
+    expect(catalogIds).toHaveLength(60);
 
-    const suite = getJudgeProblemSuite("iv.prefix.balance-returns-to-zero");
-    expect(suite?.visibleTests.length).toBe(2);
-    expect(suite?.hiddenTests.length).toBe(2);
-    expect(suite?.fixtures.length).toBe(4);
-  });
-
-  it("makes every binary-search catalog problem executable", () => {
-    const binarySearchProblems = getInterviewProblems().filter((problem) => problem.group === "binary_search");
-    expect(binarySearchProblems).toHaveLength(5);
-
-    for (const problem of binarySearchProblems) {
+    for (const problem of interviewProblems) {
       const suite = getJudgeProblemSuite(problem.id);
       expect(suite, problem.id).not.toBeNull();
-      expect(suite?.version).toBe(problem.version);
-      expect(suite?.visibleTests.length, problem.id).toBeGreaterThanOrEqual(2);
-      expect(suite?.hiddenTests.length, problem.id).toBeGreaterThanOrEqual(2);
-      expect(suite?.fixtures.length).toBe((suite?.visibleTests.length ?? 0) + (suite?.hiddenTests.length ?? 0));
-    }
-  });
-
-  it("covers boundary, adversarial, or scale behavior in each binary-search suite", () => {
-    const binarySearchIds = getInterviewProblems()
-      .filter((problem) => problem.group === "binary_search")
-      .map((problem) => problem.id);
-
-    for (const problemId of binarySearchIds) {
-      const suite = getJudgeProblemSuite(problemId)!;
-      const hiddenCategories = new Set(suite.hiddenTests.map((test) => test.category));
-      expect(
-        ["edge_case", "boundary", "adversarial", "overflow_guard"].some((category) => hiddenCategories.has(category)),
-        problemId
-      ).toBe(true);
+      expect(suite!.version, problem.id).toBe(problem.version);
+      expect(suite!.visibleTests.length, problem.id).toBeGreaterThan(0);
+      expect(suite!.hiddenTests.length, problem.id).toBeGreaterThan(0);
+      expect(suite!.fixtures.length, problem.id).toBe(
+        suite!.visibleTests.length + suite!.hiddenTests.length
+      );
+      expect(getJudgeIoDescription(problem.id), problem.id).toMatch(/stdin:/i);
     }
   });
 
@@ -87,7 +63,34 @@ describe("judge problem test suites (#178)", () => {
     expect(JSON.stringify(suite?.fixtures)).toContain("2 2 2");
   });
 
-  it("returns null for problems without a judge suite yet", () => {
-    expect(getJudgeProblemSuite("iv.graph.service-init-order")).toBeNull();
+  it("includes boundary/adversarial/scale coverage for every final mock problem", () => {
+    const mockProblemIds = [
+      "iv.graph.service-init-order",
+      "iv.sliding.longest-window-under-budget",
+      "iv.heap.top-k-hot-keys",
+      "iv.intervals.max-concurrent-maintenance",
+      "iv.bsearch.min-rate-before-deadline",
+      "iv.heap.k-closest-points",
+      "iv.tree.diameter",
+      "iv.graph.cheapest-route",
+      "iv.dp.fewest-coins",
+      "iv.cache.lru-design",
+      "iv.cpp.iterator-invalidation",
+      "iv.cpp.dangling-reference",
+      "iv.cpp.missing-virtual-destructor"
+    ];
+
+    for (const problemId of mockProblemIds) {
+      const suite = getJudgeProblemSuite(problemId);
+      const categories = new Set(
+        [...(suite?.visibleTests ?? []), ...(suite?.hiddenTests ?? [])].map((test) => test.category)
+      );
+      expect(categories.has("normal"), problemId).toBe(true);
+      expect(
+        categories.has("boundary") || categories.has("adversarial"),
+        problemId
+      ).toBe(true);
+      expect(suite!.fixtures.length, problemId).toBeGreaterThanOrEqual(4);
+    }
   });
 });

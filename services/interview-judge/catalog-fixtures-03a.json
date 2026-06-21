@@ -1,0 +1,55 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.dsu.earliest-all-connected",
+      "version": 1,
+      "ioDescription": "stdin: n m, then m records timestamp u v in arbitrary order. stdout: earliest timestamp when all n vertices are connected, or -1.",
+      "cases": [
+        {"id":"visible.1","name":"connects over time","hidden":false,"category":"normal","stdin":"4 4\n3 2 3\n1 0 1\n4 0 3\n2 1 2\n","expectedStdout":"3\n"},
+        {"id":"hidden.2","name":"never connected","hidden":true,"category":"boundary","stdin":"4 2\n1 0 1\n2 2 3\n","expectedStdout":"-1\n"},
+        {"id":"hidden.3","name":"single vertex","hidden":true,"category":"boundary","stdin":"1 0\n","expectedStdout":"0\n"}
+      ]
+    },
+    {
+      "problemId": "iv.tree.max-depth",
+      "version": 1,
+      "ioDescription": "stdin: token count n, then n level-order tokens (integer or null). stdout: maximum node depth, empty tree = 0.",
+      "cases": [
+        {"id":"visible.1","name":"balanced depth","hidden":false,"category":"normal","stdin":"7\n3 9 20 null null 15 7\n","expectedStdout":"3\n"},
+        {"id":"hidden.2","name":"empty","hidden":true,"category":"boundary","stdin":"0\n","expectedStdout":"0\n"},
+        {"id":"hidden.3","name":"left chain","hidden":true,"category":"adversarial","stdin":"7\n1 2 null 3 null 4 null\n","expectedStdout":"4\n"}
+      ]
+    },
+    {
+      "problemId": "iv.tree.right-side-view",
+      "version": 1,
+      "ioDescription": "stdin: token count n, then level-order tokens. stdout: rightmost value at each depth.",
+      "cases": [
+        {"id":"visible.1","name":"normal view","hidden":false,"category":"normal","stdin":"7\n1 2 3 null 5 null 4\n","expectedStdout":"1 3 4\n"},
+        {"id":"hidden.2","name":"single","hidden":true,"category":"boundary","stdin":"1\n8\n","expectedStdout":"8\n"},
+        {"id":"hidden.3","name":"left-only","hidden":true,"category":"boundary","stdin":"5\n1 2 null 3 null\n","expectedStdout":"1 2 3\n"}
+      ]
+    },
+    {
+      "problemId": "iv.bst.kth-smallest",
+      "version": 1,
+      "ioDescription": "stdin: token count n and k, then level-order BST tokens. stdout: kth smallest value (1-based).",
+      "cases": [
+        {"id":"visible.1","name":"middle","hidden":false,"category":"normal","stdin":"7 3\n5 3 7 2 4 6 8\n","expectedStdout":"4\n"},
+        {"id":"hidden.2","name":"smallest","hidden":true,"category":"boundary","stdin":"3 1\n2 1 3\n","expectedStdout":"1\n"},
+        {"id":"hidden.3","name":"skewed","hidden":true,"category":"adversarial","stdin":"7 4\n1 null 2 null 3 null 4\n","expectedStdout":"4\n"}
+      ]
+    },
+    {
+      "problemId": "iv.tree.diameter",
+      "version": 1,
+      "ioDescription": "stdin: token count n, then level-order tokens. stdout: diameter measured in edges, empty/single = 0.",
+      "cases": [
+        {"id":"visible.1","name":"through root","hidden":false,"category":"normal","stdin":"7\n1 2 3 4 5 null null\n","expectedStdout":"3\n"},
+        {"id":"hidden.2","name":"single","hidden":true,"category":"boundary","stdin":"1\n9\n","expectedStdout":"0\n"},
+        {"id":"hidden.3","name":"deep subtree","hidden":true,"category":"adversarial","stdin":"11\n1 2 null 3 4 5 null null null 6 7\n","expectedStdout":"4\n"},
+        {"id":"hidden.4","name":"empty","hidden":true,"category":"boundary","stdin":"0\n","expectedStdout":"0\n"}
+      ]
+    }
+  ]
+}

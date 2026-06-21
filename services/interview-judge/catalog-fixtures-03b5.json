@@ -1,0 +1,14 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.list.detect-cycle",
+      "version": 1,
+      "ioDescription": "stdin: n pos, then n values; pos is the index the tail points to, or -1. stdout: true or false.",
+      "cases": [
+        {"id":"visible.1","name":"loop to middle","hidden":false,"category":"normal","stdin":"4 1\n3 2 0 -4\n","expectedStdout":"true\n"},
+        {"id":"hidden.2","name":"no loop","hidden":true,"category":"boundary","stdin":"3 -1\n1 2 3\n","expectedStdout":"false\n"},
+        {"id":"hidden.3","name":"one-node loop","hidden":true,"category":"adversarial","stdin":"1 0\n7\n","expectedStdout":"true\n"}
+      ]
+    }
+  ]
+}
