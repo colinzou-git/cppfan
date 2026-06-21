@@ -25,6 +25,7 @@ export type PhaseNotes = Partial<Record<SessionPhase, string>>;
 export const SESSION_DURATIONS: SessionDuration[] = [35, 45, 50];
 
 export type SessionState = {
+  sessionId: string | null;
   problemId: string;
   mode: SessionMode;
   durationMinutes: SessionDuration;
@@ -37,6 +38,8 @@ export type SessionState = {
   assistanceUsed: boolean;
   abandonmentReason: string | null;
   status: SessionStatus;
+  startedAt: string | null;
+  completedAt: string | null;
 };
 
 export function emptyPhaseElapsedSeconds(): PhaseElapsedSeconds {
@@ -47,11 +50,14 @@ export function createSession(input: {
   problemId: string;
   mode: SessionMode;
   durationMinutes: SessionDuration;
+  sessionId?: string | null;
+  startedAt?: string | null;
 }): SessionState {
   if (!SESSION_DURATIONS.includes(input.durationMinutes)) {
     throw new Error(`unsupported session duration: ${input.durationMinutes}`);
   }
   return {
+    sessionId: input.sessionId ?? null,
     problemId: input.problemId,
     mode: input.mode,
     durationMinutes: input.durationMinutes,
@@ -63,7 +69,9 @@ export function createSession(input: {
     testNotes: "",
     assistanceUsed: false,
     abandonmentReason: null,
-    status: "in_progress"
+    status: "in_progress",
+    startedAt: input.startedAt ?? null,
+    completedAt: null
   };
 }
 
@@ -73,13 +81,17 @@ export function currentPhase(state: SessionState): SessionPhase {
 
 const LAST_PHASE_INDEX = SESSION_PHASES.length - 1;
 
+function finishedAt(state: SessionState): string | null {
+  return state.completedAt ?? new Date().toISOString();
+}
+
 /** Move to the next phase; completing the session when advancing past the last. */
 export function advancePhase(state: SessionState): SessionState {
   if (state.status !== "in_progress") {
     return state;
   }
   if (state.phaseIndex >= LAST_PHASE_INDEX) {
-    return { ...state, status: "completed" };
+    return { ...state, status: "completed", completedAt: finishedAt(state) };
   }
   return { ...state, phaseIndex: state.phaseIndex + 1 };
 }
@@ -139,12 +151,19 @@ export function isOverBudget(state: SessionState): boolean {
 }
 
 export function completeSession(state: SessionState): SessionState {
-  return state.status === "in_progress" || state.status === "paused" ? { ...state, status: "completed" } : state;
+  return state.status === "in_progress" || state.status === "paused"
+    ? { ...state, status: "completed", completedAt: finishedAt(state) }
+    : state;
 }
 
 export function abandonSession(state: SessionState): SessionState {
   return state.status === "in_progress" || state.status === "paused"
-    ? { ...state, status: "abandoned", abandonmentReason: state.abandonmentReason ?? "manual_stop" }
+    ? {
+        ...state,
+        status: "abandoned",
+        abandonmentReason: state.abandonmentReason ?? "manual_stop",
+        completedAt: finishedAt(state)
+      }
     : state;
 }
 
