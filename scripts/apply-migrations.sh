@@ -68,10 +68,43 @@ if [ "${#files[@]}" -eq 0 ]; then
   exit 1
 fi
 
+is_transient_migration_error() {
+  local log_file="$1"
+  grep -qiE 'tuple concurrently updated|deadlock detected|could not serialize access|canceling statement due to conflict' "${log_file}"
+}
+
+run_migration_with_retry() {
+  local file="$1"
+  local max_attempts=4
+  local attempt=1
+  local log_file
+  log_file="$(mktemp)"
+
+  while true; do
+    if psql "${SUPABASE_DB_URL}" --single-transaction -v ON_ERROR_STOP=1 -q -f "${file}" >"${log_file}" 2>&1; then
+      cat "${log_file}"
+      rm -f "${log_file}"
+      return 0
+    fi
+
+    cat "${log_file}" >&2
+    if [ "${attempt}" -lt "${max_attempts}" ] && is_transient_migration_error "${log_file}"; then
+      echo "WARN: transient database conflict while applying $(basename "${file}"); retrying attempt $((attempt + 1))/${max_attempts}." >&2
+      sleep $((attempt * 2))
+      attempt=$((attempt + 1))
+      : >"${log_file}"
+      continue
+    fi
+
+    rm -f "${log_file}"
+    return 1
+  done
+}
+
 echo "==> Applying ${#files[@]} migration(s) from ${migrations_dir}"
 for file in "${files[@]}"; do
   echo "--> $(basename "${file}")"
-  psql "${SUPABASE_DB_URL}" --single-transaction -v ON_ERROR_STOP=1 -q -f "${file}"
+  run_migration_with_retry "${file}"
 done
 
 echo "==> Done. All migrations applied (idempotent; safe to re-run)."
