@@ -9,14 +9,14 @@ function stableHash(value: string): number {
   return hash >>> 0;
 }
 
+function usesAuthoringFirstSuffix(choice: PublicLearningItemChoice | undefined) {
+  return Boolean(choice?.id.endsWith(".a"));
+}
+
 /**
- * Display choices in a stable pseudo-random order without using the answer key.
- *
- * The curriculum seed and SQL migrations intentionally keep answer rows easy to
- * audit, which often means the correct choice is first. Learner-facing quiz,
- * placement, evaluation, and review surfaces must not preserve that authoring
- * order because it leaks a pattern. The original ids are preserved, so all
- * server-side grading and stored answers keep working.
+ * Display choices in a stable pseudo-random order without using hidden grading
+ * data. The original ids are preserved, so server-side grading and saved answers
+ * keep working.
  */
 export function orderPublicChoices(
   choices: PublicLearningItemChoice[],
@@ -33,11 +33,7 @@ export function orderPublicChoices(
     .sort((a, b) => a.score - b.score || a.index - b.index)
     .map((entry) => entry.choice);
 
-  // Avoid preserving the original first option. In the seed/database content the
-  // original first row is often the correct answer, so this closes the most
-  // obvious answer-position leak even in the rare case where the hash puts it
-  // back first.
-  if (ordered[0]?.id === choices[0]?.id) {
+  while (ordered.length > 1 && (ordered[0]?.id === choices[0]?.id || usesAuthoringFirstSuffix(ordered[0]))) {
     ordered.push(ordered.shift()!);
   }
 
