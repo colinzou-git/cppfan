@@ -4,6 +4,7 @@ import {
   getItemLinksBySkill as getSeedItemLinksBySkill,
   getLearningItemById as getSeedLearningItemById
 } from "./learning-item-seed";
+import { orderPublicChoices } from "./choice-ordering";
 import type {
   LearningItem,
   LearningItemSkill,
@@ -23,8 +24,15 @@ export type LearningItemResult =
 
 type ReadResult<T> = { data: T | null; error: { code?: string | null } | null };
 
+function withDisplayChoiceOrder(details: LearningItemWithDetails): LearningItemWithDetails {
+  return {
+    ...details,
+    choices: orderPublicChoices(details.choices, `learning-item:${details.item.id}`)
+  };
+}
+
 function fromSeed(seed: LearningItemWithDetails | null): LearningItemResult {
-  return seed ? { status: "ok", data: seed } : { status: "not_found" };
+  return seed ? { status: "ok", data: withDisplayChoiceOrder(seed) } : { status: "not_found" };
 }
 
 /**
@@ -54,11 +62,11 @@ export function resolveLearningItemResult(
   }
   return {
     status: "ok",
-    data: {
+    data: withDisplayChoiceOrder({
       item: itemResult.data,
       skills: skillsResult.data ?? [],
       choices: choicesResult.data ?? []
-    }
+    })
   };
 }
 
