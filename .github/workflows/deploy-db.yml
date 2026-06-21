@@ -23,11 +23,11 @@ jobs:
     name: Apply production Supabase migrations
     runs-on: ubuntu-latest
     env:
-      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_URL: ${{secrets.SUPABASE_DB_URL}}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Check database secret
         run: |
