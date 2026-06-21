@@ -30,8 +30,36 @@ jobs:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           if [ -z "${SUPABASE_DB_URL:-}" ]; then
-            echo "::notice::SUPABASE_DB_URL is not configured as a GitHub Actions secret; skipping production migration."
-            echo "Add the Supabase session-pooler Postgres URI as a repository Actions secret named SUPABASE_DB_URL, then re-run this workflow."
-            exit 0
+            echo "::error::SUPABASE_DB_URL is not configured as a GitHub Actions repository secret."
+            echo "Add the Supabase session-pooler Postgres URI under Settings -> Secrets and variables -> Actions, then re-run this workflow."
+            exit 1
           fi
           bash scripts/apply-migrations.sh
+
+      - name: Verify Goals schema reached production
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 <<'SQL'
+          do $$
+          begin
+            if to_regclass('public.study_goals') is null then
+              raise exception 'missing public.study_goals';
+            end if;
+            if to_regclass('public.study_goal_revisions') is null then
+              raise exception 'missing public.study_goal_revisions';
+            end if;
+            if to_regclass('public.study_goal_targets') is null then
+              raise exception 'missing public.study_goal_targets';
+            end if;
+            if to_regclass('public.study_goal_daily_allocations') is null then
+              raise exception 'missing public.study_goal_daily_allocations';
+            end if;
+            if not exists (select 1 from pg_proc where proname = 'create_study_goal') then
+              raise exception 'missing create_study_goal RPC';
+            end if;
+            if not exists (select 1 from pg_proc where proname = 'revise_study_goal') then
+              raise exception 'missing revise_study_goal RPC';
+            end if;
+          end $$;
+          SQL
