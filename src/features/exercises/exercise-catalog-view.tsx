@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { setExercise } from "./exercise-actions";
 import type { ExerciseStatus } from "./exercise-evidence";
 import type { ExerciseView } from "./exercise-view";
@@ -68,6 +69,7 @@ export function ExerciseCatalogView({
         </p>
       ) : null}
 
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
       {exercises.map((exercise) => {
         const entry = progress[exercise.id] as Entry | undefined;
         const status: ExerciseStatus | "none" = entry ? entry.status : "none";
@@ -77,7 +79,10 @@ export function ExerciseCatalogView({
         return (
           <article
             key={exercise.id}
-            className="grid gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm"
+            className={cn(
+              "grid min-w-0 gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm",
+              isOpen && "lg:col-span-2"
+            )}
             data-testid="exercise-card"
             data-exercise-id={exercise.id}
           >
@@ -228,6 +233,7 @@ export function ExerciseCatalogView({
           </article>
         );
       })}
+      </div>
 
       {!authenticated ? (
         <p className="text-xs font-medium text-slate-500">Sign in to save exercise progress across sessions.</p>
