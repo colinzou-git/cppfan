@@ -29,3 +29,20 @@ const TAG_SET: ReadonlySet<string> = new Set(CODE_ERROR_TAGS);
 export function isCodeErrorTag(value: unknown): value is CodeErrorTag {
   return typeof value === "string" && TAG_SET.has(value);
 }
+
+/** Where a tag came from. Deterministic sources outrank advisory AI inference. */
+export type CodeTagSource = "compiler" | "runtime" | "test" | "ai";
+
+export type CodeTagConfidence = "low" | "medium" | "high";
+
+/**
+ * One classified error tag for a Code Lab attempt (#412). Deterministic
+ * classifications (compiler/runtime/test) are derived from real runner/test
+ * output; AI classifications stay weak evidence (#410).
+ */
+export type CodeTagClassification = {
+  tag: CodeErrorTag;
+  source: CodeTagSource;
+  confidence: CodeTagConfidence;
+  message: string;
+};

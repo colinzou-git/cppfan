@@ -95,6 +95,22 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Deterministic error tagging (Phase 3.3)
+
+Run/Test results carry **deterministic** error-tag classifications (#412) derived
+from real compiler/runtime/test output — **not AI**. Common cases are mapped to
+stable `CodeErrorTag` values: missing `;`, undeclared name, missing include, type
+mismatch, missing return (compiler); ASan/UBSan/segfault out-of-bounds (runtime);
+and skill-aware visible-test failures (binary-search boundary, graph visited, DP
+base case, array off-by-one). The `CodeErrorTagPanel` shows tag + source +
+confidence + explanation under the output and test panels.
+
+- Classifiers are pattern-based and **never throw** on unrecognised output.
+- Deterministic tags outrank AI tags; AI tags from #410 remain **weak evidence**.
+- `code-attempt-evidence.ts` provides skill-event *drafts* for later
+  remediation/mastery phases — this phase makes **no mastery-scoring change** and
+  does not persist tags.
+
 ## Boundary-case checklists (Phase 3.2)
 
 A Code Lab item can show a collapsible **boundary-case checklist** of edge cases

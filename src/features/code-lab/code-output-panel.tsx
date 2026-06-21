@@ -1,6 +1,7 @@
 "use client";
 
 import type { CodeRunResult } from "./code-lab-types";
+import { CodeErrorTagPanel } from "./code-error-tag-panel";
 
 const STATUS_LABELS: Record<CodeRunResult["status"], string> = {
   success: "Ran successfully",
@@ -51,6 +52,8 @@ export function CodeOutputPanel({ result }: { result: CodeRunResult | null }) {
       {!result.compileOutput && !result.stdout && !result.stderr ? (
         <p className="text-xs text-slate-500">No output was produced.</p>
       ) : null}
+
+      <CodeErrorTagPanel classifications={result.classifications} />
     </section>
   );
 }
