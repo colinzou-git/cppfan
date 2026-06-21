@@ -1,0 +1,37 @@
+name: Supabase production migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/apply-migrations.sh"
+      - ".github/workflows/supabase-production-migrations.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-production-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply production Supabase migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Apply all migrations to production Supabase
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::notice::SUPABASE_DB_URL is not configured as a GitHub Actions secret; skipping production migration."
+            echo "Add the Supabase session-pooler Postgres URI as a repository Actions secret named SUPABASE_DB_URL, then re-run this workflow."
+            exit 0
+          fi
+          bash scripts/apply-migrations.sh
