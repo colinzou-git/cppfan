@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rowsToSelfScores } from "@/features/interview/rubric-store";
+import { rowsToRubricScores, rowsToSelfScores } from "@/features/interview/rubric-store";
 
 describe("rowsToSelfScores (#179)", () => {
   it("maps valid rows to self RubricScores", () => {
@@ -28,5 +28,24 @@ describe("rowsToSelfScores (#179)", () => {
     ]);
     expect(scores.find((s) => s.criterion === "testing")?.score).toBe(4);
     expect(scores.find((s) => s.criterion === "optimization")?.score).toBe(0);
+  });
+
+  it("preserves peer and automated sources when reading all rubric evidence", () => {
+    const scores = rowsToRubricScores([
+      { criterion: "testing", score: 3, source: "peer" },
+      { criterion: "complexity", score: 4, source: "automated" },
+      { criterion: "communication", score: 2, source: "self" }
+    ]);
+    expect(scores).toEqual([
+      { criterion: "testing", score: 3, source: "peer" },
+      { criterion: "complexity", score: 4, source: "automated" },
+      { criterion: "communication", score: 2, source: "self" }
+    ]);
+  });
+
+  it("falls back to the requested source for legacy rows", () => {
+    expect(rowsToRubricScores([{ criterion: "testing", score: 2 }], "automated")).toEqual([
+      { criterion: "testing", score: 2, source: "automated" }
+    ]);
   });
 });
