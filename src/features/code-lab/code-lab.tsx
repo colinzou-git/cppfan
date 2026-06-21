@@ -228,7 +228,11 @@ export function CodeLab({
           </div>
         ) : null}
       </CardHeader>
-      <CardContent className="grid gap-3">
+      {/* On xl+, editor/input/actions on the left and output/tests/AI feedback on
+          the right; one vertical column on mobile/iPad. min-w-0 keeps Monaco and
+          long output from overflowing the card. */}
+      <CardContent className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)] xl:items-start">
+        <section className="grid min-w-0 gap-3">
         <CodeEditor value={source} onChange={setSource} label="C++ source code" />
 
         {config.mode === "stdin" ? (
@@ -291,15 +295,18 @@ export function CodeLab({
             defaultExpanded={suggestChecklist}
           />
         ) : null}
+        </section>
 
-        <CodeOutputPanel result={runResult} />
-        <TestResultsPanel result={testResult} />
-        <ErrorRemediationPanel recommendation={remediation} onAction={handleRemediationAction} />
-        {/* Avoid competing cards: show the scaffold suggestion only when there is
-            no error-pattern remediation to act on. */}
-        {remediation ? null : <ScaffoldRecommendationCard recommendation={scaffold} />}
-        <AiCodeReviewPanel review={review} pending={busy === "review" || busy === "explain"} />
-        {traceEnabled ? <AiTracePanel trace={trace} pending={tracePending} /> : null}
+        <aside className="grid min-w-0 gap-3 xl:max-h-[calc(100vh-12rem)] xl:overflow-auto xl:pr-1">
+          <CodeOutputPanel result={runResult} />
+          <TestResultsPanel result={testResult} />
+          <ErrorRemediationPanel recommendation={remediation} onAction={handleRemediationAction} />
+          {/* Avoid competing cards: show the scaffold suggestion only when there is
+              no error-pattern remediation to act on. */}
+          {remediation ? null : <ScaffoldRecommendationCard recommendation={scaffold} />}
+          <AiCodeReviewPanel review={review} pending={busy === "review" || busy === "explain"} />
+          {traceEnabled ? <AiTracePanel trace={trace} pending={tracePending} /> : null}
+        </aside>
       </CardContent>
     </Card>
   );

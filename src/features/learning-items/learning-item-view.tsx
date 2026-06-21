@@ -9,6 +9,7 @@ import { ParsonsExercise } from "./parsons-exercise";
 import { CompletionExercise } from "./completion-exercise";
 import { MathVisualization } from "./math-visualization";
 import { MaybeCodeLab } from "@/features/code-lab/maybe-code-lab";
+import { isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
 import {
   getPublicCompletionBlanksForItem,
@@ -45,6 +46,9 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   const parsonsBlocks = isParsons ? getPublicParsonsBlocksForItem(item.id) : [];
   const isCompletion = item.type === "completion";
   const completionBlanks = isCompletion ? getPublicCompletionBlanksForItem(item.id) : [];
+  // Code Lab items use a side-by-side desktop layout: lesson/prompt on the left,
+  // the Code Lab on the right (#431). Other items stay a single reading column.
+  const hasCodeLab = isCodeLabItem(item.id);
 
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
@@ -63,63 +67,79 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
           {item.difficulty} · about {item.estimated_minutes} min
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-5">
-        <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-800">
-          <FormattedContent content={item.prompt} />
-        </div>
-
-        <MathVisualization itemId={item.id} />
-
-        <MaybeCodeLab itemId={item.id} />
-
-        {hasChoices ? (
-          <div data-testid="learning-item-choices">
-            <AnswerForm itemId={item.id} choices={choices} explanation={item.explanation ?? null} />
+      <CardContent
+        className={
+          hasCodeLab
+            ? "grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(34rem,1.1fr)] xl:items-start"
+            : "grid gap-5"
+        }
+      >
+        <section className="grid min-w-0 gap-5">
+          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-800">
+            <FormattedContent content={item.prompt} />
           </div>
-        ) : null}
 
-        {isParsons && parsonsBlocks.length > 0 ? (
-          <ParsonsExercise itemId={item.id} blocks={parsonsBlocks} />
-        ) : null}
+          <MathVisualization itemId={item.id} />
 
-        {isCompletion && completionBlanks.length > 0 ? (
-          <CompletionExercise itemId={item.id} blanks={completionBlanks} />
-        ) : null}
+          {hasChoices ? (
+            <div data-testid="learning-item-choices">
+              <AnswerForm itemId={item.id} choices={choices} explanation={item.explanation ?? null} />
+            </div>
+          ) : null}
 
-        {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
+          {isParsons && parsonsBlocks.length > 0 ? (
+            <ParsonsExercise itemId={item.id} blocks={parsonsBlocks} />
+          ) : null}
 
-        {item.explanation && !isLesson && !hasChoices ? (
-          <RevealExplanation explanation={item.explanation} />
-        ) : null}
+          {isCompletion && completionBlanks.length > 0 ? (
+            <CompletionExercise itemId={item.id} blanks={completionBlanks} />
+          ) : null}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ItemHelpLinks
-            context={{
-              schemaVersion: 1,
-              sourceKind: isParsons || isCompletion ? "guided_exercise" : isLesson ? "learning_item" : "quiz_question",
-              sourceId: item.id,
-              sourceVersion: item.updated_at ?? "1",
-              title: item.title,
-              prompt: item.prompt,
-              topic: skills.map((skill) => skill.skill_id).join(", ") || undefined,
-              instructions: isParsons
-                ? parsonsBlocks.map((block) => `Available code line: ${block.content}`)
-                : isCompletion
-                  ? completionBlanks.map((blank) => `Fill blank ${blank.position}.`)
-                  : undefined,
-              visibleChoices: choices.map((choice) => choice.content),
-              visibleFeedback: isLesson ? item.explanation ?? undefined : undefined,
-              assessmentState: isLesson ? "instructional" : "unanswered",
-              revealPolicy: isLesson ? "normal" : "hint_only",
-              metadata: {
-                itemType: item.type,
-                difficulty: item.difficulty,
-                estimatedMinutes: item.estimated_minutes
-              }
-            }}
-          />
-          {isReviewEligibleType(item.type) ? <AddToReviewButton itemId={item.id} /> : null}
-        </div>
+          {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
+
+          {item.explanation && !isLesson && !hasChoices ? (
+            <RevealExplanation explanation={item.explanation} />
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <ItemHelpLinks
+              context={{
+                schemaVersion: 1,
+                sourceKind: isParsons || isCompletion ? "guided_exercise" : isLesson ? "learning_item" : "quiz_question",
+                sourceId: item.id,
+                sourceVersion: item.updated_at ?? "1",
+                title: item.title,
+                prompt: item.prompt,
+                topic: skills.map((skill) => skill.skill_id).join(", ") || undefined,
+                instructions: isParsons
+                  ? parsonsBlocks.map((block) => `Available code line: ${block.content}`)
+                  : isCompletion
+                    ? completionBlanks.map((blank) => `Fill blank ${blank.position}.`)
+                    : undefined,
+                visibleChoices: choices.map((choice) => choice.content),
+                visibleFeedback: isLesson ? item.explanation ?? undefined : undefined,
+                assessmentState: isLesson ? "instructional" : "unanswered",
+                revealPolicy: isLesson ? "normal" : "hint_only",
+                metadata: {
+                  itemType: item.type,
+                  difficulty: item.difficulty,
+                  estimatedMinutes: item.estimated_minutes
+                }
+              }}
+            />
+            {isReviewEligibleType(item.type) ? <AddToReviewButton itemId={item.id} /> : null}
+          </div>
+        </section>
+
+        {/* MaybeCodeLab renders once. On xl it sits in a sticky right pane next to
+            the lesson; on mobile it stacks below. Non-code items render nothing. */}
+        {hasCodeLab ? (
+          <aside className="min-w-0 xl:sticky xl:top-6">
+            <MaybeCodeLab itemId={item.id} />
+          </aside>
+        ) : (
+          <MaybeCodeLab itemId={item.id} />
+        )}
       </CardContent>
     </Card>
   );

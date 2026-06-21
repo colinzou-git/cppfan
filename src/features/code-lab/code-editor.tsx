@@ -26,7 +26,7 @@ export function CodeEditor({ value, onChange, label, readOnly = false }: CodeEdi
   const labelId = useId();
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <label id={labelId} className="text-xs font-bold uppercase tracking-wide text-slate-600">
         {label}
       </label>
