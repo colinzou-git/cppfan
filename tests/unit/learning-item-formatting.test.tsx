@@ -39,6 +39,20 @@ describe("learning item formatted content (#332)", () => {
     expect(within(explanation).getByText("return 0;", { selector: "code" })).toBeTruthy();
   });
 
+  it("normalizes backend-escaped Markdown line breaks before parsing", () => {
+    const escapedPrompt =
+      'Example:\\n\\n```cpp\\n#include <iostream>\\nint main() {\\n  std::cout << "Hello";\\n  return 0;\\n}\\n```';
+
+    render(<FormattedContent content={escapedPrompt} />);
+
+    expect(screen.getByText("Example:")).toBeTruthy();
+
+    const codeBlock = screen.getByTestId("formatted-code-block");
+    expect(codeBlock.querySelector("pre code")?.textContent).toContain("#include <iostream>");
+    expect(codeBlock.textContent).not.toContain("\\n");
+    expect(codeBlock.textContent).not.toContain("```cpp");
+  });
+
   it("keeps raw HTML inert while formatting supported Markdown", () => {
     const { container } = render(<FormattedContent content={'<script>alert("x")</script>'} />);
 
