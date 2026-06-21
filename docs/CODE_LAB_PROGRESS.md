@@ -18,12 +18,12 @@ _Last updated: 2026-06-21 — by the /loop driver._
 2. **#408 — Phase 2 AI trace** — **DONE**: PR #419 → `ca5a191`; closed w/ audit.
 3. **Phase 3 wave (#410–#418)** — new; work in phase order. #410 (structured AI
    feedback + stable error-tag schema) is the foundation many others build on:
-   - #410 Phase 3.1 Structured Code Lab AI feedback + error-tag schema — **PR OPEN**
-     (`feat/code-lab-phase3-1`): new `code-error-tags`, `code-feedback-{types,
-     prompts,parser,evidence,panel}`; Review + Trace now return
-     `StructuredCodeFeedback` (weak evidence, stable tags, graceful fallback).
-     Local: 826 unit tests pass, build/lint/typecheck green, e2e chromium 4/4.
-   - #411 3.2 Boundary-case checklist
+   - #410 Phase 3.1 Structured Code Lab AI feedback + error-tag schema — **DONE**:
+     PR #420 → `c1520a5`; closed with final audit.
+   - #411 3.2 Boundary-case checklist — **PR OPEN** (`feat/code-lab-phase3-2`):
+     new `boundary-checklist-{types,data,service,state}` + panel; resolves from
+     skillTags + `boundaryChecklistIds`; AI-free; auto-expands on
+     `try_boundary_case_checklist`. 840 unit tests pass; e2e chromium green.
    - #412 3.3 Deterministic error tagging MVP (depends on #410 schema)
    - #413 3.4 Prediction-before-run mode
    - #414 3.5 Error-pattern remediation recommendations (depends on tagging)

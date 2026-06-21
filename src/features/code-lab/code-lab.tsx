@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedContent } from "@/features/learning-items/formatted-content";
 import type {
@@ -16,6 +16,8 @@ import { TestResultsPanel } from "./test-results-panel";
 import { AiCodeReviewPanel } from "./ai-code-review-panel";
 import { TraceControls, type TraceSource } from "./trace-controls";
 import { AiTracePanel } from "./ai-trace-panel";
+import { BoundaryChecklistPanel } from "./boundary-checklist";
+import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
 import type { CodeTraceResult } from "./code-trace-types";
 import {
   reviewCodeRequest,
@@ -44,6 +46,10 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
   const testResultRef = useRef<CodeTestResult | null>(null);
 
   const traceEnabled = config.traceEnabled !== false;
+  const checklists = useMemo(() => getBoundaryChecklistsForCodeLab(config), [config]);
+  const suggestChecklist =
+    review?.nextAction === "try_boundary_case_checklist" ||
+    trace?.feedback?.nextAction === "try_boundary_case_checklist";
   const hasRunError =
     runResult !== null &&
     runResult.status !== "success" &&
@@ -152,6 +158,14 @@ export function CodeLab({ itemId, config }: { itemId: string; config: LearningIt
             onTrace={handleTrace}
             busy={tracePending}
             disabled={busy !== null || source.trim().length === 0}
+          />
+        ) : null}
+
+        {checklists.length > 0 ? (
+          <BoundaryChecklistPanel
+            checklists={checklists}
+            onUseSampleInput={config.mode === "stdin" ? setStdin : undefined}
+            defaultExpanded={suggestChecklist}
           />
         ) : null}
 

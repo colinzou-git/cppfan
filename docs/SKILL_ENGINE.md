@@ -270,7 +270,9 @@ shared `MaybeCodeLab` mount renders the editor/runner only for items that opt in
 no debugger is involved. See [CODE_LAB.md](CODE_LAB.md). Code Lab AI Review/Trace
 emit a stable, machine-validated error-tag schema marked `weak_ai_inference` —
 future remediation/mastery work may consume these tags as **weak evidence only**,
-never overriding deterministic compile/test outcomes.
+never overriding deterministic compile/test outcomes. Code Lab items can also show
+skill-resolved **boundary-case checklists** (#411) — strategy hints that do not
+affect mastery scoring.
 
 Each learning item should link to one or more skills.
 

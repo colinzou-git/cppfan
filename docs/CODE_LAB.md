@@ -95,6 +95,21 @@ AI Review and AI Trace return **machine-validated `StructuredCodeFeedback`**
 - The error-tag vocabulary is intentionally small and stable (`code-error-tags.ts`)
   so later remediation/mastery phases can consume it; never renumber a tag.
 
+## Boundary-case checklists (Phase 3.2)
+
+A Code Lab item can show a collapsible **boundary-case checklist** of edge cases
+to test (e.g. empty input, one element, target before first, lo/hi always
+shrink). It is **AI-free** and does **not** affect mastery scoring — items are
+strategy hints, not grading criteria.
+
+- Checklists resolve from the item's `skillTags` and any explicit
+  `boundaryChecklistIds` (supplement, de-duplicated); set
+  `boundaryChecklistsEnabled: false` to hide them. Data lives in
+  `boundary-checklist-data.ts` (keep the curated set small).
+- An item with `sampleInput` offers a **Use as stdin** button.
+- When structured AI feedback (#410) recommends
+  `nextAction: try_boundary_case_checklist`, the panel auto-expands.
+
 ## Hidden tests
 
 Visible tests may show their stdin/expected output. Hidden tests live in the
