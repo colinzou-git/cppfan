@@ -1,12 +1,16 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, Fragment, type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { buildAiChatStarterPrompt } from "./ai-chat-context";
 import { DictationControl } from "./dictation-control";
 import { listThreads, runTutor } from "./tutor-transport";
 import { tutorUrl } from "./tutor-url";
 import type { AiChatContext, AiChatMessageView, AiChatStreamEvent } from "./ai-chat-types";
+
+type TutorMessageBlock =
+  | { type: "paragraph"; lines: string[] }
+  | { type: "table"; header: string[]; rows: string[][] };
 
 function localEntry(role: "user" | "assistant", requestId: string, content: string): AiChatMessageView {
   return {
@@ -20,6 +24,167 @@ function localEntry(role: "user" | "assistant", requestId: string, content: stri
     model: null,
     createdAt: new Date().toISOString()
   };
+}
+
+function splitTableCells(line: string) {
+  const trimmed = line.trim();
+  const withoutLeadingPipe = trimmed.startsWith("|") ? trimmed.slice(1) : trimmed;
+  const withoutTrailingPipe = withoutLeadingPipe.endsWith("|")
+    ? withoutLeadingPipe.slice(0, -1)
+    : withoutLeadingPipe;
+  return withoutTrailingPipe.split("|").map((cell) => cell.trim());
+}
+
+function isTableRow(line: string) {
+  const trimmed = line.trim();
+  return trimmed.startsWith("|") && trimmed.endsWith("|") && splitTableCells(trimmed).length > 1;
+}
+
+function isTableSeparator(line: string) {
+  if (!isTableRow(line)) return false;
+  return splitTableCells(line).every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function isTableStart(lines: string[], index: number) {
+  if (!isTableRow(lines[index]) || !isTableSeparator(lines[index + 1] ?? "")) return false;
+  return splitTableCells(lines[index]).length === splitTableCells(lines[index + 1]).length;
+}
+
+function normalizeTableCells(cells: string[], expected: number) {
+  const normalized = cells.slice(0, expected);
+  while (normalized.length < expected) normalized.push("");
+  return normalized;
+}
+
+function parseTutorMessageBlocks(content: string): TutorMessageBlock[] {
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const blocks: TutorMessageBlock[] = [];
+  let paragraph: string[] = [];
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    blocks.push({ type: "paragraph", lines: paragraph });
+    paragraph = [];
+  };
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (isTableStart(lines, index)) {
+      flushParagraph();
+      const header = splitTableCells(line);
+      const rows: string[][] = [];
+      index += 2;
+      while (index < lines.length && isTableRow(lines[index])) {
+        rows.push(normalizeTableCells(splitTableCells(lines[index]), header.length));
+        index += 1;
+      }
+      index -= 1;
+      blocks.push({ type: "table", header, rows });
+    } else if (line.trim()) {
+      paragraph.push(line);
+    } else {
+      flushParagraph();
+    }
+  }
+
+  flushParagraph();
+  return blocks;
+}
+
+function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const tokenPattern = /(`[^`]+`|\*\*[^*]+\*\*)/g;
+  let lastIndex = 0;
+  let tokenIndex = 0;
+
+  for (const match of text.matchAll(tokenPattern)) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    const token = match[0];
+    const key = `${keyPrefix}-${tokenIndex}`;
+    if (token.startsWith("`")) {
+      nodes.push(
+        <code key={key} className="rounded bg-slate-200 px-1 py-0.5 font-mono text-[0.92em] text-slate-950">
+          {token.slice(1, -1)}
+        </code>
+      );
+    } else {
+      nodes.push(
+        <strong key={key} className="font-black text-slate-950">
+          {renderInlineMarkdown(token.slice(2, -2), `${key}-strong`)}
+        </strong>
+      );
+    }
+    lastIndex = match.index + token.length;
+    tokenIndex += 1;
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
+function TutorParagraph({ lines, blockIndex }: { lines: string[]; blockIndex: number }) {
+  return (
+    <p className="whitespace-pre-wrap break-words leading-6">
+      {lines.map((line, lineIndex) => (
+        <Fragment key={`${blockIndex}-${lineIndex}`}>
+          {lineIndex > 0 ? "\n" : null}
+          {renderInlineMarkdown(line, `${blockIndex}-${lineIndex}`)}
+        </Fragment>
+      ))}
+    </p>
+  );
+}
+
+function TutorMarkdownTable({ header, rows, blockIndex }: { header: string[]; rows: string[][]; blockIndex: number }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-slate-300 bg-white shadow-sm">
+      <table className="min-w-full border-collapse text-left text-sm text-slate-900">
+        <thead className="bg-slate-50 text-slate-950">
+          <tr>
+            {header.map((cell, cellIndex) => (
+              <th
+                key={`h-${blockIndex}-${cellIndex}`}
+                scope="col"
+                className="border-b border-r border-slate-300 px-3 py-2 align-top font-black last:border-r-0"
+              >
+                {renderInlineMarkdown(cell, `h-${blockIndex}-${cellIndex}`)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={`r-${blockIndex}-${rowIndex}`} className="odd:bg-white even:bg-slate-50/70">
+              {row.map((cell, cellIndex) => (
+                <td
+                  key={`c-${blockIndex}-${rowIndex}-${cellIndex}`}
+                  className="border-b border-r border-slate-200 px-3 py-2 align-top last:border-r-0 last:border-b-0"
+                >
+                  {renderInlineMarkdown(cell, `c-${blockIndex}-${rowIndex}-${cellIndex}`)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export function TutorMessageContent({ content }: { content: string }) {
+  const blocks = parseTutorMessageBlocks(content);
+
+  return (
+    <div className="space-y-3">
+      {blocks.map((block, blockIndex) =>
+        block.type === "table" ? (
+          <TutorMarkdownTable key={blockIndex} header={block.header} rows={block.rows} blockIndex={blockIndex} />
+        ) : (
+          <TutorParagraph key={blockIndex} lines={block.lines} blockIndex={blockIndex} />
+        )
+      )}
+    </div>
+  );
 }
 
 export function TutorConversation({
@@ -156,7 +321,7 @@ export function TutorConversation({
           {messages.map((entry) => (
             <article key={`${entry.role}-${entry.requestId}`} className={`max-w-[94%] rounded-xl p-4 text-sm ${entry.role === "user" ? "ml-auto bg-blue-700 text-white" : "bg-slate-100 text-slate-900"}`}>
               <p className="mb-1 text-xs font-black uppercase tracking-wide opacity-70">{entry.role === "user" ? "You" : "AI tutor"}</p>
-              <p className="whitespace-pre-wrap break-words">{entry.content}</p>
+              {entry.role === "assistant" ? <TutorMessageContent content={entry.content} /> : <p className="whitespace-pre-wrap break-words">{entry.content}</p>}
               {entry.status !== "complete" ? <p className="mt-2 text-xs font-semibold opacity-70">{entry.status}</p> : null}
             </article>
           ))}
