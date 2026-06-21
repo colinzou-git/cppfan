@@ -3,6 +3,7 @@
 // out, offline, and pre-migration. Persisted results are read per-user via RLS.
 import { createClient } from "@/lib/supabase/server";
 import { getLearningItemById } from "@/features/learning-items/learning-item-seed";
+import { orderPublicChoices } from "@/features/learning-items/choice-ordering";
 import { getPlacementModules, MAX_PLACEMENT_QUESTION_COUNT } from "./placement-seed";
 import type { PlacementLevel } from "./placement-scoring";
 import type { PublicLearningItemChoice } from "@/features/learning-items/learning-item-types";
@@ -43,7 +44,7 @@ export function getPlacementAssessment(): PlacementQuestion[] {
         moduleId: module.module_id,
         moduleTitle: module.title,
         prompt: details.item.prompt,
-        choices: details.choices
+        choices: orderPublicChoices(details.choices, `placement:${itemId}`)
       });
       if (questions.length >= MAX_PLACEMENT_QUESTION_COUNT) {
         return questions;
