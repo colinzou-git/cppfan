@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
 import { submitJudgeAttempt } from "./judge-actions";
+import { summarizeSessionReview } from "./session-review";
+import { SessionReview } from "./session-review-view";
 import {
   SESSION_DURATIONS,
   advancePhase,
@@ -91,6 +93,9 @@ export function SessionRunner({
   const [session, setSession] = useState<SessionState>(initialState);
   const [notice, setNotice] = useState<string | null>(null);
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null);
+  // Count distinct code-draft saves as a proxy for "meaningful code revisions"
+  // surfaced in the completed-session review.
+  const [codeRevisions, setCodeRevisions] = useState(0);
   const [, startSaveTransition] = useTransition();
   const [isJudgePending, startJudgeTransition] = useTransition();
 
@@ -283,7 +288,13 @@ export function SessionRunner({
                 const value = event.currentTarget.value;
                 setSession((prev) => updateSessionEvidence(prev, { codeDraft: value }));
               }}
-              onBlur={(event) => apply(updateSessionEvidence(session, { codeDraft: event.currentTarget.value }))}
+              onBlur={(event) => {
+                const value = event.currentTarget.value;
+                if (value !== session.codeDraft) {
+                  setCodeRevisions((count) => count + 1);
+                }
+                apply(updateSessionEvidence(session, { codeDraft: value }));
+              }}
               data-testid="session-code-draft"
             />
           </label>
@@ -355,6 +366,20 @@ export function SessionRunner({
               ? `Session paused - current phase: ${PHASE_LABEL[phase]}`
               : `Current phase: ${PHASE_LABEL[phase]}`}
       </p>
+
+      {session.status === "completed" ? (
+        <SessionReview
+          summary={summarizeSessionReview({
+            phaseElapsedSeconds: session.phaseElapsedSeconds,
+            elapsedSeconds: session.elapsedSeconds,
+            durationMinutes: session.durationMinutes,
+            testNotes: session.testNotes,
+            codeDraft: session.codeDraft,
+            codeRevisionCount: codeRevisions,
+            judge: null
+          })}
+        />
+      ) : null}
 
       {canRevealSolution(session) ? (
         <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-900" data-testid="session-reveal">
