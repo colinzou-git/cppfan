@@ -20,6 +20,25 @@ describe("GoalForm wizard", () => {
     await waitFor(() => expect(window.localStorage.getItem(DRAFT_KEY)).toContain('"step":2'));
   });
 
+  it("lets recommended goal cards toggle into the customized target list", () => {
+    render(<GoalForm recommendedSkillIds={["cpp.program_basics.structure"]} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByText("0 of 1 recommended target selected")).toBeVisible();
+
+    const recommendedGoal = screen.getByRole("button", { name: /Program structure and main/i });
+    expect(recommendedGoal).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(recommendedGoal);
+    expect(recommendedGoal).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("1 of 1 recommended target selected")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    const skills = screen.getByLabelText("Skills");
+    const option = skills.querySelector('option[value="cpp.program_basics.structure"]') as HTMLOptionElement;
+    expect(option.selected).toBe(true);
+  });
+
   it("restores a saved draft without overwriting it during hydration", async () => {
     window.localStorage.setItem(DRAFT_KEY, JSON.stringify({
       step: 3,
