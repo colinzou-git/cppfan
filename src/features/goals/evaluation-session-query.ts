@@ -19,9 +19,15 @@ const empty = (state: GoalEvaluationView["state"], authenticated: boolean): Goal
   findings: []
 });
 
+const ready = (authenticated: boolean): GoalEvaluationView => ({
+  ...empty("ready", authenticated),
+  algorithmVersion: "goal-evaluation-v1",
+  itemPoolVersion: 1
+});
+
 export async function getGoalEvaluationView(): Promise<GoalEvaluationView> {
   const supabase = await createClient();
-  if (!supabase) return empty("unconfigured", false);
+  if (!supabase) return ready(false);
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) return empty("signed_out", false);
 
@@ -33,11 +39,11 @@ export async function getGoalEvaluationView(): Promise<GoalEvaluationView> {
     .limit(1)
     .maybeSingle();
   if (sessionResult.error) {
-    if (isMissingObjectError(sessionResult.error)) return empty("unavailable", true);
+    if (isMissingObjectError(sessionResult.error)) return ready(true);
     logConfiguredFailure("goal-evaluation-session", sessionResult.error);
     return empty("error", true);
   }
-  if (!sessionResult.data) return empty("ready", true);
+  if (!sessionResult.data) return ready(true);
 
   const item = sessionResult.data.current_item_id
     ? getGoalEvaluationItem(String(sessionResult.data.current_item_id))
