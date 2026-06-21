@@ -91,6 +91,26 @@ int main() {
       }
     ],
     skillTags: ["cpp.program_basics.statements_comments"]
+  },
+  "dsa.arrays.traversal.code_reading": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Print the numbers 1, 2, 3 — one per line — by traversing them in order.",
+    starterCode: `#include <iostream>
+
+int main() {
+  std::cout << "1" << "\\n";
+  std::cout << "2" << "\\n";
+  std::cout << "3" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Prints every element", expectedStdout: "1\n2\n3\n", matcher: "exact" },
+      { name: "First and last element boundary", expectedStdout: "1\n2\n3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.traversal"]
   }
 };
 

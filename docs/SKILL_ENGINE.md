@@ -275,7 +275,9 @@ skill-resolved **boundary-case checklists** (#411) — strategy hints that do no
 affect mastery scoring. An optional **prediction-before-run** mode (#413) lets
 items ask learners to predict stdout / failing tests before running; predictions
 are compared to actual results and emit skill-event *drafts* only (no mastery
-change yet).
+change yet). Deterministic error tags can drive one explainable, dismissible
+**remediation recommendation** (#414) that the daily plan may include **after**
+due reviews — it never displaces due reviews and never hard-locks.
 
 Each learning item should link to one or more skills.
 
