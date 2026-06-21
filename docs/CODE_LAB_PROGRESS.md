@@ -1,86 +1,54 @@
 # Code Lab build progress (resume file)
 
-This file is the source of truth for the autonomous Code Lab build loop so work
-can resume cleanly after a usage-limit pause. Update it before stopping.
+This file tracked the autonomous Code Lab build loop. **The roadmap is complete** —
+all Code Lab issues are implemented, merged to `main`, and closed with final
+closure audits. No open Code Lab issues or PRs remain.
 
 _Last updated: 2026-06-21 — by the /loop driver._
 
-## Active loop
+## Status: COMPLETE ✅
 
-- Session cron `8575493c` runs every 30 min: merge green PRs, advance to the
-  next open issue in dependency order, keep this file current.
-- Auto-merge policy: squash-merge a `feat/*` PR once **all** required checks are
-  green; then post a `## Final closure audit` and close the issue it completes.
+| Issue | Phase | PR | Merge commit |
+|---|---|---|---|
+| #407 | 1 — Code Lab (editor, runner, tests, AI review) | #409 | `e95cad6` |
+| #408 | 2 — AI execution trace | #419 | `ca5a191` |
+| #410 | 3.1 — Structured AI feedback + error-tag schema | #420 | `c1520a5` |
+| #411 | 3.2 — Boundary-case checklists | #421 | `5692da6` |
+| #412 | 3.3 — Deterministic error tagging MVP | #422 | `4d3b517` |
+| #413 | 3.4 — Prediction-before-run mode | #423 | `a5d5924` |
+| #414 | 3.5 — Error-pattern remediation recommendations | #424 | `2a321e7` |
+| #415 | 3.6 — Adaptive scaffold selector | #425 | `7ea6d35` |
+| #416 | 3.7 — Debugging skill lane (code-capable) | #426 | `2921dfb` |
+| #417 | 3.8 — Cross-context mastery rules | #427 | `f280452` |
+| #418 | 3.9 — Code Lab in capstone milestones | #428 | `fe6469b` |
 
-## Issue order
+Each issue was closed with a `## Final closure audit` mapping every acceptance
+criterion to evidence on `main`.
 
-1. **#407 — Phase 1 Code Lab** — **DONE**: PR #409 → `e95cad6`; closed w/ audit.
-2. **#408 — Phase 2 AI trace** — **DONE**: PR #419 → `ca5a191`; closed w/ audit.
-3. **Phase 3 wave (#410–#418)** — new; work in phase order. #410 (structured AI
-   feedback + stable error-tag schema) is the foundation many others build on:
-   - #410 Phase 3.1 Structured Code Lab AI feedback + error-tag schema — **DONE**:
-     PR #420 → `c1520a5`; closed with final audit.
-   - #411 3.2 Boundary-case checklist — **DONE**: PR #421 → `5692da6`; closed.
-   - #412 3.3 Deterministic error tagging MVP — **DONE**: PR #422 → `4d3b517`.
-   - #413 3.4 Prediction-before-run mode — **DONE**: PR #423 → `a5d5924`.
-   - #414 3.5 Error-pattern remediation recommendations — **DONE**: PR #424 → `2a321e7`.
-   - #415 3.6 Adaptive scaffold selector — **DONE**: PR #425 → `7ea6d35`.
-   - #416 3.7 Debugging skill lane — **DONE**: PR #426 → `2921dfb`.
-   - #417 3.8 Cross-context mastery rules — **DONE**: PR #427 → `f280452`.
-   - #418 3.9 Code Lab in capstone milestones — **PR OPEN (final issue)**
-     (`feat/code-lab-phase3-9`): 2 milestones (csv.m1, maze.m2) in-app via Code
-     Lab keyed by milestone id; adapter + completion-gating service + CodeLabMilestone;
-     completion requires passing tests; Codespaces/manual unchanged. 943 unit
-     tests pass; e2e chromium green.
-   Read each issue body before starting; respect stated dependencies.
+## If new issues appear
 
-## Current state
+The loop (session cron `8575493c`, every 30 min) keeps checking `gh issue list`.
+For any new issue it should: read the issue body + relevant specs/docs, implement
+on a `feat/*` branch, run `pnpm lint/typecheck/test/build` (plus
+`verify:interview-catalog`/`check:links` when content/catalog changes), open a PR
+with `Completion status: partial` + `Part of #N`, auto-merge on green, then close
+with a final audit.
 
-- **#408 Phase 2 (AI trace)** — implemented on `feat/code-lab-phase2`; PR opened.
-  - Added: `code-trace-types.ts`, `code-trace-prompts.ts`, `code-trace-service.ts`,
-    `trace-controls.tsx`, `ai-trace-panel.tsx`, `app/api/code/trace/route.ts`.
-  - Updated: `code-lab.tsx` (Trace control + input selector + panel),
-    `code-lab-client.ts` (`traceCodeRequest`). Trace shows unless
-    `traceEnabled: false`; degrades to unavailable when no AI provider.
-  - Reuses `completeAiResponse`; compile errors explained as blockers (no fake
-    runtime steps); disclaimer on every successful trace; route resolves only
-    VISIBLE test data so hidden I/O never reaches the prompt/response.
-  - Local: lint/typecheck/build green; **812 unit tests pass**; e2e green —
-    phase 1 9/9 and trace 3/3 across chromium/iphone/ipad.
-  - Next: wait for App checks green on the #408 PR, then auto-merge and close
-    #408 with a final audit.
-
-### (history) PR #409 / #407 — merged
-
-- **PR #409** (`feat/code-lab-phase1`) implemented all of #407 Phase 1.
-  - Green: pr-declaration-check, DB migrations, Authenticated integration,
-    C++ exercises, Vercel.
-  - **Was red:** App checks → e2e `code-lab.spec.ts` "editing" test. Monaco
-    keyboard automation drops/reorders chars; sr-only `fill` was unreliable on
-    webkit.
-  - **Fix:** expose the Monaco editor ref on mount (`__cppfanCodeLabEditor`) and
-    drive the edit via `setValue` in the e2e. Verified locally: **9/9 pass**
-    across chromium + iphone + ipad.
-  - **Then App checks failed on a unit test** (`ai-chat-runtime.test.ts`): `main`
-    advanced (richer AI provider config: credential/credentialSource) and left
-    that test asserting the old 2-field shape — `main` itself was red. Merged
-    `main` into the branch and updated the assertion. Local full suite: **795
-    pass**; lint/typecheck/build green.
-  - Next: wait for App checks green on commit `e742736`, then auto-merge #409.
-
-## On merge of #409
-
-1. Squash-merge `--delete-branch`.
-2. Post `## Final closure audit` on #407 mapping each acceptance criterion to
-   evidence, then close #407.
-3. Start #408 (Phase 2 AI trace) on a new `feat/code-lab-phase2` branch per the
-   issue body; reuse `completeAiResponse` and the existing code-lab feature
-   folder; open a PR with `Completion status: partial` + `Part of #408`.
-
-## Notes / constraints
+## Notes / constraints (durable)
 
 - App router is at `app/` (not `src/app/`).
-- Runner: mock is default + deterministic; Piston is the real provider (keyless).
+- Code runner: `mock` is the default deterministic provider; `piston` is the real
+  (keyless) provider. Mock can't surface real compile/sanitizer errors — design
+  Code Lab tasks with literal/echo output so the mock can produce deterministic
+  results; tie real diagnostics to the #412 classifier via tests.
+- Code-capable items/milestones register their Code Lab config in
+  `src/features/code-lab/code-lab-catalog.ts` keyed by item/milestone id, so all
+  `/api/code/*` routes resolve them. This avoids new learning-item rows and keeps
+  seed↔DB parity untouched.
+- Hidden tests live in the server-only `code-lab-hidden-tests.ts`; never leak I/O.
+- Monaco e2e: drive edits via the exposed `window.__cppfanCodeLabEditor` `setValue`
+  (keyboard automation drops chars across browsers).
 - Closure guard: never put a close-word (close/fix/resolve) immediately before
-  `#<n>` in a PR body, or the guard flags it as an unintended closing keyword.
-- Local e2e may not run here (no browsers/Supabase); rely on CI for Playwright.
+  `#<n>` in a PR body; declare `Completion status:` on PRs referencing
+  completion-tracked issues.
+- Local e2e runs on chromium/iphone/ipad here; CI runs the full matrix.
