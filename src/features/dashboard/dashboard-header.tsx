@@ -15,8 +15,8 @@ const links = [
 
 export function DashboardHeader() {
   return (
-    <header className="grid gap-4 rounded-3xl border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-      <div>
+    <header className="flex flex-col justify-between gap-4 rounded-3xl border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur lg:flex-row lg:items-center">
+      <div className="min-w-0">
         <Link href="/" className="text-sm font-bold text-blue-700">← cppFan</Link>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Your learning dashboard</h1>
         <p className="mt-1 text-slate-600">Daily Review, goal learning, mastery, goals, and the skill map.</p>

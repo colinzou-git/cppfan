@@ -11,9 +11,11 @@ type PageShellProps = PropsWithChildren<{
   size?: "reading" | "wide" | "full";
 }>;
 
+// Tailwind v4 removed `max-w-screen-*`; use explicit widths so `wide` actually
+// caps on very large monitors instead of silently spanning full width.
 const SIZE_CLASS = {
   reading: "max-w-4xl",
-  wide: "max-w-screen-2xl",
+  wide: "max-w-[100rem]",
   full: "max-w-none"
 } as const;
 
