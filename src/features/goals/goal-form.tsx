@@ -225,11 +225,26 @@ export function GoalForm({
           <label className="grid gap-2 text-sm font-bold">Goal title
             <input required minLength={2} maxLength={120} value={draft.title} onChange={(event) => patch({ title: event.target.value })} className="h-12 rounded-2xl border border-slate-200 px-4" />
           </label>
-          <label className="grid gap-2 text-sm font-bold">Skills
-            <select multiple required size={12} value={draft.skillIds} onChange={(event) => patch({ skillIds: [...event.target.selectedOptions].map((option) => option.value) })} className="rounded-2xl border border-slate-200 bg-white p-3 font-medium">
-              {goalSkillOptions.map((skill) => <option key={skill.id} value={skill.id}>{skill.label}</option>)}
-            </select>
-          </label>
+          <div className="grid gap-2 text-sm font-bold">
+            <p id="goal-skills-label">Skills</p>
+            <p id="goal-skills-help" className="text-xs font-semibold text-slate-500">Check each skill to include in this goal. {draft.skillIds.length} selected.</p>
+            <div role="group" aria-labelledby="goal-skills-label" aria-describedby="goal-skills-help" className="max-h-80 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 font-medium">
+              {goalSkillOptions.map((skill) => {
+                const isSelected = selectedSkillIds.has(skill.id);
+                return (
+                  <label key={skill.id} className={`flex cursor-pointer items-start gap-3 rounded-xl p-2 text-sm transition hover:bg-indigo-50 ${isSelected ? "bg-indigo-50 text-indigo-950" : "text-slate-800"}`}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSkill(skill.id)}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-indigo-600"
+                    />
+                    <span>{skill.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
           <label className="grid gap-2 text-sm font-bold">Note
             <textarea maxLength={1000} value={draft.note} onChange={(event) => patch({ note: event.target.value })} className="min-h-24 rounded-2xl border border-slate-200 p-3" />
           </label>
