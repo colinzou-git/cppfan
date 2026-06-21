@@ -83,7 +83,12 @@ export function SessionRunner({
   problemPrompt: string;
   authenticated: boolean;
 }) {
-  const [session, setSession] = useState<SessionState>(() => ensureClientSessionIdentity(initialState));
+  // Initialize from the server-provided state verbatim so the first client render
+  // matches SSR exactly. Client-only identity (random sessionId / startedAt) is
+  // assigned after mount in the effect below — generating it during the useState
+  // initializer ran on both server and client with different values, producing a
+  // hydration text mismatch (React #418) on the rendered session id (#177).
+  const [session, setSession] = useState<SessionState>(initialState);
   const [notice, setNotice] = useState<string | null>(null);
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null);
   const [, startSaveTransition] = useTransition();
@@ -162,6 +167,13 @@ export function SessionRunner({
   const inProgress = session.status === "in_progress";
   const paused = session.status === "paused";
   const atFirstPhase = session.phaseIndex === 0;
+
+  // Assign client-only session identity once, after hydration, so it never
+  // diverges from the SSR markup. A fresh (unsaved) session starts without an id;
+  // this gives it a stable one for persistence and the judge without a mismatch.
+  useEffect(() => {
+    setSession((prev) => ensureClientSessionIdentity(prev));
+  }, []);
 
   // Live timer: while in progress, accrue one second at a time and persist the
   // elapsed time on a coarse cadence so a refresh resumes near where the learner
