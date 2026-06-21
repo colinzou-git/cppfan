@@ -11,9 +11,9 @@ _Last updated: 2026-06-21 — by the /loop driver._
 A new wave after the Code Lab roadmap. Dependency order:
 
 1. **#430** shared `PageShell` + dashboard two-column at `xl` — **DONE**: PR #434 → `0cd0c16`.
-2. **#431** split learning item + Code Lab on wide screens — **PR OPEN** (`feat/desktop-layout-learn-split`).
-3. **#432** widen exercises/labs/goals/resources/review pages — uses `PageShell`.
-4. **#433** wide-screen Playwright coverage + visual smoke assertions.
+2. **#431** split learning item + Code Lab on wide screens — **DONE**: PR #435 → `89fe585`.
+3. **#432** widen exercises/labs/goals/resources/review pages — **PR OPEN** (`feat/desktop-layout-pages`).
+4. **#433** wide-screen Playwright coverage + visual smoke assertions — last in this track.
 
 Layout-only; mobile-first preserved, wide layout additive at `xl`/`2xl`.
 

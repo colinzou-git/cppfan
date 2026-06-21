@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Code2 } from "lucide-react";
+import { PageShell } from "@/components/page-shell";
 import { createClient } from "@/lib/supabase/server";
 import { ExerciseCatalogView } from "@/features/exercises/exercise-catalog-view";
 import { buildExerciseCatalogView } from "@/features/exercises/exercise-view";
@@ -23,7 +24,7 @@ export default async function ExercisesPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="grid gap-6" size="wide">
       <header>
         <Link href="/dashboard" className="text-sm font-bold text-blue-700">
           ← Back to dashboard
@@ -35,6 +36,6 @@ export default async function ExercisesPage() {
       </header>
 
       <ExerciseCatalogView exercises={exercises} initialProgress={progress} authenticated={authenticated} />
-    </main>
+    </PageShell>
   );
 }

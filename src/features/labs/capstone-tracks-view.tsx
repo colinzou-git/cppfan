@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { setMilestone } from "./capstone-actions";
 import type { CapstoneTrackView } from "./capstone-view";
 import type { MilestoneProgress, MilestoneStatus } from "./milestone-progress";
@@ -105,10 +106,18 @@ export function CapstoneTracksView({
             ) : null}
           </div>
 
-          {track.projects.map((project) => (
+          <div className="grid gap-3 xl:grid-cols-2">
+          {track.projects.map((project) => {
+            // Projects with an in-app Code Lab milestone get tall; let them span
+            // the full row on desktop so the editor/output have room.
+            const hasInAppLab = project.milestones.some((milestone) => canRunMilestoneInApp(milestone));
+            return (
             <article
               key={project.id}
-              className="grid gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm"
+              className={cn(
+                "grid min-w-0 gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm",
+                hasInAppLab && "xl:col-span-2"
+              )}
               data-testid="capstone-project"
               data-project-id={project.id}
             >
@@ -231,7 +240,9 @@ export function CapstoneTracksView({
                 })}
               </ol>
             </article>
-          ))}
+            );
+          })}
+          </div>
         </div>
       ))}
 

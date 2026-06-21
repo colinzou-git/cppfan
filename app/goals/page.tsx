@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PageShell } from "@/components/page-shell";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { GoalForm } from "@/features/goals/goal-form";
 import { GoalList } from "@/features/goals/goal-list";
@@ -34,7 +35,7 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
     : undefined;
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-5xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="grid gap-6" size="wide">
       <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
         <div>
           <Link href="/dashboard" className="text-sm font-bold text-blue-700">← Dashboard</Link>
@@ -67,17 +68,25 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
           <EvaluationResults findings={evaluation.findings} />
         </section>
       ) : null}
-      <GoalForm
-        recommendedSkillIds={recommendations.map((item) => item.skillId)}
-        recommendationReason={recommendationReason}
-      />
-      <GoalList title="Current" goals={goals.active} active />
-      <GoalList title="History" goals={history.items} />
-      {history.nextCursor ? (
-        <Link href={`/goals?history=${history.nextCursor}`} className="justify-self-start rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-800">
-          Load older history
-        </Link>
-      ) : null}
-    </main>
+      {/* Desktop: goal creation on the left, current/history lists in a sticky
+          right column; mobile stacks in the same source order. */}
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(24rem,0.75fr)] xl:items-start">
+        <div className="grid gap-6">
+          <GoalForm
+            recommendedSkillIds={recommendations.map((item) => item.skillId)}
+            recommendationReason={recommendationReason}
+          />
+        </div>
+        <aside className="grid gap-6 xl:sticky xl:top-6">
+          <GoalList title="Current" goals={goals.active} active />
+          <GoalList title="History" goals={history.items} />
+          {history.nextCursor ? (
+            <Link href={`/goals?history=${history.nextCursor}`} className="justify-self-start rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-800">
+              Load older history
+            </Link>
+          ) : null}
+        </aside>
+      </section>
+    </PageShell>
   );
 }

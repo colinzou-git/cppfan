@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarClock } from "lucide-react";
+import { PageShell } from "@/components/page-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getReviewQueue } from "@/features/review/review-queries";
@@ -13,7 +14,7 @@ export default async function ReviewPage() {
   const queue = await getReviewQueue();
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="grid gap-6" size="wide">
       <header>
         <Link href="/dashboard" className="text-sm font-bold text-blue-700">
           ← Back to dashboard
@@ -28,7 +29,16 @@ export default async function ReviewPage() {
       </header>
 
       {queue.authenticated ? (
-        <ReviewQueue entries={queue.due} />
+        // Keep the recall card readable (max ~48rem) and add session metadata to
+        // the side on desktop instead of stretching the prompt; mobile stacks.
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,48rem)_minmax(18rem,1fr)] xl:items-start">
+          <ReviewQueue entries={queue.due} />
+          <aside className="rounded-2xl border border-white/70 bg-white/80 p-4 text-sm shadow-sm xl:sticky xl:top-6">
+            <p className="font-black text-slate-950">Review progress</p>
+            <p className="mt-1 text-slate-600">{queue.due.length} due in this session.</p>
+            <p className="mt-3 text-xs text-slate-500">Recall first, reveal, then rate with FSRS.</p>
+          </aside>
+        </div>
       ) : (
         <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="review-preview">
           <CardHeader>
@@ -56,6 +66,6 @@ export default async function ReviewPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </PageShell>
   );
 }

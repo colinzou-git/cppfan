@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FlaskConical } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ItemHelpLinks } from "@/components/item-help-links";
+import { PageShell } from "@/components/page-shell";
 import { projectLabs } from "@/features/labs/project-labs";
 import { createClient } from "@/lib/supabase/server";
 import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
@@ -23,7 +24,7 @@ export default async function LabsPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="grid gap-6" size="wide">
       <header>
         <Link href="/dashboard" className="text-sm font-bold text-blue-700">
           ← Back to dashboard
@@ -41,7 +42,7 @@ export default async function LabsPage() {
       <CapstoneTracksView tracks={tracks} initialProgress={milestoneProgress} authenticated={authenticated} />
       <CapstoneHelp tracks={tracks} />
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {projectLabs.map((lab) => (
           <Card
             key={lab.id}
@@ -90,6 +91,6 @@ export default async function LabsPage() {
           </Card>
         ))}
       </div>
-    </main>
+    </PageShell>
   );
 }
