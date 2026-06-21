@@ -6,6 +6,8 @@
 # clearer to diagnose from pg_catalog than from the public REST API.
 set -euo pipefail
 
+echo "==> Verifying live Goal Evaluation database objects"
+
 if [ -z "${SUPABASE_DB_URL:-}" ]; then
   echo "SUPABASE_DB_URL is not set." >&2
   exit 1
