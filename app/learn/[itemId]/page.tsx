@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageShell } from "@/components/page-shell";
 import { LearningItemView } from "@/features/learning-items/learning-item-view";
 import { getLearningItemWithDetails } from "@/features/learning-items/learning-item-queries";
 import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
+import { isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
 import { recordSkillEvent } from "@/features/events/event-service";
 
 export default async function LearningItemPage({ params }: { params: Promise<{ itemId: string }> }) {
@@ -21,8 +23,12 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
     });
   }
 
+  // Only Code Lab items use the wide split-pane layout; other items keep a
+  // comfortable reading width so they are not awkwardly stretched (#431).
+  const wide = result.status === "ok" && isCodeLabItem(result.data.item.id);
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="grid gap-6" size={wide ? "wide" : "reading"}>
       <header>
         <Link href="/dashboard" className="text-sm font-bold text-blue-700">
           ← Back to dashboard
@@ -39,6 +45,6 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
       ) : (
         <LearningItemView data={result.data} />
       )}
-    </main>
+    </PageShell>
   );
 }
