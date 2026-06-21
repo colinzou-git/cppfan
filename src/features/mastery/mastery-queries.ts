@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { logConfiguredFailure } from "@/lib/supabase/errors";
 import { skillSeed } from "@/features/skills/skill-seed";
 import { RECENCY_WINDOW_DAYS, scoreSkillFromEvents } from "./mastery-scoring";
+import { getCoverageForSkill } from "./context-coverage";
+import { adjustMasteryForContextCoverage } from "./context-coverage-rules";
+import { explainContextCoverageStatus } from "./context-coverage-explanations";
 import { emptyStatusCounts, type MasterySummary, type SkillMastery, type SkillStatus } from "./mastery-types";
 import type { ScoringEvent } from "@/features/events/event-types";
 
@@ -77,13 +80,23 @@ export async function getMasterySummary(): Promise<MasterySummary> {
 
   for (const [skillId, events] of bySkill) {
     const score = scoreSkillFromEvents(events, nowIso);
-    counts[score.status] += 1;
+    // #417: hold a premature `mastered` at `strong` until multi-context evidence
+    // exists. Only `mastered` is adjusted; the reason is updated to explain why.
+    const coverage = getCoverageForSkill({ skillId, events });
+    const status = adjustMasteryForContextCoverage({
+      skillId,
+      currentStatus: score.status,
+      coverage
+    });
+    const reason =
+      status !== score.status ? explainContextCoverageStatus(coverage) : score.reason;
+    counts[status] += 1;
     skills.push({
       skillId,
       title: titleById.get(skillId) ?? skillId,
-      status: score.status,
+      status,
       score: score.score,
-      reason: score.reason
+      reason
     });
   }
 

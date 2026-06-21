@@ -351,6 +351,15 @@ Events should be generated from:
 
 Start with a simple rule-based score. Keep it explainable.
 
+**Cross-context coverage (#417).** Mastery also accounts for *evidence diversity*.
+A skill marked `mastered` (via the explicit marker) is held at `strong` until it
+has multi-context evidence: at least 3 contexts including a delayed review, plus —
+for code-capable (`cpp.*`/`dsa.*`) skills — independent Code Lab practice or a
+project milestone. Contexts are derived deterministically from the event ledger
+(`context-coverage.ts`), not a new table. Only `mastered` is held back; no status
+is downgraded below `strong`, and the learner is shown exactly which evidence is
+missing (`context-coverage-explanations.ts`) — never an opaque block.
+
 Suggested input categories:
 
 | Category | Weight | Examples |

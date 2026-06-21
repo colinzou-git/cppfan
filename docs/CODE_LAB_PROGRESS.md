@@ -25,11 +25,11 @@ _Last updated: 2026-06-21 — by the /loop driver._
    - #413 3.4 Prediction-before-run mode — **DONE**: PR #423 → `a5d5924`.
    - #414 3.5 Error-pattern remediation recommendations — **DONE**: PR #424 → `2a321e7`.
    - #415 3.6 Adaptive scaffold selector — **DONE**: PR #425 → `7ea6d35`.
-   - #416 3.7 Debugging skill lane — **PR OPEN** (`feat/code-lab-phase3-7`):
-     reuses existing cpp.tooling.* skills (no new skills/migration); made 2 code
-     items code-capable (first-diagnostic + ASan) tied to #412 classifier. 916
-     unit tests pass; catalog/link verifiers green; e2e chromium green.
-   - #417 3.8 Cross-context mastery rules
+   - #416 3.7 Debugging skill lane — **DONE**: PR #426 → `2921dfb`.
+   - #417 3.8 Cross-context mastery rules — **PR OPEN** (`feat/code-lab-phase3-8`):
+     context-coverage types/rules/explanations/panel; holds premature `mastered`
+     at `strong` until multi-context evidence; only mastered adjusted, never a
+     hard lock; integrated into mastery-queries. 932 unit tests pass.
    - #418 3.9 Code Lab in capstone milestones
    Read each issue body before starting; respect stated dependencies.
 
