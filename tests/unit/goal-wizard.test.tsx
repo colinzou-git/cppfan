@@ -34,9 +34,7 @@ describe("GoalForm wizard", () => {
     expect(screen.getByText("1 of 1 recommended target selected")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    const skills = screen.getByLabelText("Skills");
-    const option = skills.querySelector('option[value="cpp.program_basics.structure"]') as HTMLOptionElement;
-    expect(option.selected).toBe(true);
+    expect(screen.getByRole("checkbox", { name: /Program structure and main/i })).toBeChecked();
   });
 
   it("restores a saved draft without overwriting it during hydration", async () => {
@@ -63,10 +61,7 @@ describe("GoalForm wizard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.change(screen.getByLabelText("Goal title"), { target: { value: "Refresh foundations" } });
-    const skills = screen.getByLabelText("Skills");
-    const option = skills.querySelector('option[value="cpp.program_basics.structure"]') as HTMLOptionElement;
-    option.selected = true;
-    fireEvent.change(skills);
+    fireEvent.click(screen.getByRole("checkbox", { name: /Program structure and main/i }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(screen.getByText(/Refresh foundations/)).toBeVisible();
