@@ -142,6 +142,13 @@ jobs:
       - name: Verify curriculum examples
         run: node scripts/curriculum-examples/verify.mjs
 
+      # #176/#178: compile the interview judge's reference solutions under gcc
+      # (the production submission toolchain) and clang, and execute every
+      # visible/hidden catalog fixture against the canonical gcc/c++20 build so
+      # the executable catalog cannot drift from its hidden tests.
+      - name: Verify interview catalog reference solutions
+        run: node scripts/verify-interview-catalog.mjs
+
   auth-integration:
     name: Authenticated integration
     runs-on: ubuntu-latest
