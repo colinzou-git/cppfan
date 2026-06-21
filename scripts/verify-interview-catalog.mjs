@@ -39,22 +39,34 @@ const catalogs = await Promise.all(
 );
 const definitions = catalogs.flatMap((catalog) => catalog.definitions);
 
-function requireCommand(command) {
+function hasCommand(command) {
   const result = spawnSync(command, ["--version"], { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(`${command} is required to verify interview reference solutions`);
-  }
+  return result.status === 0;
 }
 
 function normalize(value) {
   return value.replace(/\r\n/g, "\n").trimEnd();
 }
 
-const compilers = [
-  { command: "g++", label: "gcc" },
-  { command: "clang++", label: "clang" }
+// g++ is the production toolchain (submissions compile with "gcc") and the
+// canonical fixture-execution build, so it is mandatory. clang++ is an extra
+// portability build: used when present, skipped with a notice when it is not,
+// so the gate stays runnable on any runner/dev host without weakening the real
+// gcc compile + fixture-execution check.
+const candidateCompilers = [
+  { command: "g++", label: "gcc", required: true },
+  { command: "clang++", label: "clang", required: false }
 ];
-for (const compiler of compilers) requireCommand(compiler.command);
+const compilers = [];
+for (const compiler of candidateCompilers) {
+  if (hasCommand(compiler.command)) {
+    compilers.push(compiler);
+  } else if (compiler.required) {
+    throw new Error(`${compiler.command} is required to verify interview reference solutions`);
+  } else {
+    console.warn(`note: ${compiler.command} not found — skipping its portability build.`);
+  }
+}
 
 const temp = await mkdtemp(join(tmpdir(), "cppfan-interview-catalog-"));
 const sourcePath = join(temp, "reference-solutions.cpp");
@@ -119,5 +131,6 @@ try {
 
 console.log(
   `Interview catalog verified: ${definitions.length} problems, ` +
-    `${checked} fixture executions, four compiler/standard builds.`
+    `${checked} fixture executions, ${compilers.length * 2} compiler/standard builds ` +
+    `(${compilers.map((c) => c.label).join(", ")} x c++17/c++20).`
 );
