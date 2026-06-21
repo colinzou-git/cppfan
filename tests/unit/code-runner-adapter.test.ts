@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  DEFAULT_PISTON_CPP_VERSION,
   MockRunner,
   interpretPistonResponse,
+  PistonRunner,
   simulateStdout
 } from "@/features/code-lab/code-runner-adapter";
 
@@ -37,6 +39,41 @@ describe("Code Lab mock runner", () => {
   });
 });
 
+describe("PistonRunner", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends an exact C++ runtime version instead of a wildcard", async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          compile: { stderr: "", code: 0 },
+          run: { stdout: "Hello\n", stderr: "", code: 0 }
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await new PistonRunner("https://runner.example/api").run({
+      source: `int main(){ std::cout << "Hello"; }`,
+      stdin: "",
+      compilerFlags: [],
+      timeoutMs: 5000,
+      memoryMb: 128
+    });
+
+    expect(result.status).toBe("success");
+    expect(result.simulated).toBe(false);
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as { language: string; version: string };
+    expect(body.language).toBe("c++");
+    expect(body.version).toBe(DEFAULT_PISTON_CPP_VERSION);
+    expect(body.version).not.toBe("*");
+  });
+});
+
 describe("Piston response interpretation", () => {
   it("reports a compile error from a non-zero compile stage", () => {
     const result = interpretPistonResponse(
@@ -47,6 +84,16 @@ describe("Piston response interpretation", () => {
     expect(result.status).toBe("compile_error");
     expect(result.compileOutput).toContain("expected ';'");
     expect(result.stdout).toBe("");
+  });
+
+  it("reports a compile error from compiler output even when stderr is empty", () => {
+    const result = interpretPistonResponse(
+      { compile: { code: 1, output: "compiler failed" }, run: { code: 1 } },
+      "piston",
+      12
+    );
+    expect(result.status).toBe("compile_error");
+    expect(result.compileOutput).toBe("compiler failed");
   });
 
   it("maps SIGKILL to a timeout", () => {
