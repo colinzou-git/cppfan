@@ -264,6 +264,11 @@ Recommended types:
 - `mini_project`
 - `review_prompt`
 
+Any item type can additionally opt into an in-app **Code Lab** (#407) by carrying
+Code Lab metadata (starter code, mode, visible/hidden tests, skill tags). The
+shared `MaybeCodeLab` mount renders the editor/runner only for items that opt in;
+no debugger is involved in Phase 1. See [CODE_LAB.md](CODE_LAB.md).
+
 Each learning item should link to one or more skills.
 
 Suggested fields:

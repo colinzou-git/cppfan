@@ -156,6 +156,7 @@ This README is the canonical setup and operations entry point. Focused docs:
 - Database migrations: "Database setup" below (`pnpm db:migrate`)
 - Codespaces / iPhone workflow: "Develop from a browser" above
 - Write-code exercises: [docs/WRITE_CODE_EXERCISES.md](docs/WRITE_CODE_EXERCISES.md)
+- In-app C++ Code Lab (editor, runner, tests, AI review): [docs/CODE_LAB.md](docs/CODE_LAB.md)
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · skill engine: [docs/SKILL_ENGINE.md](docs/SKILL_ENGINE.md) · events: [docs/EVENT_SCHEMA_STABLE_NAMES.md](docs/EVENT_SCHEMA_STABLE_NAMES.md)
 - End-to-end tests: [docs/PLAYWRIGHT_E2E.md](docs/PLAYWRIGHT_E2E.md)
 

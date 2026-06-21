@@ -19,7 +19,9 @@ describe("AI chat runtime", () => {
 
     expect(getAiProviderConfig()).toEqual({
       provider: "fake",
-      model: "cppfan-fake-tutor"
+      model: "cppfan-fake-tutor",
+      credential: null,
+      credentialSource: "deployment"
     });
 
     let output = "";
