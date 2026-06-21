@@ -20,6 +20,13 @@ test("a practice session advances through phases and completes", async ({ page }
   await page.getByTestId("session-complete").click();
   await expect(runner).toHaveAttribute("data-status", "completed");
   await expect(page.getByTestId("session-restart")).toBeVisible();
+
+  // #179: the completed-session review surface (timeline, tests, revisions).
+  const review = page.getByTestId("session-review");
+  await expect(review).toBeVisible();
+  await expect(review.getByTestId("session-review-timeline")).toBeVisible();
+  await expect(review.getByTestId("session-review-budget")).toBeVisible();
+  await expect(review.getByTestId("session-review-revisions")).toBeVisible();
 });
 
 test("the interview catalog links to a timed session", async ({ page }) => {
