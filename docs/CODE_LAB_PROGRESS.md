@@ -6,16 +6,17 @@ closure audits. No open Code Lab issues or PRs remain.
 
 _Last updated: 2026-06-21 — by the /loop driver._
 
-## Active track: Desktop responsive layout (#430–#433)
+## Desktop responsive layout track (#430–#433): COMPLETE ✅
 
-A new wave after the Code Lab roadmap. Dependency order:
+| Issue | Slice | PR | Merge |
+|---|---|---|---|
+| #430 | shared `PageShell` + dashboard two-column | #434 | `0cd0c16` |
+| #431 | split learning item + Code Lab on wide screens | #435 | `89fe585` |
+| #432 | widen exercises/labs/goals/resources/review | #436 | `45f7864` |
+| #433 | wide-desktop Playwright project + smoke suite | #437 | `24a1399` |
 
-1. **#430** shared `PageShell` + dashboard two-column at `xl` — **DONE**: PR #434 → `0cd0c16`.
-2. **#431** split learning item + Code Lab on wide screens — **DONE**: PR #435 → `89fe585`.
-3. **#432** widen exercises/labs/goals/resources/review pages — **DONE**: PR #436 → `45f7864`.
-4. **#433** wide-screen Playwright coverage + visual smoke assertions — **PR OPEN** (`feat/desktop-layout-e2e`): `wide-desktop` 1920×1080 project + `wide-layout.spec.ts` geometry smoke suite. Last in track.
-
-Layout-only; mobile-first preserved, wide layout additive at `xl`/`2xl`.
+Layout-only; mobile-first preserved, wide layout additive at `xl`/`2xl`. Each
+closed with a final audit. No open desktop-layout issues remain.
 
 ## Status: Code Lab roadmap COMPLETE ✅
 
