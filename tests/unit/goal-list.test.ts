@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { remainingGoalDays } from "@/features/goals/goal-list";
+import { remainingGoalDays } from "@/features/goals/goal-date";
 
 describe("remainingGoalDays", () => {
   it("counts the learner local end date inclusively until local midnight", () => {
