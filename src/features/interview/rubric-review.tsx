@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { saveRubric } from "./rubric-actions";
+import { saveRubric, savePeerRubric } from "./rubric-actions";
 import {
   RUBRIC_CRITERIA,
   reviewSession,
@@ -11,6 +11,8 @@ import {
   type RubricScore,
   type ScoreBand
 } from "./rubric";
+
+type EntrySource = "self" | "peer";
 
 const BAND_STYLE: Record<ScoreBand, string> = {
   strong: "bg-emerald-100 text-emerald-800",
@@ -48,47 +50,67 @@ export function RubricReview({
   initialScores: RubricScore[];
   authenticated: boolean;
 }) {
-  const initialByCriterion = useMemo(() => {
+  const byEntrySource = useMemo(() => {
+    const maps: Record<EntrySource, Partial<Record<RubricCriterionId, number>>> = { self: {}, peer: {} };
+    for (const s of initialScores) {
+      if (s.source === "self" || s.source === "peer") {
+        maps[s.source][s.criterion] = s.score;
+      }
+    }
+    return maps;
+  }, [initialScores]);
+
+  // Automated evidence (#178 judge / session) is trusted and read-only here — the
+  // rater sees it alongside their own scoring but never edits it.
+  const automatedByCriterion = useMemo(() => {
     const map: Partial<Record<RubricCriterionId, number>> = {};
     for (const s of initialScores) {
-      if (s.source === "self") {
+      if (s.source === "automated") {
         map[s.criterion] = s.score;
       }
     }
     return map;
   }, [initialScores]);
 
-  const [scoresById, setScoresById] = useState<Partial<Record<RubricCriterionId, number>>>(initialByCriterion);
+  const [entrySource, setEntrySource] = useState<EntrySource>("self");
+  const [scoresBySource, setScoresBySource] = useState(byEntrySource);
   const [notice, setNotice] = useState<string | null>(null);
   const [saving, startTransition] = useTransition();
 
-  const selfScores = useMemo<RubricScore[]>(
+  const scoresById = scoresBySource[entrySource];
+
+  const enteredScores = useMemo<RubricScore[]>(
     () =>
       RUBRIC_CRITERIA.filter((c) => scoresById[c.id] !== undefined).map((c) => ({
         criterion: c.id,
         score: scoresById[c.id] as number,
-        source: "self" as const
+        source: entrySource
       })),
-    [scoresById]
+    [scoresById, entrySource]
   );
 
-  const review = useMemo(() => reviewSession(selfScores), [selfScores]);
+  const review = useMemo(() => reviewSession(enteredScores), [enteredScores]);
   const summaryByCriterion = useMemo(
     () => new Map(review.summaries.map((s) => [s.criterion, s])),
     [review]
   );
 
   function setScore(id: RubricCriterionId, value: number) {
-    setScoresById((prev) => ({ ...prev, [id]: value }));
+    setScoresBySource((prev) => ({
+      ...prev,
+      [entrySource]: { ...prev[entrySource], [id]: value }
+    }));
   }
+
+  const sourceLabel = entrySource === "self" ? "self-review" : "peer review";
 
   function onSave() {
     startTransition(async () => {
-      const result = await saveRubric(selfScores);
+      const result = await (entrySource === "self" ? saveRubric(enteredScores) : savePeerRubric(enteredScores));
       if (result.status === "signed_out") {
-        setNotice("Sign in to save this self-review.");
+        setNotice(`Sign in to save this ${sourceLabel}.`);
       } else if (result.status === "error") {
-        setNotice("Could not save your self-review just now.");
+        setNotice(`Could not save your ${sourceLabel} just now.`);
       } else {
         setNotice("Saved.");
       }
@@ -98,7 +120,37 @@ export function RubricReview({
   return (
     <div className="grid gap-6" data-testid="rubric-review">
       <section className="grid gap-3">
-        <h2 className="text-lg font-black text-slate-900">Score each dimension</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-black text-slate-900">Score each dimension</h2>
+          <div
+            className="flex gap-1 rounded-full bg-slate-100 p-1"
+            role="group"
+            aria-label="Feedback source"
+            data-testid="rubric-source-toggle"
+          >
+            {(["self", "peer"] as const).map((source) => (
+              <Button
+                key={source}
+                type="button"
+                size="sm"
+                variant={entrySource === source ? "default" : "secondary"}
+                aria-pressed={entrySource === source}
+                onClick={() => {
+                  setEntrySource(source);
+                  setNotice(null);
+                }}
+                data-testid={`rubric-source-${source}`}
+              >
+                {source === "self" ? "Self" : "Peer interviewer"}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs font-medium text-slate-500">
+          {entrySource === "self"
+            ? "Your own reflection. Kept separate from peer and automated evidence."
+            : "A mock-interview partner's assessment. Stored as a distinct, trusted source."}
+        </p>
         <div className="grid gap-2">
           {RUBRIC_CRITERIA.map((criterion) => {
             const summary = summaryByCriterion.get(criterion.id);
@@ -118,6 +170,16 @@ export function RubricReview({
                 {band ? (
                   <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${BAND_STYLE[band]}`}>
                     {BAND_LABEL[band]}
+                  </span>
+                ) : null}
+                {automatedByCriterion[criterion.id] !== undefined ? (
+                  <span
+                    className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-800"
+                    title="Automated evidence from the judge/session (read-only)"
+                    data-testid="rubric-automated-score"
+                    data-criterion-id={criterion.id}
+                  >
+                    Auto {automatedByCriterion[criterion.id]}
                   </span>
                 ) : null}
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -187,8 +249,8 @@ export function RubricReview({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={onSave} disabled={saving || selfScores.length === 0} data-testid="rubric-save">
-          {saving ? "Saving…" : "Save self-review"}
+        <Button type="button" onClick={onSave} disabled={saving || enteredScores.length === 0} data-testid="rubric-save">
+          {saving ? "Saving…" : entrySource === "self" ? "Save self-review" : "Save peer review"}
         </Button>
         {notice ? (
           <p className="text-sm font-semibold text-amber-700" role="status" data-testid="rubric-notice">
@@ -198,7 +260,7 @@ export function RubricReview({
       </div>
 
       {!authenticated ? (
-        <p className="text-xs font-medium text-slate-500">Sign in to save your self-review across sessions.</p>
+        <p className="text-xs font-medium text-slate-500">Sign in to save your review across sessions.</p>
       ) : null}
     </div>
   );
