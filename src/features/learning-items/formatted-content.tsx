@@ -14,6 +14,14 @@ const UNORDERED_ITEM_RE = /^\s*[-+*]\s+(.+)$/;
 const ORDERED_ITEM_RE = /^\s*\d+\.\s+(.+)$/;
 const BLOCKQUOTE_RE = /^\s*>\s?(.*)$/;
 
+function normalizeMarkdownContent(content: string): string {
+  return content
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\r/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n?/g, "\n");
+}
+
 function startsBlock(line: string): boolean {
   return (
     FENCE_RE.test(line) ||
@@ -25,7 +33,7 @@ function startsBlock(line: string): boolean {
 }
 
 function parseBlocks(content: string): ContentBlock[] {
-  const lines = content.replace(/\r\n?/g, "\n").split("\n");
+  const lines = normalizeMarkdownContent(content).split("\n");
   const blocks: ContentBlock[] = [];
   let index = 0;
 
