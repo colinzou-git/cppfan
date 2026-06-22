@@ -3,7 +3,7 @@ import type { CodeRunResult } from "./code-lab-types";
 /**
  * Runner adapter boundary (#407). The Code Lab never executes untrusted C++ in
  * the Next.js process; it delegates to a provider behind this interface so the
- * mock (tests/CI) and a hosted provider (Piston) are interchangeable.
+ * mock (tests/CI), Piston, and Judge0 are interchangeable.
  */
 
 export type RunnerInput = {
@@ -140,8 +140,8 @@ type PistonResponse = {
 
 /**
  * Hosted runner backed by a Piston instance (https://github.com/engineerd/piston).
- * The public emkc.org endpoint requires no API key; a self-hosted base URL and
- * key are also supported. Runner credentials stay server-side.
+ * A self-hosted base URL and key are supported. Runner credentials stay
+ * server-side. Prefer Judge0 for production cppFan Code Lab deployments.
  */
 export class PistonRunner implements CodeRunnerAdapter {
   readonly name = "piston";
@@ -198,6 +198,91 @@ export class PistonRunner implements CodeRunnerAdapter {
     }
 
     return interpretPistonResponse(payload, this.name, Date.now() - start);
+  }
+}
+
+type Judge0Status = {
+  id: number;
+  description: string;
+};
+
+type Judge0Response = {
+  stdout?: string | null;
+  time?: string | number | null;
+  memory?: number | null;
+  stderr?: string | null;
+  token?: string;
+  compile_output?: string | null;
+  message?: string | null;
+  status?: Judge0Status | null;
+};
+
+export type Judge0RunnerOptions = {
+  baseUrl: string;
+  apiKey?: string;
+  languageId: number;
+  compilerOptionsEnabled?: boolean;
+};
+
+/**
+ * Production C++ runner backed by a Judge0 CE/Extra CE instance. The browser
+ * never calls Judge0 directly; credentials are attached only on this server-side
+ * adapter path.
+ */
+export class Judge0Runner implements CodeRunnerAdapter {
+  readonly name = "judge0";
+
+  constructor(private readonly options: Judge0RunnerOptions) {}
+
+  async run(input: RunnerInput): Promise<CodeRunResult> {
+    const start = Date.now();
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (this.options.apiKey) headers["X-Auth-Token"] = this.options.apiKey;
+
+    const timeoutSeconds = Math.max(1, Math.ceil(input.timeoutMs / 1000));
+    const body: Record<string, unknown> = {
+      language_id: this.options.languageId,
+      source_code: input.source,
+      stdin: input.stdin,
+      cpu_time_limit: timeoutSeconds,
+      wall_time_limit: timeoutSeconds + 3,
+      memory_limit: input.memoryMb * 1024
+    };
+
+    if (this.options.compilerOptionsEnabled && input.compilerFlags.length > 0) {
+      body.compiler_options = input.compilerFlags.join(" ");
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `${this.options.baseUrl.replace(/\/$/, "")}/submissions?base64_encoded=false&wait=true`,
+        {
+          method: "POST",
+          headers,
+          cache: "no-store",
+          signal: AbortSignal.timeout(input.timeoutMs + 10_000),
+          body: JSON.stringify(body)
+        }
+      );
+    } catch {
+      return runnerError(this.name, "The Judge0 runner did not respond. Try again shortly.", start);
+    }
+
+    if (!response.ok) {
+      const detail = await readShortResponseBody(response);
+      const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
+      return runnerError(this.name, `The Judge0 runner rejected this submission (${statusDetail}).`, start);
+    }
+
+    let payload: Judge0Response;
+    try {
+      payload = (await response.json()) as Judge0Response;
+    } catch {
+      return runnerError(this.name, "The Judge0 runner returned an unreadable response.", start);
+    }
+
+    return interpretJudge0Response(payload, this.name, Date.now() - start);
   }
 }
 
@@ -261,6 +346,104 @@ export function interpretPistonResponse(
     simulated: false,
     note: timedOut ? "Execution exceeded the time limit." : undefined
   };
+}
+
+export function interpretJudge0Response(
+  payload: Judge0Response,
+  provider: string,
+  durationMs: number
+): CodeRunResult {
+  const statusId = payload.status?.id;
+  const statusDescription = payload.status?.description ?? "Unknown";
+  const compileOutput = payload.compile_output ?? "";
+  const stdout = payload.stdout ?? "";
+  const stderr = payload.stderr ?? "";
+  const memoryKb = typeof payload.memory === "number" ? payload.memory : null;
+  const measuredDurationMs = judge0TimeToMs(payload.time, durationMs);
+  const message = payload.message ?? undefined;
+
+  if (statusId === 3) {
+    return {
+      status: "success",
+      compileOutput,
+      stdout,
+      stderr,
+      exitCode: 0,
+      timedOut: false,
+      durationMs: measuredDurationMs,
+      memoryKb,
+      provider,
+      simulated: false
+    };
+  }
+
+  if (statusId === 6) {
+    return {
+      status: "compile_error",
+      compileOutput: firstNonEmptyText(compileOutput, message, "Compilation failed."),
+      stdout: "",
+      stderr,
+      exitCode: null,
+      timedOut: false,
+      durationMs: measuredDurationMs,
+      memoryKb,
+      provider,
+      simulated: false,
+      note: statusDescription
+    };
+  }
+
+  if (statusId === 5) {
+    return {
+      status: "timeout",
+      compileOutput,
+      stdout,
+      stderr,
+      exitCode: null,
+      timedOut: true,
+      durationMs: measuredDurationMs,
+      memoryKb,
+      provider,
+      simulated: false,
+      note: "Execution exceeded the time limit."
+    };
+  }
+
+  if (statusId !== undefined && statusId >= 7 && statusId <= 12) {
+    return {
+      status: "runtime_error",
+      compileOutput,
+      stdout,
+      stderr: firstNonEmptyText(stderr, message, statusDescription),
+      exitCode: null,
+      timedOut: false,
+      durationMs: measuredDurationMs,
+      memoryKb,
+      provider,
+      simulated: false,
+      note: statusDescription
+    };
+  }
+
+  return {
+    status: "runner_error",
+    compileOutput,
+    stdout,
+    stderr,
+    exitCode: null,
+    timedOut: false,
+    durationMs: measuredDurationMs,
+    memoryKb,
+    provider,
+    simulated: false,
+    note: firstNonEmptyText(message, `Judge0 returned status ${statusId ?? "unknown"}: ${statusDescription}`)
+  };
+}
+
+function judge0TimeToMs(time: Judge0Response["time"], fallbackMs: number): number {
+  const seconds = Number(time);
+  if (!Number.isFinite(seconds)) return fallbackMs;
+  return Math.max(0, Math.round(seconds * 1000));
 }
 
 async function readShortResponseBody(response: Response): Promise<string> {
