@@ -148,7 +148,7 @@ describe("Piston response interpretation", () => {
     expect(result.stdout).toBe("");
   });
 
-  it("reports a compile error from compiler output even when stderr is empty", () => {
+  it("reports a compile error from compiler output even when stderr is missing", () => {
     const result = interpretPistonResponse(
       { compile: { code: 1, output: "compiler failed" }, run: { code: 1 } },
       "piston",
@@ -156,6 +156,26 @@ describe("Piston response interpretation", () => {
     );
     expect(result.status).toBe("compile_error");
     expect(result.compileOutput).toBe("compiler failed");
+  });
+
+  it("reports a compile error from compiler output when stderr is blank", () => {
+    const result = interpretPistonResponse(
+      { compile: { code: 1, stderr: "", output: "compiler failed" }, run: { code: 1 } },
+      "piston",
+      12
+    );
+    expect(result.status).toBe("compile_error");
+    expect(result.compileOutput).toBe("compiler failed");
+  });
+
+  it("preserves runtime output diagnostics when stderr is blank", () => {
+    const result = interpretPistonResponse(
+      { compile: { code: 0 }, run: { code: 1, stderr: "", output: "segmentation fault" } },
+      "piston",
+      9
+    );
+    expect(result.status).toBe("runtime_error");
+    expect(result.stderr).toBe("segmentation fault");
   });
 
   it("maps SIGKILL to a timeout", () => {
