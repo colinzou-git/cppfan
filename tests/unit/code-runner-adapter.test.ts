@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { selectRunner } from "@/features/code-lab/code-runner";
 import {
   DEFAULT_PISTON_CPP_VERSION,
-  MockRunner,
+  interpretJudge0Response,
   interpretPistonResponse,
+  Judge0Runner,
+  MockRunner,
   PistonRunner,
   simulateStdout
 } from "@/features/code-lab/code-runner-adapter";
@@ -57,7 +59,7 @@ describe("Code Lab runner selection", () => {
     expect(selection.adapter.name).toBe("mock");
   });
 
-  it("defaults production deployments to real Piston execution", () => {
+  it("keeps production offline unless a real runner is explicitly configured", () => {
     vi.stubEnv("CODE_RUNNER_PROVIDER", "");
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("CI", "");
@@ -66,7 +68,7 @@ describe("Code Lab runner selection", () => {
 
     expect(selection.kind).toBe("ready");
     if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
-    expect(selection.adapter.name).toBe("piston");
+    expect(selection.adapter.name).toBe("mock");
   });
 
   it("keeps CI offline even when NODE_ENV is production", () => {
@@ -91,6 +93,42 @@ describe("Code Lab runner selection", () => {
     expect(selection.kind).toBe("ready");
     if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
     expect(selection.adapter.name).toBe("mock");
+  });
+
+  it("reports Judge0 as unconfigured without a base URL", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "judge0");
+    vi.stubEnv("CODE_RUNNER_BASE_URL", "");
+    vi.stubEnv("CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID", "54");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("unconfigured");
+    if (selection.kind !== "unconfigured") throw new Error("Expected unconfigured runner.");
+    expect(selection.note).toContain("CODE_RUNNER_BASE_URL");
+  });
+
+  it("reports Judge0 as unconfigured without a valid C++ language id", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "judge0");
+    vi.stubEnv("CODE_RUNNER_BASE_URL", "http://judge0.example");
+    vi.stubEnv("CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID", "not-a-number");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("unconfigured");
+    if (selection.kind !== "unconfigured") throw new Error("Expected unconfigured runner.");
+    expect(selection.note).toContain("CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID");
+  });
+
+  it("selects Judge0 when required env vars are present", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "judge0");
+    vi.stubEnv("CODE_RUNNER_BASE_URL", "http://judge0.example");
+    vi.stubEnv("CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID", "54");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("ready");
+    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
+    expect(selection.adapter.name).toBe("judge0");
   });
 });
 
@@ -133,6 +171,61 @@ describe("PistonRunner", () => {
     expect(body.language).toBe("c++");
     expect(body.version).toBe(DEFAULT_PISTON_CPP_VERSION);
     expect(body.version).not.toBe("*");
+  });
+});
+
+describe("Judge0Runner", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("submits C++ source to Judge0 with server-side auth header", async () => {
+    const fetchMock = vi.fn(
+      async (_url: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) =>
+        new Response(
+          JSON.stringify({
+            stdout: "5\n",
+            time: "0.004",
+            memory: 1024,
+            stderr: null,
+            compile_output: null,
+            status: { id: 3, description: "Accepted" }
+          }),
+          { status: 200, headers: { "content-type": "application/json" } }
+        )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await new Judge0Runner({
+      baseUrl: "http://judge0.example",
+      apiKey: "secret",
+      languageId: 54
+    }).run({
+      source: `int main(){ return 0; }`,
+      stdin: "2 3",
+      compilerFlags: ["-std=c++20"],
+      timeoutMs: 5000,
+      memoryMb: 128
+    });
+
+    expect(result.status).toBe("success");
+    expect(result.provider).toBe("judge0");
+    expect(result.stdout).toBe("5\n");
+    expect(result.memoryKb).toBe(1024);
+    expect(result.durationMs).toBe(4);
+
+    const firstCall = fetchMock.mock.calls[0];
+    if (!firstCall) throw new Error("Expected Judge0Runner to call fetch.");
+    expect(String(firstCall[0])).toBe("http://judge0.example/submissions?base64_encoded=false&wait=true");
+    const init = firstCall[1];
+    if (!init) throw new Error("Expected Judge0Runner to pass fetch options.");
+    expect((init.headers as Record<string, string>)["X-Auth-Token"]).toBe("secret");
+    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    expect(body.language_id).toBe(54);
+    expect(body.source_code).toContain("int main");
+    expect(body.stdin).toBe("2 3");
+    expect(body.memory_limit).toBe(128 * 1024);
+    expect(body).not.toHaveProperty("compiler_options");
   });
 });
 
@@ -207,5 +300,65 @@ describe("Piston response interpretation", () => {
     expect(result.status).toBe("success");
     expect(result.stdout).toBe("ok\n");
     expect(result.simulated).toBe(false);
+  });
+});
+
+describe("Judge0 response interpretation", () => {
+  it("maps Accepted to success", () => {
+    const result = interpretJudge0Response(
+      { stdout: "ok\n", time: "0.007", memory: 2048, status: { id: 3, description: "Accepted" } },
+      "judge0",
+      50
+    );
+    expect(result.status).toBe("success");
+    expect(result.stdout).toBe("ok\n");
+    expect(result.durationMs).toBe(7);
+    expect(result.memoryKb).toBe(2048);
+  });
+
+  it("maps Compilation Error to compile_error", () => {
+    const result = interpretJudge0Response(
+      {
+        compile_output: "main.cpp:1: error: expected ';'",
+        status: { id: 6, description: "Compilation Error" }
+      },
+      "judge0",
+      50
+    );
+    expect(result.status).toBe("compile_error");
+    expect(result.compileOutput).toContain("expected ';'");
+  });
+
+  it("maps Time Limit Exceeded to timeout", () => {
+    const result = interpretJudge0Response(
+      { status: { id: 5, description: "Time Limit Exceeded" } },
+      "judge0",
+      50
+    );
+    expect(result.status).toBe("timeout");
+    expect(result.timedOut).toBe(true);
+  });
+
+  it("maps runtime statuses to runtime_error", () => {
+    const result = interpretJudge0Response(
+      { stderr: "segmentation fault", status: { id: 11, description: "Runtime Error (SIGSEGV)" } },
+      "judge0",
+      50
+    );
+    expect(result.status).toBe("runtime_error");
+    expect(result.stderr).toContain("segmentation fault");
+  });
+
+  it("maps Internal Error to runner_error", () => {
+    const result = interpretJudge0Response(
+      {
+        message: "No such file or directory @ rb_sysopen - /box/main.cpp",
+        status: { id: 13, description: "Internal Error" }
+      },
+      "judge0",
+      50
+    );
+    expect(result.status).toBe("runner_error");
+    expect(result.note).toContain("/box/main.cpp");
   });
 });
