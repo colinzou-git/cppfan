@@ -441,6 +441,7 @@ export function interpretJudge0Response(
 }
 
 function judge0TimeToMs(time: Judge0Response["time"], fallbackMs: number): number {
+  if (time === null || time === undefined || time === "") return fallbackMs;
   const seconds = Number(time);
   if (!Number.isFinite(seconds)) return fallbackMs;
   return Math.max(0, Math.round(seconds * 1000));
