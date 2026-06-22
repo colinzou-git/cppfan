@@ -4,6 +4,13 @@ import { Check, X } from "lucide-react";
 import type { CodeTestResult } from "./code-lab-types";
 import { CodeErrorTagPanel } from "./code-error-tag-panel";
 
+const PROVIDER_LABELS: Record<string, string> = {
+  mock: "simulated runner",
+  judge0: "Judge0 real compile/run",
+  piston: "Piston runner",
+  none: "no runner"
+};
+
 export function TestResultsPanel({ result }: { result: CodeTestResult | null }) {
   if (!result) return null;
 
@@ -13,7 +20,12 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
         className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3"
         data-testid="code-test-results"
       >
-        <p className="text-sm font-bold text-amber-900">Tests did not run</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-bold text-amber-900">Tests did not run</p>
+          <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-bold text-amber-900">
+            {providerLabel(result)}
+          </span>
+        </div>
         <p className="text-xs text-amber-900">{result.note ?? "Your code did not compile."}</p>
         {result.compileOutput ? (
           <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-amber-200 bg-white p-2 text-xs text-amber-900">
@@ -33,7 +45,7 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
       data-testid="code-test-results"
       aria-live="polite"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
             allPassed ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"
@@ -42,9 +54,7 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
         >
           {result.passed}/{result.total} tests passed
         </span>
-        {result.simulated ? (
-          <span className="text-xs text-slate-500">simulated runner</span>
-        ) : null}
+        <span className="text-xs text-slate-500">{providerLabel(result)}</span>
       </div>
 
       <ul className="flex flex-col gap-1">
@@ -83,4 +93,9 @@ export function TestResultsPanel({ result }: { result: CodeTestResult | null }) 
       <CodeErrorTagPanel classifications={result.classifications} />
     </section>
   );
+}
+
+function providerLabel(result: CodeTestResult): string {
+  if (result.simulated) return "simulated runner";
+  return PROVIDER_LABELS[result.provider] ?? `${result.provider} runner`;
 }
