@@ -210,10 +210,6 @@ export function interpretPistonResponse(
   provider: string,
   durationMs: number
 ): CodeRunResult {
-  if (!payload.run && payload.message) {
-    return runnerErrorFromDuration(provider, `The code runner returned: ${payload.message}`, durationMs);
-  }
-
   const compileOutput = firstNonEmptyText(payload.compile?.stderr, payload.compile?.output);
   const compileFailed = (payload.compile?.code ?? 0) !== 0;
 
@@ -232,7 +228,17 @@ export function interpretPistonResponse(
     };
   }
 
-  const run = payload.run ?? {};
+  if (!payload.run) {
+    return runnerErrorFromDuration(
+      provider,
+      payload.message
+        ? `The code runner returned: ${payload.message}`
+        : "The code runner returned no execution result.",
+      durationMs
+    );
+  }
+
+  const run = payload.run;
   const signal = run.signal ?? null;
   const timedOut = signal === "SIGKILL" || signal === "SIGXCPU";
   const exitCode = run.code ?? null;
