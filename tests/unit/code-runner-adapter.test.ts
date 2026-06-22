@@ -178,6 +178,16 @@ describe("Piston response interpretation", () => {
     expect(result.stderr).toBe("segmentation fault");
   });
 
+  it("reports a runner error when the run stage is missing", () => {
+    const result = interpretPistonResponse(
+      { compile: { code: 0 } },
+      "piston",
+      9
+    );
+    expect(result.status).toBe("runner_error");
+    expect(result.note).toBe("The code runner returned no execution result.");
+  });
+
   it("maps SIGKILL to a timeout", () => {
     const result = interpretPistonResponse(
       { run: { code: null, signal: "SIGKILL", stdout: "" } },
