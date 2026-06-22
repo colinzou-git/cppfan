@@ -201,6 +201,10 @@ export class PistonRunner implements CodeRunnerAdapter {
   }
 }
 
+function firstNonEmptyText(...values: Array<string | undefined>): string {
+  return values.find((value) => value && value.length > 0) ?? "";
+}
+
 export function interpretPistonResponse(
   payload: PistonResponse,
   provider: string,
@@ -210,7 +214,7 @@ export function interpretPistonResponse(
     return runnerErrorFromDuration(provider, `The code runner returned: ${payload.message}`, durationMs);
   }
 
-  const compileOutput = payload.compile?.stderr ?? payload.compile?.output ?? "";
+  const compileOutput = firstNonEmptyText(payload.compile?.stderr, payload.compile?.output);
   const compileFailed = (payload.compile?.code ?? 0) !== 0;
 
   if (compileFailed) {
@@ -242,7 +246,7 @@ export function interpretPistonResponse(
     status,
     compileOutput,
     stdout: run.stdout ?? "",
-    stderr: run.stderr ?? run.output ?? "",
+    stderr: firstNonEmptyText(run.stderr, run.output),
     exitCode,
     timedOut,
     durationMs,
