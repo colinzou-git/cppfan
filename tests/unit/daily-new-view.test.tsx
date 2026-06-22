@@ -127,4 +127,15 @@ describe("DailyNew", () => {
     expect(allocateExtra).toHaveBeenCalledTimes(1);
     expect(refresh).toHaveBeenCalledTimes(1);
   });
+
+  it("does not blame stale Learn Extra allocation on another tab", async () => {
+    allocateExtra.mockResolvedValue({ status: "stale" });
+    render(<DailyNew plan={plan({ extraAction: action({ id: "extra-candidate", source: "learn_extra" }) })} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Learn Extra:/i }));
+
+    await waitFor(() => expect(screen.getByRole("status"))
+      .toHaveTextContent("The plan changed while adding extra work. Refresh and try again."));
+    expect(screen.getByRole("status")).not.toHaveTextContent("another tab");
+  });
 });
