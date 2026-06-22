@@ -2,6 +2,7 @@ import type { CodeRunResult } from "./code-lab-types";
 import { runnerMemoryMb, runnerTimeoutMs } from "./code-lab-defaults";
 import {
   DEFAULT_PISTON_CPP_VERSION,
+  Judge0Runner,
   MockRunner,
   PistonRunner,
   type CodeRunnerAdapter,
@@ -10,9 +11,9 @@ import {
 
 /**
  * Server-only runner selection (#407). Chooses a provider from env and never
- * exposes runner credentials to the client. Local dev, tests, and CI default to
- * the deterministic mock so they stay offline; production deployments default
- * to Piston so learners get real compile/run unless explicitly overridden.
+ * exposes runner credentials to the client. Local dev, tests, CI, and unconfigured
+ * production deployments default to the deterministic mock so they stay offline;
+ * real compile/run is enabled explicitly with CODE_RUNNER_PROVIDER=judge0.
  */
 
 export type RunnerSelection =
@@ -23,8 +24,7 @@ function defaultRunnerProvider(): string {
   const configuredProvider = process.env.CODE_RUNNER_PROVIDER?.trim().toLowerCase();
   if (configuredProvider) return configuredProvider;
 
-  if (process.env.CI) return "mock";
-  return process.env.NODE_ENV === "production" ? "piston" : "mock";
+  return "mock";
 }
 
 export function selectRunner(): RunnerSelection {
@@ -44,18 +44,39 @@ export function selectRunner(): RunnerSelection {
   }
 
   if (provider === "judge0") {
-    // Judge0 is intentionally not wired in Phase 1: it needs a base URL/key the
-    // operator must supply. Surface a clear unconfigured state instead of
-    // silently falling back so misconfiguration is visible.
+    const baseUrl = process.env.CODE_RUNNER_BASE_URL?.trim();
+    const languageIdRaw = process.env.CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID?.trim();
+    const languageId = Number(languageIdRaw);
+
+    if (!baseUrl) {
+      return {
+        kind: "unconfigured",
+        note: "The Judge0 runner is selected but CODE_RUNNER_BASE_URL is not set."
+      };
+    }
+
+    if (!Number.isInteger(languageId) || languageId <= 0) {
+      return {
+        kind: "unconfigured",
+        note: "The Judge0 runner is selected but CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID is not a valid number."
+      };
+    }
+
     return {
-      kind: "unconfigured",
-      note: "The judge0 runner is selected but not configured for this deployment."
+      kind: "ready",
+      adapter: new Judge0Runner({
+        baseUrl,
+        apiKey: process.env.CODE_RUNNER_API_KEY?.trim(),
+        languageId,
+        compilerOptionsEnabled:
+          process.env.CODE_RUNNER_JUDGE0_ENABLE_COMPILER_OPTIONS?.trim().toLowerCase() === "true"
+      })
     };
   }
 
   return {
     kind: "unconfigured",
-    note: `Unknown code runner provider "${provider}". Set CODE_RUNNER_PROVIDER to mock or piston.`
+    note: `Unknown code runner provider "${provider}". Set CODE_RUNNER_PROVIDER to mock, piston, or judge0.`
   };
 }
 
