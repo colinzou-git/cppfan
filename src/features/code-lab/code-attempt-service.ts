@@ -2,6 +2,8 @@
 // cannot be imported into a client component.
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
+import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events/event-service";
+import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
 
 /**
@@ -41,15 +43,79 @@ export async function recordCodeAttempt(input: {
     ai_review_requested: input.aiReviewRequested ?? false
   });
 
+  let attemptRecorded = true;
   if (error) {
+    attemptRecorded = false;
     // Pre-migration (table absent) and any write failure are non-fatal: the run
     // result is still returned to the learner. Surface real failures in logs.
     if (!isMissingObjectError(error)) {
       console.error(`[code-lab] attempt insert failed (code=${error.code ?? "none"})`);
     }
-    return false;
   }
-  return true;
+
+  const evidenceRecorded = await recordCodeAttemptSkillEvents(input).catch(() => false);
+  return attemptRecorded || evidenceRecorded;
+}
+
+async function recordCodeAttemptSkillEvents(input: {
+  itemId: string;
+  source: string;
+  run?: CodeRunResult | null;
+  test?: CodeTestResult | null;
+  aiReviewRequested?: boolean;
+}): Promise<boolean> {
+  const result = input.test ?? input.run;
+  if (!result || result.simulated) return false;
+
+  const skillTags = getCodeLabConfigForItem(input.itemId)?.skillTags ?? [];
+  if (skillTags.length === 0) return false;
+
+  const metadata = codeAttemptMetadata(input);
+  const events: RecordSkillEventInput[] = skillTags.map((skillId) => ({
+    eventType: "code_attempted",
+    skillId,
+    learningItemId: input.itemId,
+    metadata
+  }));
+
+  if (isPassingRealTestAttempt(input.test)) {
+    events.push(
+      ...skillTags.map((skillId) => ({
+        eventType: "code_passed" as const,
+        skillId,
+        learningItemId: input.itemId,
+        metadata
+      }))
+    );
+  }
+
+  return recordSkillEvents(events);
+}
+
+function isPassingRealTestAttempt(test: CodeTestResult | null | undefined): boolean {
+  return Boolean(test && !test.simulated && test.status === "ok" && test.total > 0 && test.passed === test.total);
+}
+
+function codeAttemptMetadata(input: {
+  itemId: string;
+  run?: CodeRunResult | null;
+  test?: CodeTestResult | null;
+  aiReviewRequested?: boolean;
+}): Record<string, unknown> {
+  const result = input.test ?? input.run;
+  return {
+    itemId: input.itemId,
+    provider: result?.provider ?? "none",
+    simulated: result?.simulated ?? false,
+    runStatus: input.run?.status ?? input.test?.status ?? "ok",
+    testsPassed: input.test?.passed ?? null,
+    testsTotal: input.test?.total ?? null,
+    hiddenPassed: input.test?.hiddenPassed ?? null,
+    hiddenTotal: input.test?.hiddenTotal ?? null,
+    durationMs: input.run?.durationMs ?? null,
+    memoryKb: input.run?.memoryKb ?? null,
+    aiReviewRequested: input.aiReviewRequested ?? false
+  };
 }
 
 export function summarizeAttempt(input: {
