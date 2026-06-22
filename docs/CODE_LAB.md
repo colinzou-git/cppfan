@@ -21,21 +21,29 @@ Bundled seed examples (run without Supabase):
 - `cpp.program_basics.io.lesson` — echo a line of input
 - `cpp.program_basics.statements_comments.lesson` — print two lines
 
-## Running locally with the mock runner
+## Runner defaults
 
-By default `CODE_RUNNER_PROVIDER=mock`. The mock is a deterministic, network-free
-simulator for the simple program shapes the seed uses (printing string literals,
-echoing stdin). **It does not compile real C++** — every result is flagged
-`simulated`. This keeps local dev and CI fast and offline.
+When `CODE_RUNNER_PROVIDER` is unset, cppFan chooses the safest default for the
+environment:
+
+- local dev, tests, and CI: `mock` — deterministic, network-free, simulated
+  output for simple seed examples.
+- non-CI production deployments: `piston` — real C++ compile/run through the
+  server-side runner adapter.
+
+Set `CODE_RUNNER_PROVIDER=mock` explicitly when you need a production-like build
+to stay offline.
 
 ```bash
-CODE_RUNNER_PROVIDER=mock   # default; deterministic simulator
+CODE_RUNNER_PROVIDER=mock   # force deterministic simulator
 ```
+
+The mock does **not** compile real C++ — every result is flagged `simulated`.
 
 ## Real execution (Piston)
 
-For real compile/run, point the runner at a Piston instance. The public endpoint
-needs no API key:
+For real compile/run, use the default non-CI production runner or point the
+runner at a Piston instance explicitly. The public endpoint needs no API key:
 
 ```bash
 CODE_RUNNER_PROVIDER=piston
