@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DailyNew } from "@/features/goals/daily-new";
 import type { DailyNewAction, DailyNewPlan } from "@/features/goals/daily-new-model";
 
@@ -9,6 +9,11 @@ vi.mock("@/app/goals/actions", () => ({
   allocateExtraGoalInlineAction: (...args: unknown[]) => allocateExtra(...args)
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+
+beforeEach(() => {
+  allocateExtra.mockReset();
+  refresh.mockReset();
+});
 
 function action(overrides: Partial<DailyNewAction> = {}): DailyNewAction {
   return {
