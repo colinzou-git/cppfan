@@ -12,6 +12,13 @@ const STATUS_LABELS: Record<CodeRunResult["status"], string> = {
   runner_unconfigured: "Runner unavailable"
 };
 
+const PROVIDER_LABELS: Record<string, string> = {
+  mock: "Simulated runner",
+  judge0: "Judge0 real compile/run",
+  piston: "Piston runner",
+  none: "No runner"
+};
+
 export function CodeOutputPanel({ result }: { result: CodeRunResult | null }) {
   if (!result) return null;
 
@@ -32,13 +39,14 @@ export function CodeOutputPanel({ result }: { result: CodeRunResult | null }) {
         >
           {STATUS_LABELS[result.status]}
         </span>
-        {result.simulated ? (
-          <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-            Simulated runner
-          </span>
-        ) : null}
+        <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+          {providerLabel(result)}
+        </span>
         {result.durationMs !== null ? (
           <span className="text-xs text-slate-500">{result.durationMs} ms</span>
+        ) : null}
+        {result.memoryKb !== null ? (
+          <span className="text-xs text-slate-500">{result.memoryKb} KB</span>
         ) : null}
       </div>
 
@@ -56,6 +64,11 @@ export function CodeOutputPanel({ result }: { result: CodeRunResult | null }) {
       <CodeErrorTagPanel classifications={result.classifications} />
     </section>
   );
+}
+
+function providerLabel(result: CodeRunResult): string {
+  if (result.simulated) return "Simulated runner";
+  return PROVIDER_LABELS[result.provider] ?? `${result.provider} runner`;
 }
 
 function OutputBlock({
