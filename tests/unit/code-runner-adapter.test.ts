@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { selectRunner } from "@/features/code-lab/code-runner";
 import {
   DEFAULT_PISTON_CPP_VERSION,
   MockRunner,
@@ -36,6 +37,60 @@ describe("Code Lab mock runner", () => {
     expect(result.simulated).toBe(true);
     expect(result.provider).toBe("mock");
     expect(result.stdout).toBe("hi");
+  });
+});
+
+describe("Code Lab runner selection", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("keeps local/test defaults on the mock runner", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "");
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("CI", "");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("ready");
+    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
+    expect(selection.adapter.name).toBe("mock");
+  });
+
+  it("defaults production deployments to real Piston execution", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CI", "");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("ready");
+    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
+    expect(selection.adapter.name).toBe("piston");
+  });
+
+  it("keeps CI offline even when NODE_ENV is production", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CI", "true");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("ready");
+    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
+    expect(selection.adapter.name).toBe("mock");
+  });
+
+  it("honors an explicit provider override", () => {
+    vi.stubEnv("CODE_RUNNER_PROVIDER", "mock");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CI", "");
+
+    const selection = selectRunner();
+
+    expect(selection.kind).toBe("ready");
+    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
+    expect(selection.adapter.name).toBe("mock");
   });
 });
 
