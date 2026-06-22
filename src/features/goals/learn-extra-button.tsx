@@ -26,9 +26,11 @@ export function LearnExtraButton({ title }: { title: string }) {
           links.item(links.length - 1)?.focus();
         }, 100);
       } else {
-        setMessage(result.status === "stale"
-          ? "The plan changed in another tab. Refresh and try again."
-          : `Learn Extra could not add work: ${result.status.replaceAll("_", " ")}.`);
+        setMessage(
+          result.status === "stale"
+            ? "The plan changed while adding extra work. Refresh and try again."
+            : `Learn Extra could not add work: ${result.status.replaceAll("_", " ")}.`
+        );
       }
     });
   }
