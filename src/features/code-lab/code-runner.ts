@@ -10,16 +10,25 @@ import {
 
 /**
  * Server-only runner selection (#407). Chooses a provider from env and never
- * exposes runner credentials to the client. Defaults to the deterministic mock
- * so local dev and CI run without any external dependency or key.
+ * exposes runner credentials to the client. Local dev, tests, and CI default to
+ * the deterministic mock so they stay offline; production deployments default
+ * to Piston so learners get real compile/run unless explicitly overridden.
  */
 
 export type RunnerSelection =
   | { kind: "ready"; adapter: CodeRunnerAdapter }
   | { kind: "unconfigured"; note: string };
 
+function defaultRunnerProvider(): string {
+  const configuredProvider = process.env.CODE_RUNNER_PROVIDER?.trim().toLowerCase();
+  if (configuredProvider) return configuredProvider;
+
+  if (process.env.CI) return "mock";
+  return process.env.NODE_ENV === "production" ? "piston" : "mock";
+}
+
 export function selectRunner(): RunnerSelection {
-  const provider = (process.env.CODE_RUNNER_PROVIDER ?? "mock").trim().toLowerCase();
+  const provider = defaultRunnerProvider();
 
   if (provider === "mock") {
     return { kind: "ready", adapter: new MockRunner() };
