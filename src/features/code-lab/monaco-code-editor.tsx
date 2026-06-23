@@ -28,7 +28,13 @@ if (typeof window !== "undefined") {
   loader.config({ monaco });
 }
 
-export default function MonacoCodeEditor({ value, onChange, label, readOnly = false }: CodeEditorProps) {
+export default function MonacoCodeEditor({
+  value,
+  onChange,
+  label,
+  readOnly = false,
+  height = "320px"
+}: CodeEditorProps) {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const applyingExternalValueRef = useRef(false);
 
@@ -56,7 +62,7 @@ export default function MonacoCodeEditor({ value, onChange, label, readOnly = fa
 
   return (
     <Editor
-      height="320px"
+      height={height}
       defaultLanguage="cpp"
       language="cpp"
       theme="vs"

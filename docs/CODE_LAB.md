@@ -23,6 +23,22 @@ Bundled seed examples include:
 - `cpp.program_basics.io.lesson` — echo a line of input
 - `cpp.program_basics.statements_comments.lesson` — print two lines
 
+### Two layouts, one controller (#431)
+
+Code Lab state (run/test/review/trace, predictions, remediation, scaffold) lives
+in the shared `useCodeLabController` hook so both layouts behave identically:
+
+- **Embedded** — `CodeLab` renders inside the lesson page next to the prompt.
+  Its header has a **Full screen** link to the dedicated route.
+- **Full page** — `CodeLabWorkspace` at `/lab/[itemId]` gives the editor the
+  whole viewport height. On `xl`+ it is a three-column layout — problem panel,
+  centered editor, tabbed output dock (Output / Tests / Input / AI) whose header
+  carries the file title and run/test controls. The columns are **user-resizable**
+  (default 1/6 · 1/2 · 1/3; widths persist to `localStorage`). Below `xl` it
+  collapses to a single scrolling column so iPhone/iPad stay usable. The route
+  404s for non-Code-Lab items. Column math is the pure, unit-tested
+  `column-sizes.ts`.
+
 ## Runner architecture
 
 Untrusted C++ is **never** executed in the Next.js/Vercel process. Browser UI

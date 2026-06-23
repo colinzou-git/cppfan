@@ -8,6 +8,8 @@ export type CodeEditorProps = {
   onChange: (value: string) => void;
   label: string;
   readOnly?: boolean;
+  /** Editor height. Defaults to a fixed 320px; the full-page workspace overrides it. */
+  height?: string;
 };
 
 // Monaco is loaded client-only: it touches `window`/`navigator` and must not be
@@ -16,27 +18,36 @@ export type CodeEditorProps = {
 const MonacoCodeEditor = dynamic(() => import("./monaco-code-editor"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-[320px] place-items-center bg-slate-50 text-sm text-slate-500">
+    <div className="grid h-full min-h-[320px] place-items-center bg-slate-50 text-sm text-slate-500">
       Loading editor…
     </div>
   )
 });
 
-export function CodeEditor({ value, onChange, label, readOnly = false }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  onChange,
+  label,
+  readOnly = false,
+  fill = false
+}: CodeEditorProps & { fill?: boolean }) {
   const labelId = useId();
+  // `fill` makes the editor expand to the height of a flex parent (the full-page
+  // workspace center column); the embedded lesson keeps the fixed 320px default.
+  const height = fill ? "100%" : "320px";
 
   return (
-    <div className="flex min-w-0 flex-col gap-1">
+    <div className={`flex min-w-0 flex-col gap-1${fill ? " h-full" : ""}`}>
       <label id={labelId} className="text-xs font-bold uppercase tracking-wide text-slate-600">
         {label}
       </label>
       <div
-        className="overflow-hidden rounded-xl border border-slate-200"
+        className={`overflow-hidden rounded-xl border border-slate-200${fill ? " min-h-0 flex-1" : ""}`}
         role="group"
         aria-labelledby={labelId}
         data-testid="code-editor"
       >
-        <MonacoCodeEditor value={value} onChange={onChange} label={label} readOnly={readOnly} />
+        <MonacoCodeEditor value={value} onChange={onChange} label={label} readOnly={readOnly} height={height} />
         {/* Accessible value mirror for assistive tech: Monaco's own input is the
             primary editing surface; this hidden control keeps a labelled copy of
             the source available to screen readers. */}
