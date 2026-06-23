@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { GraduationCap } from "lucide-react";
+import type { MouseEvent } from "react";
 import type { ScaffoldRecommendation } from "./scaffold-selector-types";
 import { SCAFFOLD_LEVEL_LABELS } from "./scaffold-reasons";
 
@@ -17,6 +18,27 @@ export function ScaffoldRecommendationCard({
   if (!recommendation) return null;
 
   const levelLabel = SCAFFOLD_LEVEL_LABELS[recommendation.level];
+  const href = recommendation.itemId ? `/learn/${recommendation.itemId}#code-lab` : "";
+
+  function handleOpenRecommendation(event: MouseEvent<HTMLAnchorElement>) {
+    if (!href || typeof window === "undefined") return;
+
+    const target = new URL(href, window.location.origin);
+    const current = new URL(window.location.href);
+    const isSameLearningItem = target.pathname === current.pathname;
+
+    if (!isSameLearningItem) return;
+
+    const codeLab = document.getElementById("code-lab");
+    if (!codeLab) return;
+
+    event.preventDefault();
+    window.history.replaceState(null, "", `${target.pathname}${target.hash}`);
+    codeLab.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const editor = codeLab.querySelector<HTMLElement>("[data-testid='code-editor']");
+    editor?.focus({ preventScroll: true });
+  }
 
   return (
     <section
@@ -32,7 +54,8 @@ export function ScaffoldRecommendationCard({
       <p className="text-xs text-sky-900">{recommendation.reason}</p>
       {recommendation.itemId ? (
         <Link
-          href={`/learn/${recommendation.itemId}#code-lab`}
+          href={href}
+          onClick={handleOpenRecommendation}
           className="w-fit rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
           data-testid="scaffold-recommendation-link"
         >
