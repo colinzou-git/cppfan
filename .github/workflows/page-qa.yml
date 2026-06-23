@@ -1,0 +1,80 @@
+name: Page QA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # Daily browser smoke audit. Keeps page/workflow regressions visible even
+    # when no PR is open.
+    - cron: "17 10 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: page-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  page-qa:
+    name: Playwright page QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Optional: set these as GitHub Actions secrets to make the Code Lab QA run
+      # against the real Judge0 runner. If they are absent, the Judge0-specific
+      # workflow self-skips and the generic page audit still runs.
+      CODE_RUNNER_PROVIDER: ${{ secrets.CODE_RUNNER_PROVIDER }}
+      CODE_RUNNER_BASE_URL: ${{ secrets.CODE_RUNNER_BASE_URL }}
+      CODE_RUNNER_API_KEY: ${{ secrets.CODE_RUNNER_API_KEY }}
+      CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID: ${{ secrets.CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID }}
+      CODE_RUNNER_TIMEOUT_MS: ${{ secrets.CODE_RUNNER_TIMEOUT_MS }}
+      CODE_RUNNER_MEMORY_MB: ${{ secrets.CODE_RUNNER_MEMORY_MB }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable pnpm through Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Typecheck QA tests
+        run: pnpm typecheck
+
+      - name: Run page crawler audit
+        run: pnpm exec playwright test tests/e2e/page-audit.spec.ts --project=chromium
+
+      - name: Run Code Lab workflow audit
+        run: pnpm exec playwright test tests/e2e/code-lab-qa.spec.ts --project=chromium
+
+      - name: Upload Playwright diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-page-qa
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
