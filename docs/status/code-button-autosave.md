@@ -29,13 +29,16 @@ slice, then update this doc.
   generic "Code Lab" title for milestone ids absent from `learning_items`, and
   the inline `CodeLabMilestone` editor still renders on the capstone page — decide
   later whether to collapse it to a preview now that a full-page path exists.
-- [ ] **Slice 2 — Autosave/resume foundation.** Migration `code_lab_drafts`
-  (user_id, learning_item_id, source_code, updated_at; unique per user+item; RLS
-  select/insert/update/delete own). API route `/api/code/draft` (GET load, PUT
-  upsert). Client transport + debounced autosave hook. Wire into
-  `useCodeLabController`: load draft on mount (API if signed in, else
-  localStorage), debounce-save on edit, localStorage fallback. A "saved · just
-  now" indicator.
+- [x] **Slice 2 — Autosave/resume foundation.** DONE. Migration
+  `20260623130000_create_code_lab_drafts.sql` (one row per user+item, RLS CRUD
+  own). Server `code-draft-service.ts` (load/upsert, best-effort self-skip).
+  Route `app/api/code/draft/route.ts` (GET load, PUT upsert). Client
+  `code-draft-client.ts`. Hook `use-code-draft.ts` (localStorage-first hydrate,
+  then cross-device Supabase; debounced save; flush on unmount) wired into
+  `useCodeLabController` and exposed as `draftStatus`. Save indicator
+  (`code-lab-draft-status`) in the workspace. Applies to embedded + full-page
+  labs. Migration deploys via the db CI job / supabase-production-migrations —
+  not runnable on this host; verify in CI.
 - [ ] **Slice 3 — Exercises 'Code' button.** Strategy: add Code Lab configs for
   exercises that can run in-app (or link only those that have one; flag the rest).
   Needs design — record approach here before building.

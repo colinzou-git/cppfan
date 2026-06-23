@@ -26,6 +26,7 @@ import {
   runTestsRequest,
   traceCodeRequest
 } from "./code-lab-client";
+import { useCodeDraft } from "./use-code-draft";
 
 export type CodeLabControllerArgs = {
   itemId: string;
@@ -41,6 +42,14 @@ export type CodeLabControllerArgs = {
  */
 export function useCodeLabController({ itemId, config, onResult }: CodeLabControllerArgs) {
   const [source, setSource] = useState(config.starterCode);
+  // Autosave/resume: hydrates source from the saved draft on mount and persists
+  // edits (cross-device when signed in, localStorage otherwise). #431
+  const { status: draftStatus } = useCodeDraft({
+    itemId,
+    starterCode: config.starterCode,
+    source,
+    setSource
+  });
   const [stdin, setStdin] = useState(config.stdin ?? "");
   const [busy, setBusy] = useState<CodeAction | null>(null);
   const [runResult, setRunResult] = useState<CodeRunResult | null>(null);
@@ -209,6 +218,7 @@ export function useCodeLabController({ itemId, config, onResult }: CodeLabContro
   return {
     source,
     setSource,
+    draftStatus,
     stdin,
     setStdin,
     busy,

@@ -52,3 +52,45 @@ export function validateCodeRequest(body: Record<string, unknown>): ParsedCodeRe
 
   return { ok: true, itemId, source, stdin, userQuestion };
 }
+
+export type ParsedDraftRequest =
+  | { ok: true; itemId: string; source: string }
+  | { ok: false; code: string; message: string };
+
+/**
+ * Validate an autosave draft write (#431). Unlike a run, an empty draft is
+ * allowed (the learner may clear the editor), but the item must be code-capable
+ * and the source within the same size bound as a run.
+ */
+export function validateDraftRequest(body: Record<string, unknown>): ParsedDraftRequest {
+  const itemId = typeof body.itemId === "string" ? body.itemId.trim() : "";
+  if (!itemId || itemId.length > 240) {
+    return { ok: false, code: "invalid_item", message: "A valid item id is required." };
+  }
+  if (!getCodeLabConfigForItem(itemId)) {
+    return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
+  }
+
+  const source = typeof body.source === "string" ? body.source : "";
+  if (source.length > CODE_LAB_LIMITS.maxSourceChars) {
+    return {
+      ok: false,
+      code: "source_too_large",
+      message: `Code must be under ${CODE_LAB_LIMITS.maxSourceChars.toLocaleString()} characters.`
+    };
+  }
+
+  return { ok: true, itemId, source };
+}
+
+/** Validate the item id on a draft load (GET ?itemId=). */
+export function validateDraftItemId(itemId: string | null): ParsedDraftRequest {
+  const trimmed = typeof itemId === "string" ? itemId.trim() : "";
+  if (!trimmed || trimmed.length > 240) {
+    return { ok: false, code: "invalid_item", message: "A valid item id is required." };
+  }
+  if (!getCodeLabConfigForItem(trimmed)) {
+    return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
+  }
+  return { ok: true, itemId: trimmed, source: "" };
+}

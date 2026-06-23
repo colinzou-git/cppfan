@@ -228,8 +228,9 @@ export function CodeLabWorkspace({
     return (
       <div className="flex flex-col gap-4" data-testid="code-lab-workspace">
         {problemPanel}
-        <div className="px-4">
+        <div className="flex flex-col gap-1 px-4">
           <CodeEditor value={c.source} onChange={c.setSource} label="C++ source code" />
+          <DraftStatusLine status={c.draftStatus} />
         </div>
         <div className="px-4">{controls}</div>
         <div className="border-t border-slate-200">{rightDock}</div>
@@ -246,13 +247,23 @@ export function CodeLabWorkspace({
         storageKey="cppfan:code-lab:columns"
         left={<div className="h-full border-r border-slate-200 bg-slate-50/60">{problemPanel}</div>}
         center={
-          <div className="flex h-full flex-col bg-slate-100 p-3">
+          <div className="flex h-full flex-col gap-1 bg-slate-100 p-3">
             <CodeEditor value={c.source} onChange={c.setSource} label="C++ source code" fill />
+            <DraftStatusLine status={c.draftStatus} />
           </div>
         }
         right={<div className="h-full border-l border-slate-200">{rightDock}</div>}
       />
     </div>
+  );
+}
+
+function DraftStatusLine({ status }: { status: "idle" | "saving" | "saved" }) {
+  const label = status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Autosaves as you type";
+  return (
+    <p className="text-right text-[11px] text-slate-500" data-testid="code-lab-draft-status" aria-live="polite">
+      {label}
+    </p>
   );
 }
 
