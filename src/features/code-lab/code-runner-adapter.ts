@@ -282,7 +282,67 @@ export class Judge0Runner implements CodeRunnerAdapter {
       return runnerError(this.name, "The Judge0 runner returned an unreadable response.", start);
     }
 
+    if (isJudge0Pending(payload)) {
+      if (!payload.token) {
+        return runnerError(
+          this.name,
+          "Judge0 accepted the submission but did not return a token to poll for the final result.",
+          start
+        );
+      }
+      return this.pollSubmission(payload.token, headers, input.timeoutMs, start);
+    }
+
     return interpretJudge0Response(payload, this.name, Date.now() - start);
+  }
+
+  private async pollSubmission(
+    token: string,
+    headers: Record<string, string>,
+    timeoutMs: number,
+    start: number
+  ): Promise<CodeRunResult> {
+    const baseUrl = this.options.baseUrl.replace(/\/$/, "");
+    const deadline = Date.now() + timeoutMs + 10_000;
+    let lastPayload: Judge0Response | null = null;
+
+    for (let attempt = 0; attempt < 24 && Date.now() < deadline; attempt += 1) {
+      await sleep(Math.min(600, 150 + attempt * 50));
+
+      let response: Response;
+      try {
+        response = await fetch(`${baseUrl}/submissions/${encodeURIComponent(token)}?base64_encoded=false`, {
+          method: "GET",
+          headers,
+          cache: "no-store",
+          signal: AbortSignal.timeout(Math.max(1000, deadline - Date.now()))
+        });
+      } catch {
+        return runnerError(this.name, "The Judge0 runner did not respond while polling the result.", start);
+      }
+
+      if (!response.ok) {
+        const detail = await readShortResponseBody(response);
+        const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
+        return runnerError(this.name, `The Judge0 runner rejected result polling (${statusDetail}).`, start);
+      }
+
+      try {
+        lastPayload = (await response.json()) as Judge0Response;
+      } catch {
+        return runnerError(this.name, "The Judge0 runner returned an unreadable polling response.", start);
+      }
+
+      if (!isJudge0Pending(lastPayload)) {
+        return interpretJudge0Response(lastPayload, this.name, Date.now() - start);
+      }
+    }
+
+    return runnerError(
+      this.name,
+      `Judge0 did not finish before the polling timeout (last status: ${lastPayload?.status?.description ?? "unknown"}).`,
+      start
+    );
   }
 }
 
@@ -440,11 +500,20 @@ export function interpretJudge0Response(
   };
 }
 
+function isJudge0Pending(payload: Judge0Response): boolean {
+  const statusId = payload.status?.id;
+  return statusId === 1 || statusId === 2 || Boolean(payload.token && !payload.status);
+}
+
 function judge0TimeToMs(time: Judge0Response["time"], fallbackMs: number): number {
   if (time === null || time === undefined || time === "") return fallbackMs;
   const seconds = Number(time);
   if (!Number.isFinite(seconds)) return fallbackMs;
   return Math.max(0, Math.round(seconds * 1000));
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function readShortResponseBody(response: Response): Promise<string> {
