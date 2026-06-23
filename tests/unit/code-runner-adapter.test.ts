@@ -205,6 +205,49 @@ describe("Judge0Runner", () => {
   });
 });
 
+describe("Judge0 line-wrapped base64 decoding", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("decodes a long compile_output that Judge0 wraps every 60 chars", async () => {
+    // Judge0 encodes output with Ruby's Base64.encode64, which inserts a
+    // newline every 60 characters and a trailing newline (MIME-style).
+    const compileError =
+      "main.cpp: In function 'int main()':\n" +
+      "main.cpp:7:1: error: 'adfad' does not name a type\n" +
+      "    7 | adfad\n      | ^~~~~\n";
+    const wrappedBase64 = `${(Buffer.from(compileError, "utf8").toString("base64").match(/.{1,60}/g) ?? []).join("\n")}\n`;
+    expect(wrappedBase64).toContain("\n");
+
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            stdout: null,
+            stderr: null,
+            compile_output: wrappedBase64,
+            status: { id: 6, description: "Compilation Error" }
+          }),
+          { status: 200, headers: { "content-type": "application/json" } }
+        )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await new Judge0Runner({ baseUrl: "http://judge0.example", languageId: 54 }).run({
+      source: `int main(){ return 0; }\nadfad`,
+      stdin: "",
+      compilerFlags: [],
+      timeoutMs: 5000,
+      memoryMb: 128
+    });
+
+    expect(result.status).toBe("compile_error");
+    expect(result.compileOutput).toBe(compileError);
+    expect(result.compileOutput).not.toContain("bWFpbi5jcHA");
+  });
+});
+
 describe("Piston response interpretation", () => {
   it("reports a compile error from a non-zero compile stage", () => {
     const result = interpretPistonResponse(

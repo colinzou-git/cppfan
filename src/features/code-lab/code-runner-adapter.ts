@@ -521,13 +521,16 @@ function encodeBase64Text(text: string): string {
 
 function decodeBase64Text(value: string | null | undefined): string | undefined {
   if (value === null || value === undefined || value === "") return value ?? undefined;
-  const trimmed = value.trim();
-  if (trimmed.length === 0 || trimmed.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(trimmed)) {
+  // Judge0 base64-encodes output with Ruby's Base64.encode64, which wraps lines
+  // every 60 chars. Strip all whitespace (not just the ends) so multi-line
+  // encoded output — e.g. a long compile_output — still validates and decodes.
+  const compact = value.replace(/\s+/g, "");
+  if (compact.length === 0 || compact.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(compact)) {
     return value;
   }
 
   try {
-    return Buffer.from(trimmed, "base64").toString("utf8");
+    return Buffer.from(compact, "base64").toString("utf8");
   } catch {
     return value;
   }
