@@ -242,21 +242,21 @@ export class Judge0Runner implements CodeRunnerAdapter {
     const timeoutSeconds = Math.max(1, Math.ceil(input.timeoutMs / 1000));
     const body: Record<string, unknown> = {
       language_id: this.options.languageId,
-      source_code: input.source,
-      stdin: input.stdin,
+      source_code: encodeBase64Text(input.source),
+      stdin: encodeBase64Text(input.stdin),
       cpu_time_limit: timeoutSeconds,
       wall_time_limit: timeoutSeconds + 3,
       memory_limit: input.memoryMb * 1024
     };
 
     if (this.options.compilerOptionsEnabled && input.compilerFlags.length > 0) {
-      body.compiler_options = input.compilerFlags.join(" ");
+      body.compiler_options = encodeBase64Text(input.compilerFlags.join(" "));
     }
 
     let response: Response;
     try {
       response = await fetch(
-        `${this.options.baseUrl.replace(/\/$/, "")}/submissions?base64_encoded=false&wait=true`,
+        `${this.options.baseUrl.replace(/\/$/, "")}/submissions?base64_encoded=true&wait=true`,
         {
           method: "POST",
           headers,
@@ -277,7 +277,7 @@ export class Judge0Runner implements CodeRunnerAdapter {
 
     let payload: Judge0Response;
     try {
-      payload = (await response.json()) as Judge0Response;
+      payload = decodeJudge0TextFields((await response.json()) as Judge0Response);
     } catch {
       return runnerError(this.name, "The Judge0 runner returned an unreadable response.", start);
     }
@@ -311,7 +311,7 @@ export class Judge0Runner implements CodeRunnerAdapter {
 
       let response: Response;
       try {
-        response = await fetch(`${baseUrl}/submissions/${encodeURIComponent(token)}?base64_encoded=false`, {
+        response = await fetch(`${baseUrl}/submissions/${encodeURIComponent(token)}?base64_encoded=true`, {
           method: "GET",
           headers,
           cache: "no-store",
@@ -328,7 +328,7 @@ export class Judge0Runner implements CodeRunnerAdapter {
       }
 
       try {
-        lastPayload = (await response.json()) as Judge0Response;
+        lastPayload = decodeJudge0TextFields((await response.json()) as Judge0Response);
       } catch {
         return runnerError(this.name, "The Judge0 runner returned an unreadable polling response.", start);
       }
@@ -503,6 +503,34 @@ export function interpretJudge0Response(
 function isJudge0Pending(payload: Judge0Response): boolean {
   const statusId = payload.status?.id;
   return statusId === 1 || statusId === 2 || Boolean(payload.token && !payload.status);
+}
+
+function decodeJudge0TextFields(payload: Judge0Response): Judge0Response {
+  return {
+    ...payload,
+    stdout: decodeBase64Text(payload.stdout),
+    stderr: decodeBase64Text(payload.stderr),
+    compile_output: decodeBase64Text(payload.compile_output),
+    message: decodeBase64Text(payload.message)
+  };
+}
+
+function encodeBase64Text(text: string): string {
+  return Buffer.from(text, "utf8").toString("base64");
+}
+
+function decodeBase64Text(value: string | null | undefined): string | undefined {
+  if (value === null || value === undefined || value === "") return value ?? undefined;
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(trimmed)) {
+    return value;
+  }
+
+  try {
+    return Buffer.from(trimmed, "base64").toString("utf8");
+  } catch {
+    return value;
+  }
 }
 
 function judge0TimeToMs(time: Judge0Response["time"], fallbackMs: number): number {
