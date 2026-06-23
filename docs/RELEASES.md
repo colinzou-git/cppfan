@@ -7,7 +7,25 @@ cppFan uses a dedicated `release` branch as the only branch that Vercel may depl
 - `main` — newest integrated code. Pull requests merge here and GitHub Actions validates it.
 - `release` — exact Git commit intended for production at `cppfan.online`.
 
-`vercel.json` disables automatic Vercel deployments for every branch except `release`. This prevents rapid Claude/PR merges from consuming the Vercel Hobby build-rate allowance.
+`vercel.json` disables automatic Vercel deployments for every branch except `release`. Deploys are therefore driven by what lands on `release`, never by raw pushes to `main`.
+
+## Automatic deploys on green CI
+
+Every push to `main` auto-deploys once its CI run passes. The
+`Auto deploy main to production` workflow (`.github/workflows/auto-deploy.yml`)
+triggers on a successful **CI** run for `main`, then fast-forwards `release` to
+the **exact commit CI validated** (`workflow_run.head_sha`, not a possibly-newer
+`main` HEAD). That push triggers one Vercel production build.
+
+Tests stay a release gate: a red CI run never promotes, so broken commits never
+reach production. The workflow shares a concurrency group with the manual
+promote below, so the two can never push `release` simultaneously, and it refuses
+to promote if `release` is not an ancestor of the validated commit.
+
+Build-rate note: because every green `main` commit now deploys, rapidly merging
+many PRs produces one Vercel build each. That is the intended cost of
+auto-deploy; if it ever strains the Vercel Hobby build-rate allowance, batch
+merges or fall back to manual promotion (disable/relax the auto-deploy workflow).
 
 ## One-time Vercel setup
 
@@ -22,7 +40,10 @@ After the release-control pull request is merged:
 
 Do not delete the Git integration. Vercel still needs it to build pushes to `release`.
 
-## Deploy a tested main commit
+## Manual promote (override)
+
+Auto-deploy handles the normal path. Use the manual workflow only to re-deploy
+without a new commit, or to promote when auto-deploy is intentionally disabled.
 
 1. Confirm the latest `main` CI run is green.
 2. Open the repository's **Actions** tab.
@@ -49,8 +70,7 @@ For an urgent hosting rollback, use Vercel's production rollback controls.
 For a code-based rollback:
 
 1. Revert the unwanted change on `main` with a normal pull request.
-2. Wait for CI to pass.
-3. Run **Promote main to production release** again.
+2. Wait for CI to pass — auto-deploy then promotes the revert to `release`.
 
 This preserves an auditable, forward-only Git history.
 

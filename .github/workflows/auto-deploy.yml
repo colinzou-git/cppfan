@@ -1,0 +1,78 @@
+name: Auto deploy main to production
+
+# Auto-deploy on every push to main, gated on CI. Vercel only deploys the
+# `release` branch (see vercel.json), and promotion was previously manual
+# (promote-release.yml). This automates that step: when CI succeeds for a main
+# commit, fast-forward `release` to that exact commit, which triggers the Vercel
+# production deployment. Tests stay a release gate — a red CI run never promotes.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+# Share the manual workflow's group so an auto-promote and a manual promote can
+# never push `release` at the same time.
+concurrency:
+  group: promote-production-release
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Fast-forward release to the CI-passed commit
+    # Only the successful CI run for a real main push promotes. PR runs are
+    # filtered out by the branches list above.
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out the commit that passed CI
+        uses: actions/checkout@v6
+        with:
+          # Deploy exactly what CI validated, not whatever main points at now —
+          # main may have advanced to an un-tested commit since CI started.
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Validate release history
+        id: release_state
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin release:refs/remotes/origin/release || true
+
+          if git show-ref --verify --quiet refs/remotes/origin/release; then
+            if ! git merge-base --is-ancestor origin/release HEAD; then
+              echo "release is not an ancestor of the CI-passed commit. Refusing to rewrite production history."
+              echo "Reconcile release with main manually, then re-run CI or promote manually."
+              exit 1
+            fi
+
+            if [ "$(git rev-parse origin/release)" = "$(git rev-parse HEAD)" ]; then
+              echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+              echo "release already points to this commit; nothing to deploy."
+              exit 0
+            fi
+          fi
+
+          echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+
+      - name: Promote to release (triggers Vercel deploy)
+        if: steps.release_state.outputs.up_to_date != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:refs/heads/release
+          echo "Promoted $(git rev-parse --short=7 HEAD) to release; Vercel will deploy it." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report no-op promotion
+        if: steps.release_state.outputs.up_to_date == 'true'
+        shell: bash
+        run: echo "release already up to date; no Vercel deployment was triggered." >> "$GITHUB_STEP_SUMMARY"
