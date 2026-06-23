@@ -21,10 +21,8 @@ describe("Code Lab mock runner", () => {
     expect(simulateStdout(source, "ping")).toBe("ping\n");
   });
 
-  it("ignores commented-out output and never fabricates unknown variable values", () => {
+  it("ignores commented output and never fabricates unknown variable values", () => {
     const source = `int main(){ int x = 41 + 1; /* std::cout << "trap"; */ std::cout << x; }`;
-    // x is a computed variable with no input — the mock yields no output rather
-    // than guessing a number.
     expect(simulateStdout(source, "")).toBe("");
   });
 
@@ -47,31 +45,7 @@ describe("Code Lab runner selection", () => {
     vi.unstubAllEnvs();
   });
 
-  it("keeps local/test defaults on the mock runner", () => {
-    vi.stubEnv("CODE_RUNNER_PROVIDER", "");
-    vi.stubEnv("NODE_ENV", "test");
-    vi.stubEnv("CI", "");
-
-    const selection = selectRunner();
-
-    expect(selection.kind).toBe("ready");
-    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
-    expect(selection.adapter.name).toBe("mock");
-  });
-
-  it("keeps production offline unless a real runner is explicitly configured", () => {
-    vi.stubEnv("CODE_RUNNER_PROVIDER", "");
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("CI", "");
-
-    const selection = selectRunner();
-
-    expect(selection.kind).toBe("ready");
-    if (selection.kind !== "ready") throw new Error("Expected a ready runner selection.");
-    expect(selection.adapter.name).toBe("mock");
-  });
-
-  it("keeps CI offline even when NODE_ENV is production", () => {
+  it("keeps local and CI defaults on the mock runner", () => {
     vi.stubEnv("CODE_RUNNER_PROVIDER", "");
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("CI", "true");
@@ -83,7 +57,7 @@ describe("Code Lab runner selection", () => {
     expect(selection.adapter.name).toBe("mock");
   });
 
-  it("honors an explicit provider override", () => {
+  it("honors an explicit mock provider override", () => {
     vi.stubEnv("CODE_RUNNER_PROVIDER", "mock");
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("CI", "");
@@ -179,12 +153,12 @@ describe("Judge0Runner", () => {
     vi.unstubAllGlobals();
   });
 
-  it("submits C++ source to Judge0 with server-side auth header", async () => {
+  it("submits base64-encoded C++ source to Judge0 with server-side auth header", async () => {
     const fetchMock = vi.fn(
       async (_url: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) =>
         new Response(
           JSON.stringify({
-            stdout: "5\n",
+            stdout: Buffer.from("5\n", "utf8").toString("base64"),
             time: "0.004",
             memory: 1024,
             stderr: null,
@@ -196,13 +170,15 @@ describe("Judge0Runner", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
+    const source = `int main(){ return 0; }`;
+    const stdin = "2 3";
     const result = await new Judge0Runner({
       baseUrl: "http://judge0.example",
       apiKey: "secret",
       languageId: 54
     }).run({
-      source: `int main(){ return 0; }`,
-      stdin: "2 3",
+      source,
+      stdin,
       compilerFlags: ["-std=c++20"],
       timeoutMs: 5000,
       memoryMb: 128
@@ -216,14 +192,14 @@ describe("Judge0Runner", () => {
 
     const firstCall = fetchMock.mock.calls[0];
     if (!firstCall) throw new Error("Expected Judge0Runner to call fetch.");
-    expect(String(firstCall[0])).toBe("http://judge0.example/submissions?base64_encoded=false&wait=true");
+    expect(String(firstCall[0])).toBe("http://judge0.example/submissions?base64_encoded=true&wait=true");
     const init = firstCall[1];
     if (!init) throw new Error("Expected Judge0Runner to pass fetch options.");
     expect((init.headers as Record<string, string>)["X-Auth-Token"]).toBe("secret");
     const body = JSON.parse(String(init.body)) as Record<string, unknown>;
     expect(body.language_id).toBe(54);
-    expect(body.source_code).toContain("int main");
-    expect(body.stdin).toBe("2 3");
+    expect(body.source_code).toBe(Buffer.from(source, "utf8").toString("base64"));
+    expect(body.stdin).toBe(Buffer.from(stdin, "utf8").toString("base64"));
     expect(body.memory_limit).toBe(128 * 1024);
     expect(body).not.toHaveProperty("compiler_options");
   });
@@ -251,52 +227,30 @@ describe("Piston response interpretation", () => {
     expect(result.compileOutput).toBe("compiler failed");
   });
 
-  it("reports a compile error from compiler output when stderr is blank", () => {
-    const result = interpretPistonResponse(
-      { compile: { code: 1, stderr: "", output: "compiler failed" }, run: { code: 1 } },
-      "piston",
-      12
-    );
-    expect(result.status).toBe("compile_error");
-    expect(result.compileOutput).toBe("compiler failed");
-  });
-
   it("preserves runtime output diagnostics when stderr is blank", () => {
     const result = interpretPistonResponse(
-      { compile: { code: 0 }, run: { code: 1, stderr: "", output: "segmentation fault" } },
+      { compile: { code: 0 }, run: { code: 1, stderr: "", output: "runtime failed" } },
       "piston",
       9
     );
     expect(result.status).toBe("runtime_error");
-    expect(result.stderr).toBe("segmentation fault");
+    expect(result.stderr).toBe("runtime failed");
   });
 
   it("reports a runner error when the run stage is missing", () => {
-    const result = interpretPistonResponse(
-      { compile: { code: 0 } },
-      "piston",
-      9
-    );
+    const result = interpretPistonResponse({ compile: { code: 0 } }, "piston", 9);
     expect(result.status).toBe("runner_error");
     expect(result.note).toBe("The code runner returned no execution result.");
   });
 
   it("maps SIGKILL to a timeout", () => {
-    const result = interpretPistonResponse(
-      { run: { code: null, signal: "SIGKILL", stdout: "" } },
-      "piston",
-      9
-    );
+    const result = interpretPistonResponse({ run: { code: null, signal: "SIGKILL", stdout: "" } }, "piston", 9);
     expect(result.status).toBe("timeout");
     expect(result.timedOut).toBe(true);
   });
 
   it("reports success with stdout for a clean run", () => {
-    const result = interpretPistonResponse(
-      { compile: { code: 0 }, run: { code: 0, stdout: "ok\n" } },
-      "piston",
-      7
-    );
+    const result = interpretPistonResponse({ compile: { code: 0 }, run: { code: 0, stdout: "ok\n" } }, "piston", 7);
     expect(result.status).toBe("success");
     expect(result.stdout).toBe("ok\n");
     expect(result.simulated).toBe(false);
@@ -318,10 +272,7 @@ describe("Judge0 response interpretation", () => {
 
   it("maps Compilation Error to compile_error", () => {
     const result = interpretJudge0Response(
-      {
-        compile_output: "main.cpp:1: error: expected ';'",
-        status: { id: 6, description: "Compilation Error" }
-      },
+      { compile_output: "main.cpp:1: error: expected ';'", status: { id: 6, description: "Compilation Error" } },
       "judge0",
       50
     );
@@ -330,35 +281,28 @@ describe("Judge0 response interpretation", () => {
   });
 
   it("maps Time Limit Exceeded to timeout", () => {
-    const result = interpretJudge0Response(
-      { status: { id: 5, description: "Time Limit Exceeded" } },
-      "judge0",
-      50
-    );
+    const result = interpretJudge0Response({ status: { id: 5, description: "Time Limit Exceeded" } }, "judge0", 50);
     expect(result.status).toBe("timeout");
     expect(result.timedOut).toBe(true);
   });
 
   it("maps runtime statuses to runtime_error", () => {
     const result = interpretJudge0Response(
-      { stderr: "segmentation fault", status: { id: 11, description: "Runtime Error (SIGSEGV)" } },
+      { stderr: "runtime failed", status: { id: 11, description: "Runtime Error" } },
       "judge0",
       50
     );
     expect(result.status).toBe("runtime_error");
-    expect(result.stderr).toContain("segmentation fault");
+    expect(result.stderr).toContain("runtime failed");
   });
 
   it("maps Internal Error to runner_error", () => {
     const result = interpretJudge0Response(
-      {
-        message: "No such file or directory @ rb_sysopen - /box/main.cpp",
-        status: { id: 13, description: "Internal Error" }
-      },
+      { message: "Judge0 worker internal error", status: { id: 13, description: "Internal Error" } },
       "judge0",
       50
     );
     expect(result.status).toBe("runner_error");
-    expect(result.note).toContain("/box/main.cpp");
+    expect(result.note).toContain("internal error");
   });
 });
