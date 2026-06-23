@@ -78,7 +78,21 @@ export async function expectNoHorizontalOverflow(page: Page) {
 }
 
 export async function expectNoRawMarkdownArtifacts(page: Page, root?: Locator) {
-  const text = root ? await root.evaluate(stripCodeAndReturnText) : await page.evaluate(stripBodyCodeAndReturnText);
+  const text = root
+    ? await root.evaluate((element) => {
+        const clone = element.cloneNode(true) as Element;
+        clone
+          .querySelectorAll("script,style,pre,code,textarea,.monaco-editor,[data-testid='code-editor']")
+          .forEach((node) => node.remove());
+        return clone.textContent ?? "";
+      })
+    : await page.evaluate(() => {
+        const clone = document.body.cloneNode(true) as Element;
+        clone
+          .querySelectorAll("script,style,pre,code,textarea,.monaco-editor,[data-testid='code-editor']")
+          .forEach((node) => node.remove());
+        return clone.textContent ?? "";
+      });
 
   const artifacts = [
     { name: "triple backtick code fence", pattern: /```/ },
@@ -132,16 +146,4 @@ export async function focusMonacoAt(page: Page, lineNumber: number, column: numb
 
 async function waitForCodeLabEditor(page: Page) {
   await page.waitForFunction(() => Boolean((window as unknown as { __cppfanCodeLabEditor?: unknown }).__cppfanCodeLabEditor));
-}
-
-function stripBodyCodeAndReturnText(): string {
-  return stripCodeAndReturnText(document.body);
-}
-
-function stripCodeAndReturnText(root: Element): string {
-  const clone = root.cloneNode(true) as Element;
-  clone
-    .querySelectorAll("script,style,pre,code,textarea,.monaco-editor,[data-testid='code-editor']")
-    .forEach((node) => node.remove());
-  return clone.textContent ?? "";
 }
