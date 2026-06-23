@@ -39,6 +39,14 @@ in the shared `useCodeLabController` hook so both layouts behave identically:
   404s for non-Code-Lab items. Column math is the pure, unit-tested
   `column-sizes.ts`.
 
+The AI tab hosts an **in-context chat** (`CodeLabChat`): it reuses the shared
+tutor transport and markdown renderer, and attaches the **current editor code**
+as the `learnerDraft` of a `lab_item` chat context at send time — so questions
+are always answered against the code on screen. The context builder is the pure
+`code-lab-chat-context.ts`, unit-tested against the chat API's own normalizer.
+Sending requires sign-in (the panel surfaces the tutor's auth/availability
+notices); compiler output and tests remain authoritative over AI replies.
+
 ## Runner architecture
 
 Untrusted C++ is **never** executed in the Next.js/Vercel process. Browser UI

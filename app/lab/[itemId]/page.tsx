@@ -38,10 +38,16 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
   }
 
   const title = result.status === "ok" ? result.data.item.title : "Code Lab";
+  const sourceVersion = result.status === "ok" ? result.data.item.updated_at ?? "1" : "1";
 
   return (
     <main className="p-3 xl:p-6">
-      <CodeLabWorkspace itemId={decodedId} title={title} config={config} />
+      <CodeLabWorkspace
+        itemId={decodedId}
+        title={title}
+        config={config}
+        sourceVersion={sourceVersion}
+      />
     </main>
   );
 }

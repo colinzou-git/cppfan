@@ -17,6 +17,7 @@ import { PredictionBeforeRun } from "./prediction-before-run";
 import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { ResizableColumns } from "./resizable-columns";
+import { CodeLabChat } from "./code-lab-chat";
 import { useCodeLabController } from "./use-code-lab-controller";
 
 type DockTab = "output" | "tests" | "stdin" | "ai";
@@ -31,11 +32,14 @@ type DockTab = "output" | "tests" | "stdin" | "ai";
 export function CodeLabWorkspace({
   itemId,
   title,
-  config
+  config,
+  sourceVersion = "1"
 }: {
   itemId: string;
   title: string;
   config: LearningItemCodeLab;
+  /** Item version (updated_at) so saved chat threads invalidate when the item changes. */
+  sourceVersion?: string;
 }) {
   const c = useCodeLabController({ itemId, config });
   const [tab, setTab] = useState<DockTab>("output");
@@ -135,6 +139,14 @@ export function CodeLabWorkspace({
 
   const aiPanel = (
     <div className="flex flex-col gap-3">
+      <CodeLabChat
+        itemId={itemId}
+        title={title}
+        prompt={config.prompt ?? title}
+        topic={config.skillTags && config.skillTags.length > 0 ? config.skillTags.join(", ") : undefined}
+        sourceVersion={sourceVersion}
+        source={c.source}
+      />
       <ErrorRemediationPanel recommendation={c.remediation} onAction={c.handleRemediationAction} />
       {c.remediation ? null : <ScaffoldRecommendationCard recommendation={c.scaffold} />}
       <AiCodeReviewPanel review={c.review} pending={c.busy === "review" || c.busy === "explain"} />
