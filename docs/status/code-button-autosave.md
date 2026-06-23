@@ -39,11 +39,33 @@ slice, then update this doc.
   (`code-lab-draft-status`) in the workspace. Applies to embedded + full-page
   labs. Migration deploys via the db CI job / supabase-production-migrations —
   not runnable on this host; verify in CI.
-- [ ] **Slice 3 — Exercises 'Code' button.** Strategy: add Code Lab configs for
-  exercises that can run in-app (or link only those that have one; flag the rest).
-  Needs design — record approach here before building.
-- [ ] **Slice 4 — Interview coding 'Code' button.** Same config strategy for
-  interview coding questions surfaced by the session runner.
+- [ ] **Slice 3 — Exercises 'Code' button.** BLOCKED on a product decision.
+  Findings: exercises (`exercise-catalog.ts`, e.g. `dsa-two-sum-sorted`) are
+  **repo-based, multi-file `.hpp`** exercises run via `scripts/exercises/*.sh` /
+  Codespace. None has an in-app Code Lab config, and the in-app runner is
+  single-file Judge0 — so `/lab/[id]` cannot run them faithfully without
+  authoring a new single-file config + tests per exercise (large content effort,
+  changes the exercise's nature). Options for the user:
+  (a) author in-app single-file configs for a chosen subset; (b) point the
+  exercise 'Code' button at the Codespace/repo flow instead of `/lab`;
+  (c) skip exercises.
+- [ ] **Slice 4 — Interview coding 'Code' button.** BLOCKED on a product
+  decision. Findings: interview coding problems (`problem-catalog.ts`, ids like
+  `iv.sliding.longest-window-under-budget`) already have their **own judge +
+  submission pipeline** (`judge-client.ts`, `judge-test-suites.ts`), separate
+  from the Code Lab. Routing them to `/lab` would duplicate or conflict with that
+  flow. Options: (a) add a 'Code' affordance into the existing interview judge UI
+  instead of `/lab`; (b) map specific interview problems to in-app Code Lab
+  configs; (c) skip interview. Note: some diagnostic items are `learning_item`s
+  that may already be code-capable — those could get the button cheaply.
+
+## Decision needed (asked the user 2026-06-23)
+
+Exercises and interview coding both live in separate systems (repo harness;
+interview judge). The full-page `/lab` path only fits items with an in-app Code
+Lab config. Awaiting the user's choice on approach before building Slices 3/4.
+Hourly resume loop stopped — Slices 1–2 (the cleanly auto-completable core) are
+shipped; the rest needs this decision, not more unattended iterations.
 
 ## Constraints / parity notes
 
