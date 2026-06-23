@@ -78,9 +78,7 @@ export async function expectNoHorizontalOverflow(page: Page) {
 }
 
 export async function expectNoRawMarkdownArtifacts(page: Page, root?: Locator) {
-  const text = root
-    ? await root.evaluate((element) => visibleTextWithoutCode(element))
-    : await page.evaluate(() => visibleTextWithoutCode(document.body));
+  const text = root ? await root.evaluate(stripCodeAndReturnText) : await page.evaluate(stripBodyCodeAndReturnText);
 
   const artifacts = [
     { name: "triple backtick code fence", pattern: /```/ },
@@ -136,7 +134,11 @@ async function waitForCodeLabEditor(page: Page) {
   await page.waitForFunction(() => Boolean((window as unknown as { __cppfanCodeLabEditor?: unknown }).__cppfanCodeLabEditor));
 }
 
-function visibleTextWithoutCode(root: Element): string {
+function stripBodyCodeAndReturnText(): string {
+  return stripCodeAndReturnText(document.body);
+}
+
+function stripCodeAndReturnText(root: Element): string {
   const clone = root.cloneNode(true) as Element;
   clone
     .querySelectorAll("script,style,pre,code,textarea,.monaco-editor,[data-testid='code-editor']")
