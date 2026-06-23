@@ -2,6 +2,7 @@
 
 import { Editor, loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
+import { useEffect, useRef } from "react";
 import type { CodeEditorProps } from "./code-editor";
 
 // Use the bundled monaco-editor instead of @monaco-editor/react's default CDN
@@ -28,15 +29,43 @@ if (typeof window !== "undefined") {
 }
 
 export default function MonacoCodeEditor({ value, onChange, label, readOnly = false }: CodeEditorProps) {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const applyingExternalValueRef = useRef(false);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    const model = editor?.getModel();
+    if (!editor || !model || model.getValue() === value) return;
+
+    const selection = editor.getSelection();
+    const scrollTop = editor.getScrollTop();
+    const scrollLeft = editor.getScrollLeft();
+
+    applyingExternalValueRef.current = true;
+    editor.executeEdits("cppfan-external-value", [
+      {
+        range: model.getFullModelRange(),
+        text: value
+      }
+    ]);
+    if (selection) editor.setSelection(selection);
+    editor.setScrollTop(scrollTop);
+    editor.setScrollLeft(scrollLeft);
+    applyingExternalValueRef.current = false;
+  }, [value]);
+
   return (
     <Editor
       height="320px"
       defaultLanguage="cpp"
       language="cpp"
       theme="vs"
-      value={value}
-      onChange={(next) => onChange(next ?? "")}
+      defaultValue={value}
+      onChange={(next) => {
+        if (!applyingExternalValueRef.current) onChange(next ?? "");
+      }}
       onMount={(editor) => {
+        editorRef.current = editor;
         // Expose the editor instance so end-to-end tests can drive edits through
         // Monaco's own API (setValue), which fires the same change handler a
         // keystroke would. Monaco keyboard automation drops/reorders characters
