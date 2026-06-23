@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { setMilestone } from "./capstone-actions";
@@ -198,7 +199,25 @@ export function CapstoneTracksView({
                       ) : null}
 
                       <div className="flex flex-wrap gap-2">
-                        {status === "none" ? (
+                        {/* In-app-lab milestones get a Code button to the full-screen
+                            editor; opening it implies starting work, so it auto-marks
+                            the milestone started and replaces the standalone start
+                            button. Other milestones keep Mark started (they have no
+                            in-app editor to open). */}
+                        {inAppLab ? (
+                          <Button asChild data-testid="capstone-milestone-code">
+                            <Link
+                              href={`/lab/${encodeURIComponent(milestone.id)}`}
+                              onClick={() => {
+                                if (status === "none") apply(milestone.id, "started", null);
+                              }}
+                            >
+                              <Code2 className="h-4 w-4" aria-hidden="true" />
+                              Code
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {status === "none" && !inAppLab ? (
                           <Button
                             type="button"
                             onClick={() => apply(milestone.id, "started", null)}
