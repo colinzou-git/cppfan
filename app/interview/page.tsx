@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Target } from "lucide-react";
+import { Target, Code2 } from "lucide-react";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { groupInterviewProblems } from "@/features/interview/interview-catalog-view";
 
@@ -72,29 +72,39 @@ export default function InterviewPage() {
                     </ul>
                   ) : null}
 
-                  <ItemHelpLinks
-                    context={{
-                      schemaVersion: 1,
-                      sourceKind: "interview_question",
-                      sourceId: problem.id,
-                      sourceVersion: String(problem.version),
-                      title: problem.title,
-                      prompt: problem.prompt,
-                      topic: problem.patternTags.join(", "),
-                      instructions: [
-                        `Constraints: ${problem.constraints}`,
-                        `Target complexity: ${problem.targetComplexity}`,
-                        ...problem.requiredEdgeCases.map((edgeCase) => `Edge case to consider: ${edgeCase}`),
-                        ...problem.visibleExamples.map((example) => `Visible example: ${example.input} → ${example.output}`)
-                      ],
-                      assessmentState: "unanswered",
-                      revealPolicy: "hint_only",
-                      metadata: {
-                        difficulty: problem.difficulty,
-                        sessionMode: "practice"
-                      }
-                    }}
-                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={`/interview/session?problem=${encodeURIComponent(problem.id)}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700"
+                      data-testid="interview-problem-code"
+                    >
+                      <Code2 className="h-4 w-4" aria-hidden="true" />
+                      Code
+                    </Link>
+                    <ItemHelpLinks
+                      context={{
+                        schemaVersion: 1,
+                        sourceKind: "interview_question",
+                        sourceId: problem.id,
+                        sourceVersion: String(problem.version),
+                        title: problem.title,
+                        prompt: problem.prompt,
+                        topic: problem.patternTags.join(", "),
+                        instructions: [
+                          `Constraints: ${problem.constraints}`,
+                          `Target complexity: ${problem.targetComplexity}`,
+                          ...problem.requiredEdgeCases.map((edgeCase) => `Edge case to consider: ${edgeCase}`),
+                          ...problem.visibleExamples.map((example) => `Visible example: ${example.input} → ${example.output}`)
+                        ],
+                        assessmentState: "unanswered",
+                        revealPolicy: "hint_only",
+                        metadata: {
+                          difficulty: problem.difficulty,
+                          sessionMode: "practice"
+                        }
+                      }}
+                    />
+                  </div>
 
                   {problem.hintLadder.length > 0 ? (
                     <details>

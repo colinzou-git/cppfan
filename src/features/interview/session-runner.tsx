@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
 import { submitJudgeAttempt } from "./judge-actions";
+import { interviewDraftStorageKey } from "./interview-draft-storage";
 import { summarizeSessionReview } from "./session-review";
 import { SessionReview } from "./session-review-view";
 import {
@@ -179,6 +180,33 @@ export function SessionRunner({
   useEffect(() => {
     setSession((prev) => ensureClientSessionIdentity(prev));
   }, []);
+
+  // Resume a locally-saved code draft when the server/session has none (#431) —
+  // e.g. a signed-out learner returning to the same problem. The server draft
+  // (signed in) always wins, so this only fills an empty draft.
+  useEffect(() => {
+    if (initialState.codeDraft.trim().length > 0) return;
+    try {
+      const saved = window.localStorage.getItem(interviewDraftStorageKey(initialState.problemId));
+      if (saved) setSession((prev) => updateSessionEvidence(prev, { codeDraft: saved }));
+    } catch {
+      // localStorage unavailable — fall back to the empty draft.
+    }
+  }, [initialState.codeDraft, initialState.problemId]);
+
+  // Mirror the draft to localStorage as it changes (debounced) so it survives a
+  // refresh/navigation even before the next blur-time server save.
+  useEffect(() => {
+    const key = interviewDraftStorageKey(session.problemId);
+    const handle = setTimeout(() => {
+      try {
+        window.localStorage.setItem(key, session.codeDraft);
+      } catch {
+        // best-effort
+      }
+    }, 800);
+    return () => clearTimeout(handle);
+  }, [session.codeDraft, session.problemId]);
 
   // Live timer: while in progress, accrue one second at a time and persist the
   // elapsed time on a coarse cadence so a refresh resumes near where the learner

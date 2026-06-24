@@ -16,15 +16,27 @@ export const metadata = {
   title: "Interview session — cppFan"
 };
 
-export default async function InterviewSessionPage() {
+export default async function InterviewSessionPage({
+  searchParams
+}: {
+  searchParams: Promise<{ problem?: string | string[] }>;
+}) {
   const saved = await getCurrentSession();
 
-  // Resume the saved session, or start a fresh practice session on the first
-  // catalog problem.
+  // A `?problem=<id>` entry point (from the catalog Code button, #431) starts a
+  // fresh session on that problem unless the saved session is already on it.
+  const requested = await searchParams;
+  const requestedId = typeof requested.problem === "string" ? requested.problem : undefined;
+  const requestedProblem = requestedId ? getInterviewProblem(requestedId) : null;
+
+  // Resume the saved session, or start a fresh practice session on the requested
+  // (or first) catalog problem.
   const problems = getInterviewProblems();
   const fallbackProblemId = problems[0]?.id ?? "";
   const state: SessionState =
-    saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes: 45 });
+    requestedProblem && (!saved || saved.problemId !== requestedProblem.id)
+      ? createSession({ problemId: requestedProblem.id, mode: "practice", durationMinutes: 45 })
+      : saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes: 45 });
 
   const problem = getInterviewProblem(state.problemId) ?? problems[0] ?? null;
   const judgeIoDescription = problem ? getJudgeIoDescription(problem.id) : null;

@@ -78,11 +78,22 @@ slice, then update this doc.
   tests on `/lab` (attempt recorded), so no capability is lost — running just
   moves to `/lab`. e2e + gate unit tests updated.
 
-## Remaining
+- [x] **Slice 4 — Interview 'Code' affordance (Both).** DONE. (a) Entry point: a
+  'Code' button (`interview-problem-code`) on each problem in the interview hub
+  links to `/interview/session?problem=<id>`; the session page honors that param,
+  starting a fresh session on the chosen problem unless the saved session is
+  already on it. (b) Draft autosave: the SessionRunner code draft now hydrates
+  from + debounce-saves to localStorage (`interview-draft-storage.ts`),
+  complementing the existing signed-in session-store persistence (so signed-out /
+  offline drafts resume too). Kept the interview's own judge pipeline — no /lab
+  routing.
 
-- [ ] **Slice 4 — Interview 'Code' affordance** in the existing judge UI. Locate
-  where interview coding problems are presented/submitted (session-runner +
-  judge-client) and add a Code affordance there. Not yet started.
+## Feature complete
+
+All decided slices shipped: Labs Code button, cross-device autosave/resume,
+inline→preview collapse with attempt-based completion gating, exercises skipped
+(by decision), interview Code entry point + draft autosave. The hourly resume
+loop was already stopped after the core slices.
 
 ## Constraints / parity notes
 
