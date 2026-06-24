@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
 import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events/event-service";
+import { getExerciseById } from "@/features/exercises/exercise-catalog";
+import { setExerciseProgress } from "@/features/exercises/exercise-progress";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
 
@@ -54,6 +56,18 @@ export async function recordCodeAttempt(input: {
   }
 
   const evidenceRecorded = await recordCodeAttemptSkillEvents(input).catch(() => false);
+
+  // #440: a passing real (non-simulated) test run for a write-code exercise
+  // auto-completes that exercise. recordEvents:false avoids duplicate code_passed
+  // spam — the attempt evidence above already records it.
+  if (isPassingRealTestAttempt(input.test) && getExerciseById(input.itemId)) {
+    await setExerciseProgress({
+      exerciseId: input.itemId,
+      status: "completed",
+      recordEvents: false
+    }).catch(() => "error");
+  }
+
   return attemptRecorded || evidenceRecorded;
 }
 

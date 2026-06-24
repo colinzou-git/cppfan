@@ -44,6 +44,13 @@ describe("POST /api/code/run", () => {
     expect(body.result.stdout).toBe("Hello, cppFan!\n");
     expect(body.result.simulated).toBe(true);
   });
+
+  it("runs a write-code exercise Code Lab config (#440)", async () => {
+    const response = await runPost(
+      jsonRequest({ itemId: "dsa-two-sum-sorted", source: "int main(){return 0;}" })
+    );
+    expect(response.status).toBe(200);
+  });
 });
 
 describe("POST /api/code/test", () => {
@@ -53,6 +60,16 @@ describe("POST /api/code/test", () => {
     const body = await response.json();
     expect(body.result.passed).toBe(body.result.total);
     expect(body.result.hiddenTotal).toBeGreaterThan(0);
+    expect(JSON.stringify(body.result)).not.toContain("hidden:");
+  });
+
+  it("tests a write-code exercise without leaking hidden I/O (#440)", async () => {
+    const response = await testPost(
+      jsonRequest({ itemId: "dsa-two-sum-sorted", source: "int main(){return 0;}" })
+    );
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.result.total).toBeGreaterThan(0);
     expect(JSON.stringify(body.result)).not.toContain("hidden:");
   });
 });

@@ -1,5 +1,6 @@
 import type { LearningItemCodeLab } from "./code-lab-types";
 import { PROJECT_CODE_LAB_CONFIGS } from "./project-code-lab-configs";
+import { EXERCISE_CODE_LAB_CONFIGS } from "./exercise-code-lab-configs";
 
 /**
  * Code Lab metadata attached to existing learning items (#407). This is the
@@ -189,7 +190,10 @@ int main() {
   // #439 project-level Code Lab configs. Keyed by PROJECT id (not milestone id):
   // each project compiles/tests one main.cpp codebase; milestones are checkpoints
   // labelled inside the prompt and on visible tests, never compiled separately.
-  ...PROJECT_CODE_LAB_CONFIGS
+  ...PROJECT_CODE_LAB_CONFIGS,
+  // #440 write-code exercise Code Lab configs, keyed by EXERCISE id. Each is an
+  // atomic test-backed task opened at /lab/<exerciseId>.
+  ...EXERCISE_CODE_LAB_CONFIGS
 };
 
 /**

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
+import { Code2 } from "lucide-react";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -58,8 +60,8 @@ export function ExerciseCatalogView({
       <div>
         <h2 className="text-xl font-black text-slate-900">Write-code exercises</h2>
         <p className="text-sm text-slate-600">
-          Test-backed C++ exercises you build in a Codespace or your own editor — cppFan never runs
-          your code. Reference solutions in the public repo are honor-system material.
+          Practice C++ by editing code directly in cppFan. Use the Code button to open the built-in
+          editor, run your program, test it, and get AI help.
         </p>
       </div>
 
@@ -115,6 +117,12 @@ export function ExerciseCatalogView({
             </div>
 
             <div className="flex flex-wrap gap-2">
+              <Button asChild data-testid="exercise-code">
+                <Link href={`/lab/${encodeURIComponent(exercise.id)}`}>
+                  <Code2 className="h-4 w-4" aria-hidden="true" />
+                  Code
+                </Link>
+              </Button>
               <Button
                 type="button"
                 variant="secondary"
@@ -134,9 +142,10 @@ export function ExerciseCatalogView({
                   prompt: `Complete the ${exercise.title} C++ exercise and pass its repository tests.`,
                   topic: exercise.skillTitles.join(", "),
                   instructions: [
-                    `Prepare a working copy with scripts/exercises/prepare.sh ${exercise.id}.`,
-                    `Edit ${exercise.editableFiles.join(", ")}.`,
-                    `Run scripts/exercises/test.sh ${exercise.id}.`,
+                    `Open the built-in Code Lab at /lab/${exercise.id}.`,
+                    `Edit the starter C++ code for ${exercise.title}.`,
+                    `Run visible tests in cppFan until they pass.`,
+                    `Advanced local workflow if desired: scripts/exercises/prepare.sh ${exercise.id}; edit ${exercise.editableFiles.join(", ")}; run scripts/exercises/test.sh ${exercise.id}.`,
                     ...exercise.hints.map((hint) => `Hint available to the learner: ${hint}`)
                   ],
                   learnerDraft: reflection || undefined,
@@ -154,19 +163,15 @@ export function ExerciseCatalogView({
             {isOpen ? (
               <div className="grid gap-2 rounded-xl bg-slate-50 p-3 text-sm text-slate-700" data-testid="exercise-instructions">
                 <p>
-                  Open this repository in a GitHub Codespace (or clone it locally). On iPhone, use the
-                  GitHub app or open the Codespace in your mobile browser.
+                  Recommended: click Code to solve this exercise in cppFan’s built-in editor. Run tests
+                  there first.
                 </p>
                 <ol className="ml-4 list-decimal">
-                  <li>
-                    Prepare a working copy: <code>scripts/exercises/prepare.sh {exercise.id}</code>
-                  </li>
-                  <li>
-                    Edit: <code>{exercise.editableFiles.join(", ")}</code>
-                  </li>
-                  <li>
-                    Run the tests: <code>scripts/exercises/test.sh {exercise.id}</code>
-                  </li>
+                  <li>Read the requirements and hints.</li>
+                  <li>Open the Code editor for this exercise.</li>
+                  <li>Edit the starter code.</li>
+                  <li>Run visible tests and improve until they pass.</li>
+                  <li>Use AI feedback if you get stuck.</li>
                 </ol>
                 {exercise.hints.length > 0 ? (
                   <details>
@@ -178,9 +183,23 @@ export function ExerciseCatalogView({
                     </ul>
                   </details>
                 ) : null}
+                <details>
+                  <summary className="cursor-pointer font-semibold">Advanced local workflow</summary>
+                  <ol className="ml-4 list-decimal">
+                    <li>
+                      Prepare a local copy: <code>scripts/exercises/prepare.sh {exercise.id}</code>
+                    </li>
+                    <li>
+                      Edit: <code>{exercise.editableFiles.join(", ")}</code>
+                    </li>
+                    <li>
+                      Run local tests: <code>scripts/exercises/test.sh {exercise.id}</code>
+                    </li>
+                  </ol>
+                </details>
                 <p className="text-xs text-slate-500">
-                  Mark it complete only after the tests pass for you — this is self-reported and never
-                  declares mastery on its own.
+                  Passing the built-in tests records progress automatically; you can also self-report
+                  with Mark tests passed. Completion never declares mastery on its own.
                 </p>
               </div>
             ) : null}

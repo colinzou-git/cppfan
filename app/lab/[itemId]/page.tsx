@@ -4,10 +4,11 @@ import { getLearningItemWithDetails } from "@/features/learning-items/learning-i
 import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
 import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
+import { getExerciseById } from "@/features/exercises/exercise-catalog";
 
 /**
- * Dedicated full-page Code Lab (#431, #439). Resolves both lesson Code Labs and
- * project-level Project Labs (one main.cpp per project). Other ids 404 so the
+ * Dedicated full-page Code Lab (#431, #439, #440). Resolves lesson Code Labs,
+ * write-code exercises, and project-level Project Labs. Other ids 404 so the
  * route can't be used as a generic shell. The workspace owns the wide, resizable
  * layout, so this page renders nearly full-bleed.
  */
@@ -18,6 +19,24 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
   const config = getCodeLabConfigForItem(decodedId);
   if (!config) {
     notFound();
+  }
+
+  // Write-code exercises (#440) carry no learning_items row; resolve them from
+  // the static catalog and render the workspace with an exercise-level back link.
+  const exercise = getExerciseById(decodedId);
+  if (exercise) {
+    return (
+      <main className="p-3 xl:p-6">
+        <CodeLabWorkspace
+          itemId={decodedId}
+          title={exercise.title}
+          config={config}
+          sourceVersion="write-code-exercise:1"
+          backHref="/exercises"
+          backLabel="Back to write-code exercises"
+        />
+      </main>
+    );
   }
 
   // Project labs (#439) carry no learning_items row; resolve them from the static

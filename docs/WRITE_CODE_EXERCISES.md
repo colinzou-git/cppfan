@@ -1,10 +1,33 @@
-# Write-Code Exercises (Codespaces workflow)
+# Write-Code Exercises
 
-Status: implemented roadmap issue #81 / #128 workflow. Quizzes, code reading,
-and Parsons puzzles scaffold understanding, but proficiency needs writing,
-compiling, testing, and debugging real code. These exercises run in **GitHub
-Codespaces** (or any machine with a C++20 compiler); cppFan never executes
-arbitrary C++ on its web server.
+Status: implemented roadmap issue #81 / #128 workflow; in-app Code Lab is the
+primary path as of #440. Quizzes, code reading, and Parsons puzzles scaffold
+understanding, but proficiency needs writing, compiling, testing, and debugging
+real code.
+
+## Primary path: in-app Code Lab (#440)
+
+On `/exercises`, each write-code exercise card has a **Code** button that opens
+the built-in full-screen Code Lab at `/lab/<exerciseId>` (e.g.
+`/lab/dsa-two-sum-sorted`). There the learner edits starter C++, runs the
+program, runs visible/hidden tests on the keyless Piston runner, and gets AI
+help — all in the browser, on phone/tablet/desktop. Passing the real
+(non-simulated) tests records code-attempt evidence and auto-marks the exercise
+completed (without duplicate skill-event spam); `Mark tests passed` remains as a
+manual self-report. AI Chat / Chat history stay scoped to
+`sourceKind: "write_code_exercise"` + the exercise id.
+
+Exercise-level Code Lab configs live in
+`src/features/code-lab/exercise-code-lab-configs.ts`, keyed by exercise id. They
+are single-file stdin/stdout harnesses that preserve the spirit of the original
+header-based packages; hidden test I/O (if any) stays server-side.
+
+## Advanced path: local / Codespaces workflow
+
+The original test-backed packages still exist for learners who prefer a real
+toolchain (kept under the card's "Advanced local workflow"). These run in
+**GitHub Codespaces** (or any machine with a C++20 compiler); that path does not
+execute C++ on cppFan's web server.
 
 ## Package layout
 

@@ -49,10 +49,17 @@ export async function setExerciseProgress(input: {
   exerciseId: string;
   status: ExerciseStatus;
   reflection?: string | null;
+  /**
+   * Record write-code skill events for this write (#440). Defaults to true for
+   * explicit learner actions; pass false when auto-completing from a passing
+   * Code Lab test, which already records deterministic attempt evidence.
+   */
+  recordEvents?: boolean;
 }): Promise<ExerciseWriteOutcome> {
   if (!getExerciseById(input.exerciseId)) {
     return "invalid";
   }
+  const shouldRecordEvents = input.recordEvents ?? true;
 
   const supabase = await createClient();
   if (!supabase) {
@@ -66,22 +73,30 @@ export async function setExerciseProgress(input: {
   }
 
   const now = new Date().toISOString();
-  const { error } = await supabase.from("exercise_progress").upsert(
-    {
-      user_id: user.id,
-      exercise_id: input.exerciseId,
-      status: input.status,
-      reflection: input.reflection ?? null,
-      completed_at: input.status === "completed" ? now : null,
-      updated_at: now
-    },
-    { onConflict: "user_id,exercise_id" }
-  );
+  // Omit reflection when not provided so a conflict update preserves any existing
+  // learner reflection (e.g. auto-completion from a passing Code Lab test). On
+  // first insert the column falls back to its default.
+  const row: Record<string, unknown> = {
+    user_id: user.id,
+    exercise_id: input.exerciseId,
+    status: input.status,
+    completed_at: input.status === "completed" ? now : null,
+    updated_at: now
+  };
+  if (input.reflection !== undefined) {
+    row.reflection = input.reflection;
+  }
+  const { error } = await supabase.from("exercise_progress").upsert(row, {
+    onConflict: "user_id,exercise_id"
+  });
   if (error) {
     return "error";
   }
 
-  // Best-effort mastery evidence (separate from FSRS).
-  await recordSkillEvents(writeCodeEvents(input.exerciseId, input.status));
+  // Best-effort mastery evidence (separate from FSRS). Skipped for auto-completion
+  // from Code Lab tests, which already record deterministic attempt evidence.
+  if (shouldRecordEvents) {
+    await recordSkillEvents(writeCodeEvents(input.exerciseId, input.status));
+  }
   return "ok";
 }
