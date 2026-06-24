@@ -68,7 +68,10 @@ test.describe("wide desktop responsive layout", () => {
   test("labs uses wide desktop space with project cards sharing a row", async ({ page }) => {
     await page.goto("/labs");
     await expect(page.getByTestId("capstone-tracks")).toBeVisible();
-    const labs = page.getByTestId("project-lab");
+    // Scope to the flat "More projects" grid: capstone-track cards also use the
+    // project-lab testid but are grouped per track, so the first two globally can
+    // sit in different stacked tracks (#439).
+    const labs = page.getByTestId("project-labs-grid").getByTestId("project-lab");
     await expect(labs.first()).toBeVisible();
     expect(await labs.count()).toBeGreaterThan(1);
 

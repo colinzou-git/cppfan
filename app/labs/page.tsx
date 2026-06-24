@@ -46,7 +46,7 @@ export default async function LabsPage() {
 
       <section className="grid gap-3" aria-label="More projects">
         <h2 className="text-xl font-black text-slate-900">More projects</h2>
-        <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3" data-testid="project-labs-grid">
           {projectLabs.map((lab) => (
             <ProjectCard
               key={lab.id}

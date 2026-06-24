@@ -29,7 +29,9 @@ test("every project card has the four project-level actions and a project-level 
     await expect(card.getByRole("link", { name: /chat history/i })).toBeVisible();
     await expect(card.getByTestId("project-mark-complete")).toBeVisible();
 
-    const href = (await card.getByTestId("project-code").locator("a").getAttribute("href")) ?? "";
+    // `Button asChild` merges data-testid onto the <a>, so the testid element is
+    // the link itself (no nested anchor).
+    const href = (await card.getByTestId("project-code").getAttribute("href")) ?? "";
     expect(href).toMatch(/\/lab\//);
     expect(href).not.toMatch(/\.m\d+/);
   }
@@ -39,7 +41,7 @@ test("CSV table summarizer Code opens the project-level Code Lab", async ({ page
   await page.goto("/labs");
 
   const card = page.locator('[data-project-id="csv-table-summarizer"]').first();
-  await card.getByTestId("project-code").locator("a").click();
+  await card.getByTestId("project-code").click();
 
   await expect(page).toHaveURL(/\/lab\/csv-table-summarizer$/);
   await expect(page.getByTestId("code-lab-workspace")).toBeVisible();
