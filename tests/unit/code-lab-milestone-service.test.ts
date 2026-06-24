@@ -34,7 +34,13 @@ describe("canMarkMilestoneComplete", () => {
   });
 
   it("blocks completion until tests have been run", () => {
-    expect(canMarkMilestoneComplete({ milestone: inApp }).ok).toBe(false);
+    const gate = canMarkMilestoneComplete({ milestone: inApp });
+    expect(gate.ok).toBe(false);
+    expect(gate.reason).toMatch(/open code/i);
+  });
+
+  it("allows completion from a persisted passing attempt (tests passed on /lab)", () => {
+    expect(canMarkMilestoneComplete({ milestone: inApp, hasPassingAttempt: true }).ok).toBe(true);
   });
 
   it("does not gate manual/Codespaces milestones", () => {

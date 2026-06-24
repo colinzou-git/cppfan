@@ -8,11 +8,19 @@ import { createClient } from "@/lib/supabase/server";
 import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
 import { CapstoneHelp } from "@/features/labs/capstone-help";
 import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
+import { canRunMilestoneInApp } from "@/features/labs/milestone-code-lab-adapter";
 import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
+import { getPassingCodeLabItemIds } from "@/features/code-lab/code-attempt-service";
 
 export default async function LabsPage() {
   const tracks = buildCapstoneTrackView();
   const milestoneProgress = await getMilestoneProgressForUser();
+  // In-app milestones now complete via a passing /lab attempt (#431); resolve
+  // which the learner has already passed so "Mark complete" stays gated.
+  const inAppMilestoneIds = tracks.flatMap((track) =>
+    track.projects.flatMap((project) => project.milestones.filter(canRunMilestoneInApp).map((m) => m.id))
+  );
+  const passingMilestoneIds = await getPassingCodeLabItemIds(inAppMilestoneIds);
 
   let authenticated = false;
   const supabase = await createClient();
@@ -39,7 +47,12 @@ export default async function LabsPage() {
         </p>
       </header>
 
-      <CapstoneTracksView tracks={tracks} initialProgress={milestoneProgress} authenticated={authenticated} />
+      <CapstoneTracksView
+        tracks={tracks}
+        initialProgress={milestoneProgress}
+        authenticated={authenticated}
+        passingMilestoneIds={passingMilestoneIds}
+      />
       <CapstoneHelp tracks={tracks} />
 
       <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">

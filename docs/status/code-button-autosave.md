@@ -59,13 +59,30 @@ slice, then update this doc.
   configs; (c) skip interview. Note: some diagnostic items are `learning_item`s
   that may already be code-capable — those could get the button cheaply.
 
-## Decision needed (asked the user 2026-06-23)
+## Decisions made (user, 2026-06-23)
 
-Exercises and interview coding both live in separate systems (repo harness;
-interview judge). The full-page `/lab` path only fits items with an in-app Code
-Lab config. Awaiting the user's choice on approach before building Slices 3/4.
-Hourly resume loop stopped — Slices 1–2 (the cleanly auto-completable core) are
-shipped; the rest needs this decision, not more unattended iterations.
+- Exercises: **skip for now** (repo-based, no in-app runner).
+- Interview: **add a 'Code' affordance into the existing interview judge UI**, not
+  `/lab` (interview keeps its own judge pipeline). STILL TODO — needs the judge
+  UI surface located in `session-runner.tsx` / interview problem flow.
+- Inline capstone editor: **collapse to a read-only preview**; editing/running
+  moves to `/lab`.
+
+- [x] **Slice 5 — Collapse inline capstone editor to a preview.** DONE.
+  `MilestoneCodePreview` (read-only starter-code preview) replaces the inline
+  `CodeLabMilestone` (component + its unit test deleted). Completion gate
+  re-based: `canMarkMilestoneComplete` accepts `hasPassingAttempt`, fed by a new
+  best-effort `getPassingCodeLabItemIds` server query (passing
+  `code_lab_attempts`), wired through both `/labs` and `/labs/tracks/[id]`.
+  Rationale: marking complete already requires sign-in, and signed-in users run
+  tests on `/lab` (attempt recorded), so no capability is lost — running just
+  moves to `/lab`. e2e + gate unit tests updated.
+
+## Remaining
+
+- [ ] **Slice 4 — Interview 'Code' affordance** in the existing judge UI. Locate
+  where interview coding problems are presented/submitted (session-runner +
+  judge-client) and add a Code affordance there. Not yet started.
 
 ## Constraints / parity notes
 

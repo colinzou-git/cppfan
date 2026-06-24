@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
 import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
+import { canRunMilestoneInApp } from "@/features/labs/milestone-code-lab-adapter";
 import { getMilestoneProgressForUser } from "@/features/labs/milestone-progress";
+import { getPassingCodeLabItemIds } from "@/features/code-lab/code-attempt-service";
 
 export default async function CapstoneTrackPage({ params }: { params: Promise<{ trackId: string }> }) {
   const { trackId } = await params;
@@ -13,6 +15,10 @@ export default async function CapstoneTrackPage({ params }: { params: Promise<{ 
   }
 
   const milestoneProgress = await getMilestoneProgressForUser();
+  const inAppMilestoneIds = track.projects.flatMap((project) =>
+    project.milestones.filter(canRunMilestoneInApp).map((m) => m.id)
+  );
+  const passingMilestoneIds = await getPassingCodeLabItemIds(inAppMilestoneIds);
 
   let authenticated = false;
   const supabase = await createClient();
@@ -39,6 +45,7 @@ export default async function CapstoneTrackPage({ params }: { params: Promise<{ 
         tracks={[track]}
         initialProgress={milestoneProgress}
         authenticated={authenticated}
+        passingMilestoneIds={passingMilestoneIds}
         linkToTrack={false}
       />
     </main>

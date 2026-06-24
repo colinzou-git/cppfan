@@ -118,6 +118,46 @@ function codeAttemptMetadata(input: {
   };
 }
 
+/**
+ * Item ids (from the given set) for which the signed-in learner has a recorded
+ * attempt that passed every visible test (#431). Gates capstone milestone
+ * completion now that running happens on the full-screen /lab page rather than
+ * inline. Best-effort: returns [] when signed out, unconfigured, or pre-migration.
+ */
+export async function getPassingCodeLabItemIds(itemIds: string[]): Promise<string[]> {
+  if (itemIds.length === 0) return [];
+
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("code_lab_attempts")
+    .select("learning_item_id, tests_passed, tests_total")
+    .eq("user_id", user.id)
+    .in("learning_item_id", itemIds);
+
+  if (error || !data) {
+    if (error && !isMissingObjectError(error)) {
+      console.error(`[code-lab] passing-attempt query failed (code=${error.code ?? "none"})`);
+    }
+    return [];
+  }
+
+  const passing = new Set<string>();
+  for (const row of data) {
+    const total = row.tests_total;
+    if (typeof total === "number" && total > 0 && row.tests_passed === total) {
+      passing.add(row.learning_item_id);
+    }
+  }
+  return [...passing];
+}
+
 export function summarizeAttempt(input: {
   itemId: string;
   run?: CodeRunResult | null;

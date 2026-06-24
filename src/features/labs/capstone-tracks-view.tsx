@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
 import { setMilestone } from "./capstone-actions";
 import type { CapstoneTrackView } from "./capstone-view";
 import type { MilestoneProgress, MilestoneStatus } from "./milestone-progress";
-import { CodeLabMilestone } from "./code-lab-milestone";
+import { MilestoneCodePreview } from "./milestone-code-preview";
 import { canRunMilestoneInApp } from "./milestone-code-lab-adapter";
 import { canMarkMilestoneComplete } from "./code-lab-milestone-service";
-import type { CodeRunResult, CodeTestResult } from "@/features/code-lab/code-lab-types";
 
 type ProgressEntry = { status: MilestoneStatus; reflection: string | null };
 
@@ -25,11 +24,14 @@ export function CapstoneTracksView({
   tracks,
   initialProgress,
   authenticated,
+  passingMilestoneIds,
   linkToTrack = true
 }: {
   tracks: CapstoneTrackView[];
   initialProgress: MilestoneProgress[];
   authenticated: boolean;
+  /** In-app milestone ids whose visible tests already passed on /lab (#431). */
+  passingMilestoneIds?: string[];
   /** Show a per-track link to its overview page (off on the track page itself). */
   linkToTrack?: boolean;
 }) {
@@ -39,9 +41,7 @@ export function CapstoneTracksView({
     )
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [labResults, setLabResults] = useState<
-    Record<string, { run?: CodeRunResult | null; test?: CodeTestResult | null }>
-  >({});
+  const passing = useMemo(() => new Set(passingMilestoneIds ?? []), [passingMilestoneIds]);
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -140,8 +140,8 @@ export function CapstoneTracksView({
                   const inAppLab = canRunMilestoneInApp(milestone);
                   const completionGate = canMarkMilestoneComplete({
                     milestone,
-                    testResult: labResults[milestone.id]?.test ?? null,
-                    reflection: draftFor(milestone.id)
+                    reflection: draftFor(milestone.id),
+                    hasPassingAttempt: passing.has(milestone.id)
                   });
                   return (
                     <li
@@ -177,14 +177,7 @@ export function CapstoneTracksView({
                         <p className="text-xs font-medium text-slate-500">Stretch: {milestone.extensionTask}</p>
                       ) : null}
 
-                      {inAppLab ? (
-                        <CodeLabMilestone
-                          milestone={milestone}
-                          onResult={(result) =>
-                            setLabResults((prev) => ({ ...prev, [milestone.id]: result }))
-                          }
-                        />
-                      ) : null}
+                      {inAppLab ? <MilestoneCodePreview milestone={milestone} /> : null}
 
                       {status !== "none" ? (
                         <textarea

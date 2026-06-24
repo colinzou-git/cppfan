@@ -34,6 +34,12 @@ export function canMarkMilestoneComplete(input: {
   milestone: CapstoneMilestone;
   testResult?: CodeTestResult | null;
   reflection?: string;
+  /**
+   * #431: a previously recorded passing attempt (visible tests passed in the
+   * full-screen /lab editor, persisted cross-device) satisfies the in-app test
+   * gate, since editing/running now happens on /lab rather than inline here.
+   */
+  hasPassingAttempt?: boolean;
 }): { ok: boolean; reason?: string } {
   // Reflection-verified milestones need a saved reflection, in-app or not.
   if (input.milestone.verification === "reflection" && !reflectionSaved(input.reflection)) {
@@ -45,9 +51,13 @@ export function canMarkMilestoneComplete(input: {
     return { ok: true };
   }
 
+  if (input.hasPassingAttempt) {
+    return { ok: true };
+  }
+
   const test = input.testResult;
   if (!test || test.total === 0) {
-    return { ok: false, reason: "Run the visible tests first." };
+    return { ok: false, reason: "Open Code and pass the visible tests first." };
   }
   if (test.status === "compile_error") {
     return { ok: false, reason: "Your code does not compile yet — fix it and run the tests." };
