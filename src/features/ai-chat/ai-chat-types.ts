@@ -6,6 +6,7 @@ export const AI_CHAT_SOURCE_KINDS = [
   "write_code_exercise",
   "lab_item",
   "capstone_milestone",
+  "project_lab",
   "interview_question",
   "timed_interview_question"
 ] as const;

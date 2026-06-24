@@ -1,4 +1,5 @@
 import type { LearningItemCodeLab } from "./code-lab-types";
+import { PROJECT_CODE_LAB_CONFIGS } from "./project-code-lab-configs";
 
 /**
  * Code Lab metadata attached to existing learning items (#407). This is the
@@ -184,7 +185,11 @@ int main() {
 `,
     visibleTests: [{ name: "BFS visit order", expectedStdout: "0 1 2\n", matcher: "exact" }],
     skillTags: ["dsa.graphs.bfs"]
-  }
+  },
+  // #439 project-level Code Lab configs. Keyed by PROJECT id (not milestone id):
+  // each project compiles/tests one main.cpp codebase; milestones are checkpoints
+  // labelled inside the prompt and on visible tests, never compiled separately.
+  ...PROJECT_CODE_LAB_CONFIGS
 };
 
 /**

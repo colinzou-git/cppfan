@@ -22,6 +22,12 @@ export type CodeTestCase = {
   stdin?: string;
   expectedStdout?: string;
   matcher?: CodeTestMatcher;
+  /**
+   * Optional milestone this visible test maps to (#439). Project labs compile a
+   * single codebase; this only labels which checkpoint a test exercises so
+   * milestone progress can later be inferred. Never gates compilation.
+   */
+  milestoneId?: string;
 };
 
 /**

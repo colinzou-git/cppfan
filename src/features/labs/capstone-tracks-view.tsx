@@ -1,95 +1,50 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { Code2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { setMilestone } from "./capstone-actions";
 import type { CapstoneTrackView } from "./capstone-view";
-import type { MilestoneProgress, MilestoneStatus } from "./milestone-progress";
-import { MilestoneCodePreview } from "./milestone-code-preview";
-import { canRunMilestoneInApp } from "./milestone-code-lab-adapter";
-import { canMarkMilestoneComplete } from "./code-lab-milestone-service";
+import { getProjectLabById } from "./project-labs";
+import { ProjectCard, type ProjectCardData } from "./project-card";
+import type { ProjectProgress, ProjectProgressStatus } from "./project-progress";
 
-type ProgressEntry = { status: MilestoneStatus; reflection: string | null };
-
-const STATUS_LABEL: Record<MilestoneStatus | "none", string> = {
-  none: "Not started",
-  started: "In progress",
-  completed: "Completed"
-};
-
+/**
+ * Capstone tracks (#129/#130, simplified for #439). Tracks keep their title and
+ * summary; each project renders as the same unified ProjectCard used by the flat
+ * project list — milestones are plain-text guidance and the only actions are the
+ * project-level Code / AI Chat / Chat history / Mark complete. No milestone-level
+ * code, "Mark started", reflection textareas, or per-milestone progress remain.
+ */
 export function CapstoneTracksView({
   tracks,
-  initialProgress,
+  projectProgress,
   authenticated,
-  passingMilestoneIds,
   linkToTrack = true
 }: {
   tracks: CapstoneTrackView[];
-  initialProgress: MilestoneProgress[];
+  /** Project-level completion rows for the signed-in learner. */
+  projectProgress?: ProjectProgress[];
   authenticated: boolean;
-  /** In-app milestone ids whose visible tests already passed on /lab (#431). */
-  passingMilestoneIds?: string[];
   /** Show a per-track link to its overview page (off on the track page itself). */
   linkToTrack?: boolean;
 }) {
-  const [progress, setProgress] = useState<Record<string, ProgressEntry>>(() =>
-    Object.fromEntries(
-      initialProgress.map((p) => [p.milestone_id, { status: p.status, reflection: p.reflection }])
-    )
-  );
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const passing = useMemo(() => new Set(passingMilestoneIds ?? []), [passingMilestoneIds]);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
-
-  const draftFor = (id: string) => drafts[id] ?? progress[id]?.reflection ?? "";
-
-  function apply(milestoneId: string, status: MilestoneStatus, reflection: string | null) {
-    setNotice(null);
-    setPendingId(milestoneId);
-    startTransition(async () => {
-      const result = await setMilestone({ milestoneId, status, reflection });
-      setPendingId(null);
-      if (result.status === "ok") {
-        setProgress((prev) => ({ ...prev, [milestoneId]: { status, reflection } }));
-      } else if (result.status === "signed_out") {
-        setNotice("Sign in to save your capstone progress.");
-      } else if (result.status === "unavailable") {
-        setNotice("Progress saving is temporarily unavailable. Please try again soon.");
-      } else {
-        setNotice("Could not save that just now. Please try again.");
-      }
-    });
-  }
-
-  const totalMilestones = useMemo(
-    () => tracks.reduce((n, t) => n + t.projects.reduce((m, p) => m + p.milestones.length, 0), 0),
-    [tracks]
-  );
-  const completedCount = Object.values(progress).filter((p) => p.status === "completed").length;
+  const statusByProject = useMemo(() => {
+    const map = new Map<string, ProjectProgressStatus>();
+    for (const row of projectProgress ?? []) {
+      map.set(row.project_id, row.status);
+    }
+    return map;
+  }, [projectProgress]);
 
   return (
     <section className="grid gap-5" data-testid="capstone-tracks" aria-label="Capstone tracks">
-      <div className="flex items-center justify-between gap-2">
+      <div>
         <h2 className="text-xl font-black text-slate-900">Capstone tracks</h2>
-        <span className="text-xs font-semibold text-slate-500" data-testid="capstone-progress-count">
-          {completedCount} / {totalMilestones} milestones done
-        </span>
-      </div>
-      <p className="text-sm text-slate-600">
-        Sequenced projects with individually-trackable milestones. Prerequisites are recommendations,
-        not locks — start any project whenever you like.
-      </p>
-
-      {notice ? (
-        <p className="text-sm font-semibold text-amber-700" role="alert" data-testid="capstone-notice">
-          {notice}
+        <p className="mt-1 text-sm text-slate-600">
+          Sequenced projects that build on each other. Prerequisites are recommendations, not locks —
+          start any project whenever you like. Each project is one codebase; milestones are checkpoints
+          inside it.
         </p>
-      ) : null}
+      </div>
 
       {tracks.map((track) => (
         <div key={track.id} className="grid gap-3" data-testid="capstone-track" data-track-id={track.id}>
@@ -108,158 +63,32 @@ export function CapstoneTracksView({
           </div>
 
           <div className="grid gap-3 xl:grid-cols-2">
-          {track.projects.map((project) => {
-            // Projects with an in-app Code Lab milestone get tall; let them span
-            // the full row on desktop so the editor/output have room.
-            const hasInAppLab = project.milestones.some((milestone) => canRunMilestoneInApp(milestone));
-            return (
-            <article
-              key={project.id}
-              className={cn(
-                "grid min-w-0 gap-3 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm",
-                hasInAppLab && "xl:col-span-2"
-              )}
-              data-testid="capstone-project"
-              data-project-id={project.id}
-            >
-              <div>
-                <h4 className="font-bold text-slate-900">{project.title}</h4>
-                <p className="text-sm text-slate-600">{project.summary}</p>
-                {project.prerequisiteTitles.length > 0 ? (
-                  <p className="mt-1 text-xs font-medium text-slate-500">
-                    Recommended first: {project.prerequisiteTitles.join(", ")}
-                  </p>
-                ) : null}
-              </div>
-
-              <ol className="grid gap-3">
-                {project.milestones.map((milestone, index) => {
-                  const entry = progress[milestone.id] as ProgressEntry | undefined;
-                  const status: MilestoneStatus | "none" = entry ? entry.status : "none";
-                  const isPending = pendingId === milestone.id;
-                  const inAppLab = canRunMilestoneInApp(milestone);
-                  const completionGate = canMarkMilestoneComplete({
-                    milestone,
-                    reflection: draftFor(milestone.id),
-                    hasPassingAttempt: passing.has(milestone.id)
-                  });
-                  return (
-                    <li
-                      key={milestone.id}
-                      className="grid gap-2 rounded-xl border border-slate-200 px-3 py-3"
-                      data-testid="capstone-milestone"
-                      data-milestone-id={milestone.id}
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-bold text-slate-800">
-                          M{index + 1}. {milestone.title}
-                        </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                          {milestone.required ? "Required" : "Optional"}
-                        </span>
-                        <span className="text-xs font-medium text-slate-400">~{milestone.estimatedMinutes} min</span>
-                        <span
-                          className={`ml-auto rounded-full px-2 py-0.5 text-xs font-bold ${
-                            status === "completed"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : status === "started"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-slate-100 text-slate-600"
-                          }`}
-                          data-testid="capstone-milestone-status"
-                        >
-                          {STATUS_LABEL[status]}
-                        </span>
-                      </div>
-
-                      <p className="text-xs italic text-slate-500">Reflect: {milestone.reflectionPrompt}</p>
-                      {milestone.extensionTask ? (
-                        <p className="text-xs font-medium text-slate-500">Stretch: {milestone.extensionTask}</p>
-                      ) : null}
-
-                      {inAppLab ? <MilestoneCodePreview milestone={milestone} /> : null}
-
-                      {status !== "none" ? (
-                        <textarea
-                          className="min-h-[3rem] rounded-lg border border-slate-200 px-2 py-1 text-sm"
-                          placeholder="Your reflection (optional)"
-                          aria-label={`Reflection for ${milestone.title}`}
-                          value={draftFor(milestone.id)}
-                          readOnly={status === "completed"}
-                          onChange={(e) => setDrafts((prev) => ({ ...prev, [milestone.id]: e.target.value }))}
-                          data-testid="capstone-reflection"
-                        />
-                      ) : null}
-
-                      <div className="flex flex-wrap gap-2">
-                        {/* In-app-lab milestones get a Code button to the full-screen
-                            editor; opening it implies starting work, so it auto-marks
-                            the milestone started and replaces the standalone start
-                            button. Other milestones keep Mark started (they have no
-                            in-app editor to open). */}
-                        {inAppLab ? (
-                          <Button asChild data-testid="capstone-milestone-code">
-                            <Link
-                              href={`/lab/${encodeURIComponent(milestone.id)}`}
-                              onClick={() => {
-                                if (status === "none") apply(milestone.id, "started", null);
-                              }}
-                            >
-                              <Code2 className="h-4 w-4" aria-hidden="true" />
-                              Code
-                            </Link>
-                          </Button>
-                        ) : null}
-                        {status === "none" && !inAppLab ? (
-                          <Button
-                            type="button"
-                            onClick={() => apply(milestone.id, "started", null)}
-                            disabled={isPending}
-                            data-testid="capstone-milestone-start"
-                          >
-                            Mark started
-                          </Button>
-                        ) : null}
-                        {status === "started" ? (
-                          <Button
-                            type="button"
-                            onClick={() => apply(milestone.id, "completed", draftFor(milestone.id) || null)}
-                            disabled={isPending || !completionGate.ok}
-                            data-testid="capstone-milestone-complete"
-                          >
-                            Mark complete
-                          </Button>
-                        ) : null}
-                        {status === "completed" ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => apply(milestone.id, "started", progress[milestone.id]?.reflection ?? null)}
-                            disabled={isPending}
-                            data-testid="capstone-milestone-reopen"
-                          >
-                            Reopen
-                          </Button>
-                        ) : null}
-                      </div>
-                      {status === "started" && !completionGate.ok && completionGate.reason ? (
-                        <p className="text-xs font-medium text-amber-700" data-testid="capstone-milestone-gate">
-                          {completionGate.reason}
-                        </p>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ol>
-            </article>
-            );
-          })}
+            {track.projects.map((project) => {
+              const lab = getProjectLabById(project.id);
+              const card: ProjectCardData = {
+                id: project.id,
+                title: project.title,
+                summary: project.summary,
+                difficulty: lab?.difficulty,
+                focus: lab?.focus,
+                prerequisiteTitles: project.prerequisiteTitles,
+                milestones: project.milestones.map((milestone) => milestone.title),
+                sourceVersion: lab?.version
+              };
+              return (
+                <ProjectCard
+                  key={project.id}
+                  project={card}
+                  completionStatus={statusByProject.get(project.id)}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
 
       {!authenticated ? (
-        <p className="text-xs font-medium text-slate-500">Sign in to save milestone progress across sessions.</p>
+        <p className="text-xs font-medium text-slate-500">Sign in to save project progress across sessions.</p>
       ) : null}
     </section>
   );

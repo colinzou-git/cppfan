@@ -69,6 +69,35 @@ Completed milestones also emit bounded `code_passed` evidence for the
 milestone's practiced skills. This is mastery evidence only; it does not create
 FSRS review cards and never auto-declares mastery.
 
+## Update (#439): project-level Code Labs and unified cards
+
+`/labs` now renders every project — capstone-track and flat — with the same
+unified `ProjectCard` (`src/features/labs/project-card.tsx`). Each project is one
+codebase:
+
+- A project is a single compilable codebase opened at `/lab/<projectId>` (e.g.
+  `/lab/csv-table-summarizer`). Milestones are checkpoints **inside** that code,
+  shown as plain-text guidance — they are never compiled separately and no longer
+  have milestone-level Code buttons, code previews, "Mark started", "Reopen", or
+  reflection textareas on the card list.
+- Each card has exactly four project-level actions: `Code`, `AI Chat`,
+  `Chat history`, and `Mark complete`. AI Chat / Chat history are scoped by
+  `sourceKind: "project_lab"` + the project id, so history is per whole project.
+- Project-level Code Lab configs live in
+  `src/features/code-lab/project-code-lab-configs.ts`, keyed by **project id**
+  (never a milestone id). Visible tests may carry an optional `milestoneId` label
+  so milestone progress can later be inferred from project-level attempts/tests.
+- Manual project completion is stored in `project_lab_progress` (RLS-owned;
+  see `project-progress.ts` / `project-actions.ts`) and emits a
+  `completion_submitted` event. Milestone-level `capstone_milestone_progress`
+  remains for backward compatibility but is no longer driven from the `/labs`
+  card UI. The old `AI help for capstone milestones` section was removed.
+
+Inferred per-milestone badges are intentionally out of scope for #439; the data
+shape (project-level attempts, `milestoneId`-tagged tests) is in place for a
+future scorer. The "no in-browser build" non-goal below is superseded for the
+in-app Code Lab, which runs project code via the keyless Piston runner.
+
 ## Recommendations
 
 The daily plan can surface the next incomplete required milestone with a

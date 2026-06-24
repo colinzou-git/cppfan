@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { getLearningItemWithDetails } from "@/features/learning-items/learning-item-queries";
 import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
 import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
+import { getProjectLabById } from "@/features/labs/project-labs";
 
 /**
- * Dedicated full-page Code Lab (#431). Only Code Lab items resolve here; other
- * items 404 so the route can't be used as a generic shell. The workspace owns
- * the wide, resizable layout, so this page renders nearly full-bleed.
+ * Dedicated full-page Code Lab (#431, #439). Resolves both lesson Code Labs and
+ * project-level Project Labs (one main.cpp per project). Other ids 404 so the
+ * route can't be used as a generic shell. The workspace owns the wide, resizable
+ * layout, so this page renders nearly full-bleed.
  */
 export default async function CodeLabPage({ params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
@@ -16,6 +18,24 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
   const config = getCodeLabConfigForItem(decodedId);
   if (!config) {
     notFound();
+  }
+
+  // Project labs (#439) carry no learning_items row; resolve them from the static
+  // catalog and render the same workspace with project-level back link + chat.
+  const project = getProjectLabById(decodedId);
+  if (project) {
+    return (
+      <main className="p-3 xl:p-6">
+        <CodeLabWorkspace
+          itemId={decodedId}
+          title={project.title}
+          config={config}
+          sourceVersion={project.version ?? "project-lab:1"}
+          backHref="/labs"
+          backLabel="Back to project labs"
+        />
+      </main>
+    );
   }
 
   const result = await getLearningItemWithDetails(decodedId);

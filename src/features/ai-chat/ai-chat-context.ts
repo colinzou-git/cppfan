@@ -162,7 +162,11 @@ function defaultHelpRequest(context: AiChatContext): string {
   if (context.sourceKind === "write_code_exercise") {
     return "Help me understand the task and plan a correct C++ approach. Point out likely pitfalls.";
   }
-  if (context.sourceKind === "lab_item" || context.sourceKind === "capstone_milestone") {
+  if (
+    context.sourceKind === "lab_item" ||
+    context.sourceKind === "capstone_milestone" ||
+    context.sourceKind === "project_lab"
+  ) {
     return "Help me plan the next concrete step and check my reasoning.";
   }
   return "Explain the key idea clearly and help me reason through it.";

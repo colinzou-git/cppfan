@@ -9,6 +9,8 @@ export type ProjectLab = {
   focus: string[];
   /** Ordered milestones; not graded — guidance for the learner. */
   milestones: string[];
+  /** Optional content version so saved chat threads invalidate on edits (#439). */
+  version?: string;
 };
 
 /*
@@ -184,4 +186,9 @@ export const projectLabs: ProjectLab[] = [
 
 export function getProjectLabsByDifficulty(difficulty: ProjectDifficulty): ProjectLab[] {
   return projectLabs.filter((lab) => lab.difficulty === difficulty);
+}
+
+/** Lookup a project lab by id, or null when it is not a known project (#439). */
+export function getProjectLabById(id: string): ProjectLab | null {
+  return projectLabs.find((project) => project.id === id) ?? null;
 }

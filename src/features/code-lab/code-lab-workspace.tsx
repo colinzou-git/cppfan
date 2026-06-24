@@ -33,17 +33,25 @@ export function CodeLabWorkspace({
   itemId,
   title,
   config,
-  sourceVersion = "1"
+  sourceVersion = "1",
+  backHref,
+  backLabel
 }: {
   itemId: string;
   title: string;
   config: LearningItemCodeLab;
   /** Item version (updated_at) so saved chat threads invalidate when the item changes. */
   sourceVersion?: string;
+  /** Back-link target; defaults to the lesson page. Project labs pass /labs (#439). */
+  backHref?: string;
+  /** Back-link label; defaults to "Back to lesson". Project labs pass "Back to project labs". */
+  backLabel?: string;
 }) {
   const c = useCodeLabController({ itemId, config });
   const [tab, setTab] = useState<DockTab>("output");
   const isWide = useIsWide();
+  const resolvedBackHref = backHref ?? `/learn/${encodeURIComponent(itemId)}`;
+  const resolvedBackLabel = backLabel ?? "Back to lesson";
 
   function onAction(action: CodeAction) {
     if (action === "run") setTab("output");
@@ -71,11 +79,11 @@ export function CodeLabWorkspace({
   const problemPanel = (
     <div className="flex flex-col gap-4 p-4">
       <Link
-        href={`/learn/${encodeURIComponent(itemId)}`}
+        href={resolvedBackHref}
         className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to lesson
+        {resolvedBackLabel}
       </Link>
       <div>
         <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Problem</p>

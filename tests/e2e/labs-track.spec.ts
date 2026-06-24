@@ -12,9 +12,9 @@ test("navigates from labs to a capstone track overview page", async ({ page }) =
 
   await expect(page).toHaveURL(/\/labs\/tracks\//);
   await expect(page.getByTestId("track-title")).toBeVisible();
-  // The track page shows the track's projects + milestones.
-  await expect(page.getByTestId("capstone-project").first()).toBeVisible();
-  await expect(page.getByTestId("capstone-milestone").first()).toBeVisible();
+  // The track page shows the track's projects as unified cards + milestone text.
+  await expect(page.getByTestId("project-lab").first()).toBeVisible();
+  await expect(page.getByTestId("project-milestone").first()).toBeVisible();
   // Prerequisites remain recommendations, never locks.
   await expect(page.getByTestId("capstone-tracks")).toContainText(/recommended first/i);
 });

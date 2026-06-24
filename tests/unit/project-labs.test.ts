@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getProjectLabsByDifficulty, projectLabs } from "@/features/labs/project-labs";
+import { getProjectLabById, getProjectLabsByDifficulty, projectLabs } from "@/features/labs/project-labs";
+import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
 
 const VALID_DIFFICULTY = new Set(["beginner", "intermediate"]);
 
@@ -23,5 +24,16 @@ describe("project labs catalog", () => {
   it("filters by difficulty", () => {
     expect(getProjectLabsByDifficulty("beginner").every((lab) => lab.difficulty === "beginner")).toBe(true);
     expect(getProjectLabsByDifficulty("beginner").length).toBeGreaterThan(0);
+  });
+
+  it("looks up a project by id", () => {
+    expect(getProjectLabById("csv-table-summarizer")?.title).toMatch(/csv/i);
+    expect(getProjectLabById("does-not-exist")).toBeNull();
+  });
+
+  it("gives every project a project-level Code Lab config (#439)", () => {
+    for (const project of projectLabs) {
+      expect(getCodeLabConfigForItem(project.id)).not.toBeNull();
+    }
   });
 });
