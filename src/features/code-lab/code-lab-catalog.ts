@@ -1,6 +1,13 @@
 import type { LearningItemCodeLab } from "./code-lab-types";
 import { PROJECT_CODE_LAB_CONFIGS } from "./project-code-lab-configs";
 import { EXERCISE_CODE_LAB_CONFIGS } from "./exercise-code-lab-configs";
+import {
+  findSkillForLearningItemId,
+  generateSkillSampleCode,
+  generateSkillSampleOutput,
+  isGeneratedCodeLabEligibleItemId
+} from "../learning-items/generated-skill-learning-items";
+import type { Skill } from "../skills/skill-types";
 
 /**
  * Code Lab metadata attached to existing learning items (#407). This is the
@@ -196,13 +203,31 @@ int main() {
   ...EXERCISE_CODE_LAB_CONFIGS
 };
 
+function getGeneratedSkillCodeLab(skill: Skill): LearningItemCodeLab {
+  const output = generateSkillSampleOutput(skill);
+  return {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Run this sample for ${skill.title}. Then edit the program so it still prints exactly \`${output}\` followed by a newline.`,
+    starterCode: generateSkillSampleCode(skill),
+    visibleTests: [{ name: "Matches the skill sample output", expectedStdout: `${output}\n`, matcher: "exact" }],
+    skillTags: [skill.id],
+    traceEnabled: true
+  };
+}
+
 /**
  * Visible Code Lab config for an item, or null when the item is not code-capable.
  * Pure data — safe to import from client and server code.
  */
 export function getCodeLabConfigForItem(itemId: string): LearningItemCodeLab | null {
   const config = codeLabConfigs[itemId];
-  return config && config.enabled ? config : null;
+  if (config && config.enabled) return config;
+
+  if (!isGeneratedCodeLabEligibleItemId(itemId)) return null;
+  const skill = findSkillForLearningItemId(itemId);
+  return skill ? getGeneratedSkillCodeLab(skill) : null;
 }
 
 export function isCodeLabItem(itemId: string): boolean {
