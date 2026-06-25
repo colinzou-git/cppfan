@@ -599,3 +599,38 @@ begin
 
   raise notice 'diagnostic scores smoke OK';
 end $$;
+
+-- 22) #441: skill_events.event_type integrity. After all migrations, no row may
+-- carry an event_type outside the stable allowlist, and the constraint that
+-- enforces it must exist. A fresh CI database has no skill_events rows, so the
+-- row check is trivially satisfied; the value is guarding against any migration
+-- that seeds or backfills a bad value, and proving the constraint is present.
+do $$
+declare
+  v_bad bigint;
+begin
+  select count(*) into v_bad
+    from public.skill_events
+    where event_type not in (
+      'lesson_started','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
+      'hint_used','review_completed','code_attempted','code_passed','skill_mastered',
+      'skill_regressed','error_pattern_observed','error_pattern_cleared',
+      'worked_example_viewed','completion_submitted','parsons_submitted',
+      'parsons_hint_used','parsons_checked','capstone_milestone_started',
+      'capstone_milestone_completed','capstone_reflection_submitted',
+      'placement_started','placement_completed','placement_reset'
+    );
+  if v_bad <> 0 then
+    raise exception '#441: % skill_events row(s) have an event_type outside the stable allowlist', v_bad;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+      where conrelid = 'public.skill_events'::regclass
+        and conname = 'skill_events_event_type_check'
+  ) then
+    raise exception '#441: skill_events_event_type_check constraint is missing';
+  end if;
+
+  raise notice 'skill_events event_type integrity smoke OK';
+end $$;
