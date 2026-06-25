@@ -1,14 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-// A stable seeded item id (see learning-item-seed.ts / the migration).
-const SEED_ITEM_ID = "cpp.structs_classes.syntax.lesson";
+// A stable seeded lesson id (see learning-item-seed.ts / the migration). Use a
+// hand-authored lesson URL that is NOT a generated-sample route — most legacy
+// `.lesson` URLs now resolve to generated sample content (see
+// generated-skill-learning-items.ts: HAND_AUTHORED_SKILL_SAMPLE_ITEM_IDS), so
+// this item must be one of the preserved hand-authored lessons to still serve
+// its own seeded content.
+const SEED_ITEM_ID = "cpp.program_basics.structure.lesson";
 
 test("a seeded learning item opens with its content", async ({ page }) => {
   await page.goto(`/learn/${SEED_ITEM_ID}`);
 
   const item = page.getByTestId("learning-item");
   await expect(item).toBeVisible();
-  await expect(item.getByRole("heading", { name: "Defining a struct or class" })).toBeVisible();
+  await expect(item.getByRole("heading", { name: "A minimal C++ program" })).toBeVisible();
   await expect(item.getByTestId("learning-item-type")).toHaveText(/lesson/i);
   await expect(page.getByRole("link", { name: /back to dashboard/i })).toBeVisible();
 });
