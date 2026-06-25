@@ -18,9 +18,12 @@ import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { ResizableColumns } from "./resizable-columns";
 import { CodeLabChat } from "./code-lab-chat";
+import { DebugTabPanel } from "./debug-tab-panel";
+import { useCodeBreakpoints } from "./use-code-breakpoints";
+import { useCodeDebugger } from "./use-code-debugger";
 import { useCodeLabController } from "./use-code-lab-controller";
 
-type DockTab = "output" | "tests" | "stdin" | "ai";
+type DockTab = "output" | "tests" | "stdin" | "debug" | "ai";
 
 /**
  * Full-page Code Lab workspace (#431). Option 1 layout: a problem panel on the
@@ -48,6 +51,13 @@ export function CodeLabWorkspace({
   backLabel?: string;
 }) {
   const c = useCodeLabController({ itemId, config });
+  const breakpointState = useCodeBreakpoints(itemId);
+  const debug = useCodeDebugger({
+    itemId,
+    source: c.source,
+    stdin: c.stdin,
+    breakpoints: breakpointState.breakpoints
+  });
   const [tab, setTab] = useState<DockTab>("output");
   const isWide = useIsWide();
   const resolvedBackHref = backHref ?? `/learn/${encodeURIComponent(itemId)}`;
@@ -178,6 +188,7 @@ export function CodeLabWorkspace({
     { id: "output", label: "Output" },
     { id: "tests", label: "Tests" },
     ...(config.mode === "stdin" ? [{ id: "stdin" as const, label: "Input" }] : []),
+    { id: "debug", label: "Debug" },
     { id: "ai", label: "AI" }
   ];
 
@@ -225,6 +236,7 @@ export function CodeLabWorkspace({
           )
         ) : null}
         {tab === "stdin" ? stdinField : null}
+        {tab === "debug" ? <DebugTabPanel breakpoints={breakpointState} debug={debug} /> : null}
         {tab === "ai" ? aiPanel : null}
       </div>
     </div>
