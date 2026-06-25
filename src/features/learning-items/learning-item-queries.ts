@@ -89,9 +89,10 @@ const PUBLIC_CHOICE_COLUMNS = "id,learning_item_id,content,order_index,created_a
  */
 export async function getLearningItemWithDetails(itemId: string): Promise<LearningItemResult> {
   const supabase = await createClient();
-  const seed = getSeedLearningItemById(itemId) ?? getGeneratedLearningItemById(itemId);
+  const generated = getGeneratedLearningItemById(itemId);
+  const seed = generated ?? getSeedLearningItemById(itemId);
 
-  if (!supabase) {
+  if (!supabase || generated) {
     return fromSeed(seed);
   }
 
