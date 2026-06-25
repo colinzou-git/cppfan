@@ -17,14 +17,28 @@ describe("metadata-driven Code Lab mount", () => {
     expect(screen.getByTestId("code-controls")).toBeInTheDocument();
   });
 
-  it("renders nothing for an item without code-lab metadata", () => {
+  it("renders nothing for a multiple-choice item without code-lab metadata", () => {
     const { container } = render(<MaybeCodeLab itemId="cpp.program_basics.structure.mc_entry" />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("catalog helpers agree on which items are code-capable", () => {
+  it("catalog helpers agree on which explicit items are code-capable", () => {
     expect(isCodeLabItem("cpp.program_basics.io.lesson")).toBe(true);
     expect(getCodeLabConfigForItem("cpp.program_basics.io.lesson")?.language).toBe("cpp");
     expect(isCodeLabItem("cpp.program_basics.structure.mc_entry")).toBe(false);
+  });
+
+  it("generates a runnable Code Lab for later skill lessons", () => {
+    const config = getCodeLabConfigForItem("cpp.values_types.variables.lesson");
+    expect(config?.language).toBe("cpp");
+    expect(config?.starterCode).toContain("Skill: Variables, types, and initialization");
+    expect(config?.visibleTests[0]?.expectedStdout).toBe("Practice: Variables, types, and initialization\n");
+  });
+
+  it("generates a Code Lab for non-quiz skill-map item shapes", () => {
+    expect(isCodeLabItem("cpp.structs_classes.public_private.concept_access")).toBe(true);
+    expect(getCodeLabConfigForItem("cpp.structs_classes.public_private.concept_access")?.skillTags).toEqual([
+      "cpp.structs_classes.public_private"
+    ]);
   });
 });
