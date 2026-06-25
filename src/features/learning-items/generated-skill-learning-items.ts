@@ -24,6 +24,17 @@ export function getGeneratedLearningItemIdForSkill(skillId: string): string {
   return `${skillId}.sample_code`;
 }
 
+function getLegacyLessonItemIdForSkill(skillId: string): string {
+  return `${skillId}.lesson`;
+}
+
+function isGeneratedSampleRouteForSkill(skill: Skill, itemId: string): boolean {
+  if (itemId === getGeneratedLearningItemIdForSkill(skill.id)) return true;
+
+  const legacyLessonId = getLegacyLessonItemIdForSkill(skill.id);
+  return itemId === legacyLessonId && !HAND_AUTHORED_SKILL_SAMPLE_ITEM_IDS.has(legacyLessonId);
+}
+
 export function generateSkillSampleOutput(skill: Skill): string {
   return `Practice: ${skill.title}`;
 }
@@ -44,7 +55,7 @@ int main() {
 export function findSkillForLearningItemId(itemId: string): Skill | null {
   return (
     activeSkillsByLongestId.find(
-      (skill) => itemId === getGeneratedLearningItemIdForSkill(skill.id) || itemId.startsWith(`${skill.id}.`)
+      (skill) => isGeneratedSampleRouteForSkill(skill, itemId) || itemId.startsWith(`${skill.id}.`)
     ) ?? null
   );
 }
@@ -71,7 +82,7 @@ export function getGeneratedItemLinksBySkill(existingLinks: Record<string, strin
 }
 
 export function getGeneratedLearningItemById(itemId: string): LearningItemWithDetails | null {
-  const skill = activeSkillsByLongestId.find((candidate) => itemId === getGeneratedLearningItemIdForSkill(candidate.id));
+  const skill = activeSkillsByLongestId.find((candidate) => isGeneratedSampleRouteForSkill(candidate, itemId));
   if (!skill) return null;
 
   const sampleCode = generateSkillSampleCode(skill);
