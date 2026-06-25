@@ -1,6 +1,6 @@
 import { CODE_LAB_LIMITS } from "./code-lab-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import type { CodeBreakpoint, CodeDebugAction } from "./code-debug-types";
+import type { CodeBreakpoint, CodeDebugAction, CodeDebugSnapshot } from "./code-debug-types";
 
 /**
  * Request validation for the Code Lab debug routes (#442), mirroring
@@ -135,4 +135,40 @@ export function validateDebugStopRequest(body: Record<string, unknown>): ParsedD
     return { ok: false, code: "invalid_session", message: "A valid session id is required." };
   }
   return { ok: true, sessionId };
+}
+
+export type ParsedDebugExplain =
+  | { ok: true; itemId: string; source: string; snapshot: CodeDebugSnapshot; userQuestion?: string }
+  | { ok: false; code: string; message: string };
+
+export function validateDebugExplainRequest(body: Record<string, unknown>): ParsedDebugExplain {
+  const itemId = typeof body.itemId === "string" ? body.itemId.trim() : "";
+  if (!itemId || itemId.length > 240) {
+    return { ok: false, code: "invalid_item", message: "A valid item id is required." };
+  }
+  if (!getCodeLabConfigForItem(itemId)) {
+    return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
+  }
+
+  const source = typeof body.source === "string" ? body.source : "";
+  if (!source.trim()) {
+    return { ok: false, code: "empty_source", message: "There is no code to explain." };
+  }
+  if (source.length > CODE_LAB_LIMITS.maxSourceChars) {
+    return { ok: false, code: "source_too_large", message: "Code is too large." };
+  }
+
+  const snapshot = body.snapshot;
+  if (
+    typeof snapshot !== "object" ||
+    snapshot === null ||
+    typeof (snapshot as { status?: unknown }).status !== "string"
+  ) {
+    return { ok: false, code: "invalid_snapshot", message: "A debug snapshot is required." };
+  }
+
+  const userQuestion =
+    typeof body.userQuestion === "string" ? body.userQuestion.slice(0, 1_000) : undefined;
+
+  return { ok: true, itemId, source, snapshot: snapshot as CodeDebugSnapshot, userQuestion };
 }

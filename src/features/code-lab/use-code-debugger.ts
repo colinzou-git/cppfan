@@ -4,10 +4,16 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type {
   CodeBreakpoint,
   CodeDebugAction,
+  CodeDebugExplainResult,
   CodeDebugSnapshot,
   CodeDebugStatus
 } from "./code-debug-types";
-import { debugActionRequest, startDebugRequest, stopDebugRequest } from "./code-debug-client";
+import {
+  debugActionRequest,
+  explainDebugRequest,
+  startDebugRequest,
+  stopDebugRequest
+} from "./code-debug-client";
 
 /**
  * Debug-session orchestration for the Code Lab Debug tab (#442). Owns the current
@@ -44,6 +50,9 @@ export type UseCodeDebugger = {
   sendAction: (action: CodeDebugAction) => Promise<void>;
   stopDebugging: () => Promise<void>;
   restartDebugging: () => Promise<void>;
+  explanation: CodeDebugExplainResult | null;
+  explaining: boolean;
+  explainCurrentStep: (userQuestion?: string) => Promise<void>;
 };
 
 const ACTIVE_STATUSES: ReadonlySet<CodeDebugStatus> = new Set<CodeDebugStatus>([
@@ -70,6 +79,8 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [watches, setWatches] = useState<DebugWatch[]>([]);
+  const [explanation, setExplanation] = useState<CodeDebugExplainResult | null>(null);
+  const [explaining, setExplaining] = useState(false);
   // The source the active session was started against (null when no session).
   const sessionSourceRef = useRef<string | null>(null);
 
@@ -87,6 +98,7 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
   const startDebugging = useCallback(async () => {
     setBusy(true);
     setError(null);
+    setExplanation(null);
     try {
       const next = await startDebugRequest({
         itemId,
@@ -134,6 +146,7 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
     } finally {
       setSnapshot(null);
       sessionSourceRef.current = null;
+      setExplanation(null);
       setBusy(false);
     }
   }, [snapshot]);
@@ -141,6 +154,22 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
   const restartDebugging = useCallback(async () => {
     await startDebugging();
   }, [startDebugging]);
+
+  const explainCurrentStep = useCallback(
+    async (userQuestion?: string) => {
+      if (!snapshot) return;
+      setExplaining(true);
+      try {
+        const result = await explainDebugRequest({ itemId, source, snapshot, userQuestion });
+        setExplanation(result);
+      } catch (caught) {
+        setExplanation({ status: "unavailable", explanation: errorMessage(caught) });
+      } finally {
+        setExplaining(false);
+      }
+    },
+    [itemId, source, snapshot]
+  );
 
   const addWatch = useCallback((expression: string) => {
     const trimmed = expression.trim();
@@ -170,6 +199,9 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
     startDebugging,
     sendAction,
     stopDebugging,
-    restartDebugging
+    restartDebugging,
+    explanation,
+    explaining,
+    explainCurrentStep
   };
 }
