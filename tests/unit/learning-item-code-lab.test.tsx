@@ -73,4 +73,20 @@ describe("metadata-driven Code Lab mount", () => {
     expect(item?.item.prompt).toContain("Skill: Variables, types, and initialization");
     expect(getCodeLabConfigForItem(itemId)?.starterCode).toContain("Skill: Variables, types, and initialization");
   });
+
+  it("also serves generated sample content from legacy lesson URLs after the first three skills", () => {
+    const item = getGeneratedLearningItemById("cpp.program_basics.exit_status.lesson");
+
+    expect(item?.item.title).toBe("main() return value and exit status sample code");
+    expect(item?.item.prompt).toContain("```cpp");
+    expect(item?.item.prompt).toContain("Skill: main() return value and exit status");
+    expect(getCodeLabConfigForItem("cpp.program_basics.exit_status.lesson")?.starterCode).toContain(
+      "Skill: main() return value and exit status"
+    );
+  });
+
+  it("keeps the first three hand-authored lesson URLs on explicit Code Lab content", () => {
+    expect(getGeneratedLearningItemById("cpp.program_basics.structure.lesson")).toBeNull();
+    expect(getCodeLabConfigForItem("cpp.program_basics.structure.lesson")?.prompt).toContain("Edit the greeting");
+  });
 });
