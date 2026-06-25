@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
 import {
