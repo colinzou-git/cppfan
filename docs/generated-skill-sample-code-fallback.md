@@ -12,15 +12,18 @@ The first three hand-authored lessons keep their existing links:
 - `cpp.program_basics.io` -> `cpp.program_basics.io.lesson`
 - `cpp.program_basics.statements_comments` -> `cpp.program_basics.statements_comments.lesson`
 
-Every other active skill now routes to a generated, non-colliding sample page:
+Every other active skill now routes from the skill map to a generated, non-colliding sample page:
 
 ```text
 <skill_id>.sample_code
 ```
 
+The old seeded lesson URL also serves generated sample content for these later skills, so direct links such as `cpp.program_basics.exit_status.lesson` are no longer stale text-only pages.
+
 Examples:
 
 - `cpp.program_basics.exit_status` -> `cpp.program_basics.exit_status.sample_code`
+- legacy direct URL also works: `cpp.program_basics.exit_status.lesson`
 - `cpp.values_types.variables` -> `cpp.values_types.variables.sample_code`
 - `cpp.values_types.initialization_pitfalls` -> `cpp.values_types.initialization_pitfalls.sample_code`
 - `cpp.values_types.fundamental_types` -> `cpp.values_types.fundamental_types.sample_code`
@@ -39,7 +42,7 @@ That collided with many existing seed/DB lessons, such as:
 - `cpp.values_types.variables.lesson`
 - `cpp.values_types.initialization_pitfalls.lesson`
 
-Because `getLearningItemWithDetails()` checks DB/seed content before generated content, those existing text lessons won and the generated prompt sample code was not shown. The `.sample_code` suffix avoids that collision.
+Because `getLearningItemWithDetails()` checked DB/seed content before generated content, those existing text lessons won and the generated prompt sample code was not shown. The `.sample_code` suffix avoids that collision for skill-map links, and `getLearningItemWithDetails()` now explicitly prefers generated sample content for legacy `.lesson` routes after the first three hand-authored lessons.
 
 ## Key files
 
@@ -48,9 +51,10 @@ Because `getLearningItemWithDetails()` checks DB/seed content before generated c
   - Generates sample C++ program text.
   - Generates fallback learning items.
   - Rewrites skill-map preview links to generated `.sample_code` pages except the first three hand-authored sample lessons.
+  - Treats later legacy `.lesson` IDs as generated sample routes too.
 
 - `src/features/learning-items/learning-item-queries.ts`
-  - Uses generated learning items when a generated `.sample_code` page is requested.
+  - Prefers generated learning items for generated `.sample_code` URLs and later legacy `.lesson` URLs.
 
 - `src/features/code-lab/code-lab-catalog.ts`
   - Generates Code Lab config for eligible skill-linked items.
@@ -58,6 +62,7 @@ Because `getLearningItemWithDetails()` checks DB/seed content before generated c
 - `tests/unit/learning-item-code-lab.test.tsx`
   - Verifies generated `.sample_code` IDs do not collide with seeded lessons.
   - Verifies later skill-map preview links are rewritten to generated sample-code pages.
+  - Verifies legacy direct URLs like `cpp.program_basics.exit_status.lesson` also receive generated sample content and Code Lab config.
 
 ## Manual verification
 
@@ -68,12 +73,16 @@ Open the dashboard skill map preview and click these skills:
 - `Initialization and const intent`
 - `Choosing a fundamental type`
 
-Expected URL suffixes:
+Expected URL suffixes from the skill map:
 
 - `/learn/cpp.program_basics.exit_status.sample_code`
 - `/learn/cpp.values_types.variables.sample_code`
 - `/learn/cpp.values_types.initialization_pitfalls.sample_code`
 - `/learn/cpp.values_types.fundamental_types.sample_code`
+
+Legacy direct URL to verify:
+
+- `/learn/cpp.program_basics.exit_status.lesson`
 
 Expected page behavior:
 
