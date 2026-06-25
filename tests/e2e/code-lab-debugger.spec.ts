@@ -20,6 +20,9 @@ test("the Debug tab persists breakpoints and degrades gracefully when unconfigur
   await page.getByTestId("code-debug-add-breakpoint").click();
   await expect(page.getByTestId("code-debug-breakpoints")).toContainText("Line 3");
 
+  // The breakpoint renders a marker in the Monaco gutter.
+  await expect(page.locator(".cppfan-breakpoint-glyph").first()).toBeVisible();
+
   // Breakpoints persist per item across a reload.
   await page.reload();
   await expect(page.getByTestId("code-lab-workspace")).toBeVisible();

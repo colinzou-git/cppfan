@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useId } from "react";
+import type { CodeBreakpoint } from "./code-debug-types";
 
 export type CodeEditorProps = {
   value: string;
@@ -10,6 +11,12 @@ export type CodeEditorProps = {
   readOnly?: boolean;
   /** Editor height. Defaults to a fixed 320px; the full-page workspace overrides it. */
   height?: string;
+  /** Debugger breakpoints to render in the gutter (#442). */
+  breakpoints?: CodeBreakpoint[];
+  /** The line the debugger is currently paused on, highlighted in the editor (#442). */
+  debugLine?: number | null;
+  /** Toggle a breakpoint when the gutter glyph margin is clicked/tapped (#442). */
+  onToggleBreakpoint?: (line: number) => void;
 };
 
 // Monaco is loaded client-only: it touches `window`/`navigator` and must not be
@@ -29,7 +36,10 @@ export function CodeEditor({
   onChange,
   label,
   readOnly = false,
-  fill = false
+  fill = false,
+  breakpoints,
+  debugLine,
+  onToggleBreakpoint
 }: CodeEditorProps & { fill?: boolean }) {
   const labelId = useId();
   // `fill` makes the editor expand to the height of a flex parent (the full-page
@@ -47,7 +57,16 @@ export function CodeEditor({
         aria-labelledby={labelId}
         data-testid="code-editor"
       >
-        <MonacoCodeEditor value={value} onChange={onChange} label={label} readOnly={readOnly} height={height} />
+        <MonacoCodeEditor
+          value={value}
+          onChange={onChange}
+          label={label}
+          readOnly={readOnly}
+          height={height}
+          breakpoints={breakpoints}
+          debugLine={debugLine}
+          onToggleBreakpoint={onToggleBreakpoint}
+        />
         {/* Accessible value mirror for assistive tech: Monaco's own input is the
             primary editing surface; this hidden control keeps a labelled copy of
             the source available to screen readers. */}
