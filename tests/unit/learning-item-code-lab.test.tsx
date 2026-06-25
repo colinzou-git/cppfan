@@ -87,6 +87,6 @@ describe("metadata-driven Code Lab mount", () => {
 
   it("keeps the first three hand-authored lesson URLs on explicit Code Lab content", () => {
     expect(getGeneratedLearningItemById("cpp.program_basics.structure.lesson")).toBeNull();
-    expect(getCodeLabConfigForItem("cpp.program_basics.structure.lesson")?.prompt).toContain("Edit the greeting");
+    expect(getCodeLabConfigForItem("cpp.program_basics.structure.lesson")?.prompt).toContain("Hello, cppFan!");
   });
 });
