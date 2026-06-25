@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveSession } from "./interview-session-actions";
@@ -290,10 +291,18 @@ export function SessionRunner({
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm lg:row-span-4">
-        <h3 className="text-sm font-black text-slate-900">Session evidence</h3>
+        <h3 className="text-sm font-black text-slate-900">Interview notes and submission</h3>
+        <p className="mt-1 text-xs font-normal text-slate-600">
+          Use this area to record your thinking during a timed interview run. For the full
+          editor/debugger, open the problem from the Interview page with Code.
+        </p>
         <div className="mt-3 grid gap-3">
           <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-phase-note">
             Current phase notes
+            <span className="text-xs font-normal text-slate-500">
+              Write thoughts for the current interview phase, such as clarifying questions,
+              examples, approach notes, or tradeoffs.
+            </span>
             <textarea
               id="session-phase-note"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
@@ -307,7 +316,18 @@ export function SessionRunner({
             />
           </label>
           <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-code-draft">
-            C++ draft
+            Timed-session C++ draft
+            <span className="text-xs font-normal text-slate-500">
+              A lightweight draft saved with this timed session. Use the full Code Lab editor
+              for running, testing, and debugging.{" "}
+              <Link
+                href={`/lab/${encodeURIComponent(session.problemId)}`}
+                className="font-semibold text-blue-700 underline"
+                data-testid="session-open-code-lab"
+              >
+                Open full Code Lab
+              </Link>
+            </span>
             <textarea
               id="session-code-draft"
               className="min-h-36 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm font-normal text-slate-800"
@@ -327,7 +347,10 @@ export function SessionRunner({
             />
           </label>
           <label className="grid gap-1 text-sm font-semibold text-slate-800" htmlFor="session-test-notes">
-            Test notes
+            Manual test notes
+            <span className="text-xs font-normal text-slate-500">
+              Record edge cases, sample inputs, expected outputs, or failed cases to revisit.
+            </span>
             <textarea
               id="session-test-notes"
               className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-800"
@@ -347,7 +370,13 @@ export function SessionRunner({
               onChange={(event) => apply(updateSessionEvidence(session, { assistanceUsed: event.target.checked }))}
               data-testid="session-assistance-used"
             />
-            Interviewer assistance used
+            <span className="grid gap-0.5">
+              Interviewer assistance used
+              <span className="text-xs font-normal text-slate-500">
+                Check this if you used hints, AI, reference material, or outside help during the
+                timed session.
+              </span>
+            </span>
           </label>
           <div className="grid gap-2">
             <Button
@@ -359,6 +388,10 @@ export function SessionRunner({
             >
               {isJudgePending ? "Queuing..." : "Queue judge run"}
             </Button>
+            <p className="text-xs font-normal text-slate-500">
+              Submit the timed-session draft for automated judge feedback when this problem has a
+              judge suite.
+            </p>
             {judgeNotice ? (
               <p className="text-xs font-semibold text-slate-600" role="status" data-testid="session-judge-notice">
                 {judgeNotice}

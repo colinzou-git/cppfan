@@ -74,12 +74,19 @@ export default function InterviewPage() {
 
                   <div className="flex flex-wrap items-center gap-3">
                     <Link
-                      href={`/interview/session?problem=${encodeURIComponent(problem.id)}`}
+                      href={`/lab/${encodeURIComponent(problem.id)}`}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700"
                       data-testid="interview-problem-code"
                     >
                       <Code2 className="h-4 w-4" aria-hidden="true" />
                       Code
+                    </Link>
+                    <Link
+                      href={`/interview/session?problem=${encodeURIComponent(problem.id)}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                      data-testid="interview-problem-timed-session"
+                    >
+                      Timed session
                     </Link>
                     <ItemHelpLinks
                       context={{

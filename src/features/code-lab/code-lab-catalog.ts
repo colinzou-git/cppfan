@@ -1,6 +1,7 @@
 import type { LearningItemCodeLab } from "./code-lab-types";
 import { PROJECT_CODE_LAB_CONFIGS } from "./project-code-lab-configs";
 import { EXERCISE_CODE_LAB_CONFIGS } from "./exercise-code-lab-configs";
+import { INTERVIEW_CODE_LAB_CONFIGS } from "./interview-code-lab-configs";
 import {
   findSkillForLearningItemId,
   generateSkillSampleCode,
@@ -200,7 +201,12 @@ int main() {
   ...PROJECT_CODE_LAB_CONFIGS,
   // #440 write-code exercise Code Lab configs, keyed by EXERCISE id. Each is an
   // atomic test-backed task opened at /lab/<exerciseId>.
-  ...EXERCISE_CODE_LAB_CONFIGS
+  ...EXERCISE_CODE_LAB_CONFIGS,
+  // #444 interview problem Code Lab configs, keyed by INTERVIEW problem id, so the
+  // Interview Code button opens /lab/<interviewProblemId> with the Debug tab.
+  // Interview ids are namespaced `iv.*`, so they cannot collide with the `cpp.*`
+  // lesson or project/exercise ids above (asserted in a unit test).
+  ...INTERVIEW_CODE_LAB_CONFIGS
 };
 
 function getGeneratedSkillCodeLab(skill: Skill): LearningItemCodeLab {

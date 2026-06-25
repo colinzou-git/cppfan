@@ -27,6 +27,12 @@ Bundled seed examples include:
 - `cpp.program_basics.io.lesson` — echo a line of input
 - `cpp.program_basics.statements_comments.lesson` — print two lines
 
+The full-page Code Lab (`/lab/<itemId>`) also resolves project labs (#439),
+write-code exercises (#440), and **interview problems** (#444, keyed by `iv.*` id
+via `interview-code-lab-configs.ts`), so the Interview page Code button opens the
+same workspace + Debug tab as Labs/Exercises. The timed interview session stays
+reachable via its own button.
+
 ### Two layouts, one controller (#431)
 
 Code Lab state (run/test/review/trace, predictions, remediation, scaffold) lives

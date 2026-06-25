@@ -5,6 +5,7 @@ import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
 import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
+import { getInterviewProblem } from "@/features/interview/problem-catalog";
 
 /**
  * Dedicated full-page Code Lab (#431, #439, #440). Resolves lesson Code Labs,
@@ -52,6 +53,25 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
           sourceVersion={project.version ?? "project-lab:1"}
           backHref="/labs"
           backLabel="Back to project labs"
+        />
+      </main>
+    );
+  }
+
+  // Interview problems (#444) carry no learning_items row; resolve them from the
+  // interview catalog and render the same workspace with an /interview back link,
+  // so the Code button opens the full Code Lab + Debug tab.
+  const interviewProblem = getInterviewProblem(decodedId);
+  if (interviewProblem) {
+    return (
+      <main className="p-3 xl:p-6">
+        <CodeLabWorkspace
+          itemId={decodedId}
+          title={interviewProblem.title}
+          config={config}
+          sourceVersion={`interview:${interviewProblem.version}`}
+          backHref="/interview"
+          backLabel="Back to interview practice"
         />
       </main>
     );
