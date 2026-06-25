@@ -1,9 +1,12 @@
+import { redirect } from "next/navigation";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
 import {
   getItemLinksBySkill as getSeedItemLinksBySkill,
   getLearningItemById as getSeedLearningItemById
 } from "./learning-item-seed";
+import { getGeneratedItemLinksBySkill, getGeneratedLearningItemById } from "./generated-skill-learning-items";
 import { orderPublicChoices } from "./choice-ordering";
 import type {
   LearningItem,
@@ -81,12 +84,12 @@ const PUBLIC_CHOICE_COLUMNS = "id,learning_item_id,content,order_index,created_a
  * Read one learning item with its skill mappings and (answer-key-free) choices.
  * Seed fallback is used only when Supabase is unconfigured, the migration is
  * absent (pre-migration), or the item is simply not found — a configured
- * database error returns `{ status: "error" }` instead of silently serving seed
+ * database error returns `{ status: "error" }` instead of silently serving
  * content (#146).
  */
 export async function getLearningItemWithDetails(itemId: string): Promise<LearningItemResult> {
   const supabase = await createClient();
-  const seed = getSeedLearningItemById(itemId);
+  const seed = getSeedLearningItemById(itemId) ?? getGeneratedLearningItemById(itemId);
 
   if (!supabase) {
     return fromSeed(seed);
@@ -143,7 +146,7 @@ export async function getItemLinksBySkill(): Promise<Record<string, string>> {
   const supabase = await createClient();
 
   if (!supabase) {
-    return getSeedItemLinksBySkill();
+    return getGeneratedItemLinksBySkill(getSeedItemLinksBySkill());
   }
 
   const [itemsResult, mapResult] = await Promise.all([
@@ -159,7 +162,7 @@ export async function getItemLinksBySkill(): Promise<Record<string, string>> {
     // Non-authoritative convenience map; seed fallback is fine, but a configured
     // failure must be observable rather than silently swallowed (#146).
     logConfiguredFailure("learning-items", itemsResult.error ?? mapResult.error);
-    return getSeedItemLinksBySkill();
+    return getGeneratedItemLinksBySkill(getSeedItemLinksBySkill());
   }
 
   const orderById = new Map<string, number>(
@@ -182,5 +185,5 @@ export async function getItemLinksBySkill(): Promise<Record<string, string>> {
   for (const [skillId, value] of bySkill) {
     links[skillId] = value.id;
   }
-  return links;
+  return getGeneratedItemLinksBySkill(links);
 }
