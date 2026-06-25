@@ -38,3 +38,6 @@ pnpm-debug.log*
 # write-code exercise working copies and build output (#81)
 exercises/*/work/
 exercises/*/.build-solution/
+
+.vercel
+.env*

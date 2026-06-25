@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 // #416: the debugging lane. A code-capable debugging item shows the Code Lab and
-// its feedback area; a non-code debugging concept item renders normally without a
-// Code Lab. Runs signed-out, mock runner, no AI.
+// its feedback area. Legacy lesson URLs now resolve to generated sample content
+// that includes a Code Lab (lesson-sample work, 2026-06-25), so a debugging
+// lesson URL renders one too. Runs signed-out, mock runner, no AI.
 
 const CODE_ITEM = "/learn/cpp.tooling.debugging_method.code_first_diagnostic";
-const CONCEPT_ITEM = "/learn/cpp.tooling.debugging.lesson";
+const LEGACY_LESSON_ITEM = "/learn/cpp.tooling.debugging.lesson";
 
 test("a code-capable debugging item shows the Code Lab and feedback area", async ({ page }) => {
   await page.goto(CODE_ITEM);
@@ -21,8 +22,9 @@ test("a code-capable debugging item shows the Code Lab and feedback area", async
   await expect(page.getByRole("button", { name: "AI Review Code" })).toBeVisible();
 });
 
-test("a non-code debugging concept item renders without a Code Lab", async ({ page }) => {
-  await page.goto(CONCEPT_ITEM);
+test("a legacy debugging lesson URL serves a generated Code Lab sample", async ({ page }) => {
+  await page.goto(LEGACY_LESSON_ITEM);
   await expect(page.getByTestId("learning-item")).toBeVisible();
-  await expect(page.getByTestId("code-lab")).toHaveCount(0);
+  // Legacy lesson URLs now resolve to generated sample content with a Code Lab.
+  await expect(page.getByTestId("code-lab")).toBeVisible();
 });
