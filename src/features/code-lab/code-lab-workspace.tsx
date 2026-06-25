@@ -249,7 +249,14 @@ export function CodeLabWorkspace({
       <div className="flex flex-col gap-4" data-testid="code-lab-workspace">
         {problemPanel}
         <div className="flex flex-col gap-1 px-4">
-          <CodeEditor value={c.source} onChange={c.setSource} label="C++ source code" />
+          <CodeEditor
+            value={c.source}
+            onChange={c.setSource}
+            label="C++ source code"
+            breakpoints={breakpointState.breakpoints}
+            debugLine={debug.snapshot?.line ?? null}
+            onToggleBreakpoint={breakpointState.toggleBreakpoint}
+          />
           <DraftStatusLine status={c.draftStatus} />
         </div>
         <div className="px-4">{controls}</div>
@@ -268,7 +275,15 @@ export function CodeLabWorkspace({
         left={<div className="h-full border-r border-slate-200 bg-slate-50/60">{problemPanel}</div>}
         center={
           <div className="flex h-full flex-col gap-1 bg-slate-100 p-3">
-            <CodeEditor value={c.source} onChange={c.setSource} label="C++ source code" fill />
+            <CodeEditor
+              value={c.source}
+              onChange={c.setSource}
+              label="C++ source code"
+              fill
+              breakpoints={breakpointState.breakpoints}
+              debugLine={debug.snapshot?.line ?? null}
+              onToggleBreakpoint={breakpointState.toggleBreakpoint}
+            />
             <DraftStatusLine status={c.draftStatus} />
           </div>
         }

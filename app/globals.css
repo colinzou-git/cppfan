@@ -74,3 +74,37 @@ pre {
   background-clip: text;
   color: transparent;
 }
+
+/* Code Lab debugger gutter decorations (#442). Monaco injects these classes onto
+   glyph-margin / line elements, so they must be global, not module-scoped. */
+.cppfan-breakpoint-glyph::before,
+.cppfan-breakpoint-disabled-glyph::before {
+  content: "";
+  display: block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin: 0.28rem 0 0 0.28rem;
+  border-radius: 9999px;
+}
+
+.cppfan-breakpoint-glyph::before {
+  background: #dc2626;
+}
+
+.cppfan-breakpoint-disabled-glyph::before {
+  background: transparent;
+  border: 1px solid #94a3b8;
+}
+
+.cppfan-debug-current-line {
+  background: rgba(250, 204, 21, 0.18);
+}
+
+.cppfan-debug-current-line-glyph::before {
+  content: "▶";
+  display: block;
+  margin-left: 0.2rem;
+  color: #ca8a04;
+  font-size: 0.7rem;
+  line-height: 1.2rem;
+}
