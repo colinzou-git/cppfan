@@ -2,6 +2,12 @@ import { skillSeed } from "../skills/skill-seed";
 import type { Skill } from "../skills/skill-types";
 import type { LearningItemWithDetails } from "./learning-item-types";
 
+const HAND_AUTHORED_SKILL_SAMPLE_ITEM_IDS = new Set([
+  "cpp.program_basics.structure.lesson",
+  "cpp.program_basics.io.lesson",
+  "cpp.program_basics.statements_comments.lesson"
+]);
+
 const activeSkillsByLongestId = [...skillSeed]
   .filter((skill) => skill.is_active)
   .sort((a, b) => b.id.length - a.id.length);
@@ -15,7 +21,7 @@ function lineComment(value: string): string {
 }
 
 export function getGeneratedLearningItemIdForSkill(skillId: string): string {
-  return `${skillId}.lesson`;
+  return `${skillId}.sample_code`;
 }
 
 export function generateSkillSampleOutput(skill: Skill): string {
@@ -36,7 +42,11 @@ int main() {
 }
 
 export function findSkillForLearningItemId(itemId: string): Skill | null {
-  return activeSkillsByLongestId.find((skill) => itemId === getGeneratedLearningItemIdForSkill(skill.id) || itemId.startsWith(`${skill.id}.`)) ?? null;
+  return (
+    activeSkillsByLongestId.find(
+      (skill) => itemId === getGeneratedLearningItemIdForSkill(skill.id) || itemId.startsWith(`${skill.id}.`)
+    ) ?? null
+  );
 }
 
 export function isGeneratedCodeLabEligibleItemId(itemId: string): boolean {
@@ -52,7 +62,8 @@ export function isGeneratedCodeLabEligibleItemId(itemId: string): boolean {
 export function getGeneratedItemLinksBySkill(existingLinks: Record<string, string>): Record<string, string> {
   const links = { ...existingLinks };
   for (const skill of activeSkillsByLongestId) {
-    if (!links[skill.id]) {
+    const existingLink = links[skill.id];
+    if (!existingLink || !HAND_AUTHORED_SKILL_SAMPLE_ITEM_IDS.has(existingLink)) {
       links[skill.id] = getGeneratedLearningItemIdForSkill(skill.id);
     }
   }
