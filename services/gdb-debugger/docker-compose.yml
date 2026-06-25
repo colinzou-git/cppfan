@@ -1,0 +1,28 @@
+# Local / OVH deployment of the GDB debugger service (#442).
+#   docker compose up --build
+# Then point the Next app at it:
+#   CODE_DEBUGGER_PROVIDER=gdb-service
+#   CODE_DEBUGGER_BASE_URL=http://<host>:3008
+#   CODE_DEBUGGER_API_KEY=<same token as DEBUGGER_API_KEY below>
+services:
+  gdb-debugger:
+    build: .
+    ports:
+      - "3008:3008"
+    environment:
+      PORT: 3008
+      # Must equal the app's CODE_DEBUGGER_API_KEY. Leave unset only for local dev.
+      DEBUGGER_API_KEY: "${DEBUGGER_API_KEY:-}"
+    # Sandbox the toolchain: bound memory/CPU/process count and ptrace for gdb.
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    pids_limit: 256
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3008/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
