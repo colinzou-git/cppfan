@@ -1,10 +1,8 @@
 /**
- * Shared types for the Code Lab real debugger (#442).
- *
- * This slice (Part of #442) covers only breakpoint state — the persistence hook
- * and editor gutter wiring depend on it. The debug-session contract (snapshot,
- * start/action/stop requests, explain) is added with the debug client/route
- * slices so each type lands next to the code that uses it.
+ * Shared types for the Code Lab real debugger (#442). Breakpoint state plus the
+ * debug-session transport contract (snapshot, start/action/stop requests, health)
+ * shared by the browser client, the Next.js debug routes, and the GDB service.
+ * The AI "explain current step" types land with that slice.
  */
 
 export type CodeBreakpointStatus = "pending" | "verified" | "invalid" | "disabled";
@@ -24,4 +22,83 @@ export type StoredCodeBreakpoint = {
   id: string;
   line: number;
   enabled: boolean;
+};
+
+export type CodeDebugVariable = {
+  name: string;
+  value: string;
+  type?: string;
+  changed?: boolean;
+};
+
+export type CodeDebugWatch = {
+  id: string;
+  expression: string;
+  value?: string;
+  status: "ok" | "error" | "unavailable";
+  message?: string;
+};
+
+export type CodeDebugFrame = {
+  id: string;
+  name: string;
+  file?: string;
+  line?: number | null;
+};
+
+export type CodeDebugStatus =
+  | "idle"
+  | "unconfigured"
+  | "starting"
+  | "running"
+  | "paused"
+  | "exited"
+  | "compile_error"
+  | "runtime_error"
+  | "timeout"
+  | "stale"
+  | "error";
+
+/** The single source of truth the UI renders for a debug session at any moment. */
+export type CodeDebugSnapshot = {
+  sessionId: string | null;
+  status: CodeDebugStatus;
+  reason?: string;
+  file: "main.cpp";
+  line: number | null;
+  stdout: string;
+  stderr: string;
+  compileOutput: string;
+  exitCode?: number | null;
+  stack: CodeDebugFrame[];
+  variables: CodeDebugVariable[];
+  watches: CodeDebugWatch[];
+  breakpoints: CodeBreakpoint[];
+  message?: string;
+};
+
+export type CodeDebugStartRequest = {
+  itemId: string;
+  source: string;
+  stdin?: string;
+  breakpoints: CodeBreakpoint[];
+  watches?: string[];
+};
+
+export type CodeDebugAction = "continue" | "pause" | "stepOver" | "stepInto" | "stepOut" | "restart";
+
+export type CodeDebugActionRequest = {
+  sessionId: string;
+  action: CodeDebugAction;
+  watches?: string[];
+};
+
+export type CodeDebugStopRequest = {
+  sessionId: string;
+};
+
+export type CodeDebuggerHealth = {
+  status: "ok" | "unconfigured" | "error";
+  provider?: string;
+  message?: string;
 };
