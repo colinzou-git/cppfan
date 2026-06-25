@@ -2,6 +2,11 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MaybeCodeLab } from "@/features/code-lab/maybe-code-lab";
 import { getCodeLabConfigForItem, isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
+import {
+  getGeneratedItemLinksBySkill,
+  getGeneratedLearningItemById,
+  getGeneratedLearningItemIdForSkill
+} from "@/features/learning-items/generated-skill-learning-items";
 
 // The real editor lazily loads Monaco, which needs browser APIs unavailable in
 // jsdom. Replace it with a lightweight textarea so the mount logic is testable.
@@ -40,5 +45,32 @@ describe("metadata-driven Code Lab mount", () => {
     expect(getCodeLabConfigForItem("cpp.structs_classes.public_private.concept_access")?.skillTags).toEqual([
       "cpp.structs_classes.public_private"
     ]);
+  });
+
+  it("uses distinct generated sample-code pages for later skill-map preview links", () => {
+    const links = getGeneratedItemLinksBySkill({
+      "cpp.program_basics.structure": "cpp.program_basics.structure.lesson",
+      "cpp.program_basics.exit_status": "cpp.program_basics.exit_status.lesson",
+      "cpp.values_types.variables": "cpp.values_types.variables.lesson",
+      "cpp.values_types.initialization_pitfalls": "cpp.values_types.initialization_pitfalls.lesson"
+    });
+
+    expect(links["cpp.program_basics.structure"]).toBe("cpp.program_basics.structure.lesson");
+    expect(links["cpp.program_basics.exit_status"]).toBe("cpp.program_basics.exit_status.sample_code");
+    expect(links["cpp.values_types.variables"]).toBe("cpp.values_types.variables.sample_code");
+    expect(links["cpp.values_types.initialization_pitfalls"]).toBe(
+      "cpp.values_types.initialization_pitfalls.sample_code"
+    );
+  });
+
+  it("creates generated sample-code learning items that do not collide with seeded lesson ids", () => {
+    const itemId = getGeneratedLearningItemIdForSkill("cpp.values_types.variables");
+    const item = getGeneratedLearningItemById(itemId);
+
+    expect(itemId).toBe("cpp.values_types.variables.sample_code");
+    expect(item?.item.title).toBe("Variables, types, and initialization sample code");
+    expect(item?.item.prompt).toContain("```cpp");
+    expect(item?.item.prompt).toContain("Skill: Variables, types, and initialization");
+    expect(getCodeLabConfigForItem(itemId)?.starterCode).toContain("Skill: Variables, types, and initialization");
   });
 });
