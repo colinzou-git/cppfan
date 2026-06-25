@@ -102,3 +102,16 @@ export type CodeDebuggerHealth = {
   provider?: string;
   message?: string;
 };
+
+export type CodeDebugExplainRequest = {
+  itemId: string;
+  source: string;
+  snapshot: CodeDebugSnapshot;
+  userQuestion?: string;
+};
+
+export type CodeDebugExplainResult = {
+  status: "ok" | "unavailable";
+  explanation: string;
+  relatedSkills?: string[];
+};

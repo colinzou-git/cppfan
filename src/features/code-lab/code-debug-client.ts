@@ -1,5 +1,7 @@
 import type {
   CodeDebugActionRequest,
+  CodeDebugExplainRequest,
+  CodeDebugExplainResult,
   CodeDebugSnapshot,
   CodeDebugStartRequest,
   CodeDebugStopRequest,
@@ -55,4 +57,11 @@ export function stopDebugRequest(
 
 export function debugHealthRequest(signal?: AbortSignal): Promise<CodeDebuggerHealth> {
   return requestJson<CodeDebuggerHealth>("/api/code/debug/health", { method: "GET" }, signal);
+}
+
+export function explainDebugRequest(
+  input: CodeDebugExplainRequest,
+  signal?: AbortSignal
+): Promise<CodeDebugExplainResult> {
+  return postJson<CodeDebugExplainResult>("/api/code/debug/explain", input, signal);
 }

@@ -33,6 +33,7 @@ export function DebugTabPanel({
   const isActive = ["starting", "running", "paused", "compile_error", "runtime_error", "timeout"].includes(status);
   const paused = status === "paused" && !debug.isStale;
   const running = status === "running" || status === "starting";
+  const explainable = ["paused", "exited", "compile_error", "runtime_error", "timeout"].includes(status);
 
   function addLine() {
     const line = Number.parseInt(lineDraft, 10);
@@ -72,6 +73,12 @@ export function DebugTabPanel({
           onClick={debug.stopDebugging}
           disabled={!isActive || debug.busy}
         />
+        <DebugButton
+          testId="code-debug-explain"
+          label="Explain current step"
+          onClick={() => debug.explainCurrentStep()}
+          disabled={!explainable || debug.explaining}
+        />
       </div>
 
       <p className="text-xs text-slate-600" data-testid="code-debug-status" aria-live="polite">
@@ -83,6 +90,18 @@ export function DebugTabPanel({
         <p className="text-xs font-bold text-amber-700" role="alert">
           {debug.error}
         </p>
+      ) : null}
+
+      {debug.explaining || debug.explanation ? (
+        <section
+          className="rounded-lg border border-indigo-100 bg-indigo-50/60 p-2"
+          data-testid="code-debug-explanation"
+        >
+          <h3 className="text-xs font-bold uppercase tracking-wide text-indigo-700">Explain current step</h3>
+          <p className="mt-1 whitespace-pre-wrap text-xs text-slate-700">
+            {debug.explaining ? "Explaining…" : debug.explanation?.explanation}
+          </p>
+        </section>
       ) : null}
 
       <section className="flex flex-col gap-1.5">

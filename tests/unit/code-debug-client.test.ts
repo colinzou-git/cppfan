@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   debugActionRequest,
   debugHealthRequest,
+  explainDebugRequest,
   startDebugRequest,
   stopDebugRequest
 } from "@/features/code-lab/code-debug-client";
@@ -57,6 +58,24 @@ describe("code-debug-client (#442)", () => {
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     const headers = new Headers(init.headers);
     expect(headers.has("authorization")).toBe(false);
+  });
+
+  it("posts an explain request and unwraps the result", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockResponse({ result: { status: "unavailable", explanation: "later" } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await explainDebugRequest({
+      itemId: "x",
+      source: "int main(){}",
+      snapshot
+    });
+    expect(result.status).toBe("unavailable");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/code/debug/explain",
+      expect.objectContaining({ method: "POST" })
+    );
   });
 
   it("requests health over GET", async () => {
