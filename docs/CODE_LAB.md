@@ -4,10 +4,14 @@ The Code Lab (#407) lets learners write C++ inside cppFan, run it, run visible
 and hidden tests, and ask the AI to review the result — without leaving the
 learning flow.
 
-The Code Lab is **not** a real breakpoint debugger. It has no breakpoints, step
-controls, variable watches, GDB/LLDB, or DAP integration. The AI trace feature is
-an educational approximation; compiler output and test results remain the source
-of truth.
+The Code Lab now has a **real GDB-backed Debug tab** (#442) — breakpoints, step
+controls, variable/watch inspection, and a call stack, driven by an actual
+`gdb --interpreter=mi2` process, **not** an AI approximation. It is separate from
+the older AI trace (an educational approximation). The Debug tab is real only when
+the GDB debugger service is configured; otherwise it shows a friendly
+"not configured" state. Compiler output and test results remain the source of
+truth for mastery — debugging never records `code_passed` or marks a skill
+mastered.
 
 ## How it appears
 
@@ -171,6 +175,48 @@ Relevant files:
 - `src/features/code-lab/code-lab-service.ts`
 - `src/features/code-lab/code-attempt-service.ts`
 
+## Debug tab (real GDB, #442)
+
+The full-page workspace (`/lab/<itemId>`) has a **Debug** right-dock tab beside
+Output, Tests, (Input,) and AI. It is a real debugger — `g++ -g -O0` +
+`gdb --interpreter=mi2` — not the AI trace.
+
+- **Breakpoints** toggle from the Monaco gutter (tap/click) or an
+  add-by-line-number control (required for iPhone/iPad). They persist per item in
+  `localStorage` (`cppfan:code-debug-breakpoints:<itemId>`), like code drafts; they
+  are **not** synced to Supabase.
+- **Sessions are ephemeral.** Nothing is persisted server-side; a session is reaped
+  on idle/wall timeout, and a page refresh ends it (restart to debug again).
+- **Source edits during a session** mark it stale: only Stop/Restart stay enabled,
+  because the running program no longer matches the editor.
+- **AI "Explain current step"** runs only when the learner clicks it — never
+  automatically — and is grounded strictly in the runtime snapshot.
+- **Mastery is unchanged.** Debugging records no skill events and never marks a
+  skill mastered or `code_passed`; Run/Test remain the evidence.
+
+### Security model
+
+Untrusted C++ **never** runs inside the Next.js/Vercel process. The browser calls
+Next API routes (`app/api/code/debug/{start,action,stop,health,explain}`), which
+proxy to the OVH GDB service (`services/gdb-debugger`). The browser never receives
+`CODE_DEBUGGER_API_KEY`. The service compiles and debugs in an isolated,
+network-less, temp-only workspace with bounded compile/wall/idle timeouts, memory,
+processes, output, breakpoints, watches, and steps (`services/gdb-debugger/src/security.ts`).
+
+### Configuration (server-only)
+
+```bash
+CODE_DEBUGGER_PROVIDER=gdb-service
+CODE_DEBUGGER_BASE_URL=http://<ovh-host>:3008
+CODE_DEBUGGER_API_KEY=<server-side-token>
+CODE_DEBUGGER_TIMEOUT_MS=300000
+```
+
+With `CODE_DEBUGGER_PROVIDER` **unset** (the normal CI configuration) the Debug tab
+still renders; Start Debugging returns a friendly "Real debugger service is not
+configured." state and no external service is needed. Deploy the service with
+`services/gdb-debugger` (Docker) on the same OVH environment family as Judge0.
+
 ## Troubleshooting
 
 ### `/languages` works but submissions fail
@@ -213,6 +259,27 @@ CODE_RUNNER_MEMORY_MB=128
 If multiple learners use Code Lab or hidden tests become slow, upgrade the Judge0
 host to OVH VPS-2. cppFan only needs the same environment variables pointed at
 the upgraded runner.
+
+### Debugger tab shows "not configured"
+
+Set `CODE_DEBUGGER_PROVIDER=gdb-service` and `CODE_DEBUGGER_BASE_URL`. With them
+unset, the Debug tab intentionally shows the unconfigured state and runs no
+service (the normal CI configuration).
+
+### Breakpoints do not hit
+
+Confirm the code compiles with `-g -O0` (the service uses both) and the
+breakpoint line is executable (not a blank line or a declaration-only line).
+
+### Variables show as unavailable
+
+GDB cannot show optimized-out or out-of-scope variables; the service compiles with
+`-O0`, so this usually means the variable is not yet in scope at the current line.
+
+### Debug session disappeared after refresh
+
+Debug sessions are ephemeral and server-side in-memory. A refresh ends the
+session — click Restart/Start Debugging to begin a new one.
 
 ## Adding a code-capable item
 

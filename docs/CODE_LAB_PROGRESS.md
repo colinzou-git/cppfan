@@ -1,10 +1,28 @@
 # Code Lab build progress (resume file)
 
-This file tracked the autonomous Code Lab build loop. **The roadmap is complete** —
-all Code Lab issues are implemented, merged to `main`, and closed with final
-closure audits. No open Code Lab issues or PRs remain.
+This file tracked the autonomous Code Lab build loop. The original roadmap is
+complete; the real GDB Debug tab (#442) was added on top and is **code-complete**,
+pending only the manual OVH deploy of `services/gdb-debugger`.
 
-_Last updated: 2026-06-21 — by the /loop driver._
+_Last updated: 2026-06-25 — by the /loop driver._
+
+## Real GDB Debug tab track (#442): CODE-COMPLETE ✅ (OVH deploy pending)
+
+| Slice | What | PR | Merge |
+|---|---|---|---|
+| foundation | breakpoint types + persistence hook | #449 | `981e90e` |
+| debug API | unconfigured-safe routes + client + service | #450 | `38108c2` |
+| hook | `useCodeDebugger` orchestration | #451 | `6d76fb0` |
+| Debug tab | tab + panel (toolbar, breakpoints, snapshot) | #452 | `aa2dd1e` |
+| gutter | Monaco breakpoint + current-line decorations | #453 | `f3b0e23` |
+| AI explain | on-click snapshot-grounded explanation | #454 | `8339926` |
+| gdb core | GDB/MI parser + output buffer + limits (tested) | #455 | `63483fb` |
+| gdb runtime | session manager + gdb driver + http server + Docker | #456 | `d8c7a28` |
+
+Debug tab lives in `CodeLabWorkspace` (`/lab/<itemId>`). `CODE_DEBUGGER_PROVIDER`
+unset = friendly unconfigured state (the CI default). The OVH `services/gdb-debugger`
+must be deployed and `CODE_DEBUGGER_*` set for the live debugger — a manual ops
+step, so #442 stays open with a closure audit until that deploy lands.
 
 ## Desktop responsive layout track (#430–#433): COMPLETE ✅
 
