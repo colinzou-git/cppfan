@@ -179,6 +179,49 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "dsa-valid-parentheses",
+    title: "DSA: valid parentheses",
+    skillIds: ["dsa.stacks.basic_stack"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["parentheses.hpp"],
+    requiredTests: [
+      "test_simple_balanced",
+      "test_unbalanced",
+      "test_empty",
+      "test_ignores_other_chars",
+      "test_closing_without_open"
+    ],
+    hints: [
+      "Push every opening bracket onto a stack.",
+      "On a closing bracket, the stack must be non-empty and its top must be the matching opener.",
+      "After scanning the whole string, the stack must be empty for a balanced result."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "dsa-first-unique-char",
+    title: "DSA: first unique character",
+    skillIds: ["dsa.hashing.lookup", "dsa.strings.char_frequency"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["first_unique.hpp"],
+    requiredTests: [
+      "test_first_char_unique",
+      "test_later_unique",
+      "test_none_unique",
+      "test_empty_and_single",
+      "test_unique_at_end",
+      "test_mixed_chars"
+    ],
+    hints: [
+      "First pass: count how many times each character appears.",
+      "Second pass: return the index of the first character whose count is 1.",
+      "Return -1 when no character is unique (or the string is empty)."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],

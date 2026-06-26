@@ -112,6 +112,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dsa-max-subarray-sum` | DP design, prefix sums | `math-technique-playground` |
 | `stl-vector-stats` | `std::vector`, STL algorithms | `text-statistics-analyzer` |
 | `cpp-rational-reduce` | struct invariants | `math-technique-playground` |
+| `dsa-valid-parentheses` | stacks | `math-technique-playground` |
+| `dsa-first-unique-char` | hash lookup, character frequency | `text-statistics-analyzer` |
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |

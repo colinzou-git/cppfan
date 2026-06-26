@@ -1,0 +1,17 @@
+{
+  "id": "dsa-valid-parentheses",
+  "title": "DSA: valid parentheses",
+  "skill_ids": ["dsa.stacks.basic_stack"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["parentheses.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-valid-parentheses/work exercises/dsa-valid-parentheses/tests/tests.cpp -o exercises/dsa-valid-parentheses/work/run",
+  "test_command": "exercises/dsa-valid-parentheses/work/run",
+  "required_tests": ["test_simple_balanced", "test_unbalanced", "test_empty", "test_ignores_other_chars", "test_closing_without_open"],
+  "hints": [
+    "Push every opening bracket onto a stack.",
+    "On a closing bracket, the stack must be non-empty and its top must be the matching opener.",
+    "After scanning the whole string, the stack must be empty for a balanced result."
+  ],
+  "project_lab": "math-technique-playground"
+}
