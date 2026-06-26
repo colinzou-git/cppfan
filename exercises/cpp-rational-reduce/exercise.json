@@ -1,0 +1,17 @@
+{
+  "id": "cpp-rational-reduce",
+  "title": "C++: reduce a fraction",
+  "skill_ids": ["cpp.structs_classes.invariants_intro"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["rational.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/cpp-rational-reduce/work exercises/cpp-rational-reduce/tests/tests.cpp -o exercises/cpp-rational-reduce/work/run",
+  "test_command": "exercises/cpp-rational-reduce/work/run",
+  "required_tests": ["test_basic_reduction", "test_already_reduced", "test_negative_numerator", "test_negative_denominator_moves_sign", "test_both_negative_is_positive", "test_zero_numerator", "test_reduces_to_integer"],
+  "hints": [
+    "If the denominator is negative, flip the sign of both numerator and denominator.",
+    "Compute the greatest common divisor with the Euclidean algorithm on absolute values.",
+    "Divide both parts by the gcd; gcd(0, d) is d, so 0/d becomes 0/1."
+  ],
+  "project_lab": "math-technique-playground"
+}
