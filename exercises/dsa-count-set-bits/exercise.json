@@ -1,0 +1,17 @@
+{
+  "id": "dsa-count-set-bits",
+  "title": "DSA: count set bits",
+  "skill_ids": ["dsa.math.bit_manipulation"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["count_bits.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-count-set-bits/work exercises/dsa-count-set-bits/tests/tests.cpp -o exercises/dsa-count-set-bits/work/run",
+  "test_command": "exercises/dsa-count-set-bits/work/run",
+  "required_tests": ["test_zero", "test_powers_of_two", "test_small_values", "test_all_bits", "test_mixed"],
+  "hints": [
+    "Brian Kernighan's trick: n &= (n - 1) clears the lowest set bit.",
+    "Count how many times you can clear a bit before n becomes 0.",
+    "Work on the unsigned value directly — no string conversion needed."
+  ],
+  "project_lab": "math-technique-playground"
+}

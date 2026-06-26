@@ -1,0 +1,17 @@
+{
+  "id": "dsa-sort-by-frequency",
+  "title": "DSA: sort by frequency",
+  "skill_ids": ["dsa.sorting.comparator", "dsa.hashing.lookup"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["sort_by_frequency.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-sort-by-frequency/work exercises/dsa-sort-by-frequency/tests/tests.cpp -o exercises/dsa-sort-by-frequency/work/run",
+  "test_command": "exercises/dsa-sort-by-frequency/work/run",
+  "required_tests": ["test_basic", "test_all_same_frequency_orders_by_value", "test_ties_broken_by_value", "test_empty_and_single", "test_negatives"],
+  "hints": [
+    "Count occurrences first with a map from value to count.",
+    "std::sort with a comparator: order by ascending frequency first.",
+    "Break frequency ties by the value itself (ascending)."
+  ],
+  "project_lab": "math-technique-playground"
+}

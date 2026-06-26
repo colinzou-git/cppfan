@@ -266,6 +266,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "dsa-count-set-bits",
+    title: "DSA: count set bits",
+    skillIds: ["dsa.math.bit_manipulation"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["count_bits.hpp"],
+    requiredTests: [
+      "test_zero",
+      "test_powers_of_two",
+      "test_small_values",
+      "test_all_bits",
+      "test_mixed"
+    ],
+    hints: [
+      "Brian Kernighan's trick: n &= (n - 1) clears the lowest set bit.",
+      "Count how many times you can clear a bit before n becomes 0.",
+      "Work on the unsigned value directly — no string conversion needed."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "dsa-sort-by-frequency",
+    title: "DSA: sort by frequency",
+    skillIds: ["dsa.sorting.comparator", "dsa.hashing.lookup"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["sort_by_frequency.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_all_same_frequency_orders_by_value",
+      "test_ties_broken_by_value",
+      "test_empty_and_single",
+      "test_negatives"
+    ],
+    hints: [
+      "Count occurrences first with a map from value to count.",
+      "std::sort with a comparator: order by ascending frequency first.",
+      "Break frequency ties by the value itself (ascending)."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],

@@ -552,6 +552,104 @@ int main() {
     ],
     skillTags: ["dsa.arrays.two_pointers", "dsa.arrays.traversal"]
   },
+  "dsa-count-set-bits": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: count set bits.
+
+Read a non-negative integer and print how many 1 bits are in its binary form
+(its Hamming weight).
+
+Input format:
+- A single non-negative integer (fits in 32 bits).
+
+Output format:
+- A single integer: the number of set bits, then a newline.
+
+7 -> 3 (0b111); 8 -> 1; 255 -> 8.
+
+AI evaluation rubric:
+- Bit operations (e.g. n &= n - 1), not string conversion.
+- Correct for 0 and for all 32 bits set.`,
+    stdin: "255\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int countSetBits(unsigned int n) {
+  // TODO: clear the lowest set bit (n &= n - 1) repeatedly, counting the steps.
+  (void)n;
+  return 0;
+}
+
+int main() {
+  unsigned int n;
+  cin >> n;
+  cout << countSetBits(n) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Three bits", stdin: "7\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Power of two", stdin: "8\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "Byte of ones", stdin: "255\n", expectedStdout: "8\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation"]
+  },
+  "dsa-sort-by-frequency": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: sort by frequency.
+
+Read a list of integers and print them sorted by how often each value occurs
+(ascending), breaking ties by the value itself (ascending).
+
+Input format:
+- First line: n.
+- Second line: n integers.
+
+Output format:
+- The reordered values on one line, space-separated, then a newline.
+
+For [1,1,2,2,2,3] the result is "3 1 1 2 2 2".
+
+AI evaluation rubric:
+- Frequency map, then std::sort with a comparator on (count, then value).
+- Stable, correct tie-breaking; handles empty/single inputs.`,
+    stdin: "6\n1 1 2 2 2 3\n",
+    starterCode: `#include <iostream>
+#include <vector>
+#include <map>
+#include <algorithm>
+using namespace std;
+
+vector<int> sortByFrequency(vector<int> nums) {
+  // TODO: count occurrences, then sort by ascending frequency, ties by value.
+  return nums;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  vector<int> sorted = sortByFrequency(nums);
+  for (size_t i = 0; i < sorted.size(); ++i) {
+    if (i) cout << " ";
+    cout << sorted[i];
+  }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Frequency order", stdin: "6\n1 1 2 2 2 3\n", expectedStdout: "3 1 1 2 2 2\n", matcher: "exact" },
+      { name: "Same frequency by value", stdin: "3\n3 1 2\n", expectedStdout: "1 2 3\n", matcher: "exact" },
+      { name: "Tie by value", stdin: "5\n3 3 2 2 1\n", expectedStdout: "1 2 2 3 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.sorting.comparator", "dsa.hashing.lookup"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",
