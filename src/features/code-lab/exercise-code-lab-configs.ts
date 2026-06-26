@@ -164,6 +164,104 @@ int main() {
     ],
     skillTags: ["dsa.searching.binary_search", "dsa.arrays.indexing"]
   },
+  "strings-anagram-check": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: anagram check.
+
+Read two lines and decide whether they are anagrams of each other, ignoring
+spaces and letter case.
+
+Input format:
+- First line: string A.
+- Second line: string B.
+
+Output format:
+- Print "true" if A and B are anagrams, otherwise "false".
+
+"Dormitory" and "Dirty Room" -> true. "hello" and "world" -> false.
+
+AI evaluation rubric:
+- Frequency counting (array or hash map), O(n); no sorting required.
+- Ignores spaces and case; counts must match exactly.`,
+    stdin: "Dormitory\nDirty Room\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <array>
+#include <cctype>
+using namespace std;
+
+bool areAnagrams(const string& a, const string& b) {
+  // TODO: tally character frequencies (skip spaces, lowercase), then compare.
+  (void)a;
+  (void)b;
+  return false;
+}
+
+int main() {
+  string a, b;
+  getline(cin, a);
+  getline(cin, b);
+  cout << (areAnagrams(a, b) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Anagram ignoring case/space", stdin: "Dormitory\nDirty Room\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not an anagram", stdin: "hello\nworld\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Counts must match", stdin: "aab\nabb\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.char_frequency", "dsa.strings.hashing"]
+  },
+  "dsa-max-subarray-sum": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: maximum subarray sum.
+
+Read an array of integers and print the largest sum of any non-empty contiguous
+subarray (Kadane's algorithm).
+
+Input format:
+- First line: n.
+- Second line: n integers (may be negative).
+
+Output format:
+- A single integer: the maximum subarray sum, then a newline.
+
+For [-2,1,-3,4,-1,2,1,-5,4] the answer is 6 (the subarray [4,-1,2,1]).
+
+AI evaluation rubric:
+- O(n) Kadane scan; extend the running sum while positive, else restart.
+- Uses long long; handles all-negative arrays (largest single element).`,
+    stdin: "9\n-2 1 -3 4 -1 2 1 -5 4\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+long long maxSubarraySum(const vector<int>& nums) {
+  // TODO: Kadane's algorithm. Track the best sum ending here and the overall max.
+  (void)nums;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  cout << maxSubarraySum(nums) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed signs", stdin: "9\n-2 1 -3 4 -1 2 1 -5 4\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "All positive", stdin: "4\n1 2 3 4\n", expectedStdout: "10\n", matcher: "exact" },
+      { name: "All negative", stdin: "5\n-8 -3 -6 -2 -5\n", expectedStdout: "-2\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dp_design", "dsa.techniques.prefix_sums"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

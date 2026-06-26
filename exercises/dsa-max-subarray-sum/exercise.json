@@ -1,0 +1,17 @@
+{
+  "id": "dsa-max-subarray-sum",
+  "title": "DSA: maximum subarray sum",
+  "skill_ids": ["dsa.techniques.dp_design", "dsa.techniques.prefix_sums"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["max_subarray.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-max-subarray-sum/work exercises/dsa-max-subarray-sum/tests/tests.cpp -o exercises/dsa-max-subarray-sum/work/run",
+  "test_command": "exercises/dsa-max-subarray-sum/work/run",
+  "required_tests": ["test_mixed", "test_all_positive", "test_all_negative", "test_single_element", "test_large_values_no_overflow"],
+  "hints": [
+    "Track the best subarray sum ending at the current index.",
+    "If the running sum is positive, extend it; otherwise restart at the current element.",
+    "Keep a separate overall maximum, and use long long to avoid 32-bit overflow."
+  ],
+  "project_lab": "math-technique-playground"
+}

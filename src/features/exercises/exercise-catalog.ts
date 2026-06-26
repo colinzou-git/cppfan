@@ -92,6 +92,49 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "strings-anagram-check",
+    title: "Strings: anagram check",
+    skillIds: ["dsa.strings.char_frequency", "dsa.strings.hashing"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["anagram.hpp"],
+    requiredTests: [
+      "test_basic_anagrams",
+      "test_not_anagrams",
+      "test_ignores_case",
+      "test_ignores_spaces",
+      "test_empty_and_spaces",
+      "test_counts_matter"
+    ],
+    hints: [
+      "Tally each character's frequency for the first string.",
+      "Subtract the second string's characters from the same tally.",
+      "Skip spaces and lowercase letters before counting; the strings are anagrams when every count returns to zero."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "dsa-max-subarray-sum",
+    title: "DSA: maximum subarray sum",
+    skillIds: ["dsa.techniques.dp_design", "dsa.techniques.prefix_sums"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["max_subarray.hpp"],
+    requiredTests: [
+      "test_mixed",
+      "test_all_positive",
+      "test_all_negative",
+      "test_single_element",
+      "test_large_values_no_overflow"
+    ],
+    hints: [
+      "Track the best subarray sum ending at the current index.",
+      "If the running sum is positive, extend it; otherwise restart at the current element.",
+      "Keep a separate overall maximum, and use long long to avoid 32-bit overflow."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
