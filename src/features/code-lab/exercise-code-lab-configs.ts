@@ -450,6 +450,108 @@ int main() {
     ],
     skillTags: ["dsa.hashing.lookup", "dsa.strings.char_frequency"]
   },
+  "strings-longest-unique-substring": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: longest unique substring.
+
+Read one line and print the length of the longest substring with no repeated
+characters.
+
+Input format:
+- A single line of text.
+
+Output format:
+- A single integer: the length of the longest substring of distinct characters.
+
+For "abcabcbb" the answer is 3 ("abc"); for "bbbbb" it is 1.
+
+AI evaluation rubric:
+- Sliding window with each character's last position; O(n).
+- Moves the window's left edge past a repeat; tracks the max width.`,
+    stdin: "abcabcbb\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <array>
+using namespace std;
+
+int longestUnique(const string& s) {
+  // TODO: sliding window; remember each char's last index; track the max width.
+  (void)s;
+  return 0;
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  cout << longestUnique(line) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "abcabcbb\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "All same", stdin: "bbbbb\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "All unique", stdin: "abcdef\n", expectedStdout: "6\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.sliding_window", "dsa.hashing.lookup"]
+  },
+  "dsa-merge-sorted-arrays": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: merge two sorted arrays.
+
+Read two sorted arrays and print their merge as one sorted line.
+
+Input format:
+- First line: n, then n sorted integers on the second line.
+- Third line: m, then m sorted integers on the fourth line.
+
+Output format:
+- The merged sorted values on one line, space-separated, then a newline. An empty
+  result prints an empty line.
+
+AI evaluation rubric:
+- Two-pointer merge in O(n + m); no concatenate-and-resort.
+- Stable on ties (take from the first array first); handles empty inputs.`,
+    stdin: "3\n1 3 5\n3\n2 4 6\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> mergeSorted(const vector<int>& a, const vector<int>& b) {
+  // TODO: two indices; append the smaller front element; then the remainder.
+  (void)a;
+  (void)b;
+  return {};
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (int i = 0; i < n; ++i) cin >> a[i];
+  int m;
+  cin >> m;
+  vector<int> b(m);
+  for (int i = 0; i < m; ++i) cin >> b[i];
+  vector<int> merged = mergeSorted(a, b);
+  for (size_t i = 0; i < merged.size(); ++i) {
+    if (i) cout << " ";
+    cout << merged[i];
+  }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Interleave", stdin: "3\n1 3 5\n3\n2 4 6\n", expectedStdout: "1 2 3 4 5 6\n", matcher: "exact" },
+      { name: "One empty", stdin: "0\n\n3\n1 2 3\n", expectedStdout: "1 2 3\n", matcher: "exact" },
+      { name: "Duplicates", stdin: "3\n1 1 2\n2\n1 3\n", expectedStdout: "1 1 1 2 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.two_pointers", "dsa.arrays.traversal"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

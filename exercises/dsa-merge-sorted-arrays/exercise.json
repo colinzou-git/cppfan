@@ -1,0 +1,17 @@
+{
+  "id": "dsa-merge-sorted-arrays",
+  "title": "DSA: merge two sorted arrays",
+  "skill_ids": ["dsa.arrays.two_pointers", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["merge_sorted.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-merge-sorted-arrays/work exercises/dsa-merge-sorted-arrays/tests/tests.cpp -o exercises/dsa-merge-sorted-arrays/work/run",
+  "test_command": "exercises/dsa-merge-sorted-arrays/work/run",
+  "required_tests": ["test_basic", "test_one_empty", "test_both_empty", "test_duplicates", "test_uneven_lengths", "test_negatives"],
+  "hints": [
+    "Walk an index through each input, appending the smaller front element.",
+    "When values tie, take from `a` first to keep the merge stable.",
+    "After one input is exhausted, append whatever remains of the other."
+  ],
+  "project_lab": "math-technique-playground"
+}

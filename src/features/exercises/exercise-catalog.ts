@@ -222,6 +222,50 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "text-statistics-analyzer"
   },
   {
+    id: "strings-longest-unique-substring",
+    title: "Strings: longest unique substring",
+    skillIds: ["dsa.techniques.sliding_window", "dsa.hashing.lookup"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["longest_unique.hpp"],
+    requiredTests: [
+      "test_classic",
+      "test_all_same",
+      "test_all_unique",
+      "test_empty_and_single",
+      "test_repeat_resets_window",
+      "test_with_spaces_and_digits"
+    ],
+    hints: [
+      "Keep a sliding window [start, i] and the last index where each character was seen.",
+      "When the current character was last seen at or after start, move start to one past it.",
+      "The answer is the largest window width (i - start + 1) over the whole scan."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "dsa-merge-sorted-arrays",
+    title: "DSA: merge two sorted arrays",
+    skillIds: ["dsa.arrays.two_pointers", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["merge_sorted.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_one_empty",
+      "test_both_empty",
+      "test_duplicates",
+      "test_uneven_lengths",
+      "test_negatives"
+    ],
+    hints: [
+      "Walk an index through each input, appending the smaller front element.",
+      "When values tie, take from `a` first to keep the merge stable.",
+      "After one input is exhausted, append whatever remains of the other."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
