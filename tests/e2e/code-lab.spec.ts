@@ -7,6 +7,9 @@ import { expect, test } from "@playwright/test";
 
 const CODE_ITEM = "/learn/cpp.program_basics.structure.lesson";
 const PLAIN_ITEM = "/learn/cpp.program_basics.structure.mc_entry";
+// Project lab route resolves from the static catalog (no DB), so it is the most
+// deterministic full-page Code Lab for #466 fullscreen-AI e2e.
+const FULL_PAGE_CODE_ITEM = "/lab/csv-table-summarizer";
 
 test("a code-capable item runs, tests, and reviews in-page", async ({ page }) => {
   await page.goto(CODE_ITEM);
@@ -58,4 +61,46 @@ test("a non-code item does not show the Code Lab", async ({ page }) => {
   await page.goto(PLAIN_ITEM);
   await expect(page.getByTestId("learning-item")).toBeVisible();
   await expect(page.getByTestId("code-lab")).toHaveCount(0);
+});
+
+test("full-page AI tab can expand the entire AI tab to fullscreen and close", async ({ page }) => {
+  await page.goto(FULL_PAGE_CODE_ITEM);
+
+  await expect(page.getByTestId("code-lab-workspace")).toBeVisible();
+  await page.getByTestId("code-lab-tab-ai").click();
+
+  await expect(page.getByTestId("code-lab-ai-panel")).toBeVisible();
+  await expect(page.getByTestId("code-lab-chat")).toBeVisible();
+
+  await page.getByTestId("code-lab-ai-fullscreen-toggle").click();
+
+  const fullscreen = page.getByTestId("code-lab-ai-fullscreen");
+  await expect(fullscreen).toBeVisible();
+  await expect(page.getByRole("dialog", { name: /fullscreen ai tab/i })).toBeVisible();
+  await expect(fullscreen).toContainText("AI tutor");
+  await expect(fullscreen).toContainText("Ask about your code");
+  await expect(fullscreen.getByTestId("code-lab-chat")).toBeVisible();
+
+  await page.getByTestId("code-lab-ai-fullscreen-close").click();
+  await expect(page.getByTestId("code-lab-ai-fullscreen")).toHaveCount(0);
+
+  await page.getByTestId("code-lab-ai-fullscreen-toggle").click();
+  await expect(page.getByTestId("code-lab-ai-fullscreen")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("code-lab-ai-fullscreen")).toHaveCount(0);
+  await expect(page.getByTestId("code-lab-tab-ai")).toHaveAttribute("aria-selected", "true");
+});
+
+test("fullscreen AI preserves the chat draft while expanding and closing", async ({ page }) => {
+  await page.goto(FULL_PAGE_CODE_ITEM);
+  await page.getByTestId("code-lab-tab-ai").click();
+
+  const draft = "Why does my loop fail?";
+  await page.getByTestId("code-lab-chat-input").fill(draft);
+
+  await page.getByTestId("code-lab-ai-fullscreen-toggle").click();
+  await expect(page.getByTestId("code-lab-ai-fullscreen").getByTestId("code-lab-chat-input")).toHaveValue(draft);
+
+  await page.getByTestId("code-lab-ai-fullscreen-close").click();
+  await expect(page.getByTestId("code-lab-chat-input")).toHaveValue(draft);
 });

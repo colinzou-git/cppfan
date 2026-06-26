@@ -20,7 +20,8 @@ export function CodeLabChat({
   prompt,
   topic,
   sourceVersion,
-  source
+  source,
+  fullscreen = false
 }: {
   itemId: string;
   title: string;
@@ -28,6 +29,8 @@ export function CodeLabChat({
   topic?: string;
   sourceVersion: string;
   source: string;
+  /** Grow the chat to fill a fullscreen reading area (#466). */
+  fullscreen?: boolean;
 }) {
   const sourceRef = useRef(source);
   sourceRef.current = source;
@@ -159,7 +162,12 @@ export function CodeLabChat({
   }
 
   return (
-    <section className="flex flex-col rounded-xl border border-slate-200 bg-white" data-testid="code-lab-chat">
+    <section
+      className={`flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white ${
+        fullscreen ? "min-h-[70vh] flex-1" : ""
+      }`}
+      data-testid="code-lab-chat"
+    >
       <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-600">Ask about your code</p>
         <button
@@ -174,7 +182,11 @@ export function CodeLabChat({
 
       <div
         ref={listRef}
-        className="flex max-h-80 min-h-[7rem] flex-col gap-2 overflow-y-auto p-3"
+        className={
+          fullscreen
+            ? "flex min-h-[24rem] flex-1 flex-col gap-3 overflow-y-auto p-4"
+            : "flex max-h-80 min-h-[7rem] flex-col gap-2 overflow-y-auto p-3"
+        }
         aria-live="polite"
       >
         {messages.length === 0 ? (
