@@ -106,6 +106,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | id | skills | lab |
 | --- | --- | --- |
 | `io-grade-calculator` | console I/O, variables, conversions, conditionals | `text-statistics-analyzer` |
+| `strings-valid-palindrome` | palindromes, two pointers, case handling | `text-statistics-analyzer` |
+| `dsa-binary-search-lower-bound` | binary search, array indexing | `math-technique-playground` |
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |
