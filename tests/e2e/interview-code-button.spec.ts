@@ -17,11 +17,15 @@ test("interview Code button opens the full Code Lab workspace", async ({ page })
   await expect(page.getByTestId("code-lab-tab-debug")).toBeVisible();
 });
 
-test("interview problem still offers a timed session", async ({ page }) => {
+test("interview problem still offers a timed session with clearer wording", async ({ page }) => {
   await page.goto("/interview");
   const card = page.getByTestId("interview-problem").first();
   await card.getByTestId("interview-problem-timed-session").click();
 
   await expect(page).toHaveURL(/\/interview\/session/);
-  await expect(page.getByTestId("session-runner")).toBeVisible();
+  const runner = page.getByTestId("session-runner");
+  await expect(runner).toBeVisible();
+  // Reworded tile (#444): clearer heading + an Open full Code Lab link to /lab.
+  await expect(runner.getByText("Interview notes and submission")).toBeVisible();
+  await expect(runner.getByTestId("session-open-code-lab")).toHaveAttribute("href", /\/lab\//);
 });
