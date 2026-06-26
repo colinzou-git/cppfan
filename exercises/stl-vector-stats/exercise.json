@@ -1,0 +1,17 @@
+{
+  "id": "stl-vector-stats",
+  "title": "STL: vector statistics",
+  "skill_ids": ["cpp.stl.vector", "cpp.stl.algorithms"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["vector_stats.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/stl-vector-stats/work exercises/stl-vector-stats/tests/tests.cpp -o exercises/stl-vector-stats/work/run",
+  "test_command": "exercises/stl-vector-stats/work/run",
+  "required_tests": ["test_basic", "test_single", "test_negatives", "test_fractional_mean", "test_large_sum_no_overflow"],
+  "hints": [
+    "std::min_element / std::max_element return iterators — dereference them.",
+    "std::accumulate with a 0LL seed keeps the sum in a long long.",
+    "Divide the sum by nums.size() with a double cast for the mean."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

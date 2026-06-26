@@ -262,6 +262,103 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dp_design", "dsa.techniques.prefix_sums"]
   },
+  "stl-vector-stats": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `STL: vector statistics.
+
+Read a list of integers and print their minimum, maximum, sum, and mean.
+
+Input format:
+- First line: n.
+- Second line: n integers.
+
+Output format:
+- "min: X", "max: X", "sum: X", "mean: X.X" — one per line; the mean to one
+  decimal place.
+
+Use the standard algorithms (min_element, max_element, accumulate) rather than
+hand-written loops.
+
+AI evaluation rubric:
+- Correct min/max/sum/mean; sum accumulated as long long.
+- Uses STL algorithms; mean printed to one decimal.`,
+    stdin: "4\n1 2 3 4\n",
+    starterCode: `#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  // TODO: compute min, max, sum (long long), and mean (double) with STL.
+  long long sum = 0;
+  int mn = nums.empty() ? 0 : nums[0];
+  int mx = mn;
+  double mean = 0.0;
+  cout << "min: " << mn << "\\n";
+  cout << "max: " << mx << "\\n";
+  cout << "sum: " << sum << "\\n";
+  cout << "mean: " << fixed << setprecision(1) << mean << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic stats", stdin: "4\n1 2 3 4\n", expectedStdout: "min: 1\nmax: 4\nsum: 10\nmean: 2.5\n", matcher: "exact" },
+      { name: "Negatives", stdin: "4\n-5 -1 -9 -3\n", expectedStdout: "min: -9\nmax: -1\nsum: -18\nmean: -4.5\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.stl.vector", "cpp.stl.algorithms"]
+  },
+  "cpp-rational-reduce": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `C++: reduce a fraction.
+
+Read a numerator and denominator and print the fraction in lowest terms.
+
+Input format:
+- One line: two integers, the numerator and denominator (denominator is not 0).
+
+Output format:
+- "num/den" in lowest terms, with a positive denominator (move any sign to the
+  numerator). 0/d prints as "0/1".
+
+AI evaluation rubric:
+- Reduces by the gcd; keeps the denominator positive.
+- Handles negative inputs and a zero numerator.`,
+    stdin: "2 -4\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int gcdInt(int a, int b) {
+  if (a < 0) a = -a;
+  if (b < 0) b = -b;
+  while (b != 0) { int t = a % b; a = b; b = t; }
+  return a;
+}
+
+int main() {
+  int num, den;
+  cin >> num >> den;
+  // TODO: normalize the sign onto the numerator, then divide both by the gcd.
+  cout << num << "/" << den << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Sign moves to numerator", stdin: "2 -4\n", expectedStdout: "-1/2\n", matcher: "exact" },
+      { name: "Reduces to integer", stdin: "6 3\n", expectedStdout: "2/1\n", matcher: "exact" },
+      { name: "Zero numerator", stdin: "0 5\n", expectedStdout: "0/1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.invariants_intro"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

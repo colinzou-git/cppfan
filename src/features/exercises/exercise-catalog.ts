@@ -135,6 +135,50 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "stl-vector-stats",
+    title: "STL: vector statistics",
+    skillIds: ["cpp.stl.vector", "cpp.stl.algorithms"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["vector_stats.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_single",
+      "test_negatives",
+      "test_fractional_mean",
+      "test_large_sum_no_overflow"
+    ],
+    hints: [
+      "std::min_element / std::max_element return iterators — dereference them.",
+      "std::accumulate with a 0LL seed keeps the sum in a long long.",
+      "Divide the sum by nums.size() with a double cast for the mean."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "cpp-rational-reduce",
+    title: "C++: reduce a fraction",
+    skillIds: ["cpp.structs_classes.invariants_intro"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["rational.hpp"],
+    requiredTests: [
+      "test_basic_reduction",
+      "test_already_reduced",
+      "test_negative_numerator",
+      "test_negative_denominator_moves_sign",
+      "test_both_negative_is_positive",
+      "test_zero_numerator",
+      "test_reduces_to_integer"
+    ],
+    hints: [
+      "If the denominator is negative, flip the sign of both numerator and denominator.",
+      "Compute the greatest common divisor with the Euclidean algorithm on absolute values.",
+      "Divide both parts by the gcd; gcd(0, d) is d, so 0/d becomes 0/1."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
