@@ -4,6 +4,7 @@ import { ItemHelpLinks } from "@/components/item-help-links";
 import { AnswerForm } from "./answer-form";
 import { ExplanationPanel } from "./explanation-panel";
 import { FormattedContent } from "./formatted-content";
+import { FurtherReadingPanel } from "./further-reading-panel";
 import { RevealExplanation } from "./reveal-explanation";
 import { ParsonsExercise } from "./parsons-exercise";
 import { CompletionExercise } from "./completion-exercise";
@@ -99,6 +100,10 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
 
           {item.explanation && !isLesson && !hasChoices ? (
             <RevealExplanation explanation={item.explanation} />
+          ) : null}
+
+          {isLesson ? (
+            <FurtherReadingPanel itemId={item.id} skillIds={skills.map((skill) => skill.skill_id)} />
           ) : null}
 
           <div className="flex flex-wrap items-center gap-2">

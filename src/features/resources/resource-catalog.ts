@@ -755,6 +755,13 @@ export const externalResources: ExternalResource[] = [
   }
 ];
 
+const RESOURCES_BY_ID = new Map(externalResources.map((resource) => [resource.id, resource]));
+
+/** Look up a resource by id, or null when the id is unknown (#448). */
+export function getResourceById(id: string): ExternalResource | null {
+  return RESOURCES_BY_ID.get(id) ?? null;
+}
+
 export function getResourcesByKind(kind: ResourceKind): ExternalResource[] {
   return externalResources.filter((resource) => resource.kind === kind);
 }
