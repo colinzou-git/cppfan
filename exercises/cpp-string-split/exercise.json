@@ -1,0 +1,17 @@
+{
+  "id": "cpp-string-split",
+  "title": "C++: split a string",
+  "skill_ids": ["dsa.strings.parsing", "cpp.stl.string"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["split.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/cpp-string-split/work exercises/cpp-string-split/tests/tests.cpp -o exercises/cpp-string-split/work/run",
+  "test_command": "exercises/cpp-string-split/work/run",
+  "required_tests": ["test_basic", "test_empty_fields", "test_leading_trailing_delims", "test_no_delim", "test_empty_string", "test_other_delimiter"],
+  "hints": [
+    "Accumulate characters into a current field string.",
+    "On a delimiter, push the current field and clear it.",
+    "Push the final field once after the loop so empty trailing fields are kept."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

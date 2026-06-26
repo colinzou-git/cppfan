@@ -308,6 +308,50 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "cpp-string-split",
+    title: "C++: split a string",
+    skillIds: ["dsa.strings.parsing", "cpp.stl.string"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["split.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_empty_fields",
+      "test_leading_trailing_delims",
+      "test_no_delim",
+      "test_empty_string",
+      "test_other_delimiter"
+    ],
+    hints: [
+      "Accumulate characters into a current field string.",
+      "On a delimiter, push the current field and clear it.",
+      "Push the final field once after the loop so empty trailing fields are kept."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "dsa-move-zeroes",
+    title: "DSA: move zeroes to the end",
+    skillIds: ["dsa.arrays.two_pointers", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["move_zeroes.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_no_zeroes",
+      "test_all_zeroes",
+      "test_preserves_order",
+      "test_empty_and_single",
+      "test_negatives_kept"
+    ],
+    hints: [
+      "Keep a write index that trails a read scan over the values.",
+      "Copy each non-zero value to the write index and advance it.",
+      "After the scan, fill the remaining positions with zeroes."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],

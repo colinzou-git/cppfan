@@ -118,6 +118,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dsa-merge-sorted-arrays` | two pointers, array traversal | `math-technique-playground` |
 | `dsa-count-set-bits` | bit manipulation | `math-technique-playground` |
 | `dsa-sort-by-frequency` | custom comparators, hash lookup | `math-technique-playground` |
+| `cpp-string-split` | string parsing, `std::string` | `text-statistics-analyzer` |
+| `dsa-move-zeroes` | two pointers, array traversal | `math-technique-playground` |
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |
