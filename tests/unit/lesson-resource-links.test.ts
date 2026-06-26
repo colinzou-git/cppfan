@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getLessonResourceIds } from "@/features/resources/lesson-resource-links";
 import { getResourceById } from "@/features/resources/resource-catalog";
+import { learningItemSkills } from "@/features/learning-items/learning-item-seed";
 
 describe("lesson further-reading resolver (#448)", () => {
   it("uses the exact item override for the graph representation lesson", () => {
@@ -33,6 +34,25 @@ describe("lesson further-reading resolver (#448)", () => {
 
   it("returns nothing for a skill outside the known domains", () => {
     expect(getLessonResourceIds("misc.unknown.lesson", ["misc.unknown"])).toEqual([]);
+  });
+
+  it("every seeded cpp.* / dsa.* lesson resolves at least one valid resource", () => {
+    const lessonSkills = new Map<string, string[]>();
+    for (const mapping of learningItemSkills) {
+      if (!mapping.learning_item_id.endsWith(".lesson")) continue;
+      if (!/^(cpp|dsa)\./.test(mapping.skill_id)) continue;
+      const list = lessonSkills.get(mapping.learning_item_id) ?? [];
+      list.push(mapping.skill_id);
+      lessonSkills.set(mapping.learning_item_id, list);
+    }
+    expect(lessonSkills.size).toBeGreaterThan(0);
+    for (const [itemId, skillIds] of lessonSkills) {
+      const ids = getLessonResourceIds(itemId, skillIds);
+      expect(ids.length, `${itemId} has no resources`).toBeGreaterThan(0);
+      for (const id of ids) {
+        expect(getResourceById(id), `${itemId} -> ${id}`).not.toBeNull();
+      }
+    }
   });
 
   it("caps at 3 resources and every returned id resolves in the catalog", () => {
