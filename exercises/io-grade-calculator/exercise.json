@@ -1,0 +1,17 @@
+{
+  "id": "io-grade-calculator",
+  "title": "I/O: grade calculator",
+  "skill_ids": ["cpp.program_basics.io", "cpp.values_types.variables", "cpp.values_types.conversions", "cpp.control_flow.conditionals"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["grade_calculator.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/io-grade-calculator/work exercises/io-grade-calculator/tests/tests.cpp -o exercises/io-grade-calculator/work/run",
+  "test_command": "exercises/io-grade-calculator/work/run",
+  "required_tests": ["test_letter_a", "test_boundary_b", "test_boundary_d", "test_letter_f", "test_exact_ninety_is_a", "test_just_below_sixty_is_f", "test_decimal_scores"],
+  "hints": [
+    "Compute the average as a double: (a + b + c) / 3.0.",
+    "Check thresholds from highest to lowest (90, then 80, 70, 60).",
+    "The thresholds are inclusive — exactly 90.0 is an 'A'."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}
