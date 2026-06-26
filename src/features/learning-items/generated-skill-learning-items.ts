@@ -39,13 +39,92 @@ export function generateSkillSampleOutput(skill: Skill): string {
   return `Practice: ${skill.title}`;
 }
 
+/**
+ * A topic-aware demonstration body for a generated sample (#448). Chosen by skill
+ * id so e.g. an STL skill shows a vector and a graph skill shows an adjacency
+ * list. The block computes into local variables and MUST NOT print — the sample's
+ * only output stays exactly `Practice: <title>\n`, so the generated Code Lab's
+ * exact-stdout tests are unaffected. Returns { includes, body }.
+ */
+function skillSampleDemo(skillId: string): { includes: string[]; body: string[] } {
+  if (skillId.startsWith("cpp.stl.") || skillId.startsWith("cpp.values_types.")) {
+    return {
+      includes: ["<vector>", "<numeric>"],
+      body: [
+        "std::vector<int> values{1, 2, 3, 4, 5};",
+        "int total = std::accumulate(values.begin(), values.end(), 0);",
+        "(void)total; // edit this sample to print or transform `values`"
+      ]
+    };
+  }
+  if (skillId.startsWith("cpp.control_flow.")) {
+    return {
+      includes: [],
+      body: [
+        "int sum = 0;",
+        "for (int i = 1; i <= 5; ++i) sum += i;",
+        "(void)sum; // edit this loop to explore the control-flow skill"
+      ]
+    };
+  }
+  if (
+    skillId.startsWith("cpp.constructors.") ||
+    skillId.startsWith("cpp.structs_classes.") ||
+    skillId.startsWith("cpp.oop.")
+  ) {
+    return {
+      includes: [],
+      body: [
+        "struct Point { int x; int y; Point(int x_, int y_) : x(x_), y(y_) {} };",
+        "Point p{2, 3};",
+        "(void)p; // edit this struct to explore constructors and members"
+      ]
+    };
+  }
+  if (skillId.startsWith("cpp.smart_pointers.") || skillId.startsWith("cpp.raii.")) {
+    return {
+      includes: ["<memory>"],
+      body: [
+        "auto owned = std::make_unique<int>(42);",
+        "(void)owned; // unique_ptr frees automatically (RAII); edit to experiment"
+      ]
+    };
+  }
+  if (skillId.startsWith("dsa.graphs.")) {
+    return {
+      includes: ["<vector>"],
+      body: [
+        "// Adjacency list for a 3-node graph: 0-1, 1-2.",
+        "std::vector<std::vector<int>> adj{{1}, {0, 2}, {1}};",
+        "(void)adj; // edit to traverse the graph"
+      ]
+    };
+  }
+  if (skillId.startsWith("dsa.techniques.")) {
+    return {
+      includes: ["<vector>"],
+      body: [
+        "std::vector<int> a{3, 1, 4, 1, 5};",
+        "std::vector<int> prefix(a.size() + 1, 0);",
+        "for (size_t i = 0; i < a.size(); ++i) prefix[i + 1] = prefix[i] + a[i];",
+        "(void)prefix; // edit to answer range queries with prefix sums"
+      ]
+    };
+  }
+  return { includes: [], body: ["// Edit this sample to practice the skill above."] };
+}
+
 export function generateSkillSampleCode(skill: Skill): string {
   const output = cppStringLiteral(generateSkillSampleOutput(skill));
-  return `#include <iostream>
+  const demo = skillSampleDemo(skill.id);
+  const includes = ["<iostream>", ...demo.includes].map((header) => `#include ${header}`).join("\n");
+  const body = demo.body.map((line) => `  ${line}`).join("\n");
+  return `${includes}
 
 int main() {
   // Skill: ${lineComment(skill.title)}
   // Goal: ${lineComment(skill.learner_goal)}
+${body}
   std::cout << "${output}" << "\\n";
   return 0;
 }
