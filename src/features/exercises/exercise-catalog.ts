@@ -49,6 +49,49 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "text-statistics-analyzer"
   },
   {
+    id: "strings-valid-palindrome",
+    title: "Strings: valid palindrome",
+    skillIds: ["dsa.strings.palindrome", "dsa.arrays.two_pointers", "dsa.strings.case_handling"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["palindrome.hpp"],
+    requiredTests: [
+      "test_simple_palindrome",
+      "test_not_a_palindrome",
+      "test_ignores_case",
+      "test_ignores_punctuation_and_spaces",
+      "test_empty_and_single",
+      "test_digits"
+    ],
+    hints: [
+      "Walk two indices from the ends toward the middle.",
+      "Skip a character when it is not alphanumeric (std::isalnum).",
+      "Compare the lowercased characters (std::tolower) on a cast to unsigned char."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "dsa-binary-search-lower-bound",
+    title: "DSA: binary search lower bound",
+    skillIds: ["dsa.searching.binary_search", "dsa.arrays.indexing"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["lower_bound.hpp"],
+    requiredTests: [
+      "test_present_unique",
+      "test_absent_between",
+      "test_above_all",
+      "test_duplicates_first_match",
+      "test_empty"
+    ],
+    hints: [
+      "Search a half-open range [lo, hi) where hi starts at nums.size().",
+      "Compute mid as lo + (hi - lo) / 2 to avoid overflow.",
+      "Move lo to mid + 1 when nums[mid] < target; otherwise move hi to mid."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],

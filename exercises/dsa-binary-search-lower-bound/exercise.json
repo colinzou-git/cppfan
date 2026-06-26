@@ -1,0 +1,17 @@
+{
+  "id": "dsa-binary-search-lower-bound",
+  "title": "DSA: binary search lower bound",
+  "skill_ids": ["dsa.searching.binary_search", "dsa.arrays.indexing"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["lower_bound.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-binary-search-lower-bound/work exercises/dsa-binary-search-lower-bound/tests/tests.cpp -o exercises/dsa-binary-search-lower-bound/work/run",
+  "test_command": "exercises/dsa-binary-search-lower-bound/work/run",
+  "required_tests": ["test_present_unique", "test_absent_between", "test_above_all", "test_duplicates_first_match", "test_empty"],
+  "hints": [
+    "Search a half-open range [lo, hi) where hi starts at nums.size().",
+    "Compute mid as lo + (hi - lo) / 2 to avoid overflow.",
+    "Move lo to mid + 1 when nums[mid] < target; otherwise move hi to mid."
+  ],
+  "project_lab": "math-technique-playground"
+}

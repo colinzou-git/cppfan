@@ -67,6 +67,103 @@ int main() {
       "cpp.control_flow.conditionals"
     ]
   },
+  "strings-valid-palindrome": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: valid palindrome.
+
+Read one line of text and decide whether it is a palindrome, considering only
+alphanumeric characters and ignoring case.
+
+Input format:
+- A single line (may contain spaces and punctuation).
+
+Output format:
+- Print "true" if it is a palindrome, otherwise "false".
+
+A man, a plan, a canal: Panama -> true. race a car -> false. An empty line (or one
+with no letters/digits) is a palindrome.
+
+AI evaluation rubric:
+- Two-pointer scan from both ends, skipping non-alphanumerics.
+- Case-insensitive comparison; O(n) time, O(1) extra space.`,
+    stdin: "A man, a plan, a canal: Panama\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+bool isPalindrome(const string& s) {
+  // TODO: two indices from the ends; skip non-alphanumerics; compare lowercased.
+  (void)s;
+  return false;
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  cout << (isPalindrome(line) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic palindrome phrase", stdin: "A man, a plan, a canal: Panama\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not a palindrome", stdin: "race a car\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Digits palindrome", stdin: "12321\n", expectedStdout: "true\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.palindrome", "dsa.arrays.two_pointers", "dsa.strings.case_handling"]
+  },
+  "dsa-binary-search-lower-bound": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: binary search lower bound.
+
+Read a sorted array and a target, then print the lower-bound index: the first
+position whose value is >= target (or n if every value is smaller).
+
+Input format:
+- First line: n.
+- Second line: n integers in non-decreasing order (may repeat).
+- Third line: target.
+
+Output format:
+- A single integer: the 0-based lower-bound index, then a newline.
+
+AI evaluation rubric:
+- Binary search over a half-open range; O(log n), no linear scan.
+- Returns the first index >= target, handling duplicates and out-of-range.`,
+    stdin: "5\n1 3 5 7 9\n4\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int lowerBoundIndex(const vector<int>& nums, int target) {
+  // TODO: binary search [lo, hi); move lo past values strictly < target.
+  (void)nums;
+  (void)target;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  int target;
+  cin >> target;
+  cout << lowerBoundIndex(nums, target) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Insertion point between values", stdin: "5\n1 3 5 7 9\n4\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "First of duplicates", stdin: "5\n2 2 2 4 4\n2\n", expectedStdout: "0\n", matcher: "exact" },
+      { name: "Above all -> n", stdin: "3\n1 3 5\n10\n", expectedStdout: "3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.searching.binary_search", "dsa.arrays.indexing"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

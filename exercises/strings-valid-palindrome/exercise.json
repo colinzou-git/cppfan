@@ -1,0 +1,17 @@
+{
+  "id": "strings-valid-palindrome",
+  "title": "Strings: valid palindrome",
+  "skill_ids": ["dsa.strings.palindrome", "dsa.arrays.two_pointers", "dsa.strings.case_handling"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["palindrome.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-valid-palindrome/work exercises/strings-valid-palindrome/tests/tests.cpp -o exercises/strings-valid-palindrome/work/run",
+  "test_command": "exercises/strings-valid-palindrome/work/run",
+  "required_tests": ["test_simple_palindrome", "test_not_a_palindrome", "test_ignores_case", "test_ignores_punctuation_and_spaces", "test_empty_and_single", "test_digits"],
+  "hints": [
+    "Walk two indices from the ends toward the middle.",
+    "Skip a character when it is not alphanumeric (std::isalnum).",
+    "Compare the lowercased characters (std::tolower) on a cast to unsigned char."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}
