@@ -1,11 +1,14 @@
-import { render, screen, within, fireEvent } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExerciseCatalogView } from "@/features/exercises/exercise-catalog-view";
 import type { ExerciseView } from "@/features/exercises/exercise-view";
+import { setExercise } from "@/features/exercises/exercise-actions";
 
 vi.mock("@/features/exercises/exercise-actions", () => ({
   setExercise: vi.fn()
 }));
+
+const setExerciseMock = vi.mocked(setExercise);
 
 const exercise: ExerciseView = {
   id: "dsa-two-sum-sorted",
@@ -26,36 +29,51 @@ function renderView() {
   );
 }
 
-describe("ExerciseCatalogView (#440)", () => {
-  it("uses in-app-first intro text and drops the outdated wording", () => {
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
+describe("ExerciseCatalogView grouped accordion (#447)", () => {
+  it("groups exercises under their primary skill with the four columns", () => {
     renderView();
-    expect(screen.getByText(/editing code directly in cppFan/i)).toBeInTheDocument();
-    expect(screen.queryByText(/cppFan never runs your code/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Codespace or your own editor/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId("exercise-group-row")).toHaveTextContent("Two pointers");
+    const table = screen.getByTestId("exercise-table");
+    for (const col of ["Exercise", "Progress", "Start", "Complete"]) {
+      expect(table).toHaveTextContent(col);
+    }
+    // No removed Status column / pills.
+    expect(screen.queryByText(/In progress|Tests passed|Not started/i)).not.toBeInTheDocument();
   });
 
-  it("renders a Code button linking to the exercise-level Code Lab", () => {
+  it("shows the selected exercise in the detail panel with a Study link to /lab/<id>", () => {
     renderView();
-    const code = screen.getByTestId("exercise-code");
-    const href = code.getAttribute("href") ?? "";
+    const detail = screen.getByTestId("exercise-detail");
+    expect(detail).toHaveTextContent("Two pointers / DSA: two-sum on a sorted array");
+    expect(detail).toHaveTextContent(/Description/i);
+    expect(detail).toHaveTextContent(/Learning goals/i);
+
+    const study = screen.getByTestId("exercise-study");
+    const href = study.getAttribute("href") ?? "";
     expect(href).toBe("/lab/dsa-two-sum-sorted");
     expect(href).not.toContain("csv-table-summarizer");
   });
 
-  it("shows built-in editor first with advanced local workflow collapsed", async () => {
+  it("does not show difficulty, Due, or tags in the detail panel", () => {
     renderView();
-    fireEvent.click(screen.getByTestId("exercise-instructions-toggle"));
-    const panel = await screen.findByTestId("exercise-instructions");
-    expect(panel).toHaveTextContent(/built-in editor/i);
-    expect(within(panel).getByText(/Advanced local workflow/i).tagName.toLowerCase()).toBe("summary");
+    const detail = screen.getByTestId("exercise-detail");
+    expect(detail).not.toHaveTextContent(/intermediate/i);
+    expect(detail).not.toHaveTextContent(/Due/i);
   });
 
-  it("keeps AI Chat scoped to the write-code exercise", () => {
+  it("signed-out, starting an exercise surfaces the sign-in notice", async () => {
+    setExerciseMock.mockResolvedValue({ status: "signed_out" });
     renderView();
-    const aiChat = screen.getByRole("link", { name: /ai chat/i });
-    const href = decodeURIComponent(aiChat.getAttribute("href") ?? "");
-    expect(href).toContain('"sourceKind":"write_code_exercise"');
-    expect(href).toContain('"sourceId":"dsa-two-sum-sorted"');
-    expect(href).not.toContain("project_lab");
+    fireEvent.click(screen.getByTestId("exercise-start"));
+    await waitFor(() => {
+      expect(screen.getByTestId("exercise-notice")).toHaveTextContent(/sign in/i);
+    });
+    expect(setExerciseMock).toHaveBeenCalledWith(
+      expect.objectContaining({ exerciseId: "dsa-two-sum-sorted", status: "started" })
+    );
   });
 });

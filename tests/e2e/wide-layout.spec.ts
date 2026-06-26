@@ -51,18 +51,16 @@ test.describe("wide desktop responsive layout", () => {
     expect(codePane.x).toBeGreaterThan(primary.x + primary.width * 0.6);
   });
 
-  test("the exercises catalog forms a desktop card grid", async ({ page }) => {
+  test("the exercises catalog puts the table beside the detail panel on wide screens", async ({ page }) => {
     await page.goto("/exercises");
     await expect(page.getByTestId("exercise-catalog")).toBeVisible();
-    const cards = page.getByTestId("exercise-card");
-    await expect(cards.first()).toBeVisible();
-    expect(await cards.count()).toBeGreaterThan(1);
 
-    const first = await box(cards.nth(0));
-    const second = await box(cards.nth(1));
-    // Two cards on the same row: similar y, second to the right of the first.
-    expect(Math.abs(first.y - second.y)).toBeLessThan(30);
-    expect(second.x).toBeGreaterThan(first.x + first.width * 0.5);
+    const table = await box(page.getByTestId("exercise-table"));
+    const detail = await box(page.getByTestId("exercise-detail"));
+    // Grouped table and the shared detail panel sit side by side (#447): similar y,
+    // detail to the right of the table.
+    expect(Math.abs(table.y - detail.y)).toBeLessThan(40);
+    expect(detail.x).toBeGreaterThan(table.x + table.width * 0.5);
   });
 
   test("labs uses wide desktop space with project cards sharing a row", async ({ page }) => {
