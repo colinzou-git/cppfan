@@ -114,6 +114,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `cpp-rational-reduce` | struct invariants | `math-technique-playground` |
 | `dsa-valid-parentheses` | stacks | `math-technique-playground` |
 | `dsa-first-unique-char` | hash lookup, character frequency | `text-statistics-analyzer` |
+| `strings-longest-unique-substring` | sliding window, hash lookup | `text-statistics-analyzer` |
+| `dsa-merge-sorted-arrays` | two pointers, array traversal | `math-technique-playground` |
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |
