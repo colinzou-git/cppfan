@@ -1,21 +1,17 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { setExercise } from "./exercise-actions";
+import { startExercise } from "./exercise-actions";
 import type { ExerciseStatus } from "./exercise-evidence";
 import type { ExerciseView } from "./exercise-view";
 import type { ExerciseProgress } from "./exercise-progress";
-import {
-  buildGroupedExerciseView,
-  statusProgressPct,
-  type ExerciseRowView
-} from "./exercise-grouped-view";
+import { buildGroupedExerciseView, type ExerciseRowView } from "./exercise-grouped-view";
 
-type Entry = { status: ExerciseStatus; completed_at: string | null };
+type Entry = { status: ExerciseStatus; started_at: string | null; completed_at: string | null };
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -24,11 +20,11 @@ function formatDate(iso: string | null): string {
 }
 
 /**
- * Redesigned Exercises catalog (#447): a grouped accordion list with one shared
- * right-side detail panel. Each top-level row is an exercise group; expanding it
- * reveals single-select child exercises. The detail panel shows the selected
- * exercise's title, description, learning goals, and a primary Study button to the
- * full-screen Code Lab. Start/Complete progress actions live in the table columns.
+ * Redesigned Exercises catalog (#447, #472): a grouped accordion list with one
+ * shared right-side detail panel. The Start and Complete columns show real dates
+ * — Start is the first Study-click (`started_at`), Complete is the auto-complete
+ * from a passing real Code Lab test (`completed_at`). Clicking Study records the
+ * start date (preserving any existing start/completion) and opens the Code Lab.
  */
 export function ExerciseCatalogView({
   exercises,
@@ -39,14 +35,15 @@ export function ExerciseCatalogView({
   initialProgress: ExerciseProgress[];
   authenticated: boolean;
 }) {
+  const router = useRouter();
   const [progress, setProgress] = useState<Record<string, Entry>>(() =>
     Object.fromEntries(
-      initialProgress.map((p) => [p.exercise_id, { status: p.status, completed_at: p.completed_at }])
+      initialProgress.map((p) => [
+        p.exercise_id,
+        { status: p.status, started_at: p.started_at, completed_at: p.completed_at }
+      ])
     )
   );
-  const [notice, setNotice] = useState<string | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
 
   // Fold live progress into the grouped model so the table reflects edits.
   const groups = useMemo(() => {
@@ -54,6 +51,7 @@ export function ExerciseCatalogView({
       exercise_id,
       status: entry.status,
       reflection: null,
+      started_at: entry.started_at,
       completed_at: entry.completed_at
     }));
     return buildGroupedExerciseView(exercises, progressRows);
@@ -76,26 +74,28 @@ export function ExerciseCatalogView({
     setExpandedGroupId((current) => (current === groupId ? null : groupId));
   }
 
-  function apply(exerciseId: string, status: ExerciseStatus) {
-    setNotice(null);
-    setPendingId(exerciseId);
-    startTransition(async () => {
-      const result = await setExercise({ exerciseId, status, reflection: null });
-      setPendingId(null);
-      if (result.status === "ok") {
-        setProgress((prev) => ({
-          ...prev,
-          [exerciseId]: {
-            status,
-            completed_at: status === "completed" ? new Date().toISOString() : null
-          }
-        }));
-      } else if (result.status === "signed_out") {
-        setNotice("Sign in to save your exercise progress.");
-      } else {
-        setNotice("Could not save that just now. Please try again.");
-      }
-    });
+  function handleStudy(exerciseId: string) {
+    // Record the first Study click as the start date (best-effort, preserving any
+    // existing start/completion), then navigate regardless of the outcome.
+    void startExercise({ exerciseId })
+      .then((result) => {
+        if (result.status === "ok") {
+          setProgress((prev) => {
+            const entry = prev[exerciseId];
+            if (entry?.started_at) return prev; // keep the first start date
+            return {
+              ...prev,
+              [exerciseId]: {
+                status: entry?.status ?? "started",
+                started_at: entry?.started_at ?? new Date().toISOString(),
+                completed_at: entry?.completed_at ?? null
+              }
+            };
+          });
+        }
+      })
+      .catch(() => {});
+    router.push(`/lab/${encodeURIComponent(exerciseId)}`);
   }
 
   return (
@@ -105,15 +105,9 @@ export function ExerciseCatalogView({
         your C++.
       </p>
 
-      {notice ? (
-        <p className="text-sm font-semibold text-amber-700" role="alert" data-testid="exercise-notice">
-          {notice}
-        </p>
-      ) : null}
-
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/85" data-testid="exercise-table">
-          <div className="grid grid-cols-[1fr_8rem_5rem_6rem] gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          <div className="grid grid-cols-[1fr_8rem_6rem_6rem] gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">
             <span>Exercise</span>
             <span>Progress</span>
             <span>Start</span>
@@ -128,7 +122,7 @@ export function ExerciseCatalogView({
                   type="button"
                   onClick={() => selectGroup(group.id)}
                   aria-expanded={expanded}
-                  className="grid w-full grid-cols-[1fr_8rem_5rem_6rem] items-center gap-2 px-4 py-3 text-left hover:bg-slate-50"
+                  className="grid w-full grid-cols-[1fr_8rem_6rem_6rem] items-center gap-2 px-4 py-3 text-left hover:bg-slate-50"
                   data-testid="exercise-group-row"
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -143,9 +137,7 @@ export function ExerciseCatalogView({
                     <span className="truncate font-bold text-slate-900">{group.title}</span>
                   </span>
                   <ProgressCell pct={group.progressPct} />
-                  <span className="text-sm text-slate-600">
-                    {group.startedCount}/{group.totalCount}
-                  </span>
+                  <span className="text-sm text-slate-600">{formatDate(group.startDate)}</span>
                   <span className="text-sm text-slate-600">{formatDate(group.completeDate)}</span>
                 </button>
 
@@ -156,10 +148,7 @@ export function ExerciseCatalogView({
                         row={row}
                         groupTitle={group.title}
                         selected={selectedChildId === row.id}
-                        pending={pendingId === row.id}
                         onSelect={() => setSelectedChildId(row.id)}
-                        onStart={() => apply(row.id, "started")}
-                        onComplete={() => apply(row.id, "completed")}
                       />
                     ))
                   : null}
@@ -168,11 +157,17 @@ export function ExerciseCatalogView({
           })}
         </div>
 
-        <DetailPanel group={selected?.group.title ?? null} child={selected?.child ?? null} />
+        <DetailPanel
+          group={selected?.group.title ?? null}
+          child={selected?.child ?? null}
+          onStudy={handleStudy}
+        />
       </div>
 
       {!authenticated ? (
-        <p className="text-xs font-medium text-slate-500">Sign in to save exercise progress across sessions.</p>
+        <p className="text-xs font-medium text-slate-500" data-testid="exercise-signed-out-note">
+          Sign in to save exercise progress across sessions.
+        </p>
       ) : null}
     </section>
   );
@@ -193,23 +188,17 @@ function ChildRow({
   row,
   groupTitle,
   selected,
-  pending,
-  onSelect,
-  onStart,
-  onComplete
+  onSelect
 }: {
   row: ExerciseRowView;
   groupTitle: string;
   selected: boolean;
-  pending: boolean;
   onSelect: () => void;
-  onStart: () => void;
-  onComplete: () => void;
 }) {
   return (
     <div
       className={cn(
-        "grid grid-cols-[1fr_8rem_5rem_6rem] items-center gap-2 border-t border-slate-100 px-4 py-2",
+        "grid grid-cols-[1fr_8rem_6rem_6rem] items-center gap-2 border-t border-slate-100 px-4 py-2",
         selected && "bg-blue-50"
       )}
       data-testid="exercise-child-row"
@@ -226,39 +215,26 @@ function ChildRow({
         />
         <span className="truncate text-sm text-slate-800">{row.title}</span>
       </label>
-      <ProgressCell pct={statusProgressPct(row.status)} />
-      <span>
-        {row.status === "none" ? (
-          <Button type="button" size="sm" onClick={onStart} disabled={pending} data-testid="exercise-start">
-            Start
-          </Button>
-        ) : (
-          <span className="text-xs font-semibold text-slate-400">Started</span>
-        )}
+      <ProgressCell pct={row.progressPct} />
+      <span className="text-sm text-slate-600" data-testid="exercise-start-date">
+        {formatDate(row.startDate)}
       </span>
-      <span className="text-sm text-slate-600">
-        {row.status === "completed" ? (
-          formatDate(row.completeDate)
-        ) : row.status === "started" ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={onComplete}
-            disabled={pending}
-            data-testid="exercise-complete"
-          >
-            Complete
-          </Button>
-        ) : (
-          "—"
-        )}
+      <span className="text-sm text-slate-600" data-testid="exercise-complete-date">
+        {formatDate(row.completeDate)}
       </span>
     </div>
   );
 }
 
-function DetailPanel({ group, child }: { group: string | null; child: ExerciseRowView | null }) {
+function DetailPanel({
+  group,
+  child,
+  onStudy
+}: {
+  group: string | null;
+  child: ExerciseRowView | null;
+  onStudy: (exerciseId: string) => void;
+}) {
   if (!group || !child) {
     return (
       <aside
@@ -288,11 +264,15 @@ function DetailPanel({ group, child }: { group: string | null; child: ExerciseRo
           ))}
         </ul>
       </div>
-      <Button asChild size="lg" data-testid="exercise-study">
-        <Link href={`/lab/${encodeURIComponent(child.id)}`}>
-          <Code2 className="h-4 w-4" aria-hidden="true" />
-          Study
-        </Link>
+      <Button
+        type="button"
+        size="lg"
+        onClick={() => onStudy(child.id)}
+        data-testid="exercise-study"
+        data-exercise-id={child.id}
+      >
+        <Code2 className="h-4 w-4" aria-hidden="true" />
+        Study
       </Button>
     </aside>
   );

@@ -21,8 +21,13 @@ function view(id: string, skillTitles: string[]): ExerciseView {
   };
 }
 
-function progress(id: string, status: ExerciseProgress["status"], completed_at: string | null): ExerciseProgress {
-  return { exercise_id: id, status, reflection: null, completed_at };
+function progress(
+  id: string,
+  status: ExerciseProgress["status"],
+  completed_at: string | null,
+  started_at: string | null = "2026-06-01T00:00:00Z"
+): ExerciseProgress {
+  return { exercise_id: id, status, reflection: null, started_at, completed_at };
 }
 
 describe("exercise grouped view (#447)", () => {
@@ -53,6 +58,26 @@ describe("exercise grouped view (#447)", () => {
     // (100 + 0) / 2 = 50
     expect(groups[0].progressPct).toBe(50);
     expect(groups[0].startedCount).toBe(1);
+  });
+
+  it("includes the child start date and the earliest group start date (#472)", () => {
+    const groups = buildGroupedExerciseView(
+      [view("a", ["Loops"]), view("b", ["Loops"])],
+      [
+        progress("a", "started", null, "2026-06-05T00:00:00Z"),
+        progress("b", "completed", "2026-06-10T00:00:00Z", "2026-06-03T00:00:00Z")
+      ]
+    );
+    const rows = groups[0].exercises;
+    expect(rows.find((r) => r.id === "a")?.startDate).toBe("2026-06-05T00:00:00Z");
+    expect(rows.find((r) => r.id === "b")?.startDate).toBe("2026-06-03T00:00:00Z");
+    // Group start date is the earliest child start date.
+    expect(groups[0].startDate).toBe("2026-06-03T00:00:00Z");
+  });
+
+  it("group start date is null when no child has started (#472)", () => {
+    const groups = buildGroupedExerciseView([view("a", ["DP"])], []);
+    expect(groups[0].startDate).toBeNull();
   });
 
   it("shows a child completion date only when completed", () => {

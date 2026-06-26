@@ -11,13 +11,15 @@ export type ExerciseProgress = {
   exercise_id: string;
   status: ExerciseStatus;
   reflection: string | null;
+  /** First-Study-click timestamp (#472); null until the learner starts it. */
+  started_at: string | null;
   /** Completion timestamp (#447); null until the exercise is completed. */
   completed_at: string | null;
 };
 
 export type ExerciseWriteOutcome = "ok" | "signed_out" | "invalid" | "error";
 
-const COLUMNS = "exercise_id,status,reflection,completed_at";
+const COLUMNS = "exercise_id,status,reflection,started_at,completed_at";
 
 /** All exercise progress rows for the signed-in learner (empty when signed out). */
 export async function getExerciseProgressForUser(): Promise<ExerciseProgress[]> {
@@ -75,14 +77,35 @@ export async function setExerciseProgress(input: {
   }
 
   const now = new Date().toISOString();
+
+  // Read the existing row first so start/complete dates are monotonic (#472):
+  // a Study click ("started") must never clear an existing completion, and
+  // repeated starts/completes keep their first timestamp.
+  const { data: existing } = await supabase
+    .from("exercise_progress")
+    .select("status,started_at,completed_at")
+    .eq("user_id", user.id)
+    .eq("exercise_id", input.exerciseId)
+    .maybeSingle();
+
+  const startedAt = (existing?.started_at as string | null | undefined) ?? now;
+  const existingCompletedAt = (existing?.completed_at as string | null | undefined) ?? null;
+  const alreadyCompleted = existing?.status === "completed" || existingCompletedAt !== null;
+
+  // Never downgrade an already-completed exercise on a later Study click.
+  const status: ExerciseStatus = input.status === "completed" || alreadyCompleted ? "completed" : "started";
+  const completedAt =
+    status === "completed" ? (existingCompletedAt ?? now) : null;
+
   // Omit reflection when not provided so a conflict update preserves any existing
   // learner reflection (e.g. auto-completion from a passing Code Lab test). On
   // first insert the column falls back to its default.
   const row: Record<string, unknown> = {
     user_id: user.id,
     exercise_id: input.exerciseId,
-    status: input.status,
-    completed_at: input.status === "completed" ? now : null,
+    status,
+    started_at: startedAt,
+    completed_at: completedAt,
     updated_at: now
   };
   if (input.reflection !== undefined) {
