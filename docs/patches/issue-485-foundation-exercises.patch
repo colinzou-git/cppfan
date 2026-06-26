@@ -1,1 +1,175 @@
-PLACEHOLDER
+diff --git a/exercises/loops-number-summary/README.md b/exercises/loops-number-summary/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/loops-number-summary/README.md
+@@ -0,0 +1,9 @@
++# Loops: number summary
++
++Read or receive a list of integers and compute a compact summary: minimum, maximum, sum, and even count. Empty input is represented explicitly so callers do not trust placeholder min/max values.
++
++## Requirements
++
++- Implement `number_summary.hpp`.
++- Keep the starter buildable with C++20.
++- Run `scripts/exercises/test.sh loops-number-summary` from the repo root.
+
+diff --git a/exercises/loops-number-summary/exercise.json b/exercises/loops-number-summary/exercise.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/loops-number-summary/exercise.json
+@@ -0,0 +1,26 @@
++{
++  "id": "loops-number-summary",
++  "title": "Loops: number summary",
++  "skill_ids": [
++    "cpp.control_flow.loops",
++    "cpp.control_flow.loop_invariants",
++    "dsa.arrays.traversal"
++  ],
++  "difficulty": "beginner",
++  "estimated_minutes": 20,
++  "editable_files": [
++    "number_summary.hpp"
++  ],
++  "required_tests": [
++    "test_empty_summary",
++    "test_mixed_values",
++    "test_single_negative",
++    "test_all_even"
++  ],
++  "hints": [
++    "Handle the empty vector before initializing min/max.",
++    "Track a loop invariant: after each value, min/max/sum/evenCount summarize everything seen so far.",
++    "Use long long for the sum so larger inputs do not overflow int."
++  ],
++  "project_lab": "number-guessing-stats"
++}
+
+diff --git a/exercises/loops-number-summary/starter/number_summary.hpp b/exercises/loops-number-summary/starter/number_summary.hpp
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/loops-number-summary/starter/number_summary.hpp
+@@ -0,0 +1,16 @@
++#pragma once
++#include <vector>
++
++struct NumberSummary {
++  bool empty = true;
++  int min = 0;
++  int max = 0;
++  long long sum = 0;
++  int evenCount = 0;
++};
++
++inline NumberSummary summarizeNumbers(const std::vector<int>& nums) {
++  (void)nums;
++  return {};
++}
+
+diff --git a/exercises/loops-number-summary/solution/number_summary.hpp b/exercises/loops-number-summary/solution/number_summary.hpp
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/loops-number-summary/solution/number_summary.hpp
+@@ -0,0 +1,27 @@
++#pragma once
++#include <vector>
++
++struct NumberSummary {
++  bool empty = true;
++  int min = 0;
++  int max = 0;
++  long long sum = 0;
++  int evenCount = 0;
++};
++
++inline NumberSummary summarizeNumbers(const std::vector<int>& nums) {
++  NumberSummary out;
++  if (nums.empty()) return out;
++  out.empty = false;
++  out.min = nums[0];
++  out.max = nums[0];
++  for (int value : nums) {
++    if (value < out.min) out.min = value;
++    if (value > out.max) out.max = value;
++    out.sum += value;
++    if (value % 2 == 0) ++out.evenCount;
++  }
++  return out;
++}
+
+diff --git a/exercises/loops-number-summary/tests/tests.cpp b/exercises/loops-number-summary/tests/tests.cpp
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/loops-number-summary/tests/tests.cpp
+@@ -0,0 +1,19 @@
++#include "check.hpp"
++#include "number_summary.hpp"
++#include <vector>
++
++void test_empty_summary() {
++  auto s = summarizeNumbers({});
++  CHECK(s.empty); CHECK(s.sum == 0); CHECK(s.evenCount == 0);
++}
++void test_mixed_values() {
++  auto s = summarizeNumbers({5, -2, 0, 7, 4});
++  CHECK(!s.empty); CHECK(s.min == -2); CHECK(s.max == 7); CHECK(s.sum == 14); CHECK(s.evenCount == 3);
++}
++void test_single_negative() { auto s = summarizeNumbers({-9}); CHECK(!s.empty); CHECK(s.min == -9); CHECK(s.max == -9); CHECK(s.sum == -9); CHECK(s.evenCount == 0); }
++void test_all_even() { auto s = summarizeNumbers({2, 4, 6}); CHECK(s.evenCount == 3); CHECK(s.sum == 12); }
++int main(){ test_empty_summary(); test_mixed_values(); test_single_negative(); test_all_even(); return REPORT(); }
+
+diff --git a/exercises/functions-temperature-converter/README.md b/exercises/functions-temperature-converter/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/functions-temperature-converter/README.md
+@@ -0,0 +1,9 @@
++# Functions: temperature converter
++
++Implement temperature conversion helpers and a command dispatcher. Command C means convert Fahrenheit to Celsius. Command F means convert Celsius to Fahrenheit.
++
++## Requirements
++
++- Implement `temperature_converter.hpp`.
++- Keep the starter buildable with C++20.
++- Run `scripts/exercises/test.sh functions-temperature-converter` from the repo root.
+
+diff --git a/exercises/functions-temperature-converter/exercise.json b/exercises/functions-temperature-converter/exercise.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/exercises/functions-temperature-converter/exercise.json
+@@ -0,0 +1,26 @@
++{
++  "id": "functions-temperature-converter",
++  "title": "Functions: temperature converter",
++  "skill_ids": [
++    "cpp.functions.basics",
++    "cpp.functions.decomposition",
++    "cpp.values_types.conversions"
++  ],
++  "difficulty": "beginner",
++  "estimated_minutes": 20,
++  "editable_files": [
++    "temperature_converter.hpp"
++  ],
++  "required_tests": [
++    "test_fahrenheit_to_celsius",
++    "test_celsius_to_fahrenheit",
++    "test_invalid_command",
++    "test_negative_temperature"
++  ],
++  "hints": [
++    "Keep the conversion formulas in small named functions.",
++    "Use fixed one-decimal formatting for deterministic output.",
++    "Separate command dispatch from the arithmetic."
++  ],
++  "project_lab": "unit-converter"
++}
+
+[PATCH TRUNCATED IN GITHUB FILE PLACEHOLDER - use the sandbox artifact from ChatGPT response for the full patch]
