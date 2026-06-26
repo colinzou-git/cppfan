@@ -29,6 +29,8 @@ export type CodeDebugVariable = {
   value: string;
   type?: string;
   changed?: boolean;
+  /** Child elements for array/vector-like values (#470), rendered expandably. */
+  children?: CodeDebugVariable[];
 };
 
 export type CodeDebugWatch = {

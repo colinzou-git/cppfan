@@ -15,10 +15,10 @@ test("the Debug tab persists breakpoints and degrades gracefully when unconfigur
   await page.getByTestId("code-lab-tab-debug").click();
   await expect(page.getByTestId("code-debug")).toBeVisible();
 
-  // Add a breakpoint via the iPhone/iPad-friendly line-number control.
+  // Add a breakpoint via the iPhone/iPad-friendly compact line-number control.
   await page.getByTestId("code-debug-line-input").fill("3");
   await page.getByTestId("code-debug-add-breakpoint").click();
-  await expect(page.getByTestId("code-debug-breakpoints")).toContainText("Line 3");
+  await expect(page.getByTestId("code-debug-breakpoints")).toContainText("3");
 
   // The breakpoint renders a marker in the Monaco gutter.
   await expect(page.locator(".cppfan-breakpoint-glyph").first()).toBeVisible();
@@ -27,11 +27,18 @@ test("the Debug tab persists breakpoints and degrades gracefully when unconfigur
   await page.reload();
   await expect(page.getByTestId("code-lab-workspace")).toBeVisible();
   await page.getByTestId("code-lab-tab-debug").click();
-  await expect(page.getByTestId("code-debug-breakpoints")).toContainText("Line 3");
+  await expect(page.getByTestId("code-debug-breakpoints")).toContainText("3");
 
   // Start Debugging with no service configured shows the unconfigured state.
   await page.getByTestId("code-debug-start").click();
   await expect(page.getByTestId("code-debug-status")).toContainText(/unconfigured|not configured/i);
+
+  // DEBUG INFO is a compact button (#470) that opens a popup with the unconfigured
+  // technical detail, kept out of the learner-facing PROGRAM OUTPUT.
+  const infoButton = page.getByTestId("code-debug-info-button");
+  await expect(infoButton).toBeVisible();
+  await infoButton.click();
+  await expect(page.getByTestId("code-debug-info-popup")).toContainText(/not configured|unconfigured/i);
 
   // The other dock tabs still work.
   await page.getByTestId("code-lab-tab-output").click();
