@@ -11,6 +11,7 @@ export type ExerciseRowStatus = ExerciseStatus | "none";
 export type ExerciseRowView = ExerciseView & {
   status: ExerciseRowStatus;
   progressPct: number;
+  startDate: string | null;
   completeDate: string | null;
   description: string;
   learningGoals: string[];
@@ -24,6 +25,7 @@ export type ExerciseGroupView = {
   progressPct: number;
   startedCount: number;
   totalCount: number;
+  startDate: string | null;
   completeDate: string | null;
 };
 
@@ -69,6 +71,7 @@ function buildRow(exercise: ExerciseView, progress: ExerciseProgress | undefined
     ...exercise,
     status,
     progressPct: statusProgressPct(status),
+    startDate: progress?.started_at ?? null,
     completeDate: status === "completed" ? (progress?.completed_at ?? null) : null,
     description: deriveDescription(exercise),
     learningGoals: exercise.skillTitles
@@ -80,6 +83,13 @@ function latestDate(dates: (string | null)[]): string | null {
   const present = dates.filter((d): d is string => d !== null);
   if (present.length === 0) return null;
   return present.reduce((latest, d) => (d > latest ? d : latest));
+}
+
+/** Earliest ISO date among the inputs, or null when none are present. */
+function earliestDate(dates: (string | null)[]): string | null {
+  const present = dates.filter((d): d is string => d !== null);
+  if (present.length === 0) return null;
+  return present.reduce((earliest, d) => (d < earliest ? d : earliest));
 }
 
 export function buildGroupedExerciseView(
@@ -111,6 +121,7 @@ export function buildGroupedExerciseView(
       progressPct,
       startedCount,
       totalCount,
+      startDate: earliestDate(rows.map((r) => r.startDate)),
       completeDate: allComplete ? latestDate(rows.map((r) => r.completeDate)) : null
     });
   }

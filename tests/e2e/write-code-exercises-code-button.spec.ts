@@ -5,25 +5,25 @@ import { expect, test } from "@playwright/test";
 // the shared detail panel's primary Study button opens the full-screen Code Lab at
 // /lab/<exerciseId>. Signed-out, no AI.
 
-test("the detail panel Study button links to /lab/<exerciseId>", async ({ page }) => {
+test("the detail panel Study button targets a lab exercise", async ({ page }) => {
   await page.goto("/exercises");
 
+  // Study is a button (#472): it records the start date and navigates via the
+  // router. Its target exercise is exposed as data-exercise-id.
   const study = page.getByTestId("exercise-study");
   await expect(study).toBeVisible();
-  const href = (await study.getAttribute("href")) ?? "";
-  expect(href).toMatch(/^\/lab\/.+/);
+  expect((await study.getAttribute("data-exercise-id")) ?? "").not.toBe("");
 });
 
 test("selecting a different child exercise retargets the Study button", async ({ page }) => {
   await page.goto("/exercises");
 
-  // Pick the second child radio in the default-expanded group, if present.
   const radios = page.getByTestId("exercise-child-radio");
-  const before = (await page.getByTestId("exercise-study").getAttribute("href")) ?? "";
+  const before = (await page.getByTestId("exercise-study").getAttribute("data-exercise-id")) ?? "";
   if ((await radios.count()) > 1) {
     await radios.nth(1).check();
-    const after = (await page.getByTestId("exercise-study").getAttribute("href")) ?? "";
-    expect(after).toMatch(/^\/lab\/.+/);
+    const after = (await page.getByTestId("exercise-study").getAttribute("data-exercise-id")) ?? "";
+    expect(after).not.toBe("");
     expect(after).not.toBe(before);
   }
 });

@@ -15,10 +15,12 @@ test("exercises catalog renders grouped rows with a detail panel", async ({ page
   await expect(page.getByTestId("exercise-study")).toBeVisible();
 });
 
-test("signed-out, starting an exercise prompts to sign in", async ({ page }) => {
+test("signed-out, the page invites signing in to save progress", async ({ page }) => {
   await page.goto("/exercises");
 
-  // The first group is expanded by default; start its first child exercise.
-  await page.getByTestId("exercise-start").first().click();
-  await expect(page.getByTestId("exercise-notice")).toContainText(/sign in/i);
+  // Start/Complete are now real date columns (#472); signed-out shows the
+  // save-progress note. Clicking Study still navigates to the Code Lab.
+  await expect(page.getByTestId("exercise-signed-out-note")).toContainText(/sign in/i);
+  await page.getByTestId("exercise-study").click();
+  await expect(page).toHaveURL(/\/lab\/.+/);
 });

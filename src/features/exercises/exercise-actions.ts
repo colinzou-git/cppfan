@@ -37,3 +37,26 @@ export async function setExercise(input: {
   }
   return { status: "error" };
 }
+
+/**
+ * Record that the learner opened an exercise from the Study button (#472): stamps
+ * `started_at` once, preserving any existing start/completion. This is a
+ * navigation event, not a code attempt, so it records no skill evidence. The UI
+ * navigates to the Code Lab regardless of the outcome.
+ */
+export async function startExercise(input: { exerciseId: string }): Promise<ExerciseActionResult> {
+  const exerciseId = typeof input?.exerciseId === "string" ? input.exerciseId : "";
+  if (!exerciseId) {
+    return { status: "error" };
+  }
+
+  const outcome = await setExerciseProgress({ exerciseId, status: "started", recordEvents: false });
+  if (outcome === "ok") {
+    revalidatePath("/exercises");
+    return { status: "ok" };
+  }
+  if (outcome === "signed_out") {
+    return { status: "signed_out" };
+  }
+  return { status: "error" };
+}
