@@ -650,6 +650,107 @@ int main() {
     ],
     skillTags: ["dsa.sorting.comparator", "dsa.hashing.lookup"]
   },
+  "cpp-string-split": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `C++: split a string.
+
+Read a delimiter character and a line, then print each field on its own line.
+
+Input format:
+- First line: a single delimiter character.
+- Second line: the text to split (may contain the delimiter and be empty).
+
+Output format:
+- Each field between delimiters on its own line. Empty fields print as blank
+  lines. (n delimiters produce n+1 lines.)
+
+AI evaluation rubric:
+- Keeps empty fields; splits on the exact delimiter character.
+- Emits delimiter-count + 1 fields, including a trailing empty field.`,
+    stdin: ",\na,,b\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+vector<string> split(const string& s, char delim) {
+  // TODO: accumulate a field; on a delimiter push it and reset; push the last.
+  (void)s;
+  (void)delim;
+  return {};
+}
+
+int main() {
+  string delimLine;
+  getline(cin, delimLine);
+  char delim = delimLine.empty() ? ',' : delimLine[0];
+  string text;
+  getline(cin, text);
+  for (const string& field : split(text, delim)) cout << field << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Keeps empty field", stdin: ",\na,,b\n", expectedStdout: "a\n\nb\n", matcher: "exact" },
+      { name: "Three fields", stdin: ",\nx,y,z\n", expectedStdout: "x\ny\nz\n", matcher: "exact" },
+      { name: "Space delimiter", stdin: " \none two\n", expectedStdout: "one\ntwo\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.parsing", "cpp.stl.string"]
+  },
+  "dsa-move-zeroes": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: move zeroes to the end.
+
+Read an array and print it with every 0 moved to the end, keeping the order of
+the non-zero values.
+
+Input format:
+- First line: n.
+- Second line: n integers.
+
+Output format:
+- The rearranged values on one line, space-separated, then a newline.
+
+[0,1,0,3,12] -> "1 3 12 0 0".
+
+AI evaluation rubric:
+- Stable two-pointer rearrangement in O(n); non-zero order preserved.
+- Handles all-zero, no-zero, and empty inputs.`,
+    stdin: "5\n0 1 0 3 12\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> moveZeroes(vector<int> nums) {
+  // TODO: copy non-zero values forward to a write index, then fill with zeroes.
+  return nums;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  vector<int> out = moveZeroes(nums);
+  for (size_t i = 0; i < out.size(); ++i) {
+    if (i) cout << " ";
+    cout << out[i];
+  }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Interleaved zeroes", stdin: "5\n0 1 0 3 12\n", expectedStdout: "1 3 12 0 0\n", matcher: "exact" },
+      { name: "No zeroes", stdin: "3\n1 2 3\n", expectedStdout: "1 2 3\n", matcher: "exact" },
+      { name: "Preserves order", stdin: "6\n4 0 5 0 0 6\n", expectedStdout: "4 5 6 0 0 0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.two_pointers", "dsa.arrays.traversal"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

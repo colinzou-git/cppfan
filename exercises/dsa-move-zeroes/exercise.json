@@ -1,0 +1,17 @@
+{
+  "id": "dsa-move-zeroes",
+  "title": "DSA: move zeroes to the end",
+  "skill_ids": ["dsa.arrays.two_pointers", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["move_zeroes.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-move-zeroes/work exercises/dsa-move-zeroes/tests/tests.cpp -o exercises/dsa-move-zeroes/work/run",
+  "test_command": "exercises/dsa-move-zeroes/work/run",
+  "required_tests": ["test_basic", "test_no_zeroes", "test_all_zeroes", "test_preserves_order", "test_empty_and_single", "test_negatives_kept"],
+  "hints": [
+    "Keep a write index that trails a read scan over the values.",
+    "Copy each non-zero value to the write index and advance it.",
+    "After the scan, fill the remaining positions with zeroes."
+  ],
+  "project_lab": "math-technique-playground"
+}
