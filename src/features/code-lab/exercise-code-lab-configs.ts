@@ -10,6 +10,63 @@ import type { LearningItemCodeLab } from "./code-lab-types";
  * includes each exercise's skillIds so attempt evidence maps to the right skills.
  */
 export const EXERCISE_CODE_LAB_CONFIGS: Record<string, LearningItemCodeLab> = {
+  "io-grade-calculator": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `I/O: grade calculator.
+
+Read a student's name and three scores, then print the average and a letter grade.
+
+Input format:
+- First line: the student's name (may contain spaces).
+- Second line: three scores separated by spaces.
+
+Output format:
+- "Average: X.X" — the mean of the three scores to one decimal place.
+- "Grade: L" — the letter grade for that average.
+
+Grade thresholds (inclusive): average >= 90 is A, >= 80 is B, >= 70 is C,
+>= 60 is D, otherwise F. Exactly 90.0 is an A.
+
+AI evaluation rubric:
+- Reads the name line and three numeric scores.
+- Computes the average as a double and prints it to one decimal.
+- Maps the average to the correct letter from highest threshold to lowest.`,
+    stdin: "Ada Lovelace\n95 90 100\n",
+    starterCode: `#include <iostream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+char letterFor(double average) {
+  // TODO: return 'A','B','C','D' for average >= 90/80/70/60, else 'F'.
+  return 'F';
+}
+
+int main() {
+  string name;
+  getline(cin, name);
+  double a, b, c;
+  cin >> a >> b >> c;
+  double average = (a + b + c) / 3.0;
+  cout << "Average: " << fixed << setprecision(1) << average << "\\n";
+  cout << "Grade: " << letterFor(average) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "A grade", stdin: "Ada Lovelace\n95 90 100\n", expectedStdout: "Average: 95.0\nGrade: A\n", matcher: "exact" },
+      { name: "Boundary B grade", stdin: "Grace Hopper\n80 80 80\n", expectedStdout: "Average: 80.0\nGrade: B\n", matcher: "exact" },
+      { name: "F grade", stdin: "Test Student\n50 55 45\n", expectedStdout: "Average: 50.0\nGrade: F\n", matcher: "exact" }
+    ],
+    skillTags: [
+      "cpp.program_basics.io",
+      "cpp.values_types.variables",
+      "cpp.values_types.conversions",
+      "cpp.control_flow.conditionals"
+    ]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

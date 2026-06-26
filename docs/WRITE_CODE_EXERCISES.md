@@ -105,6 +105,7 @@ See [CODE_LAB.md](CODE_LAB.md).
 
 | id | skills | lab |
 | --- | --- | --- |
+| `io-grade-calculator` | console I/O, variables, conversions, conditionals | `text-statistics-analyzer` |
 | `raii-scoped-array` | RAII lifetime/cleanup, move semantics | `note-manager` |
 | `stl-text-stats` | `std::map`, STL algorithms, parsing | `text-statistics-analyzer` |
 | `trie-autocomplete` | trie, character handling, prefix queries | `dictionary-autocomplete` |

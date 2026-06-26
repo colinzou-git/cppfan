@@ -21,6 +21,34 @@ export type Exercise = {
 
 export const exerciseCatalog: Exercise[] = [
   {
+    id: "io-grade-calculator",
+    title: "I/O: grade calculator",
+    skillIds: [
+      "cpp.program_basics.io",
+      "cpp.values_types.variables",
+      "cpp.values_types.conversions",
+      "cpp.control_flow.conditionals"
+    ],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["grade_calculator.hpp"],
+    requiredTests: [
+      "test_letter_a",
+      "test_boundary_b",
+      "test_boundary_d",
+      "test_letter_f",
+      "test_exact_ninety_is_a",
+      "test_just_below_sixty_is_f",
+      "test_decimal_scores"
+    ],
+    hints: [
+      "Compute the average as a double: (a + b + c) / 3.0.",
+      "Check thresholds from highest to lowest (90, then 80, 70, 60).",
+      "The thresholds are inclusive — exactly 90.0 is an 'A'."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
     id: "dsa-two-sum-sorted",
     title: "DSA: two-sum on a sorted array",
     skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
