@@ -59,7 +59,18 @@ export function CodeLabWorkspace({
     breakpoints: breakpointState.breakpoints
   });
   const [tab, setTab] = useState<DockTab>("output");
+  const [aiFullscreen, setAiFullscreen] = useState(false);
   const isWide = useIsWide();
+
+  // Close the fullscreen AI reading mode with Escape (#466).
+  useEffect(() => {
+    if (!aiFullscreen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAiFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [aiFullscreen]);
   const resolvedBackHref = backHref ?? `/learn/${encodeURIComponent(itemId)}`;
   const resolvedBackLabel = backLabel ?? "Back to lesson";
 
@@ -164,6 +175,7 @@ export function CodeLabWorkspace({
         topic={config.skillTags && config.skillTags.length > 0 ? config.skillTags.join(", ") : undefined}
         sourceVersion={sourceVersion}
         source={c.source}
+        fullscreen={aiFullscreen}
       />
       <ErrorRemediationPanel recommendation={c.remediation} onAction={c.handleRemediationAction} />
       {c.remediation ? null : <ScaffoldRecommendationCard recommendation={c.scaffold} />}
@@ -237,7 +249,56 @@ export function CodeLabWorkspace({
         ) : null}
         {tab === "stdin" ? stdinField : null}
         {tab === "debug" ? <DebugTabPanel breakpoints={breakpointState} debug={debug} /> : null}
-        {tab === "ai" ? aiPanel : null}
+        {tab === "ai" ? (
+          // One mounted AI panel (and one CodeLabChat): the wrapper toggles to a
+          // fixed fullscreen reading mode in place, so chat draft/messages survive
+          // open/close (#466).
+          <div
+            className={
+              aiFullscreen
+                ? "fixed inset-0 z-50 flex flex-col bg-white"
+                : "flex min-h-0 flex-1 flex-col"
+            }
+            role={aiFullscreen ? "dialog" : undefined}
+            aria-modal={aiFullscreen ? true : undefined}
+            aria-label={aiFullscreen ? "Fullscreen AI tab" : undefined}
+            data-testid={aiFullscreen ? "code-lab-ai-fullscreen" : "code-lab-ai-panel"}
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
+              <span className="text-sm font-bold text-slate-800">AI tutor</span>
+              {aiFullscreen ? (
+                <button
+                  type="button"
+                  onClick={() => setAiFullscreen(false)}
+                  className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  data-testid="code-lab-ai-fullscreen-close"
+                >
+                  Exit full screen
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAiFullscreen(true)}
+                  className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  data-testid="code-lab-ai-fullscreen-toggle"
+                >
+                  Full screen
+                </button>
+              )}
+            </div>
+            <div className={aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"}>
+              <div
+                className={
+                  aiFullscreen
+                    ? "mx-auto flex min-h-full w-full max-w-5xl flex-col gap-3"
+                    : "flex min-h-0 flex-col gap-3"
+                }
+              >
+                {aiPanel}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
