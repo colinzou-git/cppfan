@@ -359,6 +359,97 @@ int main() {
     ],
     skillTags: ["cpp.structs_classes.invariants_intro"]
   },
+  "dsa-valid-parentheses": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: valid parentheses.
+
+Read one line and decide whether its brackets are balanced and correctly nested.
+
+Input format:
+- A single line that may contain (), [], {} and other characters.
+
+Output format:
+- Print "true" if balanced, otherwise "false".
+
+Non-bracket characters are ignored: "a(b)c" is balanced; "([)]" is not.
+
+AI evaluation rubric:
+- Stack-based matching of (), [], {}; O(n).
+- A closing bracket with an empty/mismatched stack fails; leftover openers fail.`,
+    stdin: "{[()]}\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+bool isBalanced(const string& s) {
+  // TODO: push openers; on a closer, check it matches the stack top and pop.
+  (void)s;
+  return false;
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  cout << (isBalanced(line) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Nested balanced", stdin: "{[()]}\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Mismatched", stdin: "([)]\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Ignores other chars", stdin: "if (x) { y[0]; }\n", expectedStdout: "true\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.stacks.basic_stack"]
+  },
+  "dsa-first-unique-char": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DSA: first unique character.
+
+Read one line and print the index of the first character that appears exactly
+once, or -1 if every character repeats.
+
+Input format:
+- A single line of text.
+
+Output format:
+- A single integer: the 0-based index of the first unique character, else -1.
+
+For "leetcode" the answer is 0 ('l'); for "loveleetcode" it is 2 ('v').
+
+AI evaluation rubric:
+- Count character frequencies, then scan for the first count of 1; O(n).
+- Returns -1 when nothing is unique.`,
+    stdin: "loveleetcode\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <array>
+using namespace std;
+
+int firstUniqueIndex(const string& s) {
+  // TODO: tally frequencies, then return the first index with a count of 1.
+  (void)s;
+  return -1;
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  cout << firstUniqueIndex(line) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Later unique char", stdin: "loveleetcode\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "First char unique", stdin: "leetcode\n", expectedStdout: "0\n", matcher: "exact" },
+      { name: "None unique", stdin: "aabb\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.hashing.lookup", "dsa.strings.char_frequency"]
+  },
   "dsa-two-sum-sorted": {
     enabled: true,
     language: "cpp",

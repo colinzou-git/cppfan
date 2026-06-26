@@ -1,0 +1,17 @@
+{
+  "id": "dsa-first-unique-char",
+  "title": "DSA: first unique character",
+  "skill_ids": ["dsa.hashing.lookup", "dsa.strings.char_frequency"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["first_unique.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsa-first-unique-char/work exercises/dsa-first-unique-char/tests/tests.cpp -o exercises/dsa-first-unique-char/work/run",
+  "test_command": "exercises/dsa-first-unique-char/work/run",
+  "required_tests": ["test_first_char_unique", "test_later_unique", "test_none_unique", "test_empty_and_single", "test_unique_at_end", "test_mixed_chars"],
+  "hints": [
+    "First pass: count how many times each character appears.",
+    "Second pass: return the index of the first character whose count is 1.",
+    "Return -1 when no character is unique (or the string is empty)."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}
