@@ -11,11 +11,13 @@ export type ExerciseProgress = {
   exercise_id: string;
   status: ExerciseStatus;
   reflection: string | null;
+  /** Completion timestamp (#447); null until the exercise is completed. */
+  completed_at: string | null;
 };
 
 export type ExerciseWriteOutcome = "ok" | "signed_out" | "invalid" | "error";
 
-const COLUMNS = "exercise_id,status,reflection";
+const COLUMNS = "exercise_id,status,reflection,completed_at";
 
 /** All exercise progress rows for the signed-in learner (empty when signed out). */
 export async function getExerciseProgressForUser(): Promise<ExerciseProgress[]> {
