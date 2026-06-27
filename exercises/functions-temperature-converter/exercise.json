@@ -1,0 +1,26 @@
+{
+  "id": "functions-temperature-converter",
+  "title": "Functions: temperature converter",
+  "skill_ids": [
+    "cpp.functions.basics",
+    "cpp.functions.decomposition",
+    "cpp.values_types.conversions"
+  ],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": [
+    "temperature_converter.hpp"
+  ],
+  "required_tests": [
+    "test_fahrenheit_to_celsius",
+    "test_celsius_to_fahrenheit",
+    "test_invalid_command",
+    "test_negative_temperature"
+  ],
+  "hints": [
+    "Keep the conversion formulas in small named functions.",
+    "Use fixed one-decimal formatting for deterministic output.",
+    "Separate command dispatch from the arithmetic."
+  ],
+  "project_lab": "unit-converter"
+}
