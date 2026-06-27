@@ -1,0 +1,11 @@
+{
+  "id": "class-bank-account",
+  "title": "Classes: invariant practice",
+  "skill_ids": ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.constructors.parameterized_constructor", "cpp.structs_classes.const_methods_intro"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["account_state.hpp"],
+  "required_tests": ["test_negative_initial_becomes_zero", "test_add_and_remove", "test_rejects_negative_add", "test_rejects_over_remove", "test_const_getter"],
+  "hints": ["Keep stored state private.", "Return false for invalid operations and leave state unchanged.", "Use integer state so tests are exact."],
+  "project_lab": "todo-planner"
+}
