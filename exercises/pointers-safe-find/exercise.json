@@ -1,0 +1,27 @@
+{
+  "id": "pointers-safe-find",
+  "title": "Pointers: safe find",
+  "skill_ids": [
+    "cpp.references.pointers",
+    "cpp.references.non_owning",
+    "cpp.references.dangling",
+    "dsa.arrays.traversal"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": [
+    "safe_find.hpp"
+  ],
+  "required_tests": [
+    "test_found_mutable_pointer_updates_original",
+    "test_not_found_returns_nullptr",
+    "test_first_duplicate",
+    "test_const_overload"
+  ],
+  "hints": [
+    "Return the address of an element inside the vector, never a local variable.",
+    "Use nullptr to represent no result.",
+    "Provide const and mutable overloads."
+  ],
+  "project_lab": "todo-planner"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "structs-point-distance",
+  "title": "Structs: point distance",
+  "skill_ids": [
+    "cpp.structs_classes.syntax",
+    "cpp.values_types.fundamental_types",
+    "dsa.math.geometry"
+  ],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": [
+    "point_distance.hpp"
+  ],
+  "required_tests": [
+    "test_three_four_five_squared",
+    "test_same_point",
+    "test_negative_coordinates",
+    "test_large_coordinates"
+  ],
+  "hints": [
+    "Use a struct to group x and y.",
+    "Compute squared distance; do not use sqrt.",
+    "Use long long to avoid overflow for larger coordinates."
+  ],
+  "project_lab": "math-technique-playground"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "getline-contact-parser",
+  "title": "Input: whole-line contact parser",
+  "skill_ids": [
+    "cpp.utilities.getline_input",
+    "cpp.utilities.stream_validation",
+    "dsa.strings.parsing_edge_cases"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": [
+    "contact_parser.hpp"
+  ],
+  "required_tests": [
+    "test_valid_contact_trims_fields",
+    "test_preserves_inner_name_spaces",
+    "test_rejects_too_few_fields",
+    "test_rejects_empty_email",
+    "test_handles_crlf"
+  ],
+  "hints": [
+    "Use getline so names may contain spaces.",
+    "Split into exactly three comma-separated fields.",
+    "Trim surrounding whitespace, including carriage returns."
+  ],
+  "project_lab": "cli-flashcard-reviewer"
+}

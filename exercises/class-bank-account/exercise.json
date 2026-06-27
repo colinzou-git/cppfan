@@ -1,0 +1,28 @@
+{
+  "id": "class-bank-account",
+  "title": "Classes: bank account invariant",
+  "skill_ids": [
+    "cpp.structs_classes.public_private",
+    "cpp.structs_classes.invariants_intro",
+    "cpp.constructors.parameterized_constructor",
+    "cpp.structs_classes.const_methods_intro"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": [
+    "bank_account.hpp"
+  ],
+  "required_tests": [
+    "test_negative_initial_becomes_zero",
+    "test_deposit_and_withdraw",
+    "test_rejects_negative_deposit",
+    "test_rejects_overdraft",
+    "test_const_getter"
+  ],
+  "hints": [
+    "Keep balance private.",
+    "Return false for invalid operations and leave balance unchanged.",
+    "Use cents as integers to avoid floating-point money errors."
+  ],
+  "project_lab": "todo-planner"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "constructors-student-record",
+  "title": "Constructors: student record validation",
+  "skill_ids": [
+    "cpp.constructors.member_initializer_list",
+    "cpp.constructors.parameterized_constructor",
+    "cpp.structs_classes.invariants_intro"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": [
+    "student_record.hpp"
+  ],
+  "required_tests": [
+    "test_normal_record",
+    "test_empty_name_becomes_unknown",
+    "test_negative_id_becomes_zero",
+    "test_gpa_clamped_high",
+    "test_gpa_clamped_low",
+    "test_const_getters"
+  ],
+  "hints": [
+    "Use a member initializer list.",
+    "Normalize invalid constructor inputs.",
+    "Provide const getters only; keep fields private."
+  ],
+  "project_lab": "cli-flashcard-reviewer"
+}

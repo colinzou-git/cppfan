@@ -1,0 +1,26 @@
+{
+  "id": "loops-number-summary",
+  "title": "Loops: number summary",
+  "skill_ids": [
+    "cpp.control_flow.loops",
+    "cpp.control_flow.loop_invariants",
+    "dsa.arrays.traversal"
+  ],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": [
+    "number_summary.hpp"
+  ],
+  "required_tests": [
+    "test_empty_summary",
+    "test_mixed_values",
+    "test_single_negative",
+    "test_all_even"
+  ],
+  "hints": [
+    "Handle the empty vector before initializing min/max.",
+    "Track a loop invariant: after each value, min/max/sum/evenCount summarize everything seen so far.",
+    "Use long long for the sum so larger inputs do not overflow int."
+  ],
+  "project_lab": "number-guessing-stats"
+}

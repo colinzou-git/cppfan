@@ -1,0 +1,27 @@
+{
+  "id": "references-swap-clamp",
+  "title": "References: swap and clamp",
+  "skill_ids": [
+    "cpp.references.references",
+    "cpp.references.parameter_passing",
+    "cpp.references.const_correctness"
+  ],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": [
+    "swap_clamp.hpp"
+  ],
+  "required_tests": [
+    "test_swap_values",
+    "test_clamp_low",
+    "test_clamp_high",
+    "test_already_in_range",
+    "test_equal_bounds"
+  ],
+  "hints": [
+    "Use non-const references for outputs you modify.",
+    "Do not return modified copies; mutate the caller variable.",
+    "Treat low == high as a valid clamp range."
+  ],
+  "project_lab": "unit-converter"
+}
