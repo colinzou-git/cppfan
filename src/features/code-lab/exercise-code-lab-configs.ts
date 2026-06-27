@@ -1137,5 +1137,620 @@ int main() {
       { name: "Impossible count", stdin: "3 5\n", expectedStdout: "0", matcher: "trimmed" }
     ],
     skillTags: ["dsa.math.counting_principle", "dsa.math.generate_combinations", "dsa.math.bitmask_techniques"]
+  },
+  "loops-number-summary": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Loops: number summary.
+
+Read n followed by n integers. Print either "empty" or the minimum, maximum, sum, and even count.
+
+Input format:
+- First line: n
+- Second line: n integers, omitted when n is 0
+
+Output format:
+- Empty input: empty
+- Non-empty input: min=<min> max=<max> sum=<sum> even=<evenCount>
+
+Expected solution outline:
+- Handle n == 0 before reading nums[0].
+- Maintain min, max, sum, and even count while traversing once.
+- Use long long for the sum.
+
+AI evaluation rubric:
+- Correct empty handling and loop invariants.
+- No out-of-bounds access on empty input; O(n) traversal.`,
+    stdin: "5\n5 -2 0 7 4\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+struct NumberSummary {
+  bool empty = true;
+  int min = 0;
+  int max = 0;
+  long long sum = 0;
+  int evenCount = 0;
+};
+
+NumberSummary summarizeNumbers(const vector<int>& nums) {
+  // TODO: handle empty input, then scan once to update min/max/sum/evenCount.
+  (void)nums;
+  return {};
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int& value : nums) cin >> value;
+  NumberSummary s = summarizeNumbers(nums);
+  if (s.empty) {
+    cout << "empty\n";
+  } else {
+    cout << "min=" << s.min << " max=" << s.max << " sum=" << s.sum << " even=" << s.evenCount << "\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed values", stdin: "5\n5 -2 0 7 4\n", expectedStdout: "min=-2 max=7 sum=14 even=3\n", matcher: "exact" },
+      { name: "Empty list", stdin: "0\n", expectedStdout: "empty\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.control_flow.loops", "cpp.control_flow.loop_invariants", "dsa.arrays.traversal"]
+  },
+  "functions-temperature-converter": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Functions: temperature converter.
+
+Read a conversion command and value. Command C converts Fahrenheit to Celsius. Command F converts Celsius to Fahrenheit. Unknown commands print invalid.
+
+Input format:
+- One line: <command> <value>
+
+Output format:
+- Converted value with exactly one digit after the decimal, or invalid.
+
+Expected solution outline:
+- Put each formula in its own helper function.
+- Put one-decimal formatting in one helper.
+- Keep command dispatch separate from arithmetic.
+
+AI evaluation rubric:
+- Correct formulas, fixed one-decimal output, and invalid-command handling.`,
+    stdin: "C 212\n",
+    starterCode: `#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+using namespace std;
+
+double fahrenheitToCelsius(double f) {
+  // TODO: implement (f - 32) * 5 / 9.
+  (void)f;
+  return 0.0;
+}
+
+double celsiusToFahrenheit(double c) {
+  // TODO: implement c * 9 / 5 + 32.
+  (void)c;
+  return 0.0;
+}
+
+string formatOneDecimal(double value) {
+  ostringstream out;
+  out << fixed << setprecision(1) << value;
+  return out.str();
+}
+
+string convertTemperature(char command, double value) {
+  // TODO: dispatch C/F and return "invalid" for unknown commands.
+  (void)command;
+  (void)value;
+  return "invalid";
+}
+
+int main() {
+  char command;
+  double value;
+  cin >> command >> value;
+  cout << convertTemperature(command, value) << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Fahrenheit to Celsius", stdin: "C 212\n", expectedStdout: "100.0\n", matcher: "exact" },
+      { name: "Invalid command", stdin: "X 10\n", expectedStdout: "invalid\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.functions.basics", "cpp.functions.decomposition", "cpp.values_types.conversions"]
+  },
+  "getline-contact-parser": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Input: whole-line contact parser.
+
+Read contact rows in name,email,phone format. Trim surrounding whitespace from fields. Print normalized contacts or invalid.
+
+Input format:
+- Zero or more lines, each intended to contain exactly three comma-separated fields.
+
+Output format:
+- Valid row: <name>|<email>|<phone>
+- Invalid row: invalid
+
+Expected solution outline:
+- Use getline so names can contain spaces.
+- Split on commas into exactly three fields.
+- Trim leading/trailing whitespace, including CR from CRLF input.
+
+AI evaluation rubric:
+- Preserves spaces inside names, rejects missing/extra/empty fields, and handles CRLF.`,
+    stdin: " Alice , a@example.com , 555 \n",
+    starterCode: `#include <cctype>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Contact {
+  string name;
+  string email;
+  string phone;
+};
+
+string trimField(string s) {
+  // TODO: remove leading and trailing whitespace from s.
+  return s;
+}
+
+bool parseContactLine(const string& line, Contact& out) {
+  // TODO: split into exactly 3 comma-separated, non-empty trimmed fields.
+  (void)line;
+  (void)out;
+  return false;
+}
+
+int main() {
+  string line;
+  while (getline(cin, line)) {
+    Contact contact;
+    if (parseContactLine(line, contact)) {
+      cout << contact.name << "|" << contact.email << "|" << contact.phone << "\n";
+    } else {
+      cout << "invalid\n";
+    }
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Trims fields", stdin: " Alice , a@example.com , 555 \n", expectedStdout: "Alice|a@example.com|555\n", matcher: "exact" },
+      { name: "Rejects missing field", stdin: "Alice,a@example.com\n", expectedStdout: "invalid\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.getline_input", "cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases"]
+  },
+  "references-swap-clamp": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `References: swap and clamp.
+
+Read a, b, value, low, high. Swap a and b, then clamp value into [low, high]. Print the three resulting values.
+
+Input format:
+- One line: a b value low high
+
+Output format:
+- One line: <swapped-a> <swapped-b> <clamped-value>
+
+Expected solution outline:
+- Implement swap_values(int&, int&).
+- Implement clamp_in_place(int&, int, int) using references.
+
+AI evaluation rubric:
+- Mutates the caller variables through references; handles below, above, and in-range values.`,
+    stdin: "2 7 -5 0 10\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+void swap_values(int& a, int& b) {
+  // TODO: swap through references.
+  (void)a;
+  (void)b;
+}
+
+void clamp_in_place(int& value, int low, int high) {
+  // TODO: mutate value so it lies in [low, high].
+  (void)value;
+  (void)low;
+  (void)high;
+}
+
+int main() {
+  int a, b, value, low, high;
+  cin >> a >> b >> value >> low >> high;
+  swap_values(a, b);
+  clamp_in_place(value, low, high);
+  cout << a << " " << b << " " << value << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Swap and clamp low", stdin: "2 7 -5 0 10\n", expectedStdout: "7 2 0\n", matcher: "exact" },
+      { name: "Clamp high", stdin: "1 2 99 0 10\n", expectedStdout: "2 1 10\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.references", "cpp.references.parameter_passing", "cpp.references.const_correctness"]
+  },
+  "const-report-statistics": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Const correctness: read-only report.
+
+Read n followed by n integers. Print sum, average, and whether the values are sorted nondecreasing.
+
+Input format:
+- First line: n
+- Second line: n integers, omitted when n is 0
+
+Output format:
+- sum=<sum> avg=<average> sorted=<true|false>
+
+Expected solution outline:
+- Pass vectors by const reference.
+- Return 0.0 for an empty average.
+- Check sortedness with adjacent comparisons.
+
+AI evaluation rubric:
+- Does not mutate the input; handles empty vectors and negative values.`,
+    stdin: "3\n1 2 6\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+long long sumValues(const vector<int>& values) {
+  // TODO: sum values without mutating the vector.
+  (void)values;
+  return 0;
+}
+
+double averageValue(const vector<int>& values) {
+  // TODO: return 0.0 for empty input, otherwise sum / size.
+  (void)values;
+  return 0.0;
+}
+
+bool isSortedNondecreasing(const vector<int>& values) {
+  // TODO: check adjacent values.
+  (void)values;
+  return true;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> values(n);
+  for (int& value : values) cin >> value;
+  cout << "sum=" << sumValues(values) << " avg=" << averageValue(values)
+       << " sorted=" << (isSortedNondecreasing(values) ? "true" : "false") << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Stats sorted", stdin: "3\n1 2 6\n", expectedStdout: "sum=9 avg=3 sorted=true\n", matcher: "exact" },
+      { name: "Stats unsorted", stdin: "3\n1 3 2\n", expectedStdout: "sum=6 avg=2 sorted=false\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.const_correctness", "cpp.references.interface_intent", "cpp.stl.vector"]
+  },
+  "pointers-safe-find": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Pointers: safe find.
+
+Read n, n integers, and a target. Print the first index whose value equals target, or -1.
+
+Input format:
+- First line: n
+- Second line: n integers, omitted when n is 0
+- Third line: target
+
+Output format:
+- First matching 0-based index, or -1.
+
+Expected solution outline:
+- Return a pointer to an element inside the vector.
+- Return nullptr when not found.
+- Never return the address of a local variable.
+
+AI evaluation rubric:
+- Correct pointer lifetime and first-match behavior, including duplicates and empty input.`,
+    stdin: "3\n4 7 7\n7\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int* find_first(vector<int>& values, int target) {
+  // TODO: return &element for the first match, or nullptr.
+  (void)values;
+  (void)target;
+  return nullptr;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> values(n);
+  for (int& value : values) cin >> value;
+  int target;
+  cin >> target;
+  int* found = find_first(values, target);
+  if (!found) {
+    cout << -1 << "\n";
+  } else {
+    cout << (found - values.data()) << "\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "First duplicate", stdin: "3\n4 7 7\n7\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "Not found", stdin: "2\n1 2\n5\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.pointers", "cpp.references.non_owning", "cpp.references.dangling", "dsa.arrays.traversal"]
+  },
+  "structs-point-distance": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Structs: point distance.
+
+Read two integer points and print the squared Euclidean distance between them. Do not use sqrt.
+
+Input format:
+- One line: x1 y1 x2 y2
+
+Output format:
+- One integer: (x1 - x2)^2 + (y1 - y2)^2
+
+Expected solution outline:
+- Define a Point struct with x and y fields.
+- Use long long for coordinate differences and the result.
+
+AI evaluation rubric:
+- Correct grouping with a struct; handles negative and large coordinates without floating-point math.`,
+    stdin: "0 0 3 4\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct Point {
+  long long x = 0;
+  long long y = 0;
+};
+
+long long squared_distance(Point a, Point b) {
+  // TODO: compute dx*dx + dy*dy using long long.
+  (void)a;
+  (void)b;
+  return 0;
+}
+
+int main() {
+  Point a, b;
+  cin >> a.x >> a.y >> b.x >> b.y;
+  cout << squared_distance(a, b) << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "3-4-5 triangle", stdin: "0 0 3 4\n", expectedStdout: "25\n", matcher: "exact" },
+      { name: "Negative coordinates", stdin: "-1 -2 2 2\n", expectedStdout: "25\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.syntax", "cpp.values_types.fundamental_types", "dsa.math.geometry"]
+  },
+  "class-bank-account": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Classes: bank account invariant.
+
+Read an initial balance in cents, a deposit, and a withdrawal. Apply valid operations and print the final balance.
+
+Input format:
+- One line: initial_cents deposit_cents withdraw_cents
+
+Output format:
+- One integer: final balance in cents
+
+Expected solution outline:
+- Keep balance private.
+- Normalize negative initial balance to 0.
+- Reject negative deposits, negative withdrawals, and overdrafts.
+
+AI evaluation rubric:
+- Enforces the non-negative balance invariant and exposes a const getter.`,
+    stdin: "100 50 70\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+class BankAccount {
+ public:
+  explicit BankAccount(long long initial_cents) {
+    // TODO: normalize negative initial balances to 0.
+    (void)initial_cents;
+  }
+
+  bool deposit(long long cents) {
+    // TODO: reject negative deposits; otherwise add to the balance.
+    (void)cents;
+    return false;
+  }
+
+  bool withdraw(long long cents) {
+    // TODO: reject negative withdrawals and overdrafts.
+    (void)cents;
+    return false;
+  }
+
+  long long balance_cents() const {
+    // TODO: return the current balance.
+    return 0;
+  }
+};
+
+int main() {
+  long long initial, deposit_cents, withdraw_cents;
+  cin >> initial >> deposit_cents >> withdraw_cents;
+  BankAccount account(initial);
+  account.deposit(deposit_cents);
+  account.withdraw(withdraw_cents);
+  cout << account.balance_cents() << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Valid deposit and withdrawal", stdin: "100 50 70\n", expectedStdout: "80\n", matcher: "exact" },
+      { name: "Reject overdraft", stdin: "10 0 11\n", expectedStdout: "10\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.constructors.parameterized_constructor", "cpp.structs_classes.const_methods_intro"]
+  },
+  "constructors-student-record": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Constructors: student record validation.
+
+Read a name, id, and GPA. Construct a StudentRecord that normalizes invalid constructor inputs.
+
+Input format:
+- One line: name id gpa
+
+Output format:
+- <name> <id> <gpa>
+
+Expected solution outline:
+- Use a member initializer list.
+- Replace empty names with unknown.
+- Clamp negative id to 0 and GPA into [0.0, 4.0].
+
+AI evaluation rubric:
+- Constructor owns validation; getters are const and fields stay private.`,
+    stdin: "Ada 7 3.5\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+class StudentRecord {
+ public:
+  StudentRecord(string name, int id, double gpa) {
+    // TODO: initialize and normalize all fields.
+    (void)name;
+    (void)id;
+    (void)gpa;
+  }
+
+  const string& name() const {
+    // TODO: return the stored name.
+    static const string placeholder = "unknown";
+    return placeholder;
+  }
+
+  int id() const {
+    // TODO: return the stored id.
+    return 0;
+  }
+
+  double gpa() const {
+    // TODO: return the stored GPA.
+    return 0.0;
+  }
+};
+
+int main() {
+  string name;
+  int id;
+  double gpa;
+  cin >> name >> id >> gpa;
+  StudentRecord student(name, id, gpa);
+  cout << student.name() << " " << student.id() << " " << student.gpa() << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Normal record", stdin: "Ada 7 3.5\n", expectedStdout: "Ada 7 3.5\n", matcher: "exact" },
+      { name: "Clamp high GPA", stdin: "Bob 3 9\n", expectedStdout: "Bob 3 4\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.constructors.member_initializer_list", "cpp.constructors.parameterized_constructor", "cpp.structs_classes.invariants_intro"]
+  },
+  "operators-fraction-normalize": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Operators: normalized fraction.
+
+Read two fractions a/b and c/d. Print their normalized sum.
+
+Input format:
+- One line: a b c d
+
+Output format:
+- One fraction: numerator/denominator, reduced, with positive denominator.
+
+Expected solution outline:
+- Normalize in the constructor.
+- Implement operator+ and operator<<.
+- Keep zero as 0/1.
+
+AI evaluation rubric:
+- Correct sign normalization, gcd reduction, addition, equality, and stream insertion.`,
+    stdin: "1 2 1 3\n",
+    starterCode: `#include <iostream>
+#include <ostream>
+using namespace std;
+
+class Fraction {
+ public:
+  Fraction(long long numerator = 0, long long denominator = 1) {
+    // TODO: store and normalize numerator/denominator.
+    (void)numerator;
+    (void)denominator;
+  }
+
+  long long numerator() const { return 0; }
+  long long denominator() const { return 1; }
+
+  friend Fraction operator+(const Fraction& a, const Fraction& b) {
+    // TODO: add fractions and return a normalized result.
+    (void)a;
+    (void)b;
+    return Fraction();
+  }
+
+  friend bool operator==(const Fraction& a, const Fraction& b) {
+    return a.numerator() == b.numerator() && a.denominator() == b.denominator();
+  }
+};
+
+ostream& operator<<(ostream& os, const Fraction& f) {
+  return os << f.numerator() << "/" << f.denominator();
+}
+
+int main() {
+  long long a, b, c, d;
+  cin >> a >> b >> c >> d;
+  cout << (Fraction(a, b) + Fraction(c, d)) << "\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Add fractions", stdin: "1 2 1 3\n", expectedStdout: "5/6\n", matcher: "exact" },
+      { name: "Normalize sign", stdin: "1 -2 0 1\n", expectedStdout: "-1/2\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.value_semantics.operators", "cpp.value_semantics.stream_insertion", "dsa.math.number_theory"]
   }
 };

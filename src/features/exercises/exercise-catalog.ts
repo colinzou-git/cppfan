@@ -554,6 +554,116 @@ export const exerciseCatalog: Exercise[] = [
       "For subset_from_mask, include values[i] when bit i of mask is 1."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "loops-number-summary",
+    title: "Loops: number summary",
+    skillIds: ["cpp.control_flow.loops", "cpp.control_flow.loop_invariants", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["number_summary.hpp"],
+    requiredTests: ["test_empty_summary", "test_mixed_values", "test_single_negative", "test_all_even"],
+    hints: ["Handle the empty vector before initializing min/max.", "Track a loop invariant: after each value, min/max/sum/evenCount summarize everything seen so far.", "Use long long for the sum so larger inputs do not overflow int."],
+    projectLab: "number-guessing-stats"
+  },
+  {
+    id: "functions-temperature-converter",
+    title: "Functions: temperature converter",
+    skillIds: ["cpp.functions.basics", "cpp.functions.decomposition", "cpp.values_types.conversions"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["temperature_converter.hpp"],
+    requiredTests: ["test_fahrenheit_to_celsius", "test_celsius_to_fahrenheit", "test_invalid_command", "test_negative_temperature"],
+    hints: ["Keep the conversion formulas in small named functions.", "Use fixed one-decimal formatting for deterministic output.", "Separate command dispatch from the arithmetic."],
+    projectLab: "unit-converter"
+  },
+  {
+    id: "getline-contact-parser",
+    title: "Input: whole-line contact parser",
+    skillIds: ["cpp.utilities.getline_input", "cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["contact_parser.hpp"],
+    requiredTests: ["test_valid_contact_trims_fields", "test_preserves_inner_name_spaces", "test_rejects_too_few_fields", "test_rejects_empty_email", "test_handles_crlf"],
+    hints: ["Use getline so names may contain spaces.", "Split into exactly three comma-separated fields.", "Trim surrounding whitespace, including carriage returns."],
+    projectLab: "cli-flashcard-reviewer"
+  },
+  {
+    id: "references-swap-clamp",
+    title: "References: swap and clamp",
+    skillIds: ["cpp.references.references", "cpp.references.parameter_passing", "cpp.references.const_correctness"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["swap_clamp.hpp"],
+    requiredTests: ["test_swap_values", "test_clamp_low", "test_clamp_high", "test_already_in_range", "test_equal_bounds"],
+    hints: ["Use non-const references for outputs you modify.", "Do not return modified copies; mutate the caller variable.", "Treat low == high as a valid clamp range."],
+    projectLab: "unit-converter"
+  },
+  {
+    id: "const-report-statistics",
+    title: "Const correctness: read-only report",
+    skillIds: ["cpp.references.const_correctness", "cpp.references.interface_intent", "cpp.stl.vector"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["report_statistics.hpp"],
+    requiredTests: ["test_sum_and_average", "test_empty_average", "test_sorted_true", "test_sorted_false", "test_const_vector_compiles"],
+    hints: ["Accept const std::vector<int>& to avoid copies and mutation.", "Return 0.0 for an empty average.", "Check sortedness with adjacent comparisons."],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "pointers-safe-find",
+    title: "Pointers: safe find",
+    skillIds: ["cpp.references.pointers", "cpp.references.non_owning", "cpp.references.dangling", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["safe_find.hpp"],
+    requiredTests: ["test_found_mutable_pointer_updates_original", "test_not_found_returns_nullptr", "test_first_duplicate", "test_const_overload"],
+    hints: ["Return the address of an element inside the vector, never a local variable.", "Use nullptr to represent no result.", "Provide const and mutable overloads."],
+    projectLab: "todo-planner"
+  },
+  {
+    id: "structs-point-distance",
+    title: "Structs: point distance",
+    skillIds: ["cpp.structs_classes.syntax", "cpp.values_types.fundamental_types", "dsa.math.geometry"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["point_distance.hpp"],
+    requiredTests: ["test_three_four_five_squared", "test_same_point", "test_negative_coordinates", "test_large_coordinates"],
+    hints: ["Use a struct to group x and y.", "Compute squared distance; do not use sqrt.", "Use long long to avoid overflow for larger coordinates."],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "class-bank-account",
+    title: "Classes: bank account invariant",
+    skillIds: ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.constructors.parameterized_constructor", "cpp.structs_classes.const_methods_intro"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["bank_account.hpp"],
+    requiredTests: ["test_negative_initial_becomes_zero", "test_deposit_and_withdraw", "test_rejects_negative_deposit", "test_rejects_overdraft", "test_const_getter"],
+    hints: ["Keep balance private.", "Return false for invalid operations and leave balance unchanged.", "Use cents as integers to avoid floating-point money errors."],
+    projectLab: "todo-planner"
+  },
+  {
+    id: "constructors-student-record",
+    title: "Constructors: student record validation",
+    skillIds: ["cpp.constructors.member_initializer_list", "cpp.constructors.parameterized_constructor", "cpp.structs_classes.invariants_intro"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["student_record.hpp"],
+    requiredTests: ["test_normal_record", "test_empty_name_becomes_unknown", "test_negative_id_becomes_zero", "test_gpa_clamped_high", "test_gpa_clamped_low", "test_const_getters"],
+    hints: ["Use a member initializer list.", "Normalize invalid constructor inputs.", "Provide const getters only; keep fields private."],
+    projectLab: "cli-flashcard-reviewer"
+  },
+  {
+    id: "operators-fraction-normalize",
+    title: "Operators: normalized fraction",
+    skillIds: ["cpp.value_semantics.operators", "cpp.value_semantics.stream_insertion", "dsa.math.number_theory"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["fraction.hpp"],
+    requiredTests: ["test_reduces_and_normalizes_sign", "test_zero_numerator", "test_addition", "test_equality_after_reduction", "test_stream_insertion"],
+    hints: ["Normalize in one private helper used by constructors and arithmetic.", "Keep denominator positive and reduce by gcd.", "Implement value-style operators that return new Fractions."],
+    projectLab: "math-technique-playground"
   }
 ];
 

@@ -1,0 +1,27 @@
+{
+  "id": "operators-fraction-normalize",
+  "title": "Operators: normalized fraction",
+  "skill_ids": [
+    "cpp.value_semantics.operators",
+    "cpp.value_semantics.stream_insertion",
+    "dsa.math.number_theory"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": [
+    "fraction.hpp"
+  ],
+  "required_tests": [
+    "test_reduces_and_normalizes_sign",
+    "test_zero_numerator",
+    "test_addition",
+    "test_equality_after_reduction",
+    "test_stream_insertion"
+  ],
+  "hints": [
+    "Normalize in one private helper used by constructors and arithmetic.",
+    "Keep denominator positive and reduce by gcd.",
+    "Implement value-style operators that return new Fractions."
+  ],
+  "project_lab": "math-technique-playground"
+}

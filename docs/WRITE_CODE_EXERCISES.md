@@ -129,6 +129,16 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `concurrency-task-queue` | threads, mutexes, condition variables, shared-state design | `task-queue-lab` |
 | `graph-maze-shortest-path` | graph BFS, connected components, shortest paths | `maze-route-planner` |
 | `math-combination-generator` | counting principle, combination generation, bitmask subsets | `math-technique-playground` |
+| `loops-number-summary` | cpp.control_flow.loops, cpp.control_flow.loop_invariants, dsa.arrays.traversal | `number-guessing-stats` |
+| `functions-temperature-converter` | cpp.functions.basics, cpp.functions.decomposition, cpp.values_types.conversions | `unit-converter` |
+| `getline-contact-parser` | cpp.utilities.getline_input, cpp.utilities.stream_validation, dsa.strings.parsing_edge_cases | `cli-flashcard-reviewer` |
+| `references-swap-clamp` | cpp.references.references, cpp.references.parameter_passing, cpp.references.const_correctness | `unit-converter` |
+| `const-report-statistics` | cpp.references.const_correctness, cpp.references.interface_intent, cpp.stl.vector | `text-statistics-analyzer` |
+| `pointers-safe-find` | cpp.references.pointers, cpp.references.non_owning, cpp.references.dangling, dsa.arrays.traversal | `todo-planner` |
+| `structs-point-distance` | cpp.structs_classes.syntax, cpp.values_types.fundamental_types, dsa.math.geometry | `math-technique-playground` |
+| `class-bank-account` | cpp.structs_classes.public_private, cpp.structs_classes.invariants_intro, cpp.constructors.parameterized_constructor, cpp.structs_classes.const_methods_intro | `todo-planner` |
+| `constructors-student-record` | cpp.constructors.member_initializer_list, cpp.constructors.parameterized_constructor, cpp.structs_classes.invariants_intro | `cli-flashcard-reviewer` |
+| `operators-fraction-normalize` | cpp.value_semantics.operators, cpp.value_semantics.stream_insertion, dsa.math.number_theory | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

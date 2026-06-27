@@ -1,0 +1,2 @@
+#pragma once
+class BankAccount { long long balance_ = 0; public: explicit BankAccount(long long initial_cents) : balance_(initial_cents < 0 ? 0 : initial_cents) {} bool deposit(long long cents){ if(cents < 0) return false; balance_ += cents; return true; } bool withdraw(long long cents){ if(cents < 0 || cents > balance_) return false; balance_ -= cents; return true; } long long balance_cents() const { return balance_; } };
