@@ -1,0 +1,27 @@
+{
+  "id": "const-report-statistics",
+  "title": "Const correctness: read-only report",
+  "skill_ids": [
+    "cpp.references.const_correctness",
+    "cpp.references.interface_intent",
+    "cpp.stl.vector"
+  ],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": [
+    "report_statistics.hpp"
+  ],
+  "required_tests": [
+    "test_sum_and_average",
+    "test_empty_average",
+    "test_sorted_true",
+    "test_sorted_false",
+    "test_const_vector_compiles"
+  ],
+  "hints": [
+    "Accept const std::vector<int>& to avoid copies and mutation.",
+    "Return 0.0 for an empty average.",
+    "Check sortedness with adjacent comparisons."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}
