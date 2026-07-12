@@ -1,0 +1,17 @@
+{
+  "id": "operators-fraction-normalize",
+  "title": "Operators: a normalized Fraction",
+  "skill_ids": ["cpp.structs_classes.invariants_intro", "cpp.structs_classes.syntax", "cpp.functions.basics"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["fraction.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/operators-fraction-normalize/work exercises/operators-fraction-normalize/tests/tests.cpp -o exercises/operators-fraction-normalize/work/run",
+  "test_command": "exercises/operators-fraction-normalize/work/run",
+  "required_tests": ["test_constructor_reduces", "test_sign_moves_to_numerator", "test_both_negative_is_positive", "test_zero_normalizes", "test_addition", "test_addition_reduces", "test_equality", "test_stream_insertion"],
+  "hints": [
+    "Normalize in the constructor: push the sign to the numerator (den > 0), then divide both by std::gcd(|num|, den).",
+    "operator+ uses a common denominator (a.num*b.den + b.num*a.den) / (a.den*b.den); constructing the result normalizes it.",
+    "Because every Fraction is already normalized, operator== can just compare num and den."
+  ],
+  "project_lab": "math-technique-playground"
+}

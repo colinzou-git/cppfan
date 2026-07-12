@@ -134,6 +134,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `getline-contact-parser` | getline input, stream validation, string parsing | `csv-table-summarizer` |
 | `references-swap-clamp` | references, parameter passing, const-correctness | `math-technique-playground` |
 | `const-report-statistics` | const-correctness, parameter passing, array traversal | `number-guessing-stats` |
+| `pointers-safe-find` | pointers, non-owning pointers, avoiding dangling | `note-manager` |
+| `structs-point-distance` | struct syntax, const methods, array traversal | `math-technique-playground` |
+| `class-bank-account` | public/private, class invariants, const methods | `note-manager` |
+| `constructors-student-record` | parameterized/default constructors, initializer lists | `quiz-generator` |
+| `operators-fraction-normalize` | class invariants, operator overloading | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

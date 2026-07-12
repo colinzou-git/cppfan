@@ -1,0 +1,17 @@
+{
+  "id": "constructors-student-record",
+  "title": "Constructors: a student record",
+  "skill_ids": ["cpp.constructors.parameterized_constructor", "cpp.constructors.member_initializer_list", "cpp.constructors.default_constructor"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["student.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/constructors-student-record/work exercises/constructors-student-record/tests/tests.cpp -o exercises/constructors-student-record/work/run",
+  "test_command": "exercises/constructors-student-record/work/run",
+  "required_tests": ["test_default_constructor", "test_parameterized_constructor", "test_negative_id_clamps", "test_gpa_clamps_high", "test_gpa_clamps_low", "test_honor_roll_threshold"],
+  "hints": [
+    "Initialize members in an initializer list (: name_(...), id_(...), gpa_(...)).",
+    "Clamp inside the initializer list with a conditional or a small static helper.",
+    "is_honor_roll only reads gpa_, so make it const and compare gpa_ >= 3.5."
+  ],
+  "project_lab": "quiz-generator"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "class-bank-account",
+  "title": "Classes: a bank account invariant",
+  "skill_ids": ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.structs_classes.const_methods_intro"],
+  "difficulty": "beginner",
+  "estimated_minutes": 30,
+  "editable_files": ["bank_account.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/class-bank-account/work exercises/class-bank-account/tests/tests.cpp -o exercises/class-bank-account/work/run",
+  "test_command": "exercises/class-bank-account/work/run",
+  "required_tests": ["test_starts_empty", "test_opening_balance", "test_negative_opening_clamps_to_zero", "test_deposit_increases_balance", "test_rejects_non_positive_deposit", "test_withdraw_succeeds_within_balance", "test_rejects_overdraft"],
+  "hints": [
+    "Keep the balance in a private member so only your methods can change it.",
+    "Validate before mutating: a rejected deposit/withdraw must leave the balance untouched.",
+    "balance() only reads state, so make it a const method."
+  ],
+  "project_lab": "note-manager"
+}

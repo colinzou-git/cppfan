@@ -662,6 +662,119 @@ export const exerciseCatalog: Exercise[] = [
       "range is simply max - min; mean is total / values.size() as a double."
     ],
     projectLab: "number-guessing-stats"
+  },
+  {
+    id: "pointers-safe-find",
+    title: "Pointers: safe find into a vector",
+    skillIds: ["cpp.references.pointers", "cpp.references.non_owning", "cpp.references.dangling"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["safe_find.hpp"],
+    requiredTests: [
+      "test_finds_first_match",
+      "test_returns_nullptr_when_missing",
+      "test_empty_vector",
+      "test_finds_first_of_duplicates",
+      "test_mutable_pointer_edits_in_place",
+      "test_contains"
+    ],
+    hints: [
+      "Take the address of the loop variable with &v when it matches.",
+      "Bind the loop variable by reference (const int& / int&) so &v points into the vector, not a copy.",
+      "Return nullptr when the loop finishes without a match."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "structs-point-distance",
+    title: "Structs: points and distance",
+    skillIds: ["cpp.structs_classes.syntax", "cpp.structs_classes.const_methods_intro", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["point.hpp"],
+    requiredTests: [
+      "test_distance_horizontal",
+      "test_distance_pythagorean",
+      "test_distance_is_symmetric",
+      "test_distance_to_self_is_zero",
+      "test_perimeter_unit_square",
+      "test_perimeter_degenerate"
+    ],
+    hints: [
+      "distance_to reads only its members and other, so mark it const.",
+      "Euclidean distance is std::sqrt(dx*dx + dy*dy).",
+      "For the perimeter, connect vertex i to (i + 1) % n so the last edge wraps to the first."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "class-bank-account",
+    title: "Classes: a bank account invariant",
+    skillIds: ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.structs_classes.const_methods_intro"],
+    difficulty: "beginner",
+    estimatedMinutes: 30,
+    editableFiles: ["bank_account.hpp"],
+    requiredTests: [
+      "test_starts_empty",
+      "test_opening_balance",
+      "test_negative_opening_clamps_to_zero",
+      "test_deposit_increases_balance",
+      "test_rejects_non_positive_deposit",
+      "test_withdraw_succeeds_within_balance",
+      "test_rejects_overdraft"
+    ],
+    hints: [
+      "Keep the balance in a private member so only your methods can change it.",
+      "Validate before mutating: a rejected deposit/withdraw must leave the balance untouched.",
+      "balance() only reads state, so make it a const method."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "constructors-student-record",
+    title: "Constructors: a student record",
+    skillIds: ["cpp.constructors.parameterized_constructor", "cpp.constructors.member_initializer_list", "cpp.constructors.default_constructor"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["student.hpp"],
+    requiredTests: [
+      "test_default_constructor",
+      "test_parameterized_constructor",
+      "test_negative_id_clamps",
+      "test_gpa_clamps_high",
+      "test_gpa_clamps_low",
+      "test_honor_roll_threshold"
+    ],
+    hints: [
+      "Initialize members in an initializer list (: name_(...), id_(...), gpa_(...)).",
+      "Clamp inside the initializer list with a conditional or a small static helper.",
+      "is_honor_roll only reads gpa_, so make it const and compare gpa_ >= 3.5."
+    ],
+    projectLab: "quiz-generator"
+  },
+  {
+    id: "operators-fraction-normalize",
+    title: "Operators: a normalized Fraction",
+    skillIds: ["cpp.structs_classes.invariants_intro", "cpp.structs_classes.syntax", "cpp.functions.basics"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["fraction.hpp"],
+    requiredTests: [
+      "test_constructor_reduces",
+      "test_sign_moves_to_numerator",
+      "test_both_negative_is_positive",
+      "test_zero_normalizes",
+      "test_addition",
+      "test_addition_reduces",
+      "test_equality",
+      "test_stream_insertion"
+    ],
+    hints: [
+      "Normalize in the constructor: push the sign to the numerator (den > 0), then divide both by std::gcd(|num|, den).",
+      "operator+ uses a common denominator (a.num*b.den + b.num*a.den) / (a.den*b.den); constructing the result normalizes it.",
+      "Because every Fraction is already normalized, operator== can just compare num and den."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 
