@@ -1,0 +1,17 @@
+{
+  "id": "deque-browser-history",
+  "title": "STL: browser history",
+  "skill_ids": ["cpp.structs_classes.public_private", "dsa.arrays.indexing", "cpp.structs_classes.invariants_intro"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["browser_history.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/deque-browser-history/work exercises/deque-browser-history/tests/tests.cpp -o exercises/deque-browser-history/work/run",
+  "test_command": "exercises/deque-browser-history/work/run",
+  "required_tests": ["test_starts_on_homepage", "test_visit_updates_current", "test_back_and_forward", "test_back_clamps_at_start", "test_forward_clamps_at_end", "test_visit_clears_forward"],
+  "hints": [
+    "Keep a vector of visited pages and a cursor index into it.",
+    "visit() should resize to cursor + 1 (dropping forward history) before push_back.",
+    "Clamp the cursor to [0, size - 1] in back() and forward()."
+  ],
+  "project_lab": "note-manager"
+}

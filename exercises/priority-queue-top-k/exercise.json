@@ -1,0 +1,17 @@
+{
+  "id": "priority-queue-top-k",
+  "title": "STL: top-k with a heap",
+  "skill_ids": ["cpp.stl.adapters", "cpp.stl.algorithms", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["top_k.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/priority-queue-top-k/work exercises/priority-queue-top-k/tests/tests.cpp -o exercises/priority-queue-top-k/work/run",
+  "test_command": "exercises/priority-queue-top-k/work/run",
+  "required_tests": ["test_top_three", "test_k_one", "test_k_ge_size_sorts_all", "test_k_zero_or_negative", "test_keeps_duplicates", "test_handles_negatives"],
+  "hints": [
+    "std::priority_queue<int> built from the range is a max-heap; top() is the largest.",
+    "Pop min(k, size) times, pushing each top() onto the result.",
+    "Handle k <= 0 up front by returning an empty vector."
+  ],
+  "project_lab": "math-technique-playground"
+}

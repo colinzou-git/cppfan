@@ -139,6 +139,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `class-bank-account` | public/private, class invariants, const methods | `note-manager` |
 | `constructors-student-record` | parameterized/default constructors, initializer lists | `quiz-generator` |
 | `operators-fraction-normalize` | class invariants, operator overloading | `math-technique-playground` |
+| `unordered-map-log-counter` | hash maps, STL algorithms, hashing | `text-statistics-analyzer` |
+| `set-deduplicate-preserve-count` | std::set, STL algorithms, traversal | `text-statistics-analyzer` |
+| `priority-queue-top-k` | container adapters (priority_queue), algorithms | `math-technique-playground` |
+| `deque-browser-history` | public/private, index arithmetic, invariants | `note-manager` |
+| `algorithm-clean-scores` | STL algorithms, std::vector, lambdas | `text-statistics-analyzer` |
 
 ## Maintaining Exercises (CI)
 

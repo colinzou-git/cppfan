@@ -775,6 +775,115 @@ export const exerciseCatalog: Exercise[] = [
       "Because every Fraction is already normalized, operator== can just compare num and den."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "unordered-map-log-counter",
+    title: "STL: event log counter",
+    skillIds: ["cpp.stl.map", "cpp.stl.algorithms", "dsa.strings.hashing"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["log_counter.hpp"],
+    requiredTests: [
+      "test_records_and_counts",
+      "test_count_absent_is_zero",
+      "test_distinct",
+      "test_most_frequent",
+      "test_most_frequent_tie_breaks_by_name",
+      "test_empty_most_frequent"
+    ],
+    hints: [
+      "operator[] on a map default-constructs a 0 count, so ++counts_[event] just works.",
+      "count() should use find() so a missing key does not insert a zero entry.",
+      "For most_frequent, track the best as you scan and break ties with event < best."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "set-deduplicate-preserve-count",
+    title: "STL: deduplicate and count",
+    skillIds: ["cpp.stl.set", "cpp.stl.algorithms", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["dedupe.hpp"],
+    requiredTests: [
+      "test_basic_dedupe",
+      "test_already_unique",
+      "test_empty",
+      "test_all_same",
+      "test_handles_negatives_sorted"
+    ],
+    hints: [
+      "std::set<int>(values.begin(), values.end()) sorts and de-duplicates in one step.",
+      "distinct is the set size; duplicates_removed is values.size() - distinct.",
+      "Copy the set into sorted_unique with assign(set.begin(), set.end())."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "priority-queue-top-k",
+    title: "STL: top-k with a heap",
+    skillIds: ["cpp.stl.adapters", "cpp.stl.algorithms", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["top_k.hpp"],
+    requiredTests: [
+      "test_top_three",
+      "test_k_one",
+      "test_k_ge_size_sorts_all",
+      "test_k_zero_or_negative",
+      "test_keeps_duplicates",
+      "test_handles_negatives"
+    ],
+    hints: [
+      "std::priority_queue<int> built from the range is a max-heap; top() is the largest.",
+      "Pop min(k, size) times, pushing each top() onto the result.",
+      "Handle k <= 0 up front by returning an empty vector."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "deque-browser-history",
+    title: "STL: browser history",
+    skillIds: ["cpp.structs_classes.public_private", "dsa.arrays.indexing", "cpp.structs_classes.invariants_intro"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["browser_history.hpp"],
+    requiredTests: [
+      "test_starts_on_homepage",
+      "test_visit_updates_current",
+      "test_back_and_forward",
+      "test_back_clamps_at_start",
+      "test_forward_clamps_at_end",
+      "test_visit_clears_forward"
+    ],
+    hints: [
+      "Keep a vector of visited pages and a cursor index into it.",
+      "visit() should resize to cursor + 1 (dropping forward history) before push_back.",
+      "Clamp the cursor to [0, size - 1] in back() and forward()."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "algorithm-clean-scores",
+    title: "STL: clean a score list",
+    skillIds: ["cpp.stl.algorithms", "cpp.stl.vector", "cpp.stl.lambdas"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["clean_scores.hpp"],
+    requiredTests: [
+      "test_sorts_and_dedupes",
+      "test_drops_out_of_range",
+      "test_inclusive_bounds",
+      "test_all_invalid",
+      "test_empty",
+      "test_already_clean"
+    ],
+    hints: [
+      "erase-remove idiom: scores.erase(std::remove_if(...), scores.end()).",
+      "The range [lo, hi] is inclusive, so drop s < lo || s > hi.",
+      "std::unique only removes ADJACENT duplicates, so sort before calling it."
+    ],
+    projectLab: "text-statistics-analyzer"
   }
 ];
 
