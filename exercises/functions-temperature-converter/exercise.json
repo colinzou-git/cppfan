@@ -1,0 +1,17 @@
+{
+  "id": "functions-temperature-converter",
+  "title": "Functions: temperature converter",
+  "skill_ids": ["cpp.functions.basics", "cpp.functions.decomposition", "cpp.values_types.conversions"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["temperature_converter.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/functions-temperature-converter/work exercises/functions-temperature-converter/tests/tests.cpp -o exercises/functions-temperature-converter/work/run",
+  "test_command": "exercises/functions-temperature-converter/work/run",
+  "required_tests": ["test_freezing_point", "test_boiling_point", "test_negative_temperatures", "test_kelvin_conversions", "test_round_trip"],
+  "hints": [
+    "Use floating-point literals (9.0 / 5.0) so you do not get integer division.",
+    "-40 is the temperature where Celsius and Fahrenheit are equal — a handy check.",
+    "Kelvin is just Celsius shifted by 273.15, so the two Kelvin functions are inverses."
+  ],
+  "project_lab": "unit-converter"
+}

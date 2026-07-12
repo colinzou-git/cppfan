@@ -1,0 +1,17 @@
+{
+  "id": "const-report-statistics",
+  "title": "Const-correctness: report statistics",
+  "skill_ids": ["cpp.references.const_correctness", "cpp.references.parameter_passing", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["report_statistics.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/const-report-statistics/work exercises/const-report-statistics/tests/tests.cpp -o exercises/const-report-statistics/work/run",
+  "test_command": "exercises/const-report-statistics/work/run",
+  "required_tests": ["test_basic_mean", "test_single_value", "test_min_max_range", "test_handles_negatives", "test_empty_input"],
+  "hints": [
+    "Take the vector by const reference so you neither copy nor modify it.",
+    "Seed min and max from values[0], then update both in a single pass.",
+    "range is simply max - min; mean is total / values.size() as a double."
+  ],
+  "project_lab": "number-guessing-stats"
+}

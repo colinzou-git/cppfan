@@ -1,0 +1,17 @@
+{
+  "id": "loops-number-summary",
+  "title": "Loops: number summary in one pass",
+  "skill_ids": ["cpp.control_flow.loops", "cpp.control_flow.loop_invariants", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["number_summary.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/loops-number-summary/work exercises/loops-number-summary/tests/tests.cpp -o exercises/loops-number-summary/work/run",
+  "test_command": "exercises/loops-number-summary/work/run",
+  "required_tests": ["test_basic_summary", "test_single_element", "test_empty_input", "test_handles_negatives", "test_counts_even_numbers", "test_min_and_max"],
+  "hints": [
+    "Handle the empty vector first and return {0, 0, 0, 0, 0}.",
+    "Seed both min and max from nums[0] before the loop, then compare each value.",
+    "Increment even_count when v % 2 == 0; this works for negative even numbers too."
+  ],
+  "project_lab": "number-guessing-stats"
+}

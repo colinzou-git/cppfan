@@ -396,5 +396,263 @@ int main() {
       { name: "Impossible count", stdin: "3 5\n", expectedStdout: "0", matcher: "trimmed" }
     ],
     skillTags: ["dsa.math.counting_principle", "dsa.math.generate_combinations", "dsa.math.bitmask_techniques"]
+  },
+  "loops-number-summary": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Summarize a list of integers in one pass.
+
+Requirements:
+1. Read n, then n integers.
+2. In a single loop, track the count, sum, minimum, maximum, and how many are even.
+3. Print exactly: count=<c> sum=<s> min=<mn> max=<mx> even=<e>
+4. For n == 0, print count=0 sum=0 min=0 max=0 even=0.
+
+Input format:
+- First line: n
+- Second line: n integers (absent when n == 0)
+
+Output format:
+- One line: count=<c> sum=<s> min=<mn> max=<mx> even=<e>
+
+Expected solution outline:
+- Seed min and max from the first value, then update every field as you read.
+
+AI evaluation rubric:
+- Single pass, correct empty-input handling, even count via v % 2 == 0.`,
+    stdin: "5\n1 2 3 4 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  long long sum = 0;
+  int count = 0, mn = 0, mx = 0, even = 0;
+  for (int i = 0; i < n; ++i) {
+    int v;
+    cin >> v;
+    // TODO: update count, sum, mn, mx, even in this single pass.
+    (void)v;
+  }
+  cout << "count=" << count << " sum=" << sum << " min=" << mn
+       << " max=" << mx << " even=" << even << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic list", stdin: "5\n1 2 3 4 5\n", expectedStdout: "count=5 sum=15 min=1 max=5 even=2\n", matcher: "exact" },
+      { name: "Handles negatives", stdin: "3\n-5 -2 3\n", expectedStdout: "count=3 sum=-4 min=-5 max=3 even=1\n", matcher: "exact" },
+      { name: "Empty input", stdin: "0\n", expectedStdout: "count=0 sum=0 min=0 max=0 even=0\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.control_flow.loops", "cpp.control_flow.loop_invariants", "dsa.arrays.traversal"]
+  },
+  "functions-temperature-converter": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Convert a Celsius temperature to Fahrenheit using a dedicated function.
+
+Requirements:
+1. Read one Celsius value (a real number).
+2. Implement celsius_to_fahrenheit(c) = c * 9 / 5 + 32 as its own function.
+3. Print exactly: F=<value> with one digit after the decimal point.
+
+Input format:
+- One line: a Celsius temperature.
+
+Output format:
+- One line: F=<fahrenheit rounded to 1 decimal>
+
+Expected solution outline:
+- Use floating-point division (9.0 / 5.0) inside a small named function.
+
+AI evaluation rubric:
+- Correct formula, function decomposition, no integer division.`,
+    stdin: "100\n",
+    starterCode: `#include <iostream>
+#include <cstdio>
+using namespace std;
+
+double celsius_to_fahrenheit(double c) {
+  // TODO: return c * 9 / 5 + 32 using floating-point division.
+  (void)c;
+  return 0.0;
+}
+
+int main() {
+  double c;
+  cin >> c;
+  printf("F=%.1f\\n", celsius_to_fahrenheit(c));
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Freezing point", stdin: "0\n", expectedStdout: "F=32.0\n", matcher: "exact" },
+      { name: "Boiling point", stdin: "100\n", expectedStdout: "F=212.0\n", matcher: "exact" },
+      { name: "Minus forty", stdin: "-40\n", expectedStdout: "F=-40.0\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.functions.basics", "cpp.functions.decomposition", "cpp.values_types.conversions"]
+  },
+  "getline-contact-parser": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Parse a single "Name, email, phone" line.
+
+Requirements:
+1. Read the whole line with getline.
+2. Split it on commas into exactly three fields and trim surrounding spaces.
+3. If there are three non-empty fields and the email contains '@', print:
+   OK <name>|<email>|<phone>
+4. Otherwise print: INVALID
+
+Input format:
+- One line, comma-separated.
+
+Output format:
+- Either "OK <name>|<email>|<phone>" or "INVALID".
+
+Expected solution outline:
+- Trim with find_first_not_of / find_last_not_of; validate field count, non-empty, and '@'.
+
+AI evaluation rubric:
+- Correct trimming, exact field-count check, '@' validation.`,
+    stdin: "Ada Lovelace,ada@math.org,555-0100\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string trim(const string& s) {
+  const string ws = " \\t\\r\\n";
+  auto b = s.find_first_not_of(ws);
+  if (b == string::npos) return "";
+  auto e = s.find_last_not_of(ws);
+  return s.substr(b, e - b + 1);
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  // TODO: split on ',', trim fields, validate, then print OK ... or INVALID.
+  cout << "INVALID\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Clean line", stdin: "Ada Lovelace,ada@math.org,555-0100\n", expectedStdout: "OK Ada Lovelace|ada@math.org|555-0100\n", matcher: "exact" },
+      { name: "Trims spaces", stdin: "  Grace , grace@x.com , 555 \n", expectedStdout: "OK Grace|grace@x.com|555\n", matcher: "exact" },
+      { name: "Rejects bad email", stdin: "Al,not-email,5\n", expectedStdout: "INVALID\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.getline_input", "cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases"]
+  },
+  "references-swap-clamp": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Swap two values, then clamp each into a range, using reference parameters.
+
+Requirements:
+1. Read four integers: a, b, lo, hi.
+2. swap_ints(a, b) exchanges them through references.
+3. clamp_in_place(x, lo, hi) pins x into [lo, hi] through its reference.
+4. Print exactly: a=<a> b=<b> after swapping then clamping both.
+
+Input format:
+- One line: a b lo hi
+
+Output format:
+- One line: a=<a> b=<b>
+
+Expected solution outline:
+- Swap first, then clamp each value into [lo, hi].
+
+AI evaluation rubric:
+- Reference-based swap, correct clamp order, no copies returned.`,
+    stdin: "99 -20 -5 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+void swap_ints(int& a, int& b) {
+  // TODO: exchange a and b through their references.
+  (void)a; (void)b;
+}
+
+void clamp_in_place(int& x, int lo, int hi) {
+  // TODO: pin x into [lo, hi].
+  (void)x; (void)lo; (void)hi;
+}
+
+int main() {
+  int a, b, lo, hi;
+  cin >> a >> b >> lo >> hi;
+  swap_ints(a, b);
+  clamp_in_place(a, lo, hi);
+  clamp_in_place(b, lo, hi);
+  cout << "a=" << a << " b=" << b << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Swap only", stdin: "3 8 0 10\n", expectedStdout: "a=8 b=3\n", matcher: "exact" },
+      { name: "Swap then clamp both", stdin: "99 -20 -5 5\n", expectedStdout: "a=-5 b=5\n", matcher: "exact" },
+      { name: "Clamp high side", stdin: "3 8 0 5\n", expectedStdout: "a=5 b=3\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.references", "cpp.references.parameter_passing", "cpp.references.const_correctness"]
+  },
+  "const-report-statistics": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Report statistics over a read-only vector of numbers.
+
+Requirements:
+1. Read n, then n real numbers into a vector.
+2. Compute mean, min, max, and range (= max - min) without modifying the vector.
+3. Print exactly: mean=<m> min=<mn> max=<mx> range=<r>, each with one decimal.
+
+Input format:
+- First line: n
+- Second line: n real numbers
+
+Output format:
+- One line: mean=<m> min=<mn> max=<mx> range=<r>
+
+Expected solution outline:
+- Pass the vector by const reference to a helper; single pass for total/min/max.
+
+AI evaluation rubric:
+- const-correct read-only access, correct range, single pass.`,
+    stdin: "4\n3 9 1 7\n",
+    starterCode: `#include <iostream>
+#include <cstdio>
+#include <vector>
+using namespace std;
+
+struct Stats { double mean, mn, mx, range; };
+
+Stats compute_stats(const vector<double>& values) {
+  // TODO: single pass over the const reference; do not modify values.
+  (void)values;
+  return Stats{0.0, 0.0, 0.0, 0.0};
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<double> v(n);
+  for (int i = 0; i < n; ++i) cin >> v[i];
+  Stats s = compute_stats(v);
+  printf("mean=%.1f min=%.1f max=%.1f range=%.1f\\n", s.mean, s.mn, s.mx, s.range);
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Even spread", stdin: "3\n2 4 6\n", expectedStdout: "mean=4.0 min=2.0 max=6.0 range=4.0\n", matcher: "exact" },
+      { name: "Mixed order", stdin: "4\n3 9 1 7\n", expectedStdout: "mean=5.0 min=1.0 max=9.0 range=8.0\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.const_correctness", "cpp.references.parameter_passing", "dsa.arrays.traversal"]
   }
 };

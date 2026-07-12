@@ -223,6 +223,114 @@ export const exerciseCatalog: Exercise[] = [
       "For subset_from_mask, include values[i] when bit i of mask is 1."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "loops-number-summary",
+    title: "Loops: number summary in one pass",
+    skillIds: ["cpp.control_flow.loops", "cpp.control_flow.loop_invariants", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["number_summary.hpp"],
+    requiredTests: [
+      "test_basic_summary",
+      "test_single_element",
+      "test_empty_input",
+      "test_handles_negatives",
+      "test_counts_even_numbers",
+      "test_min_and_max"
+    ],
+    hints: [
+      "Handle the empty vector first and return {0, 0, 0, 0, 0}.",
+      "Seed both min and max from nums[0] before the loop, then compare each value.",
+      "Increment even_count when v % 2 == 0; this works for negative even numbers too."
+    ],
+    projectLab: "number-guessing-stats"
+  },
+  {
+    id: "functions-temperature-converter",
+    title: "Functions: temperature converter",
+    skillIds: ["cpp.functions.basics", "cpp.functions.decomposition", "cpp.values_types.conversions"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["temperature_converter.hpp"],
+    requiredTests: [
+      "test_freezing_point",
+      "test_boiling_point",
+      "test_negative_temperatures",
+      "test_kelvin_conversions",
+      "test_round_trip"
+    ],
+    hints: [
+      "Use floating-point literals (9.0 / 5.0) so you do not get integer division.",
+      "-40 is the temperature where Celsius and Fahrenheit are equal — a handy check.",
+      "Kelvin is just Celsius shifted by 273.15, so the two Kelvin functions are inverses."
+    ],
+    projectLab: "unit-converter"
+  },
+  {
+    id: "getline-contact-parser",
+    title: "Parsing: contact line parser",
+    skillIds: ["cpp.utilities.getline_input", "cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["contact_parser.hpp"],
+    requiredTests: [
+      "test_parses_clean_line",
+      "test_trims_surrounding_spaces",
+      "test_rejects_wrong_field_count",
+      "test_rejects_email_without_at",
+      "test_rejects_empty_field"
+    ],
+    hints: [
+      "Scan the line character by character, splitting into a new field on each comma.",
+      "Trim with find_first_not_of / find_last_not_of over \" \\t\\r\\n\".",
+      "Only mark valid when there are exactly three non-empty fields and the email contains '@'."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "references-swap-clamp",
+    title: "References: swap and clamp",
+    skillIds: ["cpp.references.references", "cpp.references.parameter_passing", "cpp.references.const_correctness"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["swap_clamp.hpp"],
+    requiredTests: [
+      "test_swap_exchanges_values",
+      "test_swap_equal_values",
+      "test_clamp_below_range",
+      "test_clamp_above_range",
+      "test_clamp_within_range",
+      "test_clamp_in_place_modifies",
+      "test_max_of_reads_without_mutating"
+    ],
+    hints: [
+      "swap_ints needs a temporary so you do not overwrite one value before reading it.",
+      "clamp_value takes plain ints and returns a result; it must not change the caller.",
+      "max_of takes const int& — you may read the arguments but not assign to them."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "const-report-statistics",
+    title: "Const-correctness: report statistics",
+    skillIds: ["cpp.references.const_correctness", "cpp.references.parameter_passing", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["report_statistics.hpp"],
+    requiredTests: [
+      "test_basic_mean",
+      "test_single_value",
+      "test_min_max_range",
+      "test_handles_negatives",
+      "test_empty_input"
+    ],
+    hints: [
+      "Take the vector by const reference so you neither copy nor modify it.",
+      "Seed min and max from values[0], then update both in a single pass.",
+      "range is simply max - min; mean is total / values.size() as a double."
+    ],
+    projectLab: "number-guessing-stats"
   }
 ];
 
