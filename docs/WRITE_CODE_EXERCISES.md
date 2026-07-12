@@ -129,6 +129,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `concurrency-task-queue` | threads, mutexes, condition variables, shared-state design | `task-queue-lab` |
 | `graph-maze-shortest-path` | graph BFS, connected components, shortest paths | `maze-route-planner` |
 | `math-combination-generator` | counting principle, combination generation, bitmask subsets | `math-technique-playground` |
+| `loops-number-summary` | loops, loop invariants, array traversal | `number-guessing-stats` |
+| `functions-temperature-converter` | functions, decomposition, numeric conversions | `unit-converter` |
+| `getline-contact-parser` | getline input, stream validation, string parsing | `csv-table-summarizer` |
+| `references-swap-clamp` | references, parameter passing, const-correctness | `math-technique-playground` |
+| `const-report-statistics` | const-correctness, parameter passing, array traversal | `number-guessing-stats` |
 
 ## Maintaining Exercises (CI)
 

@@ -1,0 +1,17 @@
+{
+  "id": "references-swap-clamp",
+  "title": "References: swap and clamp",
+  "skill_ids": ["cpp.references.references", "cpp.references.parameter_passing", "cpp.references.const_correctness"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["swap_clamp.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/references-swap-clamp/work exercises/references-swap-clamp/tests/tests.cpp -o exercises/references-swap-clamp/work/run",
+  "test_command": "exercises/references-swap-clamp/work/run",
+  "required_tests": ["test_swap_exchanges_values", "test_swap_equal_values", "test_clamp_below_range", "test_clamp_above_range", "test_clamp_within_range", "test_clamp_in_place_modifies", "test_max_of_reads_without_mutating"],
+  "hints": [
+    "swap_ints needs a temporary so you do not overwrite one value before reading it.",
+    "clamp_value takes plain ints and returns a result; it must not change the caller.",
+    "max_of takes const int& — you may read the arguments but not assign to them."
+  ],
+  "project_lab": "math-technique-playground"
+}

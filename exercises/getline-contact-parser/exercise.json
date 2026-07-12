@@ -1,0 +1,17 @@
+{
+  "id": "getline-contact-parser",
+  "title": "Parsing: contact line parser",
+  "skill_ids": ["cpp.utilities.getline_input", "cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["contact_parser.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/getline-contact-parser/work exercises/getline-contact-parser/tests/tests.cpp -o exercises/getline-contact-parser/work/run",
+  "test_command": "exercises/getline-contact-parser/work/run",
+  "required_tests": ["test_parses_clean_line", "test_trims_surrounding_spaces", "test_rejects_wrong_field_count", "test_rejects_email_without_at", "test_rejects_empty_field"],
+  "hints": [
+    "Scan the line character by character, splitting into a new field on each comma.",
+    "Trim with find_first_not_of / find_last_not_of over \" \\t\\r\\n\".",
+    "Only mark valid when there are exactly three non-empty fields and the email contains '@'."
+  ],
+  "project_lab": "csv-table-summarizer"
+}
