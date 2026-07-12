@@ -1,0 +1,17 @@
+{
+  "id": "algorithm-clean-scores",
+  "title": "STL: clean a score list",
+  "skill_ids": ["cpp.stl.algorithms", "cpp.stl.vector", "cpp.stl.lambdas"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["clean_scores.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/algorithm-clean-scores/work exercises/algorithm-clean-scores/tests/tests.cpp -o exercises/algorithm-clean-scores/work/run",
+  "test_command": "exercises/algorithm-clean-scores/work/run",
+  "required_tests": ["test_sorts_and_dedupes", "test_drops_out_of_range", "test_inclusive_bounds", "test_all_invalid", "test_empty", "test_already_clean"],
+  "hints": [
+    "erase-remove idiom: scores.erase(std::remove_if(...), scores.end()).",
+    "The range [lo, hi] is inclusive, so drop s < lo || s > hi.",
+    "std::unique only removes ADJACENT duplicates, so sort before calling it."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

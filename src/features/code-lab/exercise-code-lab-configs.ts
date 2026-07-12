@@ -1681,5 +1681,264 @@ int main() {
       { name: "Negative and zero", stdin: "1 -2 0 5\n", expectedStdout: "-1/2\n", matcher: "exact" }
     ],
     skillTags: ["cpp.structs_classes.invariants_intro", "cpp.structs_classes.syntax", "cpp.functions.basics"]
+  },
+  "unordered-map-log-counter": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Tally event names and report the most frequent one.
+
+Requirements:
+1. Read n, then n event names (one token each).
+2. Count them in a hash map.
+3. Print: most=<event> distinct=<d> where <event> is the most frequent name
+   (ties broken by the lexicographically smallest name) and <d> is the number of
+   distinct names.
+
+Input format:
+- First line: n
+- Next n lines: an event name
+
+Output format:
+- One line: most=<event> distinct=<d>
+
+Expected solution outline:
+- ++counts[name]; scan the map tracking the best (count, then smallest name).
+
+AI evaluation rubric:
+- Correct tie-breaking and distinct count.`,
+    stdin: "5\nview\nview\nview\nclick\nclick\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  unordered_map<string, int> counts;
+  for (int i = 0; i < n; ++i) {
+    string name;
+    cin >> name;
+    // TODO: tally name.
+  }
+  // TODO: find the most frequent (ties -> smallest name) and print the summary.
+  cout << "most= distinct=" << counts.size() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Most frequent", stdin: "5\nview\nview\nview\nclick\nclick\n", expectedStdout: "most=view distinct=2\n", matcher: "exact" },
+      { name: "Tie by name", stdin: "2\nbeta\nalpha\n", expectedStdout: "most=alpha distinct=2\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.stl.map", "cpp.stl.algorithms", "dsa.strings.hashing"]
+  },
+  "set-deduplicate-preserve-count": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Deduplicate a list and report how many duplicates were removed.
+
+Requirements:
+1. Read n, then n integers.
+2. Print: distinct=<d> removed=<r> followed by the distinct values in ascending
+   order, all space-separated.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- distinct=<d> removed=<r> v1 v2 ... (ascending unique values)
+
+Expected solution outline:
+- Insert into a std::set for sorted, unique keys; removed = n - set.size().
+
+AI evaluation rubric:
+- Correct distinct/removed counts and ascending unique output.`,
+    stdin: "5\n3 1 2 3 1\n",
+    starterCode: `#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  set<int> unique;
+  for (int i = 0; i < n; ++i) {
+    int x;
+    cin >> x;
+    // TODO: insert x.
+  }
+  // TODO: print distinct/removed and the ascending unique values.
+  cout << "distinct=" << unique.size() << " removed=" << (n - (int)unique.size());
+  for (int v : unique) cout << " " << v;
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Removes duplicates", stdin: "5\n3 1 2 3 1\n", expectedStdout: "distinct=3 removed=2 1 2 3\n", matcher: "exact" },
+      { name: "Already unique", stdin: "3\n5 4 6\n", expectedStdout: "distinct=3 removed=0 4 5 6\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.stl.set", "cpp.stl.algorithms", "dsa.arrays.traversal"]
+  },
+  "priority-queue-top-k": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print the k largest values in descending order using a max-heap.
+
+Requirements:
+1. Read n, then n integers, then k.
+2. Print the k largest values in descending order, space-separated (duplicates
+   kept). If k >= n, print all values sorted descending. If k <= 0, print an
+   empty line.
+
+Input format:
+- First line: n
+- Second line: n integers
+- Third line: k
+
+Output format:
+- The top-k values, descending, space-separated.
+
+Expected solution outline:
+- Build a std::priority_queue (max-heap); pop min(k, n) times.
+
+AI evaluation rubric:
+- Correct descending order, duplicates kept, k bounds handled.`,
+    stdin: "6\n4 1 7 3 9 2\n3\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> v(n);
+  for (auto& x : v) cin >> x;
+  int k;
+  cin >> k;
+  // TODO: max-heap, then pop min(k, n) values in descending order.
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Top three", stdin: "6\n4 1 7 3 9 2\n3\n", expectedStdout: "9 7 4\n", matcher: "exact" },
+      { name: "k >= n", stdin: "3\n2 5 1\n10\n", expectedStdout: "5 2 1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.stl.adapters", "cpp.stl.algorithms", "dsa.arrays.traversal"]
+  },
+  "deque-browser-history": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Simulate browser back/forward navigation.
+
+Requirements:
+1. Read a homepage line, then m, then m operations:
+   - "V <url>": visit url (clears forward history).
+   - "B <steps>": go back up to steps pages (clamp at first), print the page.
+   - "F <steps>": go forward up to steps pages (clamp at last), print the page.
+2. Print one line per B/F operation with the resulting current page.
+
+Input format:
+- First line: homepage
+- Second line: m
+- Next m lines: an operation
+
+Output format:
+- One page name per B/F operation.
+
+Expected solution outline:
+- Vector of pages + a cursor; V resizes to cursor+1 before appending.
+
+AI evaluation rubric:
+- Forward history cleared on visit; back/forward clamp at the ends.`,
+    stdin: "home\n5\nV a\nV b\nB 1\nF 1\nB 5\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  string home;
+  getline(cin, home);
+  int m;
+  cin >> m;
+  vector<string> history{home};
+  size_t cursor = 0;
+  for (int i = 0; i < m; ++i) {
+    string op;
+    cin >> op;
+    if (op == "V") {
+      string url; cin >> url;
+      // TODO: drop forward history, append url, move cursor.
+    } else if (op == "B") {
+      int s; cin >> s;
+      // TODO: move back up to s (clamp at 0) and print history[cursor].
+    } else {
+      int s; cin >> s;
+      // TODO: move forward up to s (clamp at last) and print history[cursor].
+    }
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Back and forward", stdin: "home\n5\nV a\nV b\nB 1\nF 1\nB 5\n", expectedStdout: "a\nb\nhome\n", matcher: "exact" },
+      { name: "Visit clears forward", stdin: "start\n3\nV x\nB 1\nF 9\n", expectedStdout: "start\nx\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.public_private", "dsa.arrays.indexing", "cpp.structs_classes.invariants_intro"]
+  },
+  "algorithm-clean-scores": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Clean a list of scores with STL algorithms.
+
+Requirements:
+1. Read lo, hi, n, then n integers.
+2. Drop scores outside the inclusive range [lo, hi], sort ascending, and remove
+   duplicates.
+3. Print the cleaned values, space-separated (empty line if none remain).
+
+Input format:
+- First line: lo hi n
+- Second line: n integers
+
+Output format:
+- The cleaned values, ascending, space-separated.
+
+Expected solution outline:
+- erase-remove_if for range, std::sort, then unique-erase.
+
+AI evaluation rubric:
+- Inclusive bounds, sorted, de-duplicated.`,
+    stdin: "0 100 5\n-5 40 150 40 90\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main() {
+  int lo, hi, n;
+  cin >> lo >> hi >> n;
+  vector<int> v(n);
+  for (auto& x : v) cin >> x;
+  // TODO: drop out-of-range, sort, remove duplicates.
+  for (size_t i = 0; i < v.size(); ++i) cout << v[i] << (i + 1 < v.size() ? " " : "");
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Drops and dedupes", stdin: "0 100 5\n-5 40 150 40 90\n", expectedStdout: "40 90\n", matcher: "exact" },
+      { name: "Inclusive bounds", stdin: "0 100 4\n0 100 101 -1\n", expectedStdout: "0 100\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.stl.algorithms", "cpp.stl.vector", "cpp.stl.lambdas"]
   }
 };

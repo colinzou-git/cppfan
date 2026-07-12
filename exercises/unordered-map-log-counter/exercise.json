@@ -1,0 +1,17 @@
+{
+  "id": "unordered-map-log-counter",
+  "title": "STL: event log counter",
+  "skill_ids": ["cpp.stl.map", "cpp.stl.algorithms", "dsa.strings.hashing"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["log_counter.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/unordered-map-log-counter/work exercises/unordered-map-log-counter/tests/tests.cpp -o exercises/unordered-map-log-counter/work/run",
+  "test_command": "exercises/unordered-map-log-counter/work/run",
+  "required_tests": ["test_records_and_counts", "test_count_absent_is_zero", "test_distinct", "test_most_frequent", "test_most_frequent_tie_breaks_by_name", "test_empty_most_frequent"],
+  "hints": [
+    "operator[] on a map default-constructs a 0 count, so ++counts_[event] just works.",
+    "count() should use find() so a missing key does not insert a zero entry.",
+    "For most_frequent, track the best as you scan and break ties with event < best."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}
