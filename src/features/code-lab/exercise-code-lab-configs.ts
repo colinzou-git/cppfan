@@ -1395,5 +1395,291 @@ int main() {
       { name: "Mixed order", stdin: "4\n3 9 1 7\n", expectedStdout: "mean=5.0 min=1.0 max=9.0 range=8.0\n", matcher: "exact" }
     ],
     skillTags: ["cpp.references.const_correctness", "cpp.references.parameter_passing", "dsa.arrays.traversal"]
+  },
+  "pointers-safe-find": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Find the first matching element and report its index via a pointer.
+
+Requirements:
+1. Read n, then n integers, then a target.
+2. Use a helper that returns a pointer to the first element equal to target,
+   or nullptr when none matches.
+3. Print the 0-based index of that element, or -1 if there is no match.
+
+Input format:
+- First line: n
+- Second line: n integers
+- Third line: target
+
+Output format:
+- One integer: the index, or -1.
+
+Expected solution outline:
+- Return &element from the search; the index is pointer - &vec[0].
+
+AI evaluation rubric:
+- Pointer returned into the vector (not a copy), nullptr when absent.`,
+    stdin: "5\n4 8 15 16 23\n15\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+const int* find_first(const vector<int>& values, int target) {
+  // TODO: return the address of the first matching element, or nullptr.
+  (void)values; (void)target;
+  return nullptr;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> v(n);
+  for (int i = 0; i < n; ++i) cin >> v[i];
+  int target;
+  cin >> target;
+  const int* p = find_first(v, target);
+  cout << (p ? static_cast<int>(p - &v[0]) : -1) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Finds match", stdin: "5\n4 8 15 16 23\n15\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "No match", stdin: "3\n1 2 3\n99\n", expectedStdout: "-1\n", matcher: "exact" },
+      { name: "First of duplicates", stdin: "4\n5 7 5 7\n7\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.references.pointers", "cpp.references.non_owning", "cpp.references.dangling"]
+  },
+  "structs-point-distance": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute the distance between two points using a const method.
+
+Requirements:
+1. Read four numbers: x1 y1 x2 y2.
+2. Define a Point struct with a const distance_to method.
+3. Print the Euclidean distance with four digits after the decimal point.
+
+Input format:
+- One line: x1 y1 x2 y2
+
+Output format:
+- One line: the distance formatted as %.4f
+
+Expected solution outline:
+- distance_to returns sqrt(dx*dx + dy*dy).
+
+AI evaluation rubric:
+- const method, correct Euclidean formula.`,
+    stdin: "0 0 3 4\n",
+    starterCode: `#include <iostream>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+struct Point {
+  double x, y;
+  double distance_to(const Point& o) const {
+    // TODO: sqrt((x - o.x)^2 + (y - o.y)^2)
+    (void)o;
+    return 0.0;
+  }
+};
+
+int main() {
+  Point a, b;
+  cin >> a.x >> a.y >> b.x >> b.y;
+  printf("%.4f\\n", a.distance_to(b));
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "3-4-5 triangle", stdin: "0 0 3 4\n", expectedStdout: "5.0000\n", matcher: "exact" },
+      { name: "Same point", stdin: "1 1 1 1\n", expectedStdout: "0.0000\n", matcher: "exact" },
+      { name: "Horizontal", stdin: "0 0 3 0\n", expectedStdout: "3.0000\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.syntax", "cpp.structs_classes.const_methods_intro", "dsa.arrays.traversal"]
+  },
+  "class-bank-account": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Apply a sequence of operations to a bank account that guards its balance.
+
+Requirements:
+1. Read an opening balance (a negative opening clamps to 0).
+2. Read m, then m operations, each "D amount" (deposit) or "W amount" (withdraw).
+3. Reject any deposit with amount <= 0 and any withdrawal that is <= 0 or exceeds
+   the balance; a rejected operation leaves the balance unchanged.
+4. Print the final balance.
+
+Input format:
+- First line: opening balance
+- Second line: m
+- Next m lines: "D <amount>" or "W <amount>"
+
+Output format:
+- One integer: the final balance.
+
+Expected solution outline:
+- Keep the balance private; validate each operation before applying it.
+
+AI evaluation rubric:
+- Invariant preserved (never negative), rejected ops are no-ops.`,
+    stdin: "100\n3\nD 50\nW 30\nW 999\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+class BankAccount {
+public:
+  explicit BankAccount(long long opening) { balance_ = opening < 0 ? 0 : opening; }
+  long long balance() const { return balance_; }
+  bool deposit(long long a) {
+    // TODO: accept only a > 0.
+    (void)a; return false;
+  }
+  bool withdraw(long long a) {
+    // TODO: accept only 0 < a <= balance_.
+    (void)a; return false;
+  }
+private:
+  long long balance_ = 0;
+};
+
+int main() {
+  long long opening;
+  cin >> opening;
+  BankAccount acct(opening);
+  int m;
+  cin >> m;
+  for (int i = 0; i < m; ++i) {
+    char op; long long a;
+    cin >> op >> a;
+    if (op == 'D') acct.deposit(a); else acct.withdraw(a);
+  }
+  cout << acct.balance() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Deposit then withdraw, one rejected", stdin: "100\n3\nD 50\nW 30\nW 999\n", expectedStdout: "120\n", matcher: "exact" },
+      { name: "Simple flow", stdin: "0\n2\nD 100\nW 40\n", expectedStdout: "60\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.public_private", "cpp.structs_classes.invariants_intro", "cpp.structs_classes.const_methods_intro"]
+  },
+  "constructors-student-record": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Construct a student record with validation and report it.
+
+Requirements:
+1. Read a name (single token), an id, and a gpa.
+2. Build a Student via a parameterized constructor: a negative id becomes 0,
+   and the gpa is clamped into [0.0, 4.0].
+3. Print: <name> <id> <gpa with 1 decimal> <yes|no> where the last field is the
+   honor-roll flag (gpa >= 3.5).
+
+Input format:
+- One line: name id gpa
+
+Output format:
+- One line: name id gpa honor
+
+Expected solution outline:
+- Use a member initializer list and clamp inside it.
+
+AI evaluation rubric:
+- Initializer-list construction, correct clamping and honor threshold.`,
+    stdin: "Ada 42 3.9\n",
+    starterCode: `#include <iostream>
+#include <cstdio>
+#include <string>
+using namespace std;
+
+class Student {
+public:
+  Student(string name, int id, double gpa) {
+    // TODO: initializer list; clamp id (>= 0) and gpa into [0, 4].
+    (void)name; (void)id; (void)gpa;
+  }
+  const string& name() const { static string s; return s; } // TODO
+  int id() const { return 0; }        // TODO
+  double gpa() const { return 0.0; }  // TODO
+  bool is_honor_roll() const { return false; } // TODO: gpa >= 3.5
+};
+
+int main() {
+  string name; int id; double gpa;
+  cin >> name >> id >> gpa;
+  Student s(name, id, gpa);
+  printf("%s %d %.1f %s\\n", s.name().c_str(), s.id(), s.gpa(),
+         s.is_honor_roll() ? "yes" : "no");
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Honor student", stdin: "Ada 42 3.9\n", expectedStdout: "Ada 42 3.9 yes\n", matcher: "exact" },
+      { name: "Clamps id and gpa", stdin: "Bo -7 4.5\n", expectedStdout: "Bo 0 4.0 yes\n", matcher: "exact" },
+      { name: "Below honor roll", stdin: "Gu 5 3.4\n", expectedStdout: "Gu 5 3.4 no\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.constructors.parameterized_constructor", "cpp.constructors.member_initializer_list", "cpp.constructors.default_constructor"]
+  },
+  "operators-fraction-normalize": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Add two fractions and print the normalized sum.
+
+Requirements:
+1. Read four integers: n1 d1 n2 d2 (denominators are non-zero).
+2. Build a Fraction type whose constructor stores lowest terms with den > 0.
+3. Overload operator+ and print the sum as "num/den".
+
+Input format:
+- One line: n1 d1 n2 d2
+
+Output format:
+- One line: num/den (normalized)
+
+Expected solution outline:
+- Normalize in the constructor (sign to numerator, divide by gcd).
+
+AI evaluation rubric:
+- Correct common-denominator addition and normalization.`,
+    stdin: "1 2 1 3\n",
+    starterCode: `#include <iostream>
+#include <numeric>
+using namespace std;
+
+struct Fraction {
+  long long num, den;
+  Fraction(long long n = 0, long long d = 1) : num(n), den(d) {
+    // TODO: sign to numerator (den > 0), then divide by gcd(|num|, den).
+  }
+};
+
+Fraction operator+(const Fraction& a, const Fraction& b) {
+  // TODO: common denominator, then construct (normalizes).
+  (void)a; (void)b;
+  return Fraction();
+}
+
+int main() {
+  long long n1, d1, n2, d2;
+  cin >> n1 >> d1 >> n2 >> d2;
+  Fraction s = Fraction(n1, d1) + Fraction(n2, d2);
+  cout << s.num << "/" << s.den << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "1/2 + 1/3", stdin: "1 2 1 3\n", expectedStdout: "5/6\n", matcher: "exact" },
+      { name: "Sum reduces", stdin: "1 6 1 6\n", expectedStdout: "1/3\n", matcher: "exact" },
+      { name: "Negative and zero", stdin: "1 -2 0 5\n", expectedStdout: "-1/2\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.structs_classes.invariants_intro", "cpp.structs_classes.syntax", "cpp.functions.basics"]
   }
 };

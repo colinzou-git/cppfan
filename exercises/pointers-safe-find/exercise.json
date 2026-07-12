@@ -1,0 +1,17 @@
+{
+  "id": "pointers-safe-find",
+  "title": "Pointers: safe find into a vector",
+  "skill_ids": ["cpp.references.pointers", "cpp.references.non_owning", "cpp.references.dangling"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["safe_find.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/pointers-safe-find/work exercises/pointers-safe-find/tests/tests.cpp -o exercises/pointers-safe-find/work/run",
+  "test_command": "exercises/pointers-safe-find/work/run",
+  "required_tests": ["test_finds_first_match", "test_returns_nullptr_when_missing", "test_empty_vector", "test_finds_first_of_duplicates", "test_mutable_pointer_edits_in_place", "test_contains"],
+  "hints": [
+    "Take the address of the loop variable with &v when it matches.",
+    "Bind the loop variable by reference (const int& / int&) so &v points into the vector, not a copy.",
+    "Return nullptr when the loop finishes without a match."
+  ],
+  "project_lab": "note-manager"
+}
