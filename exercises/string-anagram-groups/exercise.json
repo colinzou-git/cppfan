@@ -1,0 +1,17 @@
+{
+  "id": "string-anagram-groups",
+  "title": "Strings: group anagrams",
+  "skill_ids": ["dsa.strings.hashing", "dsa.strings.char_frequency", "cpp.stl.map"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["anagram_groups.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/string-anagram-groups/work exercises/string-anagram-groups/tests/tests.cpp -o exercises/string-anagram-groups/work/run",
+  "test_command": "exercises/string-anagram-groups/work/run",
+  "required_tests": ["test_basic_grouping", "test_single_word", "test_all_distinct", "test_empty_input", "test_keeps_duplicates", "test_case_sensitive"],
+  "hints": [
+    "Use the sorted letters of a word as its anagram signature (map key).",
+    "Bucket every word under its signature in a std::map<string, vector<string>>.",
+    "Sort each bucket, then sort the buckets by their first word for determinism."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

@@ -144,6 +144,10 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `priority-queue-top-k` | container adapters (priority_queue), algorithms | `math-technique-playground` |
 | `deque-browser-history` | public/private, index arithmetic, invariants | `note-manager` |
 | `algorithm-clean-scores` | STL algorithms, std::vector, lambdas | `text-statistics-analyzer` |
+| `string-anagram-groups` | anagram signatures, char frequency, std::map | `text-statistics-analyzer` |
+| `csv-row-parser` | string parsing, quoted-field edge cases | `csv-table-summarizer` |
+| `kmp-prefix-table` | KMP prefix function, string searching | `dictionary-autocomplete` |
+| `rolling-hash-substring-equality` | polynomial hashing, substring equality | `dictionary-autocomplete` |
 
 ## Maintaining Exercises (CI)
 

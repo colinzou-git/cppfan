@@ -1,0 +1,17 @@
+{
+  "id": "csv-row-parser",
+  "title": "Parsing: CSV row with quotes",
+  "skill_ids": ["dsa.strings.parsing", "dsa.strings.parsing_edge_cases", "cpp.utilities.stream_validation"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": ["csv_parser.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/csv-row-parser/work exercises/csv-row-parser/tests/tests.cpp -o exercises/csv-row-parser/work/run",
+  "test_command": "exercises/csv-row-parser/work/run",
+  "required_tests": ["test_plain_fields", "test_quoted_comma", "test_escaped_quotes", "test_empty_fields", "test_trailing_empty_field", "test_quote_not_at_field_start_is_literal"],
+  "hints": [
+    "Track an in_quotes flag; a comma only splits when you are not inside quotes.",
+    "Inside quotes, a doubled quote \"\" means one literal quote; a lone quote ends the field.",
+    "Push the final field after the loop so a trailing comma yields an empty last field."
+  ],
+  "project_lab": "csv-table-summarizer"
+}
