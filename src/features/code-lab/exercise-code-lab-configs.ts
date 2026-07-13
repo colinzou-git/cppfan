@@ -3614,5 +3614,249 @@ int main() {
       { name: "All even", stdin: "3\n2 4 6\n", expectedStdout: "4 16 36\n", matcher: "exact" }
     ],
     skillTags: ["cpp.templates.ranges", "cpp.templates.ranges_depth", "cpp.stl.lambdas"]
+  },
+  "geometry-convex-hull": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute the convex hull of a point set.
+
+Requirements:
+1. Read n, then n integer points "x y".
+2. Compute the convex hull (only true corners). Print each hull vertex "x y" on
+   its own line, sorted by (x, y) for a deterministic order.
+
+Input format:
+- First line: n
+- Next n lines: x y
+
+Output format:
+- Hull vertices "x y", one per line, sorted.
+
+Expected solution outline:
+- Andrew's monotone chain with a cross-product turn test.
+
+AI evaluation rubric:
+- Interior/collinear points dropped; correct hull.`,
+    stdin: "5\n0 0\n2 0\n2 2\n0 2\n1 1\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+struct P { long long x, y; };
+long long cross(const P& o, const P& a, const P& b) {
+  return (a.x-o.x)*(b.y-o.y) - (a.y-o.y)*(b.x-o.x);
+}
+
+vector<P> convex_hull(vector<P> p) {
+  // TODO: sort, build lower + upper chains, return hull vertices.
+  return {};
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<P> p(n);
+  for (auto& q : p) cin >> q.x >> q.y;
+  auto h = convex_hull(p);
+  sort(h.begin(), h.end(), [](const P& a, const P& b){ return a.x != b.x ? a.x < b.x : a.y < b.y; });
+  for (auto& q : h) cout << q.x << " " << q.y << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Square + interior", stdin: "5\n0 0\n2 0\n2 2\n0 2\n1 1\n", expectedStdout: "0 0\n0 2\n2 0\n2 2\n", matcher: "exact" },
+      { name: "Triangle", stdin: "3\n0 0\n4 0\n2 3\n", expectedStdout: "0 0\n2 3\n4 0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.convex_hull", "dsa.math.geometry", "dsa.math.vectors_dot_cross"]
+  },
+  "debug-fix-off-by-one": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Fix the off-by-one so the inclusive range sum is correct.
+
+Requirements:
+1. Read lo and hi.
+2. Print the sum of all integers from lo to hi INCLUSIVE.
+3. The starter loop stops one short — fix the boundary.
+
+Input format:
+- One line: lo hi
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Loop i from lo while i <= hi.
+
+AI evaluation rubric:
+- Includes hi; handles lo == hi.`,
+    stdin: "1 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+long long range_sum(int lo, int hi) {
+  long long total = 0;
+  for (int i = lo; i < hi; ++i) {  // BUG: excludes hi
+    total += i;
+  }
+  return total;
+}
+
+int main() {
+  int lo, hi;
+  cin >> lo >> hi;
+  cout << range_sum(lo, hi) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "1..5", stdin: "1 5\n", expectedStdout: "15\n", matcher: "exact" },
+      { name: "Single value", stdin: "3 3\n", expectedStdout: "3\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.tooling.debugging_method", "cpp.control_flow.loop_invariants", "cpp.control_flow.loops"]
+  },
+  "input-validation-menu-loop": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Return the first valid menu choice from a list of inputs.
+
+Requirements:
+1. Read n, then n whitespace-separated tokens.
+2. Print the first token that is an integer in [1, 4] (whole token, no extras),
+   or -1 if none qualifies.
+
+Input format:
+- First line: n
+- Following: n tokens
+
+Output format:
+- One integer (the choice, or -1).
+
+Expected solution outline:
+- Validate each token with from_chars; accept only values in [1,4].
+
+AI evaluation rubric:
+- Skips invalid input; correct first-valid selection.`,
+    stdin: "3\n7 abc 3\n",
+    starterCode: `#include <iostream>
+#include <charconv>
+#include <string>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  int answer = -1;
+  for (int i = 0; i < n; ++i) {
+    string t;
+    cin >> t;
+    // TODO: if answer not yet found and t is a whole-string int in [1,4], take it.
+  }
+  cout << answer << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Skips junk", stdin: "3\n7 abc 3\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "None valid", stdin: "2\n0 5\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.stream_validation", "cpp.control_flow.loops", "dsa.strings.parsing_edge_cases"]
+  },
+  "chrono-rate-limiter-sim": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Simulate a sliding-window rate limiter.
+
+Requirements:
+1. Read max_requests, window, n, then n non-decreasing timestamps (ms).
+2. A request is allowed when fewer than max_requests have been allowed within the
+   last window ms (a timestamp t' counts when t' > t - window). Print 1 (allowed)
+   or 0 (throttled) per request, space-separated.
+
+Input format:
+- First line: max_requests window n
+- Second line: n timestamps
+
+Output format:
+- n values of 1/0, space-separated.
+
+Expected solution outline:
+- Deque of allowed timestamps; evict front <= t - window.
+
+AI evaluation rubric:
+- Correct window eviction and allow/deny decisions.`,
+    stdin: "3 1000 5\n0 100 200 300 1000\n",
+    starterCode: `#include <iostream>
+#include <deque>
+#include <vector>
+using namespace std;
+
+int main() {
+  int mx;
+  long long w;
+  int n;
+  cin >> mx >> w >> n;
+  vector<long long> t(n);
+  for (auto& x : t) cin >> x;
+  // TODO: sliding window of allowed timestamps; print 1/0 per request.
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Window of 3", stdin: "3 1000 5\n0 100 200 300 1000\n", expectedStdout: "1 1 1 0 1\n", matcher: "exact" },
+      { name: "Limit one", stdin: "1 1000 3\n0 500 1500\n", expectedStdout: "1 0 1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.chrono", "dsa.techniques.sliding_window", "dsa.arrays.traversal"]
+  },
+  "random-dice-histogram": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Roll a seeded die and print the face histogram.
+
+Requirements:
+1. Read seed and rolls.
+2. Seed a std::mt19937 with seed; roll it that many times, mapping each output to
+   a face with rng() modulo 6. Print the six counts (faces 1..6) space-separated.
+
+Input format:
+- One line: seed rolls
+
+Output format:
+- Six integers, space-separated (counts of faces 1..6).
+
+Expected solution outline:
+- mt19937(seed), loop rolls times, tally rng() % 6.
+
+AI evaluation rubric:
+- Reproducible via standardized mt19937 sequence.`,
+    stdin: "42 6\n",
+    starterCode: `#include <iostream>
+#include <array>
+#include <random>
+using namespace std;
+
+int main() {
+  unsigned seed;
+  int rolls;
+  cin >> seed >> rolls;
+  array<int, 6> counts{};
+  // TODO: seed mt19937 and tally rng() % 6 across rolls.
+  for (int i = 0; i < 6; ++i) cout << (i ? " " : "") << counts[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Seed 42, 6 rolls", stdin: "42 6\n", expectedStdout: "2 0 0 0 2 2\n", matcher: "exact" },
+      { name: "Zero rolls", stdin: "7 0\n", expectedStdout: "0 0 0 0 0 0\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.random", "cpp.utilities.random_quality", "dsa.arrays.traversal"]
   }
 };

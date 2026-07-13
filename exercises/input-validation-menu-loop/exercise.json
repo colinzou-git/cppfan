@@ -1,0 +1,17 @@
+{
+  "id": "input-validation-menu-loop",
+  "title": "Utilities: validate menu input",
+  "skill_ids": ["cpp.utilities.stream_validation", "cpp.control_flow.loops", "dsa.strings.parsing_edge_cases"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["menu.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/input-validation-menu-loop/work exercises/input-validation-menu-loop/tests/tests.cpp -o exercises/input-validation-menu-loop/work/run",
+  "test_command": "exercises/input-validation-menu-loop/work/run",
+  "required_tests": ["test_skips_invalid_then_takes_valid", "test_none_valid", "test_single_valid", "test_empty_list", "test_rejects_trailing_and_spaces", "test_boundaries"],
+  "hints": [
+    "Loop over the tokens; validate each with std::from_chars requiring the whole token to parse.",
+    "Only accept when the parsed value is in [1, 4]; skip everything else.",
+    "Return the first accepted value, or -1 after the loop finds nothing."
+  ],
+  "project_lab": "quiz-generator"
+}

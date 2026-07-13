@@ -1,0 +1,17 @@
+{
+  "id": "random-dice-histogram",
+  "title": "Utilities: seeded dice histogram",
+  "skill_ids": ["cpp.utilities.random", "cpp.utilities.random_quality", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["dice_histogram.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/random-dice-histogram/work exercises/random-dice-histogram/tests/tests.cpp -o exercises/random-dice-histogram/work/run",
+  "test_command": "exercises/random-dice-histogram/work/run",
+  "required_tests": ["test_seed42_six_rolls", "test_seed1_twelve_rolls", "test_zero_rolls", "test_counts_sum_to_rolls", "test_large_distribution_exact"],
+  "hints": [
+    "Construct std::mt19937 rng(seed) once, then roll in a loop.",
+    "Map each output to a face with rng() % 6 (0..5) and increment counts[that].",
+    "Because mt19937 is standardized, the same seed reproduces the same tally exactly."
+  ],
+  "project_lab": "number-guessing-stats"
+}
