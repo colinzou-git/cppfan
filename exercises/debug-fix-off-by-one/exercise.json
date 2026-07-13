@@ -1,0 +1,17 @@
+{
+  "id": "debug-fix-off-by-one",
+  "title": "Debugging: fix the off-by-one",
+  "skill_ids": ["cpp.tooling.debugging_method", "cpp.control_flow.loop_invariants", "cpp.control_flow.loops"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["range_sum.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/debug-fix-off-by-one/work exercises/debug-fix-off-by-one/tests/tests.cpp -o exercises/debug-fix-off-by-one/work/run",
+  "test_command": "exercises/debug-fix-off-by-one/work/run",
+  "required_tests": ["test_one_to_five", "test_single_value", "test_zero_to_ten", "test_symmetric_negatives", "test_hundred"],
+  "hints": [
+    "The intended range is inclusive of hi, but the loop condition stops before it.",
+    "Change the comparison so i reaches hi (i <= hi).",
+    "Check the single-value case (lo == hi): it must still add exactly one term."
+  ],
+  "project_lab": "debugging-toolchain-lab"
+}

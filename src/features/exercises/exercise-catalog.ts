@@ -1531,6 +1531,81 @@ export const exerciseCatalog: Exercise[] = [
       "0 is even, so it stays (and squares to 0); order follows the input."
     ],
     projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "geometry-convex-hull",
+    title: "Geometry: convex hull",
+    skillIds: ["dsa.math.convex_hull", "dsa.math.geometry", "dsa.math.vectors_dot_cross"],
+    difficulty: "advanced",
+    estimatedMinutes: 45,
+    editableFiles: ["convex_hull.hpp"],
+    requiredTests: ["test_square_drops_interior", "test_drops_collinear_edge_point", "test_triangle", "test_two_points", "test_duplicates_collapse", "test_pentagon_with_inner_cloud"],
+    hints: [
+      "Sort points by (x, y) and remove exact duplicates first.",
+      "Build a lower chain left-to-right and an upper chain right-to-left, popping while the last turn is not a strict left turn (cross <= 0).",
+      "Concatenate the two chains, dropping the repeated endpoints."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "debug-fix-off-by-one",
+    title: "Debugging: fix the off-by-one",
+    skillIds: ["cpp.tooling.debugging_method", "cpp.control_flow.loop_invariants", "cpp.control_flow.loops"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["range_sum.hpp"],
+    requiredTests: ["test_one_to_five", "test_single_value", "test_zero_to_ten", "test_symmetric_negatives", "test_hundred"],
+    hints: [
+      "The intended range is inclusive of hi, but the loop condition stops before it.",
+      "Change the comparison so i reaches hi (i <= hi).",
+      "Check the single-value case (lo == hi): it must still add exactly one term."
+    ],
+    projectLab: "debugging-toolchain-lab"
+  },
+  {
+    id: "input-validation-menu-loop",
+    title: "Utilities: validate menu input",
+    skillIds: ["cpp.utilities.stream_validation", "cpp.control_flow.loops", "dsa.strings.parsing_edge_cases"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["menu.hpp"],
+    requiredTests: ["test_skips_invalid_then_takes_valid", "test_none_valid", "test_single_valid", "test_empty_list", "test_rejects_trailing_and_spaces", "test_boundaries"],
+    hints: [
+      "Loop over the tokens; validate each with std::from_chars requiring the whole token to parse.",
+      "Only accept when the parsed value is in [1, 4]; skip everything else.",
+      "Return the first accepted value, or -1 after the loop finds nothing."
+    ],
+    projectLab: "quiz-generator"
+  },
+  {
+    id: "chrono-rate-limiter-sim",
+    title: "Utilities: rate limiter simulation",
+    skillIds: ["cpp.utilities.chrono", "dsa.techniques.sliding_window", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["rate_limiter.hpp"],
+    requiredTests: ["test_basic_window", "test_limit_one", "test_all_allowed_when_spaced", "test_burst_throttled", "test_empty", "test_window_boundary_evicts"],
+    hints: [
+      "Keep a deque of the timestamps you have ALLOWED so far.",
+      "Before each request, pop the front while allowed.front() <= t - window (out of window).",
+      "Allow (and record) the request only when the deque holds fewer than max_requests."
+    ],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "random-dice-histogram",
+    title: "Utilities: seeded dice histogram",
+    skillIds: ["cpp.utilities.random", "cpp.utilities.random_quality", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["dice_histogram.hpp"],
+    requiredTests: ["test_seed42_six_rolls", "test_seed1_twelve_rolls", "test_zero_rolls", "test_counts_sum_to_rolls", "test_large_distribution_exact"],
+    hints: [
+      "Construct std::mt19937 rng(seed) once, then roll in a loop.",
+      "Map each output to a face with rng() % 6 (0..5) and increment counts[that].",
+      "Because mt19937 is standardized, the same seed reproduces the same tally exactly."
+    ],
+    projectLab: "number-guessing-stats"
   }
 ];
 

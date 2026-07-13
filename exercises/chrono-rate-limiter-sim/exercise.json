@@ -1,0 +1,17 @@
+{
+  "id": "chrono-rate-limiter-sim",
+  "title": "Utilities: rate limiter simulation",
+  "skill_ids": ["cpp.utilities.chrono", "dsa.techniques.sliding_window", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["rate_limiter.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/chrono-rate-limiter-sim/work exercises/chrono-rate-limiter-sim/tests/tests.cpp -o exercises/chrono-rate-limiter-sim/work/run",
+  "test_command": "exercises/chrono-rate-limiter-sim/work/run",
+  "required_tests": ["test_basic_window", "test_limit_one", "test_all_allowed_when_spaced", "test_burst_throttled", "test_empty", "test_window_boundary_evicts"],
+  "hints": [
+    "Keep a deque of the timestamps you have ALLOWED so far.",
+    "Before each request, pop the front while allowed.front() <= t - window (out of window).",
+    "Allow (and record) the request only when the deque holds fewer than max_requests."
+  ],
+  "project_lab": "task-queue-lab"
+}

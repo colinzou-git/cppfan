@@ -178,6 +178,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `optional-parse-int` | std::optional, from_chars validation | `csv-table-summarizer` |
 | `variant-json-token` | std::variant, std::visit, if constexpr | `csv-table-summarizer` |
 | `ranges-filter-transform` | C++20 ranges views, lambdas | `text-statistics-analyzer` |
+| `geometry-convex-hull` | convex hull, monotone chain | `math-technique-playground` |
+| `debug-fix-off-by-one` | debugging, loop bounds | `debugging-toolchain-lab` |
+| `input-validation-menu-loop` | input validation, loops | `quiz-generator` |
+| `chrono-rate-limiter-sim` | time modeling, sliding window | `task-queue-lab` |
+| `random-dice-histogram` | seeded RNG, reproducibility | `number-guessing-stats` |
 
 ## Maintaining Exercises (CI)
 

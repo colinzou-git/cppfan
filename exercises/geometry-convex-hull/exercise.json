@@ -1,0 +1,17 @@
+{
+  "id": "geometry-convex-hull",
+  "title": "Geometry: convex hull",
+  "skill_ids": ["dsa.math.convex_hull", "dsa.math.geometry", "dsa.math.vectors_dot_cross"],
+  "difficulty": "advanced",
+  "estimated_minutes": 45,
+  "editable_files": ["convex_hull.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/geometry-convex-hull/work exercises/geometry-convex-hull/tests/tests.cpp -o exercises/geometry-convex-hull/work/run",
+  "test_command": "exercises/geometry-convex-hull/work/run",
+  "required_tests": ["test_square_drops_interior", "test_drops_collinear_edge_point", "test_triangle", "test_two_points", "test_duplicates_collapse", "test_pentagon_with_inner_cloud"],
+  "hints": [
+    "Sort points by (x, y) and remove exact duplicates first.",
+    "Build a lower chain left-to-right and an upper chain right-to-left, popping while the last turn is not a strict left turn (cross <= 0).",
+    "Concatenate the two chains, dropping the repeated endpoints."
+  ],
+  "project_lab": "math-technique-playground"
+}
