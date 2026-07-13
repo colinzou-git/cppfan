@@ -1,0 +1,17 @@
+{
+  "id": "template-generic-clamp",
+  "title": "Templates: generic clamp",
+  "skill_ids": ["cpp.templates.function_templates", "cpp.templates.deduction", "cpp.templates.multiple_params"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["generic_clamp.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/template-generic-clamp/work exercises/template-generic-clamp/tests/tests.cpp -o exercises/template-generic-clamp/work/run",
+  "test_command": "exercises/template-generic-clamp/work/run",
+  "required_tests": ["test_int", "test_double", "test_char", "test_string", "test_boundaries"],
+  "hints": [
+    "Take value, lo, hi as const T& so the same code works for every type.",
+    "Compare with operator< only: value < lo, and hi < value for the upper bound.",
+    "Return lo, hi, or value — no copies of anything else are needed."
+  ],
+  "project_lab": "unit-converter"
+}

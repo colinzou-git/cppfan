@@ -1,0 +1,17 @@
+{
+  "id": "ranges-filter-transform",
+  "title": "Ranges: filter then transform",
+  "skill_ids": ["cpp.templates.ranges", "cpp.templates.ranges_depth", "cpp.stl.lambdas"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["ranges_pipeline.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/ranges-filter-transform/work exercises/ranges-filter-transform/tests/tests.cpp -o exercises/ranges-filter-transform/work/run",
+  "test_command": "exercises/ranges-filter-transform/work/run",
+  "required_tests": ["test_mixed", "test_all_even", "test_no_evens", "test_empty", "test_negatives_and_zero", "test_preserves_order"],
+  "hints": [
+    "Pipe the vector through std::views::filter(is_even) then std::views::transform(square).",
+    "The pipeline is lazy — iterate it to materialize results into a vector.",
+    "0 is even, so it stays (and squares to 0); order follows the input."
+  ],
+  "project_lab": "text-statistics-analyzer"
+}

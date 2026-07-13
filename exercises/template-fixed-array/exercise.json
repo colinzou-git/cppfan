@@ -1,0 +1,17 @@
+{
+  "id": "template-fixed-array",
+  "title": "Templates: fixed-size array",
+  "skill_ids": ["cpp.templates.class_templates", "cpp.templates.multiple_params", "cpp.templates.constexpr"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["fixed_array.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/template-fixed-array/work exercises/template-fixed-array/tests/tests.cpp -o exercises/template-fixed-array/work/run",
+  "test_command": "exercises/template-fixed-array/work/run",
+  "required_tests": ["test_size_and_default", "test_index_assignment", "test_fill", "test_double_type", "test_const_access"],
+  "hints": [
+    "The class is parameterized on both a type T and a std::size_t N.",
+    "fill(value) writes value into every one of the N slots.",
+    "sum() starts from T{} (a natural zero) and adds each element with operator+."
+  ],
+  "project_lab": "math-technique-playground"
+}

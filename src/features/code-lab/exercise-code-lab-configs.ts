@@ -3364,5 +3364,255 @@ int main() {
       { name: "Parallel apart", stdin: "0 0 4 0 0 1 4 1\n", expectedStdout: "NO\n", matcher: "exact" }
     ],
     skillTags: ["dsa.math.segment_intersection", "dsa.math.geometry", "dsa.math.vectors_dot_cross"]
+  },
+  "template-generic-clamp": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Clamp a value into a range using a function template.
+
+Requirements:
+1. Read three integers: value, lo, hi.
+2. Use a template clamp_value(value, lo, hi) that works for any ordered type.
+3. Print the clamped value.
+
+Input format:
+- One line: value lo hi
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Return lo if value < lo, hi if hi < value, else value.
+
+AI evaluation rubric:
+- Single template using operator< only.`,
+    stdin: "42 0 10\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+template <typename T>
+T clamp_value(const T& value, const T& lo, const T& hi) {
+  // TODO: pin value into [lo, hi] using operator< only.
+  (void)lo; (void)hi;
+  return value;
+}
+
+int main() {
+  int v, lo, hi;
+  cin >> v >> lo >> hi;
+  cout << clamp_value(v, lo, hi) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Above range", stdin: "42 0 10\n", expectedStdout: "10\n", matcher: "exact" },
+      { name: "Within range", stdin: "5 0 10\n", expectedStdout: "5\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.templates.function_templates", "cpp.templates.deduction", "cpp.templates.multiple_params"]
+  },
+  "template-fixed-array": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Use a fixed-size array class template to sum five numbers.
+
+Requirements:
+1. Read exactly 5 integers into a FixedArray<int, 5>.
+2. Print their sum via the container's sum() method.
+
+Input format:
+- Five integers.
+
+Output format:
+- One integer: the sum.
+
+Expected solution outline:
+- FixedArray<T, N> with operator[] and sum() over N elements.
+
+AI evaluation rubric:
+- Class template parameterized on type and size.`,
+    stdin: "1 2 3 4 5\n",
+    starterCode: `#include <iostream>
+#include <cstddef>
+using namespace std;
+
+template <typename T, size_t N>
+class FixedArray {
+public:
+  T& operator[](size_t i) { return data_[i]; }
+  T sum() const {
+    // TODO: accumulate all N elements from T{}.
+    return T{};
+  }
+private:
+  T data_[N]{};
+};
+
+int main() {
+  FixedArray<int, 5> a;
+  for (int i = 0; i < 5; ++i) cin >> a[i];
+  cout << a.sum() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Sum of five", stdin: "1 2 3 4 5\n", expectedStdout: "15\n", matcher: "exact" },
+      { name: "With negatives", stdin: "10 -3 0 5 -2\n", expectedStdout: "10\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.templates.class_templates", "cpp.templates.multiple_params", "cpp.templates.constexpr"]
+  },
+  "optional-parse-int": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Parse a whole line as an int, printing the value or "invalid".
+
+Requirements:
+1. Read one line.
+2. If the entire line is a valid int (optional leading +/-, no spaces, no
+   overflow), print it; otherwise print "invalid".
+
+Input format:
+- One line.
+
+Output format:
+- The integer, or the word invalid.
+
+Expected solution outline:
+- std::from_chars requiring the whole string be consumed; return optional.
+
+AI evaluation rubric:
+- Whole-string validation, overflow handled.`,
+    stdin: "42\n",
+    starterCode: `#include <iostream>
+#include <charconv>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<int> parse_int(const string& s) {
+  // TODO: validate the whole string with from_chars; return nullopt on failure.
+  (void)s;
+  return nullopt;
+}
+
+int main() {
+  string s;
+  getline(cin, s);
+  auto r = parse_int(s);
+  cout << (r ? to_string(*r) : string("invalid")) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Valid", stdin: "42\n", expectedStdout: "42\n", matcher: "exact" },
+      { name: "Trailing garbage", stdin: "12a\n", expectedStdout: "invalid\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases", "cpp.functions.basics"]
+  },
+  "variant-json-token": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Report a JSON token's kind and truthiness via std::visit.
+
+Requirements:
+1. Read a tag: "null", or "bool <true|false>", or "number <x>", or "string <word>".
+2. Build a variant<nullptr_t, bool, double, string> and print: <kind> <truthy>
+   where kind is null/boolean/number/string and truthy is true/false
+   (null->false, bool->itself, number->nonzero, string->non-empty).
+
+Input format:
+- One line: a tag and optional value.
+
+Output format:
+- "<kind> <true|false>".
+
+Expected solution outline:
+- std::visit with a generic lambda and if constexpr.
+
+AI evaluation rubric:
+- Correct kind and truthiness per alternative.`,
+    stdin: "bool true\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <variant>
+#include <type_traits>
+using namespace std;
+
+using JsonToken = variant<nullptr_t, bool, double, string>;
+
+string kind(const JsonToken& t) {
+  // TODO: visit and return the kind name.
+  (void)t; return "";
+}
+bool truthy(const JsonToken& t) {
+  // TODO: visit and return JSON truthiness.
+  (void)t; return false;
+}
+
+int main() {
+  string k;
+  cin >> k;
+  JsonToken t;
+  if (k == "null") t = nullptr;
+  else if (k == "bool") { string b; cin >> b; t = (b == "true"); }
+  else if (k == "number") { double d; cin >> d; t = d; }
+  else { string s; cin >> s; t = s; }
+  cout << kind(t) << " " << (truthy(t) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Boolean true", stdin: "bool true\n", expectedStdout: "boolean true\n", matcher: "exact" },
+      { name: "Number zero", stdin: "number 0\n", expectedStdout: "number false\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.variant", "cpp.utilities.variant_visit", "cpp.templates.if_constexpr"]
+  },
+  "ranges-filter-transform": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Keep the even numbers and print their squares (ranges pipeline).
+
+Requirements:
+1. Read n, then n integers.
+2. Using std::views::filter and std::views::transform, keep the evens and square
+   them; print the results space-separated in order.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- The even squares, space-separated.
+
+Expected solution outline:
+- nums | views::filter(even) | views::transform(square), iterated into output.
+
+AI evaluation rubric:
+- Composed ranges pipeline, correct order.`,
+    stdin: "4\n1 2 3 4\n",
+    starterCode: `#include <iostream>
+#include <ranges>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> v(n);
+  for (auto& x : v) cin >> x;
+  // TODO: pipe through filter(even) then transform(square) and print in order.
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed", stdin: "4\n1 2 3 4\n", expectedStdout: "4 16\n", matcher: "exact" },
+      { name: "All even", stdin: "3\n2 4 6\n", expectedStdout: "4 16 36\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.templates.ranges", "cpp.templates.ranges_depth", "cpp.stl.lambdas"]
   }
 };
