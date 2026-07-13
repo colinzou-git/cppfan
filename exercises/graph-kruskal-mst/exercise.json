@@ -1,0 +1,17 @@
+{
+  "id": "graph-kruskal-mst",
+  "title": "Graphs: Kruskal minimum spanning tree",
+  "skill_ids": ["dsa.graphs.mst", "dsa.trees.disjoint_set", "dsa.sorting.comparator"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["kruskal.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-kruskal-mst/work exercises/graph-kruskal-mst/tests/tests.cpp -o exercises/graph-kruskal-mst/work/run",
+  "test_command": "exercises/graph-kruskal-mst/work/run",
+  "required_tests": ["test_square_with_diagonals", "test_triangle_picks_two_smallest", "test_disconnected", "test_single_vertex", "test_two_vertices", "test_parallel_edges", "test_avoids_cycle_edge"],
+  "hints": [
+    "Sort the edges by ascending weight first.",
+    "Use union-find: add an edge only when its endpoints are in different components.",
+    "A spanning tree has exactly n-1 edges; if you add fewer, the graph is disconnected (-1)."
+  ],
+  "project_lab": "maze-route-planner"
+}

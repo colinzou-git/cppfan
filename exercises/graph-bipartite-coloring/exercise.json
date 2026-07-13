@@ -1,0 +1,17 @@
+{
+  "id": "graph-bipartite-coloring",
+  "title": "Graphs: bipartite check",
+  "skill_ids": ["dsa.graphs.bipartite_scc", "dsa.graphs.bfs", "dsa.graphs.representation"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["bipartite.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-bipartite-coloring/work exercises/graph-bipartite-coloring/tests/tests.cpp -o exercises/graph-bipartite-coloring/work/run",
+  "test_command": "exercises/graph-bipartite-coloring/work/run",
+  "required_tests": ["test_even_cycle_is_bipartite", "test_odd_cycle_not_bipartite", "test_tree_is_bipartite", "test_disconnected_mixed", "test_no_edges", "test_single_edge"],
+  "hints": [
+    "Build an undirected adjacency list and a color array initialized to -1.",
+    "BFS from every uncolored vertex, giving each neighbor the opposite color.",
+    "If a neighbor already has the same color as the current vertex, it is not bipartite."
+  ],
+  "project_lab": "maze-route-planner"
+}

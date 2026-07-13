@@ -2652,5 +2652,254 @@ int main() {
       { name: "Diagonal not connected", stdin: "3\n101\n010\n101\n", expectedStdout: "5\n", matcher: "exact" }
     ],
     skillTags: ["dsa.trees.disjoint_set", "dsa.graphs.connected_components", "dsa.trees.dsu_internals"]
+  },
+  "graph-course-schedule": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Decide whether all courses can be finished.
+
+Requirements:
+1. Read num_courses, then m, then m pairs "a b" meaning b must come before a.
+2. Print YES if every course is finishable (no cyclic dependency), else NO.
+
+Input format:
+- First line: num_courses
+- Second line: m
+- Next m lines: a b
+
+Output format:
+- YES or NO.
+
+Expected solution outline:
+- Kahn's algorithm: repeatedly take an in-degree-0 course; a leftover means a cycle.
+
+AI evaluation rubric:
+- Correct topological/cycle logic.`,
+    stdin: "2\n1\n1 0\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+  int nc, m;
+  cin >> nc >> m;
+  vector<vector<int>> adj(nc);
+  vector<int> indeg(nc, 0);
+  for (int i = 0; i < m; ++i) {
+    int a, b; cin >> a >> b;
+    adj[b].push_back(a); ++indeg[a];
+  }
+  // TODO: Kahn's algorithm; print YES if all nc courses can be taken, else NO.
+  cout << "YES" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Finishable", stdin: "2\n1\n1 0\n", expectedStdout: "YES\n", matcher: "exact" },
+      { name: "Cycle", stdin: "2\n2\n1 0\n0 1\n", expectedStdout: "NO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.graphs.topological_sort", "dsa.graphs.cycle_detection", "dsa.graphs.representation"]
+  },
+  "graph-bipartite-coloring": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Decide whether an undirected graph is bipartite.
+
+Requirements:
+1. Read n, then m, then m undirected edges "u v".
+2. Print YES if the graph can be 2-colored with no same-colored edge, else NO.
+3. Handle disconnected graphs.
+
+Input format:
+- First line: n
+- Second line: m
+- Next m lines: u v
+
+Output format:
+- YES or NO.
+
+Expected solution outline:
+- BFS-color each component; a same-color edge means not bipartite.
+
+AI evaluation rubric:
+- Every component checked; correct on odd cycles.`,
+    stdin: "4\n4\n0 1\n1 2\n2 3\n3 0\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  vector<vector<int>> adj(n);
+  for (int i = 0; i < m; ++i) { int u, v; cin >> u >> v; adj[u].push_back(v); adj[v].push_back(u); }
+  // TODO: 2-color every component with BFS; print NO on a conflict, else YES.
+  cout << "YES" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Even cycle", stdin: "4\n4\n0 1\n1 2\n2 3\n3 0\n", expectedStdout: "YES\n", matcher: "exact" },
+      { name: "Triangle", stdin: "3\n3\n0 1\n1 2\n2 0\n", expectedStdout: "NO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.graphs.bipartite_scc", "dsa.graphs.bfs", "dsa.graphs.representation"]
+  },
+  "graph-dijkstra-network-delay": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute how long a signal takes to reach all nodes.
+
+Requirements:
+1. Read n, m, source, then m directed edges "u v w" (non-negative w).
+2. Print the maximum shortest-path distance from source to all nodes, or -1 if
+   any node is unreachable.
+
+Input format:
+- First line: n m source
+- Next m lines: u v w
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Dijkstra with a min-heap; answer is the largest finite distance.
+
+AI evaluation rubric:
+- Correct shortest paths and unreachable handling.`,
+    stdin: "4\n4\n0\n0 1 1\n0 2 4\n1 2 2\n2 3 1\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n, m, s;
+  cin >> n >> m >> s;
+  vector<vector<pair<int,int>>> adj(n);
+  for (int i = 0; i < m; ++i) { int u, v, w; cin >> u >> v >> w; adj[u].push_back({v, w}); }
+  // TODO: Dijkstra from s; print max finite distance or -1.
+  cout << -1 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Reaches all", stdin: "4\n4\n0\n0 1 1\n0 2 4\n1 2 2\n2 3 1\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Unreachable", stdin: "3\n1\n0\n0 1 1\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.graphs.shortest_path", "dsa.graphs.shortest_path_algorithms", "dsa.graphs.representation"]
+  },
+  "graph-kruskal-mst": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute the total weight of a minimum spanning tree.
+
+Requirements:
+1. Read n, m, then m undirected weighted edges "u v w".
+2. Print the MST total weight, or -1 if the graph is disconnected.
+
+Input format:
+- First line: n
+- Second line: m
+- Next m lines: u v w
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Kruskal: sort edges, union endpoints in different components, stop at n-1 edges.
+
+AI evaluation rubric:
+- Correct MST weight and disconnected detection.`,
+    stdin: "4\n5\n0 1 1\n1 2 2\n2 3 3\n0 3 4\n0 2 5\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <array>
+#include <numeric>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  vector<array<int,3>> e(m);  // {weight, u, v}
+  for (auto& x : e) { int u, v, w; cin >> u >> v >> w; x = {w, u, v}; }
+  // TODO: sort by weight and union with a DSU; print total or -1.
+  cout << -1 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Square graph", stdin: "4\n5\n0 1 1\n1 2 2\n2 3 3\n0 3 4\n0 2 5\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "Disconnected", stdin: "3\n1\n0 1 1\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.graphs.mst", "dsa.trees.disjoint_set", "dsa.sorting.comparator"]
+  },
+  "graph-clone-undirected": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Deep-copy an undirected graph and print the copy's structure.
+
+Requirements:
+1. Read n, m, then m undirected edges "u v"; nodes are 0..n-1 with val == id.
+2. Deep-copy the graph (no shared pointers), then print each node's sorted
+   neighbor ids as "i: n1 n2 ..." on its own line.
+
+Input format:
+- First line: n
+- Second line: m
+- Next m lines: u v
+
+Output format:
+- n lines "i:" followed by sorted neighbor ids.
+
+Expected solution outline:
+- Map original->copy during traversal so cycles are copied once.
+
+AI evaluation rubric:
+- Structure preserved by a genuine deep copy.`,
+    stdin: "4\n4\n0 1\n1 2\n2 3\n3 0\n",
+    starterCode: `#include <iostream>
+#include <unordered_map>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+struct GraphNode { int val; vector<GraphNode*> neighbors; GraphNode(int v) : val(v) {} };
+
+GraphNode* clone_graph(GraphNode* node) {
+  // TODO: deep-copy using an original->copy map.
+  return node;
+}
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  vector<GraphNode*> nd;
+  for (int i = 0; i < n; ++i) nd.push_back(new GraphNode(i));
+  for (int i = 0; i < m; ++i) { int u, v; cin >> u >> v; nd[u]->neighbors.push_back(nd[v]); nd[v]->neighbors.push_back(nd[u]); }
+  GraphNode* cl = clone_graph(n ? nd[0] : nullptr);
+  vector<vector<int>> out(n);
+  vector<GraphNode*> st; unordered_map<GraphNode*, bool> seen;
+  if (cl) { st.push_back(cl); seen[cl] = true; }
+  while (!st.empty()) {
+    GraphNode* c = st.back(); st.pop_back();
+    for (GraphNode* x : c->neighbors) { out[c->val].push_back(x->val); if (!seen[x]) { seen[x] = true; st.push_back(x); } }
+  }
+  for (int i = 0; i < n; ++i) { sort(out[i].begin(), out[i].end()); cout << i << ":"; for (int v : out[i]) cout << " " << v; cout << "\\n"; }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Square preserved", stdin: "4\n4\n0 1\n1 2\n2 3\n3 0\n", expectedStdout: "0: 1 3\n1: 0 2\n2: 1 3\n3: 0 2\n", matcher: "exact" },
+      { name: "Triangle preserved", stdin: "3\n3\n0 1\n1 2\n2 0\n", expectedStdout: "0: 1 2\n1: 0 2\n2: 0 1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.graphs.dfs", "dsa.graphs.representation", "cpp.references.pointers"]
   }
 };

@@ -1,0 +1,17 @@
+{
+  "id": "graph-course-schedule",
+  "title": "Graphs: course schedule",
+  "skill_ids": ["dsa.graphs.topological_sort", "dsa.graphs.cycle_detection", "dsa.graphs.representation"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": ["course_schedule.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-course-schedule/work exercises/graph-course-schedule/tests/tests.cpp -o exercises/graph-course-schedule/work/run",
+  "test_command": "exercises/graph-course-schedule/work/run",
+  "required_tests": ["test_simple_chain_ok", "test_two_course_cycle", "test_long_chain_ok", "test_three_course_cycle", "test_no_prereqs", "test_diamond_ok", "test_self_loop_is_cycle"],
+  "hints": [
+    "Build an adjacency list and an in-degree count from the prereq pairs {a,b} (b -> a).",
+    "Kahn's algorithm: repeatedly take a course with in-degree 0 and decrement its dependents.",
+    "If you can take all num_courses this way, there is no cycle; otherwise there is."
+  ],
+  "project_lab": "maze-route-planner"
+}
