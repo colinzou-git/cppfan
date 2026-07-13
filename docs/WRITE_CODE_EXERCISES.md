@@ -183,6 +183,9 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `input-validation-menu-loop` | input validation, loops | `quiz-generator` |
 | `chrono-rate-limiter-sim` | time modeling, sliding window | `task-queue-lab` |
 | `random-dice-histogram` | seeded RNG, reproducibility | `number-guessing-stats` |
+| `filesystem-extension-summary` | std::filesystem paths, extension parsing | `directory-inventory-reporter` |
+| `concurrency-atomic-counter` | atomics, threads, data races | `task-queue-lab` |
+| `concurrency-producer-consumer` | mutex, condition variables, shared state | `task-queue-lab` |
 
 ## Maintaining Exercises (CI)
 

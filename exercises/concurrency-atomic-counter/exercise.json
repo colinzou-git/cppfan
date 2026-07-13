@@ -1,0 +1,17 @@
+{
+  "id": "concurrency-atomic-counter",
+  "title": "Concurrency: atomic counter",
+  "skill_ids": ["cpp.concurrency.atomics", "cpp.concurrency.threads", "cpp.concurrency.data_races"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["atomic_counter.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-atomic-counter/work exercises/concurrency-atomic-counter/tests/tests.cpp -o exercises/concurrency-atomic-counter/work/run",
+  "test_command": "exercises/concurrency-atomic-counter/work/run",
+  "required_tests": ["test_four_threads", "test_single_thread", "test_many_threads", "test_zero_threads", "test_zero_work", "test_repeatable_under_contention"],
+  "hints": [
+    "Store the count in a std::atomic<long long> shared by reference with each thread.",
+    "Each thread does per_thread increments with fetch_add (memory_order_relaxed is enough here).",
+    "Collect the threads in a vector and join them all before reading the counter."
+  ],
+  "project_lab": "task-queue-lab"
+}

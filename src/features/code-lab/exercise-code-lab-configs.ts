@@ -3858,5 +3858,147 @@ int main() {
       { name: "Zero rolls", stdin: "7 0\n", expectedStdout: "0 0 0 0 0 0\n", matcher: "exact" }
     ],
     skillTags: ["cpp.utilities.random", "cpp.utilities.random_quality", "dsa.arrays.traversal"]
+  },
+  "filesystem-extension-summary": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Summarize file extensions.
+
+Requirements:
+1. Read n, then n file names (whitespace-separated).
+2. Using std::filesystem::path, count names by extension. Print "<ext> <count>"
+   per line, sorted by extension; use "(none)" for names with no extension.
+
+Input format:
+- First line: n
+- Following: n file names
+
+Output format:
+- Lines of "<ext> <count>", sorted by extension.
+
+Expected solution outline:
+- path(name).extension(); tally into a std::map.
+
+AI evaluation rubric:
+- Dotfiles/plain names grouped under "(none)"; last extension only.`,
+    stdin: "5\na.txt b.txt c.md README photo.png\n",
+    starterCode: `#include <iostream>
+#include <filesystem>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  map<string, int> counts;
+  for (int i = 0; i < n; ++i) {
+    string name;
+    cin >> name;
+    // TODO: extract the extension via std::filesystem::path and tally it.
+  }
+  for (auto& [ext, count] : counts) cout << ext << " " << count << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed names", stdin: "5\na.txt b.txt c.md README photo.png\n", expectedStdout: "(none) 1\n.md 1\n.png 1\n.txt 2\n", matcher: "exact" },
+      { name: "Multi-dot + dotfile", stdin: "3\narchive.tar.gz .gitignore run.sh\n", expectedStdout: "(none) 1\n.gz 1\n.sh 1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.utilities.filesystem", "dsa.strings.parsing", "cpp.stl.map"]
+  },
+  "concurrency-atomic-counter": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Increment a shared atomic counter from many threads.
+
+Requirements:
+1. Read num_threads and per_thread.
+2. Launch num_threads threads, each incrementing one shared std::atomic
+   per_thread times. Join them and print the final value.
+
+Input format:
+- One line: num_threads per_thread
+
+Output format:
+- One integer (== num_threads * per_thread).
+
+Expected solution outline:
+- std::atomic<long long> shared by reference; fetch_add in each thread.
+
+AI evaluation rubric:
+- No lost updates under contention.`,
+    stdin: "4 1000\n",
+    starterCode: `#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+int main() {
+  int num_threads, per_thread;
+  cin >> num_threads >> per_thread;
+  atomic<long long> counter{0};
+  // TODO: launch threads incrementing counter per_thread times, then join.
+  cout << counter.load() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Four threads", stdin: "4 1000\n", expectedStdout: "4000\n", matcher: "exact" },
+      { name: "Eight threads", stdin: "8 100\n", expectedStdout: "800\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.concurrency.atomics", "cpp.concurrency.threads", "cpp.concurrency.data_races"]
+  },
+  "concurrency-producer-consumer": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Run a producer/consumer pipeline and print the consumed total.
+
+Requirements:
+1. Read producers, consumers, items_each.
+2. Each producer pushes 1..items_each into a shared queue; consumers pop and add
+   to a shared total. Coordinate with a mutex + condition_variable and stop
+   consumers once drained. Print the total.
+
+Input format:
+- One line: producers consumers items_each
+
+Output format:
+- One integer (== producers * items_each*(items_each+1)/2).
+
+Expected solution outline:
+- Mutex-guarded queue, cv.wait on (!empty || done), atomic total.
+
+AI evaluation rubric:
+- Deterministic total, clean shutdown, no deadlock.`,
+    stdin: "2 3 4\n",
+    starterCode: `#include <iostream>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+using namespace std;
+
+int main() {
+  int producers, consumers, items_each;
+  cin >> producers >> consumers >> items_each;
+  // TODO: shared queue + mutex + condition_variable; producers push 1..items_each,
+  // consumers pop and accumulate an atomic total; signal done to stop consumers.
+  long long total = 0;
+  cout << total << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Two producers", stdin: "2 3 4\n", expectedStdout: "20\n", matcher: "exact" },
+      { name: "Larger", stdin: "4 2 10\n", expectedStdout: "220\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.concurrency.condition_variables", "cpp.concurrency.mutexes", "cpp.concurrency.shared_state_design"]
   }
 };
