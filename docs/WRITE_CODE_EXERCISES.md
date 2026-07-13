@@ -148,6 +148,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `csv-row-parser` | string parsing, quoted-field edge cases | `csv-table-summarizer` |
 | `kmp-prefix-table` | KMP prefix function, string searching | `dictionary-autocomplete` |
 | `rolling-hash-substring-equality` | polynomial hashing, substring equality | `dictionary-autocomplete` |
+| `array-remove-duplicates-sorted` | two pointers, in-place compaction | `csv-table-summarizer` |
+| `array-product-except-self` | prefix/suffix products | `math-technique-playground` |
+| `sliding-window-min-size-subarray` | sliding window, two pointers | `math-technique-playground` |
+| `binary-search-first-last` | binary search, first/last occurrence | `csv-table-summarizer` |
+| `interval-merge-meetings` | interval scheduling, comparators | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

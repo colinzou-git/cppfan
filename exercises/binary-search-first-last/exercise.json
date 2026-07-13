@@ -1,0 +1,17 @@
+{
+  "id": "binary-search-first-last",
+  "title": "Binary search: first and last position",
+  "skill_ids": ["dsa.searching.binary_search", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["first_last.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/binary-search-first-last/work exercises/binary-search-first-last/tests/tests.cpp -o exercises/binary-search-first-last/work/run",
+  "test_command": "exercises/binary-search-first-last/work/run",
+  "required_tests": ["test_range_of_duplicates", "test_middle_pair", "test_not_found", "test_single_occurrence", "test_ends", "test_empty", "test_all_same"],
+  "hints": [
+    "Run two binary searches: one that keeps moving left on a match, one that keeps moving right.",
+    "For the first index, when nums[mid] >= target move hi = mid - 1, remembering a match.",
+    "For the last index, when nums[mid] <= target move lo = mid + 1, remembering a match."
+  ],
+  "project_lab": "csv-table-summarizer"
+}

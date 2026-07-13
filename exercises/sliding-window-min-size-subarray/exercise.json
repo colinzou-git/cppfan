@@ -1,0 +1,17 @@
+{
+  "id": "sliding-window-min-size-subarray",
+  "title": "Sliding window: minimum size subarray sum",
+  "skill_ids": ["dsa.techniques.sliding_window", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["min_subarray.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/sliding-window-min-size-subarray/work exercises/sliding-window-min-size-subarray/tests/tests.cpp -o exercises/sliding-window-min-size-subarray/work/run",
+  "test_command": "exercises/sliding-window-min-size-subarray/work/run",
+  "required_tests": ["test_basic", "test_whole_array", "test_no_solution", "test_single_element_suffices", "test_exact_sum", "test_empty"],
+  "hints": [
+    "Grow the window by adding nums[right] to a running sum.",
+    "While the sum >= target, record the window length and subtract nums[left] as you advance left.",
+    "Track the best length; 0 means no window ever reached the target."
+  ],
+  "project_lab": "math-technique-playground"
+}

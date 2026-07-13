@@ -973,6 +973,118 @@ export const exerciseCatalog: Exercise[] = [
       "Handle len == 0 (equal) and ranges past the end (false) before hashing."
     ],
     projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "array-remove-duplicates-sorted",
+    title: "Arrays: remove duplicates in place",
+    skillIds: ["dsa.arrays.two_pointers", "dsa.arrays.traversal", "dsa.complexity.big_o"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["remove_dups.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_already_unique",
+      "test_all_same",
+      "test_empty",
+      "test_single",
+      "test_negatives_and_run"
+    ],
+    hints: [
+      "Keep a write index starting at 1 (the first element is always kept).",
+      "Advance a read index; copy nums[read] to nums[write] only when it differs from nums[write-1].",
+      "Return the write index as the new length."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "array-product-except-self",
+    title: "Arrays: product except self",
+    skillIds: ["dsa.techniques.prefix_sums", "dsa.arrays.traversal", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["product_except_self.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_pair",
+      "test_single_zero",
+      "test_two_zeros",
+      "test_negatives",
+      "test_single_element",
+      "test_empty"
+    ],
+    hints: [
+      "First pass: result[i] = product of all elements to the LEFT of i.",
+      "Second pass (right to left): multiply result[i] by the product of everything to the RIGHT.",
+      "This avoids division, so zeros are handled naturally."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "sliding-window-min-size-subarray",
+    title: "Sliding window: minimum size subarray sum",
+    skillIds: ["dsa.techniques.sliding_window", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["min_subarray.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_whole_array",
+      "test_no_solution",
+      "test_single_element_suffices",
+      "test_exact_sum",
+      "test_empty"
+    ],
+    hints: [
+      "Grow the window by adding nums[right] to a running sum.",
+      "While the sum >= target, record the window length and subtract nums[left] as you advance left.",
+      "Track the best length; 0 means no window ever reached the target."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "binary-search-first-last",
+    title: "Binary search: first and last position",
+    skillIds: ["dsa.searching.binary_search", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["first_last.hpp"],
+    requiredTests: [
+      "test_range_of_duplicates",
+      "test_middle_pair",
+      "test_not_found",
+      "test_single_occurrence",
+      "test_ends",
+      "test_empty",
+      "test_all_same"
+    ],
+    hints: [
+      "Run two binary searches: one that keeps moving left on a match, one that keeps moving right.",
+      "For the first index, when nums[mid] >= target move hi = mid - 1, remembering a match.",
+      "For the last index, when nums[mid] <= target move lo = mid + 1, remembering a match."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "interval-merge-meetings",
+    title: "Intervals: merge meetings",
+    skillIds: ["dsa.techniques.interval_scheduling", "dsa.sorting.comparator", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["merge_intervals.hpp"],
+    requiredTests: [
+      "test_basic_merge",
+      "test_touching_merge",
+      "test_nested",
+      "test_unsorted_input",
+      "test_no_overlap",
+      "test_single_and_empty"
+    ],
+    hints: [
+      "Sort the intervals by their start value first.",
+      "Sweep left to right; merge when the next start is <= the current end.",
+      "When merging, extend the end to max(current end, next end) to handle nesting."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 

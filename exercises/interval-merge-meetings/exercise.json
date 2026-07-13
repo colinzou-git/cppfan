@@ -1,0 +1,17 @@
+{
+  "id": "interval-merge-meetings",
+  "title": "Intervals: merge meetings",
+  "skill_ids": ["dsa.techniques.interval_scheduling", "dsa.sorting.comparator", "dsa.complexity.big_o"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["merge_intervals.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/interval-merge-meetings/work exercises/interval-merge-meetings/tests/tests.cpp -o exercises/interval-merge-meetings/work/run",
+  "test_command": "exercises/interval-merge-meetings/work/run",
+  "required_tests": ["test_basic_merge", "test_touching_merge", "test_nested", "test_unsorted_input", "test_no_overlap", "test_single_and_empty"],
+  "hints": [
+    "Sort the intervals by their start value first.",
+    "Sweep left to right; merge when the next start is <= the current end.",
+    "When merging, extend the end to max(current end, next end) to handle nesting."
+  ],
+  "project_lab": "math-technique-playground"
+}

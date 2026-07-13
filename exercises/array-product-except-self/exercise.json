@@ -1,0 +1,17 @@
+{
+  "id": "array-product-except-self",
+  "title": "Arrays: product except self",
+  "skill_ids": ["dsa.techniques.prefix_sums", "dsa.arrays.traversal", "dsa.complexity.big_o"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["product_except_self.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-product-except-self/work exercises/array-product-except-self/tests/tests.cpp -o exercises/array-product-except-self/work/run",
+  "test_command": "exercises/array-product-except-self/work/run",
+  "required_tests": ["test_basic", "test_pair", "test_single_zero", "test_two_zeros", "test_negatives", "test_single_element", "test_empty"],
+  "hints": [
+    "First pass: result[i] = product of all elements to the LEFT of i.",
+    "Second pass (right to left): multiply result[i] by the product of everything to the RIGHT.",
+    "This avoids division, so zeros are handled naturally."
+  ],
+  "project_lab": "math-technique-playground"
+}
