@@ -3121,5 +3121,248 @@ int main() {
       { name: "Blocked by zero", stdin: "5\n3 2 1 0 4\n", expectedStdout: "NO\n", matcher: "exact" }
     ],
     skillTags: ["dsa.techniques.greedy", "dsa.techniques.greedy_proof", "dsa.arrays.traversal"]
+  },
+  "greedy-activity-selection": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Select the maximum number of non-overlapping activities.
+
+Requirements:
+1. Read n, then n "start end" pairs.
+2. Print the maximum number of mutually compatible activities (an activity that
+   ends at t and one that starts at t do not overlap).
+
+Input format:
+- First line: n
+- Next n lines: start end
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Sort by end time; greedily take the earliest-finishing compatible activity.
+
+AI evaluation rubric:
+- Correct greedy by finish time.`,
+    stdin: "3\n1 2\n2 4\n3 5\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<pair<int,int>> a(n);
+  for (auto& p : a) cin >> p.first >> p.second;
+  // TODO: sort by end and greedily count compatible activities.
+  cout << 0 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Two fit", stdin: "3\n1 2\n2 4\n3 5\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "All overlap", stdin: "3\n1 10\n2 9\n3 8\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.greedy", "dsa.techniques.interval_scheduling", "dsa.techniques.greedy_proof"]
+  },
+  "backtracking-subsets": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print all subsets (the power set) of distinct integers.
+
+Requirements:
+1. Read n, then n distinct integers.
+2. Sort the input, generate all 2^n subsets, sort them, and print one per line
+   (values space-separated; print "-" for the empty subset).
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- 2^n lines, each a sorted subset ("-" for empty).
+
+Expected solution outline:
+- Backtrack on include/exclude for each element.
+
+AI evaluation rubric:
+- All subsets, deterministic order.`,
+    stdin: "2\n1 2\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  sort(a.begin(), a.end());
+  vector<vector<int>> result;
+  // TODO: backtrack to fill result with every subset.
+  sort(result.begin(), result.end());
+  for (auto& s : result) {
+    if (s.empty()) cout << "-";
+    for (size_t i = 0; i < s.size(); ++i) cout << (i ? " " : "") << s[i];
+    cout << "\\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Two elements", stdin: "2\n1 2\n", expectedStdout: "-\n1\n1 2\n2\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n5\n", expectedStdout: "-\n5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"]
+  },
+  "backtracking-combination-sum": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print all combinations of candidates that sum to a target.
+
+Requirements:
+1. Read k, then k distinct positive candidates, then target.
+2. Each candidate may be reused. Print each combination (ascending, space-
+   separated) on its own line, sorted; print "none" if there are none.
+
+Input format:
+- First line: k
+- Second line: k candidates
+- Third line: target
+
+Output format:
+- One combination per line, or "none".
+
+Expected solution outline:
+- Backtrack from a start index, reusing the same index; prune when a candidate
+  exceeds the remaining target.
+
+AI evaluation rubric:
+- Correct combinations, no duplicates, sorted output.`,
+    stdin: "4\n2 3 6 7\n7\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <vector>
+using namespace std;
+
+int main() {
+  int k;
+  cin >> k;
+  vector<int> a(k);
+  for (auto& x : a) cin >> x;
+  int target;
+  cin >> target;
+  sort(a.begin(), a.end());
+  vector<vector<int>> result;
+  // TODO: backtrack to collect combinations summing to target.
+  sort(result.begin(), result.end());
+  if (result.empty()) { cout << "none" << "\\n"; return 0; }
+  for (auto& s : result) {
+    for (size_t i = 0; i < s.size(); ++i) cout << (i ? " " : "") << s[i];
+    cout << "\\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Target 7", stdin: "4\n2 3 6 7\n7\n", expectedStdout: "2 2 3\n7\n", matcher: "exact" },
+      { name: "Unreachable", stdin: "1\n2\n1\n", expectedStdout: "none\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.generate_combinations"]
+  },
+  "math-fast-power-mod": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute (base^exp) mod m with binary exponentiation.
+
+Requirements:
+1. Read base, exp, m (exp >= 0, m >= 1).
+2. Print (base^exp) mod m in [0, m).
+
+Input format:
+- One line: base exp m
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Square-and-multiply; reduce mod m each step; use __int128 for the product.
+
+AI evaluation rubric:
+- O(log exp), no overflow.`,
+    stdin: "2 10 1000\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+long long power_mod(long long base, long long exp, long long m) {
+  // TODO: binary exponentiation with a modulus (cast to __int128 for the multiply).
+  (void)base; (void)exp; (void)m;
+  return 0;
+}
+
+int main() {
+  long long b, e, m;
+  cin >> b >> e >> m;
+  cout << power_mod(b, e, m) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "1024 mod 1000", stdin: "2 10 1000\n", expectedStdout: "24\n", matcher: "exact" },
+      { name: "Large modulus", stdin: "2 62 1000000007\n", expectedStdout: "145586002\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.modular_arithmetic", "dsa.math.number_theory", "dsa.math.bit_manipulation"]
+  },
+  "geometry-segment-intersection": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Decide whether two segments intersect.
+
+Requirements:
+1. Read eight integers: x1 y1 x2 y2 x3 y3 x4 y4 (segments p1-p2 and p3-p4).
+2. Print YES if the closed segments intersect (crossing, endpoint touch, or
+   collinear overlap), else NO.
+
+Input format:
+- One line: x1 y1 x2 y2 x3 y3 x4 y4
+
+Output format:
+- YES or NO.
+
+Expected solution outline:
+- Orientation via cross products; handle collinear on-segment cases.
+
+AI evaluation rubric:
+- Integer-only orientation test; all touch/overlap cases handled.`,
+    stdin: "0 0 4 4 0 4 4 0\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct P { long long x, y; };
+long long cross(P o, P a, P b) { return (a.x-o.x)*(b.y-o.y) - (a.y-o.y)*(b.x-o.x); }
+
+int main() {
+  P p1, p2, p3, p4;
+  cin >> p1.x >> p1.y >> p2.x >> p2.y >> p3.x >> p3.y >> p4.x >> p4.y;
+  // TODO: orientation tests + collinear on-segment checks; print YES/NO.
+  cout << "NO" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Proper cross", stdin: "0 0 4 4 0 4 4 0\n", expectedStdout: "YES\n", matcher: "exact" },
+      { name: "Parallel apart", stdin: "0 0 4 0 0 1 4 1\n", expectedStdout: "NO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.segment_intersection", "dsa.math.geometry", "dsa.math.vectors_dot_cross"]
   }
 };

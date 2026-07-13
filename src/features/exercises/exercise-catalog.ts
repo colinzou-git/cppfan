@@ -1381,6 +1381,81 @@ export const exerciseCatalog: Exercise[] = [
       "Update reach = max(reach, i + nums[i]); success once reach covers the last index."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "greedy-activity-selection",
+    title: "Greedy: activity selection",
+    skillIds: ["dsa.techniques.greedy", "dsa.techniques.interval_scheduling", "dsa.techniques.greedy_proof"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["activity_selection.hpp"],
+    requiredTests: ["test_classic", "test_empty", "test_single", "test_all_overlap", "test_all_disjoint", "test_touching_is_compatible"],
+    hints: [
+      "Sort activities by their end time.",
+      "Greedily take an activity whenever its start is >= the last taken end.",
+      "Touching intervals (end == next start) are compatible."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "backtracking-subsets",
+    title: "Backtracking: subsets",
+    skillIds: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["subsets.hpp"],
+    requiredTests: ["test_empty_input", "test_single", "test_three", "test_unsorted_input_normalizes", "test_count_is_power_of_two"],
+    hints: [
+      "Sort the input so each subset comes out in ascending order.",
+      "Recurse on index i with two branches: skip nums[i], or include it (push/pop around the recursion).",
+      "Record the current subset at the base case (i == size), then sort the result list."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "backtracking-combination-sum",
+    title: "Backtracking: combination sum",
+    skillIds: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.generate_combinations"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["combination_sum.hpp"],
+    requiredTests: ["test_basic", "test_multiple", "test_unreachable", "test_single_candidate_repeated", "test_unsorted_input", "test_target_zero"],
+    hints: [
+      "Sort candidates so combinations come out ascending and you can prune early.",
+      "Recurse from a start index and pass the SAME index down so a candidate can repeat.",
+      "Record the current combination when the remainder hits 0; sort the result list."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "math-fast-power-mod",
+    title: "Math: fast modular exponentiation",
+    skillIds: ["dsa.math.modular_arithmetic", "dsa.math.number_theory", "dsa.math.bit_manipulation"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["fast_power.hpp"],
+    requiredTests: ["test_basic", "test_exponent_zero", "test_mod_one", "test_base_zero", "test_small_wraps", "test_large_no_overflow"],
+    hints: [
+      "Square the base and halve the exponent each step; multiply into the result when the low bit is set.",
+      "Reduce base % m up front and after each multiply to keep numbers small.",
+      "Cast to __int128 before taking % m so the product cannot overflow 64 bits."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "geometry-segment-intersection",
+    title: "Geometry: segment intersection",
+    skillIds: ["dsa.math.segment_intersection", "dsa.math.geometry", "dsa.math.vectors_dot_cross"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["segment_intersection.hpp"],
+    requiredTests: ["test_proper_cross", "test_parallel_apart", "test_touch_at_endpoint", "test_t_junction", "test_collinear_overlap", "test_collinear_disjoint", "test_disjoint_general"],
+    hints: [
+      "Use the cross product to get the orientation of each endpoint against the other segment.",
+      "A proper crossing happens when the two endpoints of each segment straddle the other (opposite signs).",
+      "When an orientation is 0 the points are collinear — then check the bounding box (on-segment)."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 

@@ -1,0 +1,17 @@
+{
+  "id": "backtracking-subsets",
+  "title": "Backtracking: subsets",
+  "skill_ids": ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["subsets.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/backtracking-subsets/work exercises/backtracking-subsets/tests/tests.cpp -o exercises/backtracking-subsets/work/run",
+  "test_command": "exercises/backtracking-subsets/work/run",
+  "required_tests": ["test_empty_input", "test_single", "test_three", "test_unsorted_input_normalizes", "test_count_is_power_of_two"],
+  "hints": [
+    "Sort the input so each subset comes out in ascending order.",
+    "Recurse on index i with two branches: skip nums[i], or include it (push/pop around the recursion).",
+    "Record the current subset at the base case (i == size), then sort the result list."
+  ],
+  "project_lab": "math-technique-playground"
+}

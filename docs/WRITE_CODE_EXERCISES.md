@@ -168,6 +168,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dp-coin-change-min` | dynamic programming, min-coins | `math-technique-playground` |
 | `dp-longest-common-subsequence` | dynamic programming, subsequences | `dictionary-autocomplete` |
 | `greedy-jump-game` | greedy reachability | `math-technique-playground` |
+| `greedy-activity-selection` | greedy interval scheduling | `math-technique-playground` |
+| `backtracking-subsets` | backtracking, power set | `math-technique-playground` |
+| `backtracking-combination-sum` | backtracking, combinations | `math-technique-playground` |
+| `math-fast-power-mod` | modular exponentiation, bit tricks | `math-technique-playground` |
+| `geometry-segment-intersection` | cross products, segment intersection | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 
