@@ -1,0 +1,17 @@
+{
+  "id": "value-semantics-deep-copy-buffer",
+  "title": "Value semantics: deep-copy buffer",
+  "skill_ids": ["cpp.value_semantics.deep_copy", "cpp.value_semantics.rule_of_zero_five", "cpp.value_semantics.move"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["buffer.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/value-semantics-deep-copy-buffer/work exercises/value-semantics-deep-copy-buffer/tests/tests.cpp -o exercises/value-semantics-deep-copy-buffer/work/run",
+  "test_command": "exercises/value-semantics-deep-copy-buffer/work/run",
+  "required_tests": ["test_construct_zeroed", "test_deep_copy_is_independent", "test_copy_assignment_independent", "test_self_assignment_safe", "test_move_transfers", "test_move_assignment_transfers"],
+  "hints": [
+    "Copy must allocate its own array and std::copy the elements (deep, not shared).",
+    "Copy assignment: allocate the new buffer first, then delete the old one — and guard against self-assignment.",
+    "Move steals the pointer and sets the source's pointer to nullptr and size to 0."
+  ],
+  "project_lab": "note-manager"
+}

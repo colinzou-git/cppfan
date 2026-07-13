@@ -1,0 +1,17 @@
+{
+  "id": "vector-running-median-simple",
+  "title": "Heaps: running median",
+  "skill_ids": ["dsa.trees.heap", "dsa.trees.heap_applications", "cpp.stl.adapters"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["running_median.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/vector-running-median-simple/work exercises/vector-running-median-simple/tests/tests.cpp -o exercises/vector-running-median-simple/work/run",
+  "test_command": "exercises/vector-running-median-simple/work/run",
+  "required_tests": ["test_increasing", "test_unsorted", "test_single", "test_empty", "test_duplicates", "test_mixed_stream"],
+  "hints": [
+    "Keep a max-heap for the smaller half and a min-heap for the larger half.",
+    "After each push, rebalance so the heaps differ in size by at most one.",
+    "Equal sizes -> median is the average of the two tops; otherwise it is the larger heap's top."
+  ],
+  "project_lab": "math-technique-playground"
+}
