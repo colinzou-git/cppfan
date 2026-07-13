@@ -1,0 +1,17 @@
+{
+  "id": "queue-level-order-tree",
+  "title": "Trees: level-order traversal",
+  "skill_ids": ["dsa.trees.traversal", "dsa.graphs.bfs", "cpp.stl.adapters"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["level_order.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/queue-level-order-tree/work exercises/queue-level-order-tree/tests/tests.cpp -o exercises/queue-level-order-tree/work/run",
+  "test_command": "exercises/queue-level-order-tree/work/run",
+  "required_tests": ["test_typical", "test_single", "test_empty", "test_left_skewed", "test_complete"],
+  "hints": [
+    "Push the root, then loop while the queue is non-empty.",
+    "Capture the queue size at the start of each level — that many nodes form the current level.",
+    "For each node, record its value and enqueue its non-null children."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

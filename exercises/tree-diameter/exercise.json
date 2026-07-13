@@ -1,0 +1,17 @@
+{
+  "id": "tree-diameter",
+  "title": "Trees: diameter",
+  "skill_ids": ["dsa.trees.tree_diameter", "dsa.trees.traversal", "cpp.references.pointers"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["tree_diameter.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/tree-diameter/work exercises/tree-diameter/tests/tests.cpp -o exercises/tree-diameter/work/run",
+  "test_command": "exercises/tree-diameter/work/run",
+  "required_tests": ["test_through_root", "test_single", "test_empty", "test_two_nodes", "test_complete_tree", "test_skewed_chain"],
+  "hints": [
+    "Write a DFS that returns a subtree's height in edges (empty subtree = -1, leaf = 0).",
+    "At each node, left_height + right_height (each + 1) is the longest path through it.",
+    "Track that maximum in an outer variable; the node itself returns max(left, right)."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "heap-merge-k-sorted-lists",
+  "title": "Heaps: merge k sorted lists",
+  "skill_ids": ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["merge_k_lists.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/heap-merge-k-sorted-lists/work exercises/heap-merge-k-sorted-lists/tests/tests.cpp -o exercises/heap-merge-k-sorted-lists/work/run",
+  "test_command": "exercises/heap-merge-k-sorted-lists/work/run",
+  "required_tests": ["test_three_lists", "test_with_empty_lists", "test_single_list", "test_no_lists", "test_all_empty", "test_handles_negatives"],
+  "hints": [
+    "Push each non-null list head into a min-heap keyed by node value.",
+    "Pop the smallest node, splice it onto the result tail, then push that node's next (if any).",
+    "A dummy head node makes building the result list simple; return dummy.next."
+  ],
+  "project_lab": "note-manager"
+}

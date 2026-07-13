@@ -4277,5 +4277,276 @@ int main() {
       { name: "Mixed stream", stdin: "5\n1 5 2 8 7\n", expectedStdout: "1.0 3.0 2.0 3.5 5.0\n", matcher: "exact" }
     ],
     skillTags: ["dsa.trees.heap", "dsa.trees.heap_applications", "cpp.stl.adapters"]
+  },
+  "binary-search-answer-capacity": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Find the minimum shipping capacity for a deadline.
+
+Requirements:
+1. Read n, then n package weights, then days.
+2. Print the smallest daily capacity so all packages (shipped in order) fit
+   within days days.
+
+Input format:
+- First line: n
+- Second line: n weights
+- Third line: days
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Binary search capacity in [max weight, total]; a helper counts days needed.
+
+AI evaluation rubric:
+- Correct feasibility check and binary search bounds.`,
+    stdin: "10\n1 2 3 4 5 6 7 8 9 10\n5\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <numeric>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> w(n);
+  for (auto& x : w) cin >> x;
+  int days;
+  cin >> days;
+  // TODO: binary-search the minimum feasible capacity.
+  cout << 0 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Ten in five days", stdin: "10\n1 2 3 4 5 6 7 8 9 10\n5\n", expectedStdout: "15\n", matcher: "exact" },
+      { name: "Three days", stdin: "6\n3 2 2 4 1 4\n3\n", expectedStdout: "6\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.searching.binary_search", "dsa.complexity.problem_framing", "dsa.arrays.traversal"]
+  },
+  "sort-custom-log-records": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Rank records by score (desc) then name (asc).
+
+Requirements:
+1. Read n, then n records ("name score").
+2. Sort by score descending, ties by name ascending (stable). Print each record
+   as "name score" on its own line.
+
+Input format:
+- First line: n
+- Next n lines: name score
+
+Output format:
+- The sorted records, one "name score" per line.
+
+Expected solution outline:
+- std::stable_sort with a two-key comparator.
+
+AI evaluation rubric:
+- Correct multi-key order; stable on equal keys.`,
+    stdin: "3\namy 50\nbob 90\ncid 70\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<pair<string,int>> v(n);
+  for (auto& p : v) cin >> p.first >> p.second;
+  // TODO: stable_sort by score desc, then name asc.
+  for (auto& p : v) cout << p.first << " " << p.second << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "By score", stdin: "3\namy 50\nbob 90\ncid 70\n", expectedStdout: "bob 90\ncid 70\namy 50\n", matcher: "exact" },
+      { name: "Tie by name", stdin: "3\nzoe 80\nann 80\nmia 80\n", expectedStdout: "ann 80\nmia 80\nzoe 80\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.sorting.comparator", "cpp.stl.algorithms", "cpp.stl.lambdas"]
+  },
+  "queue-level-order-tree": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print a binary tree's level-order traversal.
+
+Requirements:
+1. Read n, then n level-order tokens (integers, or "X" for a missing child).
+2. Build the tree, then print its levels: values space-separated within a level,
+   levels separated by "|".
+
+Input format:
+- First line: n
+- Second line: n tokens (ints or X)
+
+Output format:
+- Levels joined by "|", values space-separated.
+
+Expected solution outline:
+- BFS with a queue, processing one level at a time.
+
+AI evaluation rubric:
+- Correct level grouping, left to right.`,
+    stdin: "7\n3 9 20 X X 15 7\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  if (n == 0 || tok[0] == "X") { cout << "\\n"; return 0; }
+  T* root = new T(stoi(tok[0]));
+  queue<T*> q; q.push(root);
+  size_t i = 1;
+  while (!q.empty() && i < tok.size()) {
+    T* x = q.front(); q.pop();
+    if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+    if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+  }
+  // TODO: BFS by level and print values (levels joined by "|").
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Typical tree", stdin: "7\n3 9 20 X X 15 7\n", expectedStdout: "3|9 20|15 7\n", matcher: "exact" },
+      { name: "Complete tree", stdin: "7\n1 2 3 4 5 6 7\n", expectedStdout: "1|2 3|4 5 6 7\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.traversal", "dsa.graphs.bfs", "cpp.stl.adapters"]
+  },
+  "tree-diameter": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute a binary tree's diameter (longest path in edges).
+
+Requirements:
+1. Read n, then n level-order tokens (ints, or "X" for a missing child).
+2. Build the tree and print its diameter — the number of edges on the longest
+   path between any two nodes.
+
+Input format:
+- First line: n
+- Second line: n tokens (ints or X)
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- One DFS returning subtree height while tracking best left+right.
+
+AI evaluation rubric:
+- Correct diameter, path need not pass through root.`,
+    stdin: "5\n1 2 3 4 5\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+int best;
+int dfs(T* n) {
+  // TODO: return subtree height (edges); update best = max(best, left + right).
+  (void)n;
+  return -1;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  best = 0;
+  dfs(root);
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Through root", stdin: "5\n1 2 3 4 5\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Complete tree", stdin: "7\n1 2 3 4 5 6 7\n", expectedStdout: "4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.tree_diameter", "dsa.trees.traversal", "cpp.references.pointers"]
+  },
+  "heap-merge-k-sorted-lists": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Merge k sorted lists into one sorted sequence.
+
+Requirements:
+1. Read k. For each list, read its length m then m sorted integers.
+2. Merge all lists and print the merged sorted values, space-separated.
+
+Input format:
+- First line: k
+- Then per list: a line "m v1 v2 ... vm".
+
+Output format:
+- The merged values, space-separated.
+
+Expected solution outline:
+- Min-heap of current list heads; pop smallest, push its successor.
+
+AI evaluation rubric:
+- Fully sorted output; O(N log k).`,
+    stdin: "3\n3 1 4 5\n3 1 3 4\n2 2 6\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+struct N { int v; N* n; N(int x) : v(x), n(0) {} };
+
+int main() {
+  int k;
+  cin >> k;
+  vector<N*> heads;
+  for (int i = 0; i < k; ++i) {
+    int m; cin >> m;
+    N* h = nullptr; N** t = &h;
+    for (int j = 0; j < m; ++j) { int x; cin >> x; *t = new N(x); t = &(*t)->n; }
+    heads.push_back(h);
+  }
+  // TODO: min-heap merge the list heads; print values in order.
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Three lists", stdin: "3\n3 1 4 5\n3 1 3 4\n2 2 6\n", expectedStdout: "1 1 2 3 4 4 5 6\n", matcher: "exact" },
+      { name: "With empties", stdin: "4\n0\n1 1\n0\n2 0 2\n", expectedStdout: "0 1 2\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"]
   }
 };
