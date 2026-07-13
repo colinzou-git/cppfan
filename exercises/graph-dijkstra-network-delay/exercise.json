@@ -1,0 +1,17 @@
+{
+  "id": "graph-dijkstra-network-delay",
+  "title": "Graphs: Dijkstra network delay",
+  "skill_ids": ["dsa.graphs.shortest_path", "dsa.graphs.shortest_path_algorithms", "dsa.graphs.representation"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["network_delay.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-dijkstra-network-delay/work exercises/graph-dijkstra-network-delay/tests/tests.cpp -o exercises/graph-dijkstra-network-delay/work/run",
+  "test_command": "exercises/graph-dijkstra-network-delay/work/run",
+  "required_tests": ["test_reaches_all", "test_diamond_shortest", "test_unreachable_node", "test_single_node", "test_direct_edge", "test_direction_matters", "test_relaxation_picks_shorter"],
+  "hints": [
+    "Build a directed adjacency list of {neighbor, weight} and a dist array set to infinity.",
+    "Use a min-heap keyed by distance; skip stale entries where d > dist[u].",
+    "The answer is the maximum finite distance, or -1 if any node stays at infinity."
+  ],
+  "project_lab": "maze-route-planner"
+}

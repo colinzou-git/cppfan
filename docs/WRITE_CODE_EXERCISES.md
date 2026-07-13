@@ -158,6 +158,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `stack-min-stack` | stacks, O(1) minimum, amortized cost | `task-queue-lab` |
 | `tree-lowest-common-ancestor-bst` | BST search, tree traversal | `dictionary-autocomplete` |
 | `dsu-number-of-islands` | union-find, connected components | `maze-route-planner` |
+| `graph-course-schedule` | topological sort, cycle detection | `maze-route-planner` |
+| `graph-clone-undirected` | graph DFS, deep copy, pointers | `maze-route-planner` |
+| `graph-dijkstra-network-delay` | Dijkstra, shortest paths | `maze-route-planner` |
+| `graph-bipartite-coloring` | bipartite check, BFS coloring | `maze-route-planner` |
+| `graph-kruskal-mst` | minimum spanning tree, union-find | `maze-route-planner` |
 
 ## Maintaining Exercises (CI)
 

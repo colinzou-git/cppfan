@@ -1,0 +1,17 @@
+{
+  "id": "graph-clone-undirected",
+  "title": "Graphs: clone an undirected graph",
+  "skill_ids": ["dsa.graphs.dfs", "dsa.graphs.representation", "cpp.references.pointers"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["clone_graph.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/graph-clone-undirected/work exercises/graph-clone-undirected/tests/tests.cpp -o exercises/graph-clone-undirected/work/run",
+  "test_command": "exercises/graph-clone-undirected/work/run",
+  "required_tests": ["test_square", "test_triangle", "test_two_nodes", "test_single_node", "test_empty_graph"],
+  "hints": [
+    "Keep an original->copy map so each node is duplicated exactly once.",
+    "Create a node's copy the first time you see it, then wire copied neighbor pointers.",
+    "BFS or DFS both work; the map is what makes cycles and shared neighbors safe."
+  ],
+  "project_lab": "maze-route-planner"
+}

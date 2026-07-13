@@ -1194,6 +1194,118 @@ export const exerciseCatalog: Exercise[] = [
       "Only cells equal to '1' are land; connections are 4-directional, never diagonal."
     ],
     projectLab: "maze-route-planner"
+  },
+  {
+    id: "graph-course-schedule",
+    title: "Graphs: course schedule",
+    skillIds: ["dsa.graphs.topological_sort", "dsa.graphs.cycle_detection", "dsa.graphs.representation"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["course_schedule.hpp"],
+    requiredTests: [
+      "test_simple_chain_ok",
+      "test_two_course_cycle",
+      "test_long_chain_ok",
+      "test_three_course_cycle",
+      "test_no_prereqs",
+      "test_diamond_ok",
+      "test_self_loop_is_cycle"
+    ],
+    hints: [
+      "Build an adjacency list and an in-degree count from the prereq pairs {a,b} (b -> a).",
+      "Kahn's algorithm: repeatedly take a course with in-degree 0 and decrement its dependents.",
+      "If you can take all num_courses this way, there is no cycle; otherwise there is."
+    ],
+    projectLab: "maze-route-planner"
+  },
+  {
+    id: "graph-clone-undirected",
+    title: "Graphs: clone an undirected graph",
+    skillIds: ["dsa.graphs.dfs", "dsa.graphs.representation", "cpp.references.pointers"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["clone_graph.hpp"],
+    requiredTests: [
+      "test_square",
+      "test_triangle",
+      "test_two_nodes",
+      "test_single_node",
+      "test_empty_graph"
+    ],
+    hints: [
+      "Keep an original->copy map so each node is duplicated exactly once.",
+      "Create a node's copy the first time you see it, then wire copied neighbor pointers.",
+      "BFS or DFS both work; the map is what makes cycles and shared neighbors safe."
+    ],
+    projectLab: "maze-route-planner"
+  },
+  {
+    id: "graph-dijkstra-network-delay",
+    title: "Graphs: Dijkstra network delay",
+    skillIds: ["dsa.graphs.shortest_path", "dsa.graphs.shortest_path_algorithms", "dsa.graphs.representation"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["network_delay.hpp"],
+    requiredTests: [
+      "test_reaches_all",
+      "test_diamond_shortest",
+      "test_unreachable_node",
+      "test_single_node",
+      "test_direct_edge",
+      "test_direction_matters",
+      "test_relaxation_picks_shorter"
+    ],
+    hints: [
+      "Build a directed adjacency list of {neighbor, weight} and a dist array set to infinity.",
+      "Use a min-heap keyed by distance; skip stale entries where d > dist[u].",
+      "The answer is the maximum finite distance, or -1 if any node stays at infinity."
+    ],
+    projectLab: "maze-route-planner"
+  },
+  {
+    id: "graph-bipartite-coloring",
+    title: "Graphs: bipartite check",
+    skillIds: ["dsa.graphs.bipartite_scc", "dsa.graphs.bfs", "dsa.graphs.representation"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["bipartite.hpp"],
+    requiredTests: [
+      "test_even_cycle_is_bipartite",
+      "test_odd_cycle_not_bipartite",
+      "test_tree_is_bipartite",
+      "test_disconnected_mixed",
+      "test_no_edges",
+      "test_single_edge"
+    ],
+    hints: [
+      "Build an undirected adjacency list and a color array initialized to -1.",
+      "BFS from every uncolored vertex, giving each neighbor the opposite color.",
+      "If a neighbor already has the same color as the current vertex, it is not bipartite."
+    ],
+    projectLab: "maze-route-planner"
+  },
+  {
+    id: "graph-kruskal-mst",
+    title: "Graphs: Kruskal minimum spanning tree",
+    skillIds: ["dsa.graphs.mst", "dsa.trees.disjoint_set", "dsa.sorting.comparator"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["kruskal.hpp"],
+    requiredTests: [
+      "test_square_with_diagonals",
+      "test_triangle_picks_two_smallest",
+      "test_disconnected",
+      "test_single_vertex",
+      "test_two_vertices",
+      "test_parallel_edges",
+      "test_avoids_cycle_edge"
+    ],
+    hints: [
+      "Sort the edges by ascending weight first.",
+      "Use union-find: add an edge only when its endpoints are in different components.",
+      "A spanning tree has exactly n-1 edges; if you add fewer, the graph is disconnected (-1)."
+    ],
+    projectLab: "maze-route-planner"
   }
 ];
 
