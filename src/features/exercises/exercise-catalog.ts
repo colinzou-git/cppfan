@@ -1085,6 +1085,115 @@ export const exerciseCatalog: Exercise[] = [
       "When merging, extend the end to max(current end, next end) to handle nesting."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "linked-list-reverse",
+    title: "Linked list: reverse in place",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.trees.list_vs_vector"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["reverse_list.hpp"],
+    requiredTests: [
+      "test_reverses_three",
+      "test_reverses_two",
+      "test_single",
+      "test_empty",
+      "test_longer_list"
+    ],
+    hints: [
+      "Keep three pointers: prev (start nullptr), the current head, and the saved next.",
+      "Each step: save next, point head->next at prev, advance prev and head.",
+      "Return prev — it is the old tail, i.e. the new head."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "linked-list-detect-cycle",
+    title: "Linked list: detect a cycle",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.graphs.cycle_detection"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["detect_cycle.hpp"],
+    requiredTests: [
+      "test_no_cycle",
+      "test_empty_has_no_cycle",
+      "test_cycle_to_middle",
+      "test_self_loop",
+      "test_two_node_cycle",
+      "test_single_no_cycle"
+    ],
+    hints: [
+      "Move a slow pointer one step and a fast pointer two steps each iteration.",
+      "Stop when fast or fast->next is null (no cycle) or slow == fast (cycle).",
+      "Do not use an auxiliary visited set — the two-pointer method is O(1) space."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "stack-min-stack",
+    title: "Stack: O(1) minimum",
+    skillIds: ["dsa.stacks.basic_stack", "cpp.stl.adapters", "dsa.complexity.amortized"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["min_stack.hpp"],
+    requiredTests: [
+      "test_push_top_min",
+      "test_min_tracks_smaller",
+      "test_pop_restores_min",
+      "test_duplicate_minimums",
+      "test_empty_and_size",
+      "test_negative_values"
+    ],
+    hints: [
+      "Keep a second stack that stores the running minimum at each level.",
+      "On push, the new min is min(x, previous min) (or x when empty).",
+      "On pop, remove from both stacks so get_min() stays correct in O(1)."
+    ],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "tree-lowest-common-ancestor-bst",
+    title: "Trees: lowest common ancestor in a BST",
+    skillIds: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["lca_bst.hpp"],
+    requiredTests: [
+      "test_split_at_root",
+      "test_split_in_left_subtree",
+      "test_ancestor_is_one_of_them",
+      "test_deep_pair",
+      "test_single_node"
+    ],
+    hints: [
+      "Descend from the root using the BST ordering instead of searching both subtrees.",
+      "If both p and q are less than the node, go left; if both greater, go right.",
+      "Otherwise the values split here (or one equals the node) — this node is the LCA."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "dsu-number-of-islands",
+    title: "Union-find: number of islands",
+    skillIds: ["dsa.trees.disjoint_set", "dsa.graphs.connected_components", "dsa.trees.dsu_internals"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["num_islands.hpp"],
+    requiredTests: [
+      "test_empty_grid",
+      "test_all_water",
+      "test_single_land",
+      "test_one_big_island",
+      "test_three_islands",
+      "test_diagonal_not_connected",
+      "test_snake_island"
+    ],
+    hints: [
+      "Give each land cell an id r*cols + c and union it with its right and down land neighbors.",
+      "With union-find, the island count is the number of distinct roots among land cells.",
+      "Only cells equal to '1' are land; connections are 4-directional, never diagonal."
+    ],
+    projectLab: "maze-route-planner"
   }
 ];
 

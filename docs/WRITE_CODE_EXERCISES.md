@@ -153,6 +153,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `sliding-window-min-size-subarray` | sliding window, two pointers | `math-technique-playground` |
 | `binary-search-first-last` | binary search, first/last occurrence | `csv-table-summarizer` |
 | `interval-merge-meetings` | interval scheduling, comparators | `math-technique-playground` |
+| `linked-list-reverse` | linked lists, pointers | `note-manager` |
+| `linked-list-detect-cycle` | linked lists, Floyd cycle detection | `note-manager` |
+| `stack-min-stack` | stacks, O(1) minimum, amortized cost | `task-queue-lab` |
+| `tree-lowest-common-ancestor-bst` | BST search, tree traversal | `dictionary-autocomplete` |
+| `dsu-number-of-islands` | union-find, connected components | `maze-route-planner` |
 
 ## Maintaining Exercises (CI)
 

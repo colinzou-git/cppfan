@@ -1,0 +1,17 @@
+{
+  "id": "linked-list-detect-cycle",
+  "title": "Linked list: detect a cycle",
+  "skill_ids": ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.graphs.cycle_detection"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["detect_cycle.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-detect-cycle/work exercises/linked-list-detect-cycle/tests/tests.cpp -o exercises/linked-list-detect-cycle/work/run",
+  "test_command": "exercises/linked-list-detect-cycle/work/run",
+  "required_tests": ["test_no_cycle", "test_empty_has_no_cycle", "test_cycle_to_middle", "test_self_loop", "test_two_node_cycle", "test_single_no_cycle"],
+  "hints": [
+    "Move a slow pointer one step and a fast pointer two steps each iteration.",
+    "Stop when fast or fast->next is null (no cycle) or slow == fast (cycle).",
+    "Do not use an auxiliary visited set — the two-pointer method is O(1) space."
+  ],
+  "project_lab": "note-manager"
+}

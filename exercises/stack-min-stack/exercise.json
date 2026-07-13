@@ -1,0 +1,17 @@
+{
+  "id": "stack-min-stack",
+  "title": "Stack: O(1) minimum",
+  "skill_ids": ["dsa.stacks.basic_stack", "cpp.stl.adapters", "dsa.complexity.amortized"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["min_stack.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/stack-min-stack/work exercises/stack-min-stack/tests/tests.cpp -o exercises/stack-min-stack/work/run",
+  "test_command": "exercises/stack-min-stack/work/run",
+  "required_tests": ["test_push_top_min", "test_min_tracks_smaller", "test_pop_restores_min", "test_duplicate_minimums", "test_empty_and_size", "test_negative_values"],
+  "hints": [
+    "Keep a second stack that stores the running minimum at each level.",
+    "On push, the new min is min(x, previous min) (or x when empty).",
+    "On pop, remove from both stacks so get_min() stays correct in O(1)."
+  ],
+  "project_lab": "task-queue-lab"
+}
