@@ -1651,6 +1651,81 @@ export const exerciseCatalog: Exercise[] = [
       "After wait, if the queue is empty you must be done — return; otherwise pop under the lock, then add to an atomic total."
     ],
     projectLab: "task-queue-lab"
+  },
+  {
+    id: "raii-file-handle-simulator",
+    title: "RAII: file handle simulator",
+    skillIds: ["cpp.raii.resource_lifetime", "cpp.raii.destructor_cleanup", "cpp.raii.ownership_boundary"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["file_handle.hpp"],
+    requiredTests: ["test_open_on_construct", "test_scope_cleanup", "test_explicit_close", "test_close_is_idempotent"],
+    hints: [
+      "Increment the shared counter in the constructor (the resource is now open).",
+      "Guard close() with the open_ flag so it decrements exactly once.",
+      "The destructor should just call close() — that gives you automatic cleanup at scope exit."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "value-semantics-deep-copy-buffer",
+    title: "Value semantics: deep-copy buffer",
+    skillIds: ["cpp.value_semantics.deep_copy", "cpp.value_semantics.rule_of_zero_five", "cpp.value_semantics.move"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["buffer.hpp"],
+    requiredTests: ["test_construct_zeroed", "test_deep_copy_is_independent", "test_copy_assignment_independent", "test_self_assignment_safe", "test_move_transfers", "test_move_assignment_transfers"],
+    hints: [
+      "Copy must allocate its own array and std::copy the elements (deep, not shared).",
+      "Copy assignment: allocate the new buffer first, then delete the old one — and guard against self-assignment.",
+      "Move steals the pointer and sets the source's pointer to nullptr and size to 0."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "unique-ptr-task-list",
+    title: "Smart pointers: unique_ptr task list",
+    skillIds: ["cpp.smart_pointers.unique_ptr", "cpp.smart_pointers.ownership_transfer", "cpp.smart_pointers.ownership_choice"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["task_list.hpp"],
+    requiredTests: ["test_add_and_size", "test_find", "test_remove", "test_take_transfers_ownership", "test_take_missing"],
+    hints: [
+      "Use std::make_unique<Task>(...) in add and store the pointers in a vector.",
+      "find() returns task.get() — a non-owning view; the vector keeps ownership.",
+      "take() must std::move the unique_ptr out of the vector before erasing the slot."
+    ],
+    projectLab: "todo-planner"
+  },
+  {
+    id: "shared-weak-observer-graph",
+    title: "Smart pointers: shared/weak observer graph",
+    skillIds: ["cpp.smart_pointers.shared_ptr", "cpp.smart_pointers.weak_ptr", "cpp.smart_pointers.cyclic_reference"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["observer_graph.hpp"],
+    requiredTests: ["test_parent_value", "test_weak_does_not_raise_use_count", "test_expired_parent_returns_minus_one", "test_root_has_no_parent", "test_multiple_children"],
+    hints: [
+      "Children are owned with shared_ptr; the parent back-link is a weak_ptr.",
+      "Assigning child->parent = parent stores a weak reference — it does not bump the parent's use_count.",
+      "parent_value locks the weak_ptr; an empty lock() means the parent is gone, so return -1."
+    ],
+    projectLab: "note-manager"
+  },
+  {
+    id: "vector-running-median-simple",
+    title: "Heaps: running median",
+    skillIds: ["dsa.trees.heap", "dsa.trees.heap_applications", "cpp.stl.adapters"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["running_median.hpp"],
+    requiredTests: ["test_increasing", "test_unsorted", "test_single", "test_empty", "test_duplicates", "test_mixed_stream"],
+    hints: [
+      "Keep a max-heap for the smaller half and a min-heap for the larger half.",
+      "After each push, rebalance so the heaps differ in size by at most one.",
+      "Equal sizes -> median is the average of the two tops; otherwise it is the larger heap's top."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 

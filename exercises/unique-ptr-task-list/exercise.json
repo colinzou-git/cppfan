@@ -1,0 +1,17 @@
+{
+  "id": "unique-ptr-task-list",
+  "title": "Smart pointers: unique_ptr task list",
+  "skill_ids": ["cpp.smart_pointers.unique_ptr", "cpp.smart_pointers.ownership_transfer", "cpp.smart_pointers.ownership_choice"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["task_list.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/unique-ptr-task-list/work exercises/unique-ptr-task-list/tests/tests.cpp -o exercises/unique-ptr-task-list/work/run",
+  "test_command": "exercises/unique-ptr-task-list/work/run",
+  "required_tests": ["test_add_and_size", "test_find", "test_remove", "test_take_transfers_ownership", "test_take_missing"],
+  "hints": [
+    "Use std::make_unique<Task>(...) in add and store the pointers in a vector.",
+    "find() returns task.get() — a non-owning view; the vector keeps ownership.",
+    "take() must std::move the unique_ptr out of the vector before erasing the slot."
+  ],
+  "project_lab": "todo-planner"
+}

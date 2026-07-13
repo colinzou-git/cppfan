@@ -1,0 +1,17 @@
+{
+  "id": "raii-file-handle-simulator",
+  "title": "RAII: file handle simulator",
+  "skill_ids": ["cpp.raii.resource_lifetime", "cpp.raii.destructor_cleanup", "cpp.raii.ownership_boundary"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["file_handle.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/raii-file-handle-simulator/work exercises/raii-file-handle-simulator/tests/tests.cpp -o exercises/raii-file-handle-simulator/work/run",
+  "test_command": "exercises/raii-file-handle-simulator/work/run",
+  "required_tests": ["test_open_on_construct", "test_scope_cleanup", "test_explicit_close", "test_close_is_idempotent"],
+  "hints": [
+    "Increment the shared counter in the constructor (the resource is now open).",
+    "Guard close() with the open_ flag so it decrements exactly once.",
+    "The destructor should just call close() — that gives you automatic cleanup at scope exit."
+  ],
+  "project_lab": "note-manager"
+}

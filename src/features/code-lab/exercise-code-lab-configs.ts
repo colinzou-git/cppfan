@@ -4000,5 +4000,282 @@ int main() {
       { name: "Larger", stdin: "4 2 10\n", expectedStdout: "220\n", matcher: "exact" }
     ],
     skillTags: ["cpp.concurrency.condition_variables", "cpp.concurrency.mutexes", "cpp.concurrency.shared_state_design"]
+  },
+  "raii-file-handle-simulator": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Show RAII cleanup with an open-handle counter.
+
+Requirements:
+1. Read n.
+2. Open n RAII FileHandles inside a scope; print "open=<count>" while they are
+   alive, then print "open=<count>" again after the scope exits.
+
+Input format:
+- One integer n.
+
+Output format:
+- "open=n" then "open=0".
+
+Expected solution outline:
+- Constructor increments a shared counter; destructor (via close) decrements it.
+
+AI evaluation rubric:
+- Automatic cleanup at scope exit; idempotent close.`,
+    stdin: "3\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+class FileHandle {
+public:
+  FileHandle() : open_(true) { /* TODO: ++count */ }
+  ~FileHandle() { /* TODO: close */ }
+  static int open_count() { return count_ref(); }
+private:
+  static int& count_ref() { static int c = 0; return c; }
+  bool open_;
+};
+
+int main() {
+  int n;
+  cin >> n;
+  {
+    vector<FileHandle> handles(n);
+    cout << "open=" << FileHandle::open_count() << "\\n";
+  }
+  cout << "open=" << FileHandle::open_count() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Three handles", stdin: "3\n", expectedStdout: "open=3\nopen=0\n", matcher: "exact" },
+      { name: "One handle", stdin: "1\n", expectedStdout: "open=1\nopen=0\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.raii.resource_lifetime", "cpp.raii.destructor_cleanup", "cpp.raii.ownership_boundary"]
+  },
+  "value-semantics-deep-copy-buffer": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Demonstrate deep copy: modifying a copy must not affect the original.
+
+Requirements:
+1. Read n, then n integers into a Buffer a.
+2. Copy a into b, then change b's first element.
+3. Print a's contents (space-separated) — they must be unchanged by the copy.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- a's values, space-separated.
+
+Expected solution outline:
+- Copy constructor makes an independent array (deep copy).
+
+AI evaluation rubric:
+- Original untouched after the copy is modified.`,
+    stdin: "3\n1 2 3\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <cstddef>
+#include <vector>
+using namespace std;
+
+class Buffer {
+public:
+  explicit Buffer(size_t n) : v_(n) {}
+  // TODO: give Buffer a deep-copying copy constructor.
+  int& at(size_t i) { return v_[i]; }
+  size_t size() const { return v_.size(); }
+private:
+  vector<int> v_;
+};
+
+int main() {
+  size_t n;
+  cin >> n;
+  Buffer a(n);
+  for (size_t i = 0; i < n; ++i) cin >> a.at(i);
+  Buffer b = a;
+  if (b.size() > 0) b.at(0) = 999;
+  for (size_t i = 0; i < n; ++i) cout << (i ? " " : "") << a.at(i);
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Original preserved", stdin: "3\n1 2 3\n", expectedStdout: "1 2 3\n", matcher: "exact" },
+      { name: "Longer", stdin: "4\n5 6 7 8\n", expectedStdout: "5 6 7 8\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.value_semantics.deep_copy", "cpp.value_semantics.rule_of_zero_five", "cpp.value_semantics.move"]
+  },
+  "unique-ptr-task-list": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Store tasks in unique_ptrs and answer a lookup.
+
+Requirements:
+1. Read n, then n tasks ("id title"), then a query id.
+2. Print: size=<n> found=<title|NONE> where found is the queried task's title.
+
+Input format:
+- First line: n
+- Next n lines: id title
+- Last line: query id
+
+Output format:
+- "size=<n> found=<title or NONE>".
+
+Expected solution outline:
+- vector<unique_ptr<Task>>; find returns a non-owning pointer.
+
+AI evaluation rubric:
+- Ownership held by the list; find is a non-owning view.`,
+    stdin: "2\n1 write\n2 review\n2\n",
+    starterCode: `#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Task { int id; string title; };
+
+int main() {
+  int n;
+  cin >> n;
+  vector<unique_ptr<Task>> tasks;
+  for (int i = 0; i < n; ++i) {
+    int id; string title;
+    cin >> id >> title;
+    // TODO: store a make_unique<Task>.
+  }
+  int query;
+  cin >> query;
+  const Task* found = nullptr;
+  // TODO: search tasks for query (non-owning pointer).
+  cout << "size=" << tasks.size() << " found=" << (found ? found->title : string("NONE")) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Found", stdin: "2\n1 write\n2 review\n2\n", expectedStdout: "size=2 found=review\n", matcher: "exact" },
+      { name: "Missing", stdin: "2\n1 write\n2 review\n9\n", expectedStdout: "size=2 found=NONE\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.smart_pointers.unique_ptr", "cpp.smart_pointers.ownership_transfer", "cpp.smart_pointers.ownership_choice"]
+  },
+  "shared-weak-observer-graph": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Link a child to a parent with a weak back-reference.
+
+Requirements:
+1. Read a root value and a child value.
+2. Make both shared_ptr nodes; add the child to the root (root owns child via
+   shared_ptr, child->parent is a weak_ptr).
+3. Print: parent=<value> count=<root.use_count()>. The weak back-link must NOT
+   raise the root's use_count (so count is 1).
+
+Input format:
+- One line: root_value child_value
+
+Output format:
+- "parent=<v> count=<n>".
+
+Expected solution outline:
+- child->parent = root as weak_ptr; parent_value locks it.
+
+AI evaluation rubric:
+- Weak back-reference does not inflate use_count.`,
+    stdin: "10 20\n",
+    starterCode: `#include <iostream>
+#include <memory>
+#include <vector>
+using namespace std;
+
+struct Node {
+  int value;
+  vector<shared_ptr<Node>> children;
+  weak_ptr<Node> parent;
+  explicit Node(int v) : value(v) {}
+};
+
+int main() {
+  int rv, cv;
+  cin >> rv >> cv;
+  auto root = make_shared<Node>(rv);
+  auto child = make_shared<Node>(cv);
+  // TODO: add child to root->children and set child->parent (weak) to root.
+  int pv = -1;
+  // TODO: lock child->parent and read its value.
+  cout << "parent=" << pv << " count=" << root.use_count() << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Parent link", stdin: "10 20\n", expectedStdout: "parent=10 count=1\n", matcher: "exact" },
+      { name: "Other values", stdin: "7 3\n", expectedStdout: "parent=7 count=1\n", matcher: "exact" }
+    ],
+    skillTags: ["cpp.smart_pointers.shared_ptr", "cpp.smart_pointers.weak_ptr", "cpp.smart_pointers.cyclic_reference"]
+  },
+  "vector-running-median-simple": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print the running median after each value.
+
+Requirements:
+1. Read n, then n integers.
+2. After each value, print the median of everything seen so far, formatted with
+   one decimal, space-separated.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- n medians (%.1f), space-separated.
+
+Expected solution outline:
+- Two heaps: max-heap (lower half), min-heap (upper half); rebalance each step.
+
+AI evaluation rubric:
+- Correct even/odd median; O(log n) per insertion.`,
+    stdin: "4\n1 2 3 4\n",
+    starterCode: `#include <iostream>
+#include <cstdio>
+#include <functional>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  priority_queue<int> lower;
+  priority_queue<int, vector<int>, greater<>> upper;
+  bool first = true;
+  for (int i = 0; i < n; ++i) {
+    int x;
+    cin >> x;
+    // TODO: insert x, rebalance the heaps, then compute the median.
+    double median = 0.0;
+    printf("%s%.1f", first ? "" : " ", median);
+    first = false;
+  }
+  printf("\\n");
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Increasing", stdin: "4\n1 2 3 4\n", expectedStdout: "1.0 1.5 2.0 2.5\n", matcher: "exact" },
+      { name: "Mixed stream", stdin: "5\n1 5 2 8 7\n", expectedStdout: "1.0 3.0 2.0 3.5 5.0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.heap", "dsa.trees.heap_applications", "cpp.stl.adapters"]
   }
 };

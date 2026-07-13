@@ -186,6 +186,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `filesystem-extension-summary` | std::filesystem paths, extension parsing | `directory-inventory-reporter` |
 | `concurrency-atomic-counter` | atomics, threads, data races | `task-queue-lab` |
 | `concurrency-producer-consumer` | mutex, condition variables, shared state | `task-queue-lab` |
+| `raii-file-handle-simulator` | RAII lifetime, destructor cleanup | `note-manager` |
+| `value-semantics-deep-copy-buffer` | deep copy, rule of five, move | `note-manager` |
+| `unique-ptr-task-list` | unique_ptr, ownership transfer | `todo-planner` |
+| `shared-weak-observer-graph` | shared_ptr/weak_ptr, breaking cycles | `note-manager` |
+| `vector-running-median-simple` | two-heap running median | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

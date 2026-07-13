@@ -1,0 +1,17 @@
+{
+  "id": "shared-weak-observer-graph",
+  "title": "Smart pointers: shared/weak observer graph",
+  "skill_ids": ["cpp.smart_pointers.shared_ptr", "cpp.smart_pointers.weak_ptr", "cpp.smart_pointers.cyclic_reference"],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": ["observer_graph.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/shared-weak-observer-graph/work exercises/shared-weak-observer-graph/tests/tests.cpp -o exercises/shared-weak-observer-graph/work/run",
+  "test_command": "exercises/shared-weak-observer-graph/work/run",
+  "required_tests": ["test_parent_value", "test_weak_does_not_raise_use_count", "test_expired_parent_returns_minus_one", "test_root_has_no_parent", "test_multiple_children"],
+  "hints": [
+    "Children are owned with shared_ptr; the parent back-link is a weak_ptr.",
+    "Assigning child->parent = parent stores a weak reference — it does not bump the parent's use_count.",
+    "parent_value locks the weak_ptr; an empty lock() means the parent is gone, so return -1."
+  ],
+  "project_lab": "note-manager"
+}
