@@ -1,0 +1,17 @@
+{
+  "id": "dp-longest-common-subsequence",
+  "title": "DP: longest common subsequence",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms", "dsa.strings.substring_subsequence"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": ["lcs.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-longest-common-subsequence/work exercises/dp-longest-common-subsequence/tests/tests.cpp -o exercises/dp-longest-common-subsequence/work/run",
+  "test_command": "exercises/dp-longest-common-subsequence/work/run",
+  "required_tests": ["test_classic", "test_identical", "test_disjoint", "test_empty", "test_interleaved", "test_repeated_chars"],
+  "hints": [
+    "dp[i][j] is the LCS length of the first i chars of a and first j chars of b.",
+    "If the current chars match, extend the diagonal: dp[i-1][j-1] + 1.",
+    "Otherwise take max(dp[i-1][j], dp[i][j-1]); two rolling rows keep it O(min(n,m)) space."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

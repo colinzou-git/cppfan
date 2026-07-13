@@ -1306,6 +1306,81 @@ export const exerciseCatalog: Exercise[] = [
       "A spanning tree has exactly n-1 edges; if you add fewer, the graph is disconnected (-1)."
     ],
     projectLab: "maze-route-planner"
+  },
+  {
+    id: "dp-climbing-stairs",
+    title: "DP: climbing stairs",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.recursion.base_case", "dsa.techniques.dp_forms"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["climb_stairs.hpp"],
+    requiredTests: ["test_base_cases", "test_small", "test_ten", "test_larger_uses_long_long"],
+    hints: [
+      "The recurrence is ways(n) = ways(n-1) + ways(n-2) — the same shape as Fibonacci.",
+      "Base cases: ways(0) = ways(1) = 1.",
+      "Roll two variables forward instead of recursing, for O(n) time and O(1) space."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "dp-house-robber",
+    title: "DP: house robber",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["house_robber.hpp"],
+    requiredTests: ["test_basic", "test_larger", "test_empty", "test_single", "test_two", "test_alternating_choice", "test_all_zero"],
+    hints: [
+      "Track two running values: the best total that ends by taking house i, and the best that skips it.",
+      "new_take = previous_skip + value; new_skip = max(previous_take, previous_skip).",
+      "The answer is the max of the two after the last house."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "dp-coin-change-min",
+    title: "DP: minimum coin change",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.complexity.time_space_tradeoffs"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["coin_change.hpp"],
+    requiredTests: ["test_basic", "test_small_amount", "test_zero_amount", "test_impossible", "test_single_coin_repeated", "test_prefers_larger_coins", "test_no_coins"],
+    hints: [
+      "best[0] = 0; initialize the rest to a sentinel larger than any real answer.",
+      "For each amount a, try every coin <= a: best[a] = min(best[a], best[a-coin] + 1).",
+      "Greedy (always biggest coin) can be wrong — the DP is needed (e.g. coins 1,3,4 for 6)."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "dp-longest-common-subsequence",
+    title: "DP: longest common subsequence",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms", "dsa.strings.substring_subsequence"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["lcs.hpp"],
+    requiredTests: ["test_classic", "test_identical", "test_disjoint", "test_empty", "test_interleaved", "test_repeated_chars"],
+    hints: [
+      "dp[i][j] is the LCS length of the first i chars of a and first j chars of b.",
+      "If the current chars match, extend the diagonal: dp[i-1][j-1] + 1.",
+      "Otherwise take max(dp[i-1][j], dp[i][j-1]); two rolling rows keep it O(min(n,m)) space."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "greedy-jump-game",
+    title: "Greedy: jump game",
+    skillIds: ["dsa.techniques.greedy", "dsa.techniques.greedy_proof", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["jump_game.hpp"],
+    requiredTests: ["test_reachable", "test_stuck_at_zero", "test_single", "test_empty", "test_zero_then_more", "test_blocked", "test_exact_reach"],
+    hints: [
+      "Track the farthest index you can reach as you scan from the left.",
+      "If the current index is beyond that farthest reach, you are stuck — return false.",
+      "Update reach = max(reach, i + nums[i]); success once reach covers the last index."
+    ],
+    projectLab: "math-technique-playground"
   }
 ];
 
