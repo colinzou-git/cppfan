@@ -2901,5 +2901,225 @@ int main() {
       { name: "Triangle preserved", stdin: "3\n3\n0 1\n1 2\n2 0\n", expectedStdout: "0: 1 2\n1: 0 2\n2: 0 1\n", matcher: "exact" }
     ],
     skillTags: ["dsa.graphs.dfs", "dsa.graphs.representation", "cpp.references.pointers"]
+  },
+  "dp-climbing-stairs": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Count the ways to climb n stairs (1 or 2 steps at a time).
+
+Requirements:
+1. Read n.
+2. Print the number of distinct ways to climb, using ways(n) = ways(n-1) + ways(n-2).
+
+Input format:
+- One integer n.
+
+Output format:
+- One integer (use long long; it grows like Fibonacci).
+
+Expected solution outline:
+- Iterate, keeping the previous two counts.
+
+AI evaluation rubric:
+- O(n)/O(1) iteration, correct base cases.`,
+    stdin: "5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  // TODO: roll two counts forward; print ways(n).
+  long long ways = 0;
+  cout << ways << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Five stairs", stdin: "5\n", expectedStdout: "8\n", matcher: "exact" },
+      { name: "Ten stairs", stdin: "10\n", expectedStdout: "89\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.recursion.base_case", "dsa.techniques.dp_forms"]
+  },
+  "dp-house-robber": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Maximize the loot without robbing two adjacent houses.
+
+Requirements:
+1. Read n, then n house values.
+2. Print the maximum total with no two chosen houses adjacent.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- Track "best taking house i" vs "best skipping it" as you scan.
+
+AI evaluation rubric:
+- O(n)/O(1) DP, correct adjacency constraint.`,
+    stdin: "5\n2 7 9 3 1\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  long long take = 0, skip = 0;
+  for (int i = 0; i < n; ++i) {
+    int v; cin >> v;
+    // TODO: update take/skip.
+    (void)v;
+  }
+  cout << max(take, skip) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Alternating pick", stdin: "5\n2 7 9 3 1\n", expectedStdout: "12\n", matcher: "exact" },
+      { name: "Small", stdin: "4\n1 2 3 1\n", expectedStdout: "4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"]
+  },
+  "dp-coin-change-min": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Make an amount with the fewest coins.
+
+Requirements:
+1. Read k, then k coin denominations, then the target amount.
+2. Print the minimum number of coins that sum to amount, or -1 if impossible.
+
+Input format:
+- First line: k
+- Second line: k coin values
+- Third line: amount
+
+Output format:
+- One integer (-1 if impossible).
+
+Expected solution outline:
+- Bottom-up DP: best[a] = 1 + min over coins of best[a-coin].
+
+AI evaluation rubric:
+- Correct DP (not greedy), impossible handled.`,
+    stdin: "3\n1 2 5\n11\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int k;
+  cin >> k;
+  vector<int> coins(k);
+  for (auto& c : coins) cin >> c;
+  int amount;
+  cin >> amount;
+  // TODO: fill best[0..amount]; print best[amount] or -1.
+  cout << -1 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Eleven", stdin: "3\n1 2 5\n11\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Impossible", stdin: "1\n2\n3\n", expectedStdout: "-1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.complexity.time_space_tradeoffs"]
+  },
+  "dp-longest-common-subsequence": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Length of the longest common subsequence of two strings.
+
+Requirements:
+1. Read two lines: strings a and b.
+2. Print the length of their longest common subsequence.
+
+Input format:
+- First line: a
+- Second line: b
+
+Output format:
+- One integer.
+
+Expected solution outline:
+- 2-D DP; match extends the diagonal, else take the better of dropping a char.
+
+AI evaluation rubric:
+- Correct LCS recurrence and empty handling.`,
+    stdin: "abcde\nace\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  string a, b;
+  getline(cin, a);
+  getline(cin, b);
+  // TODO: DP over a and b; print the LCS length.
+  cout << 0 << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "abcde\nace\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Interleaved", stdin: "aggtab\ngxtxayb\n", expectedStdout: "4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms", "dsa.strings.substring_subsequence"]
+  },
+  "greedy-jump-game": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Can you reach the last index by jumping forward?
+
+Requirements:
+1. Read n, then n integers where nums[i] is the max jump from index i.
+2. Print YES if the last index is reachable from index 0, else NO.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- YES or NO.
+
+Expected solution outline:
+- Greedy: track the farthest reachable index; fail if an index exceeds it.
+
+AI evaluation rubric:
+- O(n) greedy, correct blocked-by-zero handling.`,
+    stdin: "5\n2 3 1 1 4\n",
+    starterCode: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> v(n);
+  for (auto& x : v) cin >> x;
+  // TODO: track the farthest reach; print NO if you get stuck, else YES.
+  cout << "NO" << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Reachable", stdin: "5\n2 3 1 1 4\n", expectedStdout: "YES\n", matcher: "exact" },
+      { name: "Blocked by zero", stdin: "5\n3 2 1 0 4\n", expectedStdout: "NO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.greedy", "dsa.techniques.greedy_proof", "dsa.arrays.traversal"]
   }
 };

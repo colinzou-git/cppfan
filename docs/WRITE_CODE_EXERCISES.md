@@ -163,6 +163,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `graph-dijkstra-network-delay` | Dijkstra, shortest paths | `maze-route-planner` |
 | `graph-bipartite-coloring` | bipartite check, BFS coloring | `maze-route-planner` |
 | `graph-kruskal-mst` | minimum spanning tree, union-find | `maze-route-planner` |
+| `dp-climbing-stairs` | dynamic programming, Fibonacci recurrence | `math-technique-playground` |
+| `dp-house-robber` | dynamic programming, non-adjacent selection | `math-technique-playground` |
+| `dp-coin-change-min` | dynamic programming, min-coins | `math-technique-playground` |
+| `dp-longest-common-subsequence` | dynamic programming, subsequences | `dictionary-autocomplete` |
+| `greedy-jump-game` | greedy reachability | `math-technique-playground` |
 
 ## Maintaining Exercises (CI)
 

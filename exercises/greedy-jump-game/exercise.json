@@ -1,0 +1,17 @@
+{
+  "id": "greedy-jump-game",
+  "title": "Greedy: jump game",
+  "skill_ids": ["dsa.techniques.greedy", "dsa.techniques.greedy_proof", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["jump_game.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/greedy-jump-game/work exercises/greedy-jump-game/tests/tests.cpp -o exercises/greedy-jump-game/work/run",
+  "test_command": "exercises/greedy-jump-game/work/run",
+  "required_tests": ["test_reachable", "test_stuck_at_zero", "test_single", "test_empty", "test_zero_then_more", "test_blocked", "test_exact_reach"],
+  "hints": [
+    "Track the farthest index you can reach as you scan from the left.",
+    "If the current index is beyond that farthest reach, you are stuck — return false.",
+    "Update reach = max(reach, i + nums[i]); success once reach covers the last index."
+  ],
+  "project_lab": "math-technique-playground"
+}
