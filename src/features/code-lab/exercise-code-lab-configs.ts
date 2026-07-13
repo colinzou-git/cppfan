@@ -2140,5 +2140,244 @@ int main() {
       { name: "Zero length and range", stdin: "hello\n2\n0 3 0\n0 3 3\n", expectedStdout: "YES\nNO\n", matcher: "exact" }
     ],
     skillTags: ["dsa.strings.hashing", "dsa.strings.searching", "dsa.strings.substring_subsequence"]
+  },
+  "array-remove-duplicates-sorted": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Remove duplicates from a sorted array in place.
+
+Requirements:
+1. Read n, then n sorted integers.
+2. Compact the array so the distinct values come first, in order.
+3. Print: <k>: v0 v1 ... where k is the number of distinct values.
+
+Input format:
+- First line: n
+- Second line: n sorted integers
+
+Output format:
+- One line: <k>: followed by the k distinct values.
+
+Expected solution outline:
+- Two pointers: a write index and a read index; copy forward on change.
+
+AI evaluation rubric:
+- O(n) in-place two-pointer, correct distinct count.`,
+    stdin: "5\n1 1 2 2 3\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int remove_duplicates(vector<int>& nums) {
+  // TODO: two-pointer in-place compaction; return the new length.
+  (void)nums;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> v(n);
+  for (auto& x : v) cin >> x;
+  int k = remove_duplicates(v);
+  cout << k << ":";
+  for (int i = 0; i < k; ++i) cout << " " << v[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Removes runs", stdin: "5\n1 1 2 2 3\n", expectedStdout: "3: 1 2 3\n", matcher: "exact" },
+      { name: "All same", stdin: "4\n5 5 5 5\n", expectedStdout: "1: 5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.two_pointers", "dsa.arrays.traversal", "dsa.complexity.big_o"]
+  },
+  "array-product-except-self": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Compute the product of all elements except self, without division.
+
+Requirements:
+1. Read n, then n integers.
+2. Print result[0..n-1] space-separated, where result[i] is the product of every
+   element except nums[i].
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- One line: the n products, space-separated.
+
+Expected solution outline:
+- Prefix products left-to-right, then multiply suffix products right-to-left.
+
+AI evaluation rubric:
+- No division; O(n); zeros handled naturally.`,
+    stdin: "4\n1 2 3 4\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<long long> a(n);
+  for (auto& x : a) cin >> x;
+  vector<long long> r(n, 1);
+  // TODO: prefix pass, then suffix pass (no division).
+  for (int i = 0; i < n; ++i) cout << r[i] << (i + 1 < n ? " " : "");
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "No zeros", stdin: "4\n1 2 3 4\n", expectedStdout: "24 12 8 6\n", matcher: "exact" },
+      { name: "Single zero", stdin: "3\n0 4 2\n", expectedStdout: "8 0 0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.prefix_sums", "dsa.arrays.traversal", "dsa.complexity.big_o"]
+  },
+  "sliding-window-min-size-subarray": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Find the shortest subarray whose sum reaches a target.
+
+Requirements:
+1. Read target, then n, then n positive integers.
+2. Print the length of the shortest contiguous subarray with sum >= target,
+   or 0 if none.
+
+Input format:
+- First line: target n
+- Second line: n positive integers
+
+Output format:
+- One integer: the shortest length (0 if impossible).
+
+Expected solution outline:
+- Sliding window: grow right, shrink left while the sum stays >= target.
+
+AI evaluation rubric:
+- O(n) window, correct no-solution handling.`,
+    stdin: "7 6\n2 3 1 2 4 3\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int target, n;
+  cin >> target >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  // TODO: sliding window over a; track the shortest length.
+  int best = 0;
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Short window", stdin: "7 6\n2 3 1 2 4 3\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "No solution", stdin: "100 3\n1 2 3\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.sliding_window", "dsa.arrays.two_pointers", "dsa.complexity.big_o"]
+  },
+  "binary-search-first-last": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Find the first and last index of a target in a sorted array.
+
+Requirements:
+1. Read n, then n sorted integers, then a target.
+2. Print "<first> <last>" (0-based), or "-1 -1" if the target is absent.
+3. Use binary search (O(log n)).
+
+Input format:
+- First line: n
+- Second line: n sorted integers
+- Third line: target
+
+Output format:
+- One line: first and last index, space-separated.
+
+Expected solution outline:
+- Two binary searches biased left and right.
+
+AI evaluation rubric:
+- O(log n), correct duplicate range and absent handling.`,
+    stdin: "6\n5 7 7 8 8 10\n8\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  int target;
+  cin >> target;
+  // TODO: binary-search the leftmost and rightmost occurrence.
+  int first = -1, last = -1;
+  cout << first << " " << last << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Range of eights", stdin: "6\n5 7 7 8 8 10\n8\n", expectedStdout: "3 4\n", matcher: "exact" },
+      { name: "Absent", stdin: "6\n5 7 7 8 8 10\n6\n", expectedStdout: "-1 -1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.searching.binary_search", "dsa.arrays.two_pointers", "dsa.complexity.big_o"]
+  },
+  "interval-merge-meetings": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Merge overlapping meeting intervals.
+
+Requirements:
+1. Read n, then n intervals (start end per line).
+2. Merge intervals that overlap or touch.
+3. Print the merged intervals sorted by start as "s-e" tokens, space-separated.
+
+Input format:
+- First line: n
+- Next n lines: start end
+
+Output format:
+- One line: merged intervals as s-e, space-separated.
+
+Expected solution outline:
+- Sort by start; merge when the next start <= current end.
+
+AI evaluation rubric:
+- Correct sorting, touching-merge, and nesting handling.`,
+    stdin: "4\n1 3\n2 6\n8 10\n15 18\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<pair<int, int>> v(n);
+  for (auto& p : v) cin >> p.first >> p.second;
+  // TODO: sort by start, then merge overlapping/touching intervals.
+  vector<pair<int, int>> m;
+  for (size_t i = 0; i < m.size(); ++i)
+    cout << m[i].first << "-" << m[i].second << (i + 1 < m.size() ? " " : "");
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic merge", stdin: "4\n1 3\n2 6\n8 10\n15 18\n", expectedStdout: "1-6 8-10 15-18\n", matcher: "exact" },
+      { name: "Touching", stdin: "2\n1 4\n4 5\n", expectedStdout: "1-5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.interval_scheduling", "dsa.sorting.comparator", "dsa.complexity.big_o"]
   }
 };

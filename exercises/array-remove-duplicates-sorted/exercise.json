@@ -1,0 +1,17 @@
+{
+  "id": "array-remove-duplicates-sorted",
+  "title": "Arrays: remove duplicates in place",
+  "skill_ids": ["dsa.arrays.two_pointers", "dsa.arrays.traversal", "dsa.complexity.big_o"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["remove_dups.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-remove-duplicates-sorted/work exercises/array-remove-duplicates-sorted/tests/tests.cpp -o exercises/array-remove-duplicates-sorted/work/run",
+  "test_command": "exercises/array-remove-duplicates-sorted/work/run",
+  "required_tests": ["test_basic", "test_already_unique", "test_all_same", "test_empty", "test_single", "test_negatives_and_run"],
+  "hints": [
+    "Keep a write index starting at 1 (the first element is always kept).",
+    "Advance a read index; copy nums[read] to nums[write] only when it differs from nums[write-1].",
+    "Return the write index as the new length."
+  ],
+  "project_lab": "csv-table-summarizer"
+}
