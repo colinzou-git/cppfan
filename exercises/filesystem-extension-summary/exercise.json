@@ -1,0 +1,17 @@
+{
+  "id": "filesystem-extension-summary",
+  "title": "Utilities: file extension summary",
+  "skill_ids": ["cpp.utilities.filesystem", "dsa.strings.parsing", "cpp.stl.map"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["extension_summary.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/filesystem-extension-summary/work exercises/filesystem-extension-summary/tests/tests.cpp -o exercises/filesystem-extension-summary/work/run",
+  "test_command": "exercises/filesystem-extension-summary/work/run",
+  "required_tests": ["test_basic_counts", "test_no_extension_and_dotfiles", "test_multi_dot_takes_last", "test_case_preserved", "test_paths_with_directories", "test_empty"],
+  "hints": [
+    "std::filesystem::path(name).extension() gives the last extension including the dot (\".txt\").",
+    "It parses the string only — no disk access is needed.",
+    "An empty extension (plain names and dotfiles like .gitignore) should tally under \"(none)\"."
+  ],
+  "project_lab": "directory-inventory-reporter"
+}

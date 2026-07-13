@@ -1606,6 +1606,51 @@ export const exerciseCatalog: Exercise[] = [
       "Because mt19937 is standardized, the same seed reproduces the same tally exactly."
     ],
     projectLab: "number-guessing-stats"
+  },
+  {
+    id: "filesystem-extension-summary",
+    title: "Utilities: file extension summary",
+    skillIds: ["cpp.utilities.filesystem", "dsa.strings.parsing", "cpp.stl.map"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["extension_summary.hpp"],
+    requiredTests: ["test_basic_counts", "test_no_extension_and_dotfiles", "test_multi_dot_takes_last", "test_case_preserved", "test_paths_with_directories", "test_empty"],
+    hints: [
+      "std::filesystem::path(name).extension() gives the last extension including the dot (\".txt\").",
+      "It parses the string only — no disk access is needed.",
+      "An empty extension (plain names and dotfiles like .gitignore) should tally under \"(none)\"."
+    ],
+    projectLab: "directory-inventory-reporter"
+  },
+  {
+    id: "concurrency-atomic-counter",
+    title: "Concurrency: atomic counter",
+    skillIds: ["cpp.concurrency.atomics", "cpp.concurrency.threads", "cpp.concurrency.data_races"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["atomic_counter.hpp"],
+    requiredTests: ["test_four_threads", "test_single_thread", "test_many_threads", "test_zero_threads", "test_zero_work", "test_repeatable_under_contention"],
+    hints: [
+      "Store the count in a std::atomic<long long> shared by reference with each thread.",
+      "Each thread does per_thread increments with fetch_add (memory_order_relaxed is enough here).",
+      "Collect the threads in a vector and join them all before reading the counter."
+    ],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-producer-consumer",
+    title: "Concurrency: producer/consumer",
+    skillIds: ["cpp.concurrency.condition_variables", "cpp.concurrency.mutexes", "cpp.concurrency.shared_state_design"],
+    difficulty: "advanced",
+    estimatedMinutes: 45,
+    editableFiles: ["producer_consumer.hpp"],
+    requiredTests: ["test_basic", "test_single_pair", "test_many", "test_one_item_each", "test_no_producers", "test_repeatable_under_contention"],
+    hints: [
+      "Protect the queue with a mutex; consumers cv.wait on a predicate (!queue.empty() || done).",
+      "Track how many producers are still active; when the last finishes, set done and notify_all.",
+      "After wait, if the queue is empty you must be done — return; otherwise pop under the lock, then add to an atomic total."
+    ],
+    projectLab: "task-queue-lab"
   }
 ];
 
