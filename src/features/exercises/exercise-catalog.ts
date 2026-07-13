@@ -1456,6 +1456,81 @@ export const exerciseCatalog: Exercise[] = [
       "When an orientation is 0 the points are collinear — then check the bounding box (on-segment)."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "template-generic-clamp",
+    title: "Templates: generic clamp",
+    skillIds: ["cpp.templates.function_templates", "cpp.templates.deduction", "cpp.templates.multiple_params"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["generic_clamp.hpp"],
+    requiredTests: ["test_int", "test_double", "test_char", "test_string", "test_boundaries"],
+    hints: [
+      "Take value, lo, hi as const T& so the same code works for every type.",
+      "Compare with operator< only: value < lo, and hi < value for the upper bound.",
+      "Return lo, hi, or value — no copies of anything else are needed."
+    ],
+    projectLab: "unit-converter"
+  },
+  {
+    id: "template-fixed-array",
+    title: "Templates: fixed-size array",
+    skillIds: ["cpp.templates.class_templates", "cpp.templates.multiple_params", "cpp.templates.constexpr"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["fixed_array.hpp"],
+    requiredTests: ["test_size_and_default", "test_index_assignment", "test_fill", "test_double_type", "test_const_access"],
+    hints: [
+      "The class is parameterized on both a type T and a std::size_t N.",
+      "fill(value) writes value into every one of the N slots.",
+      "sum() starts from T{} (a natural zero) and adds each element with operator+."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "optional-parse-int",
+    title: "Utilities: optional parse int",
+    skillIds: ["cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases", "cpp.functions.basics"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["parse_int.hpp"],
+    requiredTests: ["test_positive", "test_negative", "test_leading_plus", "test_empty_is_nullopt", "test_trailing_garbage", "test_surrounding_space", "test_non_numeric", "test_overflow"],
+    hints: [
+      "std::from_chars(begin, end, value) returns {ptr, ec}; require ec == std::errc{} AND ptr == end.",
+      "Handle empty input up front, and strip a single leading '+' before calling from_chars.",
+      "Overflow shows up as ec == std::errc::result_out_of_range — return nullopt."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "variant-json-token",
+    title: "Utilities: variant JSON token",
+    skillIds: ["cpp.utilities.variant", "cpp.utilities.variant_visit", "cpp.templates.if_constexpr"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["json_token.hpp"],
+    requiredTests: ["test_kind", "test_truthy_null_and_bool", "test_truthy_number", "test_truthy_string"],
+    hints: [
+      "std::visit calls your lambda with the currently-held alternative.",
+      "Inside a generic lambda, use `using T = std::decay_t<decltype(value)>;` then branch with `if constexpr`.",
+      "std::is_same_v<T, std::nullptr_t/bool/double> distinguishes the cases; the else is the string."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "ranges-filter-transform",
+    title: "Ranges: filter then transform",
+    skillIds: ["cpp.templates.ranges", "cpp.templates.ranges_depth", "cpp.stl.lambdas"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["ranges_pipeline.hpp"],
+    requiredTests: ["test_mixed", "test_all_even", "test_no_evens", "test_empty", "test_negatives_and_zero", "test_preserves_order"],
+    hints: [
+      "Pipe the vector through std::views::filter(is_even) then std::views::transform(square).",
+      "The pipeline is lazy — iterate it to materialize results into a vector.",
+      "0 is even, so it stays (and squares to 0); order follows the input."
+    ],
+    projectLab: "text-statistics-analyzer"
   }
 ];
 

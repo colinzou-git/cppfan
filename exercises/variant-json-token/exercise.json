@@ -1,0 +1,17 @@
+{
+  "id": "variant-json-token",
+  "title": "Utilities: variant JSON token",
+  "skill_ids": ["cpp.utilities.variant", "cpp.utilities.variant_visit", "cpp.templates.if_constexpr"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["json_token.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/variant-json-token/work exercises/variant-json-token/tests/tests.cpp -o exercises/variant-json-token/work/run",
+  "test_command": "exercises/variant-json-token/work/run",
+  "required_tests": ["test_kind", "test_truthy_null_and_bool", "test_truthy_number", "test_truthy_string"],
+  "hints": [
+    "std::visit calls your lambda with the currently-held alternative.",
+    "Inside a generic lambda, use `using T = std::decay_t<decltype(value)>;` then branch with `if constexpr`.",
+    "std::is_same_v<T, std::nullptr_t/bool/double> distinguishes the cases; the else is the string."
+  ],
+  "project_lab": "csv-table-summarizer"
+}

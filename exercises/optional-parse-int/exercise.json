@@ -1,0 +1,17 @@
+{
+  "id": "optional-parse-int",
+  "title": "Utilities: optional parse int",
+  "skill_ids": ["cpp.utilities.stream_validation", "dsa.strings.parsing_edge_cases", "cpp.functions.basics"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["parse_int.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/optional-parse-int/work exercises/optional-parse-int/tests/tests.cpp -o exercises/optional-parse-int/work/run",
+  "test_command": "exercises/optional-parse-int/work/run",
+  "required_tests": ["test_positive", "test_negative", "test_leading_plus", "test_empty_is_nullopt", "test_trailing_garbage", "test_surrounding_space", "test_non_numeric", "test_overflow"],
+  "hints": [
+    "std::from_chars(begin, end, value) returns {ptr, ec}; require ec == std::errc{} AND ptr == end.",
+    "Handle empty input up front, and strip a single leading '+' before calling from_chars.",
+    "Overflow shows up as ec == std::errc::result_out_of_range — return nullopt."
+  ],
+  "project_lab": "csv-table-summarizer"
+}

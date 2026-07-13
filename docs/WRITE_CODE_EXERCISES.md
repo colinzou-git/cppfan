@@ -173,6 +173,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `backtracking-combination-sum` | backtracking, combinations | `math-technique-playground` |
 | `math-fast-power-mod` | modular exponentiation, bit tricks | `math-technique-playground` |
 | `geometry-segment-intersection` | cross products, segment intersection | `math-technique-playground` |
+| `template-generic-clamp` | function templates, deduction | `unit-converter` |
+| `template-fixed-array` | class templates, non-type params | `math-technique-playground` |
+| `optional-parse-int` | std::optional, from_chars validation | `csv-table-summarizer` |
+| `variant-json-token` | std::variant, std::visit, if constexpr | `csv-table-summarizer` |
+| `ranges-filter-transform` | C++20 ranges views, lambdas | `text-statistics-analyzer` |
 
 ## Maintaining Exercises (CI)
 
