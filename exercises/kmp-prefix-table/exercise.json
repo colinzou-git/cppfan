@@ -1,0 +1,17 @@
+{
+  "id": "kmp-prefix-table",
+  "title": "Strings: KMP prefix table",
+  "skill_ids": ["dsa.strings.prefix_function", "dsa.strings.searching", "dsa.strings.substring_subsequence"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["prefix_table.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/kmp-prefix-table/work exercises/kmp-prefix-table/tests/tests.cpp -o exercises/kmp-prefix-table/work/run",
+  "test_command": "exercises/kmp-prefix-table/work/run",
+  "required_tests": ["test_empty", "test_single_char", "test_all_same", "test_no_repeats", "test_periodic", "test_overlapping", "test_fallback_case"],
+  "hints": [
+    "lps[0] is always 0; start the loop at i = 1.",
+    "Keep k = lps[i-1]; while k > 0 and s[i] != s[k], set k = lps[k-1].",
+    "If s[i] == s[k], increment k; then lps[i] = k."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

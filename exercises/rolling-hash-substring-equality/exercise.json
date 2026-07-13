@@ -1,0 +1,17 @@
+{
+  "id": "rolling-hash-substring-equality",
+  "title": "Strings: rolling-hash substring equality",
+  "skill_ids": ["dsa.strings.hashing", "dsa.strings.searching", "dsa.strings.substring_subsequence"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["rolling_hash.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/rolling-hash-substring-equality/work exercises/rolling-hash-substring-equality/tests/tests.cpp -o exercises/rolling-hash-substring-equality/work/run",
+  "test_command": "exercises/rolling-hash-substring-equality/work/run",
+  "required_tests": ["test_equal_substrings", "test_unequal_substrings", "test_zero_length_is_equal", "test_out_of_range_is_false", "test_full_string_self_equal", "test_repeated_blocks"],
+  "hints": [
+    "prefix[i+1] = prefix[i]*BASE + s[i] + 1; also precompute power[i] = BASE^i.",
+    "The hash of s[start, start+len) is prefix[start+len] - prefix[start]*power[len].",
+    "Handle len == 0 (equal) and ranges past the end (false) before hashing."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

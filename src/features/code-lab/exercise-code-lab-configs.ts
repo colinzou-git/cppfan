@@ -1940,5 +1940,205 @@ int main() {
       { name: "Inclusive bounds", stdin: "0 100 4\n0 100 101 -1\n", expectedStdout: "0 100\n", matcher: "exact" }
     ],
     skillTags: ["cpp.stl.algorithms", "cpp.stl.vector", "cpp.stl.lambdas"]
+  },
+  "string-anagram-groups": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Group anagrams and print them deterministically.
+
+Requirements:
+1. Read n, then n words.
+2. Group words that are anagrams (same sorted letters).
+3. Sort words within each group ascending (keep duplicates), and sort the
+   groups by their first word. Print one group per line, words space-separated.
+
+Input format:
+- First line: n
+- Following whitespace-separated: n words
+
+Output format:
+- One line per group of sorted words.
+
+Expected solution outline:
+- Bucket by sorted-letter key in a std::map, then sort within and across groups.
+
+AI evaluation rubric:
+- Correct grouping and deterministic ordering.`,
+    stdin: "6\neat tea tan ate nat bat\n",
+    starterCode: `#include <iostream>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  map<string, vector<string>> groups;
+  for (int i = 0; i < n; ++i) {
+    string w;
+    cin >> w;
+    // TODO: key by sorted letters, then bucket w.
+  }
+  // TODO: sort within/across groups and print one group per line.
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic anagrams", stdin: "6\neat tea tan ate nat bat\n", expectedStdout: "ate eat tea\nbat\nnat tan\n", matcher: "exact" },
+      { name: "All distinct", stdin: "3\ndog cat bird\n", expectedStdout: "bird\ncat\ndog\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.hashing", "dsa.strings.char_frequency", "cpp.stl.map"]
+  },
+  "csv-row-parser": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Parse one CSV row, handling quoted fields.
+
+Requirements:
+1. Read one line.
+2. Split on commas, but a field wrapped in double quotes may contain commas, and
+   "" inside quotes is an escaped double quote.
+3. Print each field on its own line, wrapped in [brackets].
+
+Input format:
+- One CSV line.
+
+Output format:
+- One [field] per line.
+
+Expected solution outline:
+- Character-by-character state machine tracking an in_quotes flag.
+
+AI evaluation rubric:
+- Quoted commas kept, doubled quotes unescaped, empty fields preserved.`,
+    stdin: "a,\"b,c\",d\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+vector<string> parse_csv_row(const string& line) {
+  // TODO: scan chars; a comma splits only outside quotes; "" -> literal quote.
+  (void)line;
+  return {""};
+}
+
+int main() {
+  string line;
+  getline(cin, line);
+  for (const auto& f : parse_csv_row(line)) cout << "[" << f << "]\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Quoted comma", stdin: "a,\"b,c\",d\n", expectedStdout: "[a]\n[b,c]\n[d]\n", matcher: "exact" },
+      { name: "Empty middle field", stdin: "a,,c\n", expectedStdout: "[a]\n[]\n[c]\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.parsing", "dsa.strings.parsing_edge_cases", "cpp.utilities.stream_validation"]
+  },
+  "kmp-prefix-table": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Print the KMP prefix (failure) function of a string.
+
+Requirements:
+1. Read one line as the string s.
+2. Print lps[0..n-1], space-separated, where lps[i] is the length of the longest
+   proper prefix of s[0..i] that is also a suffix.
+
+Input format:
+- One line: the string.
+
+Output format:
+- The lps values, space-separated (empty line for an empty string).
+
+Expected solution outline:
+- Keep a running length k, falling back via k = lps[k-1] when characters differ.
+
+AI evaluation rubric:
+- O(n) build, correct fallback, lps[0] == 0.`,
+    stdin: "abacaba\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  string s;
+  getline(cin, s);
+  vector<int> lps(s.size(), 0);
+  // TODO: for i from 1, extend/fall back to fill lps.
+  for (size_t i = 0; i < lps.size(); ++i) cout << lps[i] << (i + 1 < lps.size() ? " " : "");
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Overlapping", stdin: "abacaba\n", expectedStdout: "0 0 1 0 1 2 3\n", matcher: "exact" },
+      { name: "Periodic", stdin: "abcabc\n", expectedStdout: "0 0 0 1 2 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.prefix_function", "dsa.strings.searching", "dsa.strings.substring_subsequence"]
+  },
+  "rolling-hash-substring-equality": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Answer substring-equality queries with prefix hashing.
+
+Requirements:
+1. Read a string s, then q, then q queries "a b len".
+2. For each query print YES when s[a, a+len) == s[b, b+len), else NO.
+   len == 0 is YES; a range past the end is NO.
+
+Input format:
+- First line: s
+- Second line: q
+- Next q lines: a b len
+
+Output format:
+- YES or NO per query.
+
+Expected solution outline:
+- Precompute polynomial prefix hashes and BASE powers; compare substring hashes.
+
+AI evaluation rubric:
+- O(1) per query after O(n) precompute; correct bounds handling.`,
+    stdin: "ababcabab\n3\n0 2 2\n0 4 1\n0 5 4\n",
+    starterCode: `#include <iostream>
+#include <cstdint>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  string s;
+  getline(cin, s);
+  size_t n = s.size();
+  vector<uint64_t> pre(n + 1, 0), pw(n + 1, 1);
+  const uint64_t BASE = 1315423911ULL;
+  // TODO: fill pre and pw.
+  auto H = [&](size_t st, size_t len) { return pre[st + len] - pre[st] * pw[len]; };
+  int q;
+  cin >> q;
+  for (int i = 0; i < q; ++i) {
+    size_t a, b, l;
+    cin >> a >> b >> l;
+    bool eq = false;  // TODO: len==0 -> true; out of range -> false; else compare H.
+    (void)H;
+    cout << (eq ? "YES" : "NO") << "\\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed queries", stdin: "ababcabab\n3\n0 2 2\n0 4 1\n0 5 4\n", expectedStdout: "YES\nNO\nYES\n", matcher: "exact" },
+      { name: "Zero length and range", stdin: "hello\n2\n0 3 0\n0 3 3\n", expectedStdout: "YES\nNO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.hashing", "dsa.strings.searching", "dsa.strings.substring_subsequence"]
   }
 };

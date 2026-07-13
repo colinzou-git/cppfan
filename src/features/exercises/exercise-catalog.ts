@@ -884,6 +884,95 @@ export const exerciseCatalog: Exercise[] = [
       "std::unique only removes ADJACENT duplicates, so sort before calling it."
     ],
     projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "string-anagram-groups",
+    title: "Strings: group anagrams",
+    skillIds: ["dsa.strings.hashing", "dsa.strings.char_frequency", "cpp.stl.map"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["anagram_groups.hpp"],
+    requiredTests: [
+      "test_basic_grouping",
+      "test_single_word",
+      "test_all_distinct",
+      "test_empty_input",
+      "test_keeps_duplicates",
+      "test_case_sensitive"
+    ],
+    hints: [
+      "Use the sorted letters of a word as its anagram signature (map key).",
+      "Bucket every word under its signature in a std::map<string, vector<string>>.",
+      "Sort each bucket, then sort the buckets by their first word for determinism."
+    ],
+    projectLab: "text-statistics-analyzer"
+  },
+  {
+    id: "csv-row-parser",
+    title: "Parsing: CSV row with quotes",
+    skillIds: ["dsa.strings.parsing", "dsa.strings.parsing_edge_cases", "cpp.utilities.stream_validation"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["csv_parser.hpp"],
+    requiredTests: [
+      "test_plain_fields",
+      "test_quoted_comma",
+      "test_escaped_quotes",
+      "test_empty_fields",
+      "test_trailing_empty_field",
+      "test_quote_not_at_field_start_is_literal"
+    ],
+    hints: [
+      "Track an in_quotes flag; a comma only splits when you are not inside quotes.",
+      "Inside quotes, a doubled quote \"\" means one literal quote; a lone quote ends the field.",
+      "Push the final field after the loop so a trailing comma yields an empty last field."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "kmp-prefix-table",
+    title: "Strings: KMP prefix table",
+    skillIds: ["dsa.strings.prefix_function", "dsa.strings.searching", "dsa.strings.substring_subsequence"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["prefix_table.hpp"],
+    requiredTests: [
+      "test_empty",
+      "test_single_char",
+      "test_all_same",
+      "test_no_repeats",
+      "test_periodic",
+      "test_overlapping",
+      "test_fallback_case"
+    ],
+    hints: [
+      "lps[0] is always 0; start the loop at i = 1.",
+      "Keep k = lps[i-1]; while k > 0 and s[i] != s[k], set k = lps[k-1].",
+      "If s[i] == s[k], increment k; then lps[i] = k."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "rolling-hash-substring-equality",
+    title: "Strings: rolling-hash substring equality",
+    skillIds: ["dsa.strings.hashing", "dsa.strings.searching", "dsa.strings.substring_subsequence"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["rolling_hash.hpp"],
+    requiredTests: [
+      "test_equal_substrings",
+      "test_unequal_substrings",
+      "test_zero_length_is_equal",
+      "test_out_of_range_is_false",
+      "test_full_string_self_equal",
+      "test_repeated_blocks"
+    ],
+    hints: [
+      "prefix[i+1] = prefix[i]*BASE + s[i] + 1; also precompute power[i] = BASE^i.",
+      "The hash of s[start, start+len) is prefix[start+len] - prefix[start]*power[len].",
+      "Handle len == 0 (equal) and ranges past the end (false) before hashing."
+    ],
+    projectLab: "dictionary-autocomplete"
   }
 ];
 
