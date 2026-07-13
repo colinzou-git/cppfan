@@ -191,6 +191,11 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `unique-ptr-task-list` | unique_ptr, ownership transfer | `todo-planner` |
 | `shared-weak-observer-graph` | shared_ptr/weak_ptr, breaking cycles | `note-manager` |
 | `vector-running-median-simple` | two-heap running median | `math-technique-playground` |
+| `binary-search-answer-capacity` | binary search on the answer | `math-technique-playground` |
+| `sort-custom-log-records` | multi-key comparator, stable sort | `csv-table-summarizer` |
+| `queue-level-order-tree` | BFS level-order traversal | `dictionary-autocomplete` |
+| `tree-diameter` | tree diameter via DFS heights | `dictionary-autocomplete` |
+| `heap-merge-k-sorted-lists` | min-heap k-way merge | `note-manager` |
 
 ## Maintaining Exercises (CI)
 

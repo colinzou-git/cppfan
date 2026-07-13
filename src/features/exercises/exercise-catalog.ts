@@ -1726,6 +1726,81 @@ export const exerciseCatalog: Exercise[] = [
       "Equal sizes -> median is the average of the two tops; otherwise it is the larger heap's top."
     ],
     projectLab: "math-technique-playground"
+  },
+  {
+    id: "binary-search-answer-capacity",
+    title: "Binary search: minimum shipping capacity",
+    skillIds: ["dsa.searching.binary_search", "dsa.complexity.problem_framing", "dsa.arrays.traversal"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["min_capacity.hpp"],
+    requiredTests: ["test_ten_packages_five_days", "test_three_days", "test_four_days", "test_one_day_is_total", "test_days_ge_packages_is_max", "test_empty"],
+    hints: [
+      "The answer lies between the heaviest single package and the sum of all weights.",
+      "Write a helper that counts how many days a given capacity needs (greedily fill each day).",
+      "Binary search: if a capacity needs <= days, try smaller (hi = mid); otherwise go bigger (lo = mid + 1)."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "sort-custom-log-records",
+    title: "Sorting: custom multi-key comparator",
+    skillIds: ["dsa.sorting.comparator", "cpp.stl.algorithms", "cpp.stl.lambdas"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["sort_records.hpp"],
+    requiredTests: ["test_by_score_desc", "test_tie_by_name_asc", "test_mixed", "test_stable_on_equal_keys", "test_empty_and_single"],
+    hints: [
+      "Write a comparator: if scores differ, higher score comes first; else compare names ascending.",
+      "Use std::stable_sort so records equal on both keys keep their input order.",
+      "A lambda [](const Record& a, const Record& b){ ... } is the cleanest comparator."
+    ],
+    projectLab: "csv-table-summarizer"
+  },
+  {
+    id: "queue-level-order-tree",
+    title: "Trees: level-order traversal",
+    skillIds: ["dsa.trees.traversal", "dsa.graphs.bfs", "cpp.stl.adapters"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["level_order.hpp"],
+    requiredTests: ["test_typical", "test_single", "test_empty", "test_left_skewed", "test_complete"],
+    hints: [
+      "Push the root, then loop while the queue is non-empty.",
+      "Capture the queue size at the start of each level — that many nodes form the current level.",
+      "For each node, record its value and enqueue its non-null children."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "tree-diameter",
+    title: "Trees: diameter",
+    skillIds: ["dsa.trees.tree_diameter", "dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["tree_diameter.hpp"],
+    requiredTests: ["test_through_root", "test_single", "test_empty", "test_two_nodes", "test_complete_tree", "test_skewed_chain"],
+    hints: [
+      "Write a DFS that returns a subtree's height in edges (empty subtree = -1, leaf = 0).",
+      "At each node, left_height + right_height (each + 1) is the longest path through it.",
+      "Track that maximum in an outer variable; the node itself returns max(left, right)."
+    ],
+    projectLab: "dictionary-autocomplete"
+  },
+  {
+    id: "heap-merge-k-sorted-lists",
+    title: "Heaps: merge k sorted lists",
+    skillIds: ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["merge_k_lists.hpp"],
+    requiredTests: ["test_three_lists", "test_with_empty_lists", "test_single_list", "test_no_lists", "test_all_empty", "test_handles_negatives"],
+    hints: [
+      "Push each non-null list head into a min-heap keyed by node value.",
+      "Pop the smallest node, splice it onto the result tail, then push that node's next (if any).",
+      "A dummy head node makes building the result list simple; return dummy.next."
+    ],
+    projectLab: "note-manager"
   }
 ];
 

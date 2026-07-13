@@ -1,0 +1,17 @@
+{
+  "id": "sort-custom-log-records",
+  "title": "Sorting: custom multi-key comparator",
+  "skill_ids": ["dsa.sorting.comparator", "cpp.stl.algorithms", "cpp.stl.lambdas"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["sort_records.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/sort-custom-log-records/work exercises/sort-custom-log-records/tests/tests.cpp -o exercises/sort-custom-log-records/work/run",
+  "test_command": "exercises/sort-custom-log-records/work/run",
+  "required_tests": ["test_by_score_desc", "test_tie_by_name_asc", "test_mixed", "test_stable_on_equal_keys", "test_empty_and_single"],
+  "hints": [
+    "Write a comparator: if scores differ, higher score comes first; else compare names ascending.",
+    "Use std::stable_sort so records equal on both keys keep their input order.",
+    "A lambda [](const Record& a, const Record& b){ ... } is the cleanest comparator."
+  ],
+  "project_lab": "csv-table-summarizer"
+}
