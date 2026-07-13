@@ -1,0 +1,17 @@
+{
+  "id": "dsu-number-of-islands",
+  "title": "Union-find: number of islands",
+  "skill_ids": ["dsa.trees.disjoint_set", "dsa.graphs.connected_components", "dsa.trees.dsu_internals"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["num_islands.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dsu-number-of-islands/work exercises/dsu-number-of-islands/tests/tests.cpp -o exercises/dsu-number-of-islands/work/run",
+  "test_command": "exercises/dsu-number-of-islands/work/run",
+  "required_tests": ["test_empty_grid", "test_all_water", "test_single_land", "test_one_big_island", "test_three_islands", "test_diagonal_not_connected", "test_snake_island"],
+  "hints": [
+    "Give each land cell an id r*cols + c and union it with its right and down land neighbors.",
+    "With union-find, the island count is the number of distinct roots among land cells.",
+    "Only cells equal to '1' are land; connections are 4-directional, never diagonal."
+  ],
+  "project_lab": "maze-route-planner"
+}

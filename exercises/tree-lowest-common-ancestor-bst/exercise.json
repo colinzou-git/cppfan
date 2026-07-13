@@ -1,0 +1,17 @@
+{
+  "id": "tree-lowest-common-ancestor-bst",
+  "title": "Trees: lowest common ancestor in a BST",
+  "skill_ids": ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["lca_bst.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/tree-lowest-common-ancestor-bst/work exercises/tree-lowest-common-ancestor-bst/tests/tests.cpp -o exercises/tree-lowest-common-ancestor-bst/work/run",
+  "test_command": "exercises/tree-lowest-common-ancestor-bst/work/run",
+  "required_tests": ["test_split_at_root", "test_split_in_left_subtree", "test_ancestor_is_one_of_them", "test_deep_pair", "test_single_node"],
+  "hints": [
+    "Descend from the root using the BST ordering instead of searching both subtrees.",
+    "If both p and q are less than the node, go left; if both greater, go right.",
+    "Otherwise the values split here (or one equals the node) — this node is the LCA."
+  ],
+  "project_lab": "dictionary-autocomplete"
+}

@@ -2379,5 +2379,278 @@ int main() {
       { name: "Touching", stdin: "2\n1 4\n4 5\n", expectedStdout: "1-5\n", matcher: "exact" }
     ],
     skillTags: ["dsa.techniques.interval_scheduling", "dsa.sorting.comparator", "dsa.complexity.big_o"]
+  },
+  "linked-list-reverse": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Reverse a singly linked list and print it.
+
+Requirements:
+1. Read n, then n integers; build a linked list in that order.
+2. Reverse the list in place (repoint next pointers; no new nodes).
+3. Print the reversed values, space-separated.
+
+Input format:
+- First line: n
+- Second line: n integers
+
+Output format:
+- The reversed values, space-separated.
+
+Expected solution outline:
+- prev/curr/next three-pointer walk; return the old tail as the new head.
+
+AI evaluation rubric:
+- In-place O(1)-space reversal, correct order.`,
+    stdin: "3\n1 2 3\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+ListNode* reverse_list(ListNode* head) {
+  // TODO: reverse the next pointers; return the new head.
+  return head;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  ListNode* head = nullptr;
+  ListNode** tail = &head;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  head = reverse_list(head);
+  bool first = true;
+  for (ListNode* c = head; c; c = c->next) { cout << (first ? "" : " ") << c->val; first = false; }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Three nodes", stdin: "3\n1 2 3\n", expectedStdout: "3 2 1\n", matcher: "exact" },
+      { name: "Five nodes", stdin: "5\n10 20 30 40 50\n", expectedStdout: "50 40 30 20 10\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.trees.list_vs_vector"]
+  },
+  "linked-list-detect-cycle": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Detect a cycle in a singly linked list.
+
+Requirements:
+1. Read n, then n integers, then pos.
+2. Build a list of the n values; if pos >= 0, make the last node's next point to
+   node index pos (0-based), creating a cycle.
+3. Print YES if the list has a cycle, else NO. Use Floyd's algorithm.
+
+Input format:
+- First line: n
+- Second line: n integers
+- Third line: pos (-1 for no cycle)
+
+Output format:
+- YES or NO.
+
+Expected solution outline:
+- Slow/fast pointers; a cycle exists when they meet.
+
+AI evaluation rubric:
+- O(1) space (no visited set), correct detection.`,
+    stdin: "4\n1 2 3 4\n1\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+bool has_cycle(ListNode* head) {
+  // TODO: Floyd's tortoise and hare.
+  (void)head;
+  return false;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<ListNode*> nodes;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; nodes.push_back(new ListNode(x)); }
+  for (int i = 0; i + 1 < n; ++i) nodes[i]->next = nodes[i + 1];
+  int pos; cin >> pos;
+  if (pos >= 0 && n > 0) nodes.back()->next = nodes[pos];
+  cout << (has_cycle(n ? nodes[0] : nullptr) ? "YES" : "NO") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Has cycle", stdin: "4\n1 2 3 4\n1\n", expectedStdout: "YES\n", matcher: "exact" },
+      { name: "No cycle", stdin: "3\n1 2 3\n-1\n", expectedStdout: "NO\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.graphs.cycle_detection"]
+  },
+  "stack-min-stack": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Drive a min-stack with a command script.
+
+Requirements:
+1. Read m, then m commands: "PUSH x", "POP", "TOP", or "MIN".
+2. Maintain a stack that reports its current minimum in O(1).
+3. Print the result of each TOP and MIN command, one per line.
+
+Input format:
+- First line: m
+- Next m lines: a command
+
+Output format:
+- One line per TOP/MIN with the value.
+
+Expected solution outline:
+- Keep a parallel stack of running minimums.
+
+AI evaluation rubric:
+- O(1) get_min via a min-tracking stack.`,
+    stdin: "6\nPUSH 3\nPUSH 5\nMIN\nPUSH 2\nMIN\nTOP\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int m;
+  cin >> m;
+  vector<int> data, mins;
+  for (int i = 0; i < m; ++i) {
+    string op;
+    cin >> op;
+    if (op == "PUSH") {
+      int x; cin >> x;
+      // TODO: push x and update the running minimum.
+    } else if (op == "POP") {
+      // TODO: pop from both stacks.
+    } else if (op == "TOP") {
+      // TODO: print the top value.
+    } else {  // MIN
+      // TODO: print the current minimum.
+    }
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Min tracking", stdin: "6\nPUSH 3\nPUSH 5\nMIN\nPUSH 2\nMIN\nTOP\n", expectedStdout: "3\n2\n2\n", matcher: "exact" },
+      { name: "Pop restores min", stdin: "5\nPUSH 4\nPUSH 1\nPOP\nMIN\nTOP\n", expectedStdout: "4\n4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.stacks.basic_stack", "cpp.stl.adapters", "dsa.complexity.amortized"]
+  },
+  "tree-lowest-common-ancestor-bst": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Find the lowest common ancestor of two values in a BST.
+
+Requirements:
+1. Read n, then n integers inserted (in order) into a BST, then p and q.
+2. Print the value of the lowest common ancestor of p and q.
+3. Use the BST ordering to walk down in O(height).
+
+Input format:
+- First line: n
+- Second line: n integers (insertion order)
+- Third line: p q
+
+Output format:
+- One integer: the LCA value.
+
+Expected solution outline:
+- Descend left when both < node, right when both > node, else stop.
+
+AI evaluation rubric:
+- Uses BST property; no full traversal.`,
+    stdin: "9\n6 2 8 0 4 7 9 3 5\n3 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct TreeNode { int val; TreeNode* left; TreeNode* right; TreeNode(int v) : val(v), left(nullptr), right(nullptr) {} };
+
+TreeNode* insert(TreeNode* root, int v) {
+  if (!root) return new TreeNode(v);
+  if (v < root->val) root->left = insert(root->left, v); else root->right = insert(root->right, v);
+  return root;
+}
+
+TreeNode* lowest_common_ancestor(TreeNode* root, int p, int q) {
+  // TODO: descend using the BST ordering until the values split.
+  (void)p; (void)q;
+  return root;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  TreeNode* root = nullptr;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; root = insert(root, x); }
+  int p, q; cin >> p >> q;
+  cout << lowest_common_ancestor(root, p, q)->val << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Split in subtree", stdin: "9\n6 2 8 0 4 7 9 3 5\n3 5\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Split at root", stdin: "9\n6 2 8 0 4 7 9 3 5\n2 8\n", expectedStdout: "6\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"]
+  },
+  "dsu-number-of-islands": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Count the islands in a grid.
+
+Requirements:
+1. Read r, then r rows of a grid of '1' (land) and '0' (water).
+2. Count 4-directionally connected groups of land cells.
+3. Print the number of islands.
+
+Input format:
+- First line: r
+- Next r lines: the grid rows (equal length)
+
+Output format:
+- One integer: the island count.
+
+Expected solution outline:
+- Union-find over land cells (or DFS/BFS flood fill).
+
+AI evaluation rubric:
+- 4-directional connectivity, correct component count.`,
+    stdin: "4\n11000\n11000\n00100\n00011\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int num_islands(const vector<string>& grid) {
+  // TODO: union/flood-fill adjacent land cells and count the components.
+  (void)grid;
+  return 0;
+}
+
+int main() {
+  int r;
+  cin >> r;
+  vector<string> grid(r);
+  for (auto& row : grid) cin >> row;
+  cout << num_islands(grid) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Three islands", stdin: "4\n11000\n11000\n00100\n00011\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Diagonal not connected", stdin: "3\n101\n010\n101\n", expectedStdout: "5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.disjoint_set", "dsa.graphs.connected_components", "dsa.trees.dsu_internals"]
   }
 };

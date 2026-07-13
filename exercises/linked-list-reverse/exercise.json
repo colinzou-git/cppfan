@@ -1,0 +1,17 @@
+{
+  "id": "linked-list-reverse",
+  "title": "Linked list: reverse in place",
+  "skill_ids": ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.trees.list_vs_vector"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["reverse_list.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-reverse/work exercises/linked-list-reverse/tests/tests.cpp -o exercises/linked-list-reverse/work/run",
+  "test_command": "exercises/linked-list-reverse/work/run",
+  "required_tests": ["test_reverses_three", "test_reverses_two", "test_single", "test_empty", "test_longer_list"],
+  "hints": [
+    "Keep three pointers: prev (start nullptr), the current head, and the saved next.",
+    "Each step: save next, point head->next at prev, advance prev and head.",
+    "Return prev — it is the old tail, i.e. the new head."
+  ],
+  "project_lab": "note-manager"
+}
