@@ -1,0 +1,17 @@
+{
+  "id": "geometry-segment-intersection",
+  "title": "Geometry: segment intersection",
+  "skill_ids": ["dsa.math.segment_intersection", "dsa.math.geometry", "dsa.math.vectors_dot_cross"],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": ["segment_intersection.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/geometry-segment-intersection/work exercises/geometry-segment-intersection/tests/tests.cpp -o exercises/geometry-segment-intersection/work/run",
+  "test_command": "exercises/geometry-segment-intersection/work/run",
+  "required_tests": ["test_proper_cross", "test_parallel_apart", "test_touch_at_endpoint", "test_t_junction", "test_collinear_overlap", "test_collinear_disjoint", "test_disjoint_general"],
+  "hints": [
+    "Use the cross product to get the orientation of each endpoint against the other segment.",
+    "A proper crossing happens when the two endpoints of each segment straddle the other (opposite signs).",
+    "When an orientation is 0 the points are collinear — then check the bounding box (on-segment)."
+  ],
+  "project_lab": "math-technique-playground"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "greedy-activity-selection",
+  "title": "Greedy: activity selection",
+  "skill_ids": ["dsa.techniques.greedy", "dsa.techniques.interval_scheduling", "dsa.techniques.greedy_proof"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["activity_selection.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/greedy-activity-selection/work exercises/greedy-activity-selection/tests/tests.cpp -o exercises/greedy-activity-selection/work/run",
+  "test_command": "exercises/greedy-activity-selection/work/run",
+  "required_tests": ["test_classic", "test_empty", "test_single", "test_all_overlap", "test_all_disjoint", "test_touching_is_compatible"],
+  "hints": [
+    "Sort activities by their end time.",
+    "Greedily take an activity whenever its start is >= the last taken end.",
+    "Touching intervals (end == next start) are compatible."
+  ],
+  "project_lab": "math-technique-playground"
+}
