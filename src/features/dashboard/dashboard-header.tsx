@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { CalendarClock, Code2, FlaskConical, Library, ListChecks, Settings, Target, UserCircle } from "lucide-react";
+import { CalendarClock, Code2, FlaskConical, Library, ListChecks, NotebookPen, Settings, Target, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const links = [
+  ["/my-content", "My Content", NotebookPen],
   ["/resources", "Resources", Library],
   ["/labs", "Labs", FlaskConical],
   ["/placement", "Placement", ListChecks],
