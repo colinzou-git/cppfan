@@ -3,6 +3,7 @@ import {
   MAX_ATTACHMENT_BYTES,
   attachmentKindForMime,
   buildAttachmentPath,
+  isLearnerResourceFile,
   sanitizeFilename,
   validateAttachmentUpload
 } from "@/features/user-content/attachment-upload";
@@ -28,6 +29,13 @@ describe("attachment-upload helpers (#487)", () => {
     expect(path).toBe("u-1/c-1/a-1/Photo 2.png");
     expect(path.split("/")[0]).toBe("u-1");
     expect(path.split("/")[1]).toBe("c-1");
+  });
+
+  it("selects only learner-visible stored files for the learner page", () => {
+    expect(isLearnerResourceFile({ kind: "image", visibility: "learner_resource", storagePath: "u/c/a/x.png" })).toBe(true);
+    expect(isLearnerResourceFile({ kind: "pdf", visibility: "author_source", storagePath: "u/c/a/x.pdf" })).toBe(false);
+    expect(isLearnerResourceFile({ kind: "url", visibility: "learner_resource", storagePath: null })).toBe(false);
+    expect(isLearnerResourceFile({ kind: "image", visibility: "learner_resource", storagePath: null })).toBe(false);
   });
 
   it("validates uploads against the allowlist and size cap", () => {

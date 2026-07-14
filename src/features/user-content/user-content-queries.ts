@@ -9,6 +9,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { parseLessonPayload } from "./user-content-schema";
+import { isLearnerResourceFile } from "./attachment-upload";
 import type { AttachmentVisibility, LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
 
 export type UserContentAttachment = {
@@ -110,6 +111,37 @@ function toSummary(row: ItemRow): UserContentSummary {
 }
 
 /** The signed-in user's content items, most-recently-updated first. */
+export type SignedAttachment = { id: string; kind: UserContentAttachment["kind"]; filename: string | null; url: string };
+
+/**
+ * Learner-visible attachments for a published user lesson, each with a
+ * short-lived signed URL (the bucket is private). Author-source attachments and
+ * external references are excluded. Returns [] without a backend or when none.
+ */
+export async function getLearnerResourceAttachments(contentId: string): Promise<SignedAttachment[]> {
+  const files = (await getAttachmentsForOwner(contentId)).filter((a) => isLearnerResourceFile(a));
+  if (files.length === 0) {
+    return [];
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return [];
+  }
+  const signed: SignedAttachment[] = [];
+  for (const attachment of files) {
+    if (!attachment.storagePath) {
+      continue;
+    }
+    const { data } = await supabase.storage
+      .from("user-content-attachments")
+      .createSignedUrl(attachment.storagePath, 300);
+    if (data?.signedUrl) {
+      signed.push({ id: attachment.id, kind: attachment.kind, filename: attachment.filename, url: data.signedUrl });
+    }
+  }
+  return signed;
+}
+
 export async function getMyContentItems(): Promise<UserContentSummary[]> {
   const supabase = await createClient();
   if (!supabase) {

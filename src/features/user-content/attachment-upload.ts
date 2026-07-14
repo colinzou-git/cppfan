@@ -66,6 +66,23 @@ export function buildAttachmentPath(
   return `${userId}/${contentId}/${attachmentId}/${sanitizeFilename(filename)}`;
 }
 
+/**
+ * A learner-facing resource is a learner_resource-visibility file/image/PDF that
+ * actually has a stored object. Author-source attachments and external refs are
+ * excluded from the published page.
+ */
+export function isLearnerResourceFile(attachment: {
+  kind: string;
+  visibility: string;
+  storagePath: string | null;
+}): boolean {
+  return (
+    attachment.visibility === "learner_resource" &&
+    (attachment.kind === "file" || attachment.kind === "image" || attachment.kind === "pdf") &&
+    Boolean(attachment.storagePath)
+  );
+}
+
 export type UploadValidation = { ok: true; kind: FileAttachmentKind } | { ok: false; reason: string };
 
 /** Validate a candidate upload against the MIME allowlist and size cap. */
