@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
+import { ContentRowActions } from "@/features/user-content/content-row-actions";
 import { getMyContentItems } from "@/features/user-content/user-content-queries";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
 import {
@@ -76,7 +77,7 @@ export default async function MyContentPage({
           ) : (
             <ul className="grid gap-3">
               {visible.map((item) => (
-                <li key={item.id} className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
+                <li key={item.id} className="grid gap-3 rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
                   <Link href={`/my-content/lessons/${item.id}/edit`} className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -89,6 +90,7 @@ export default async function MyContentPage({
                     </div>
                     <span className="text-sm font-bold text-blue-700">Edit →</span>
                   </Link>
+                  <ContentRowActions contentId={item.id} status={item.lifecycleStatus} revision={item.draftRevision} />
                 </li>
               ))}
             </ul>
