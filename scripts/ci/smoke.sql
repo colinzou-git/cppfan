@@ -849,3 +849,47 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content publish/projection smoke OK';
 end $$;
+
+-- 27) #487: multiple-choice publish projects gradeable choices (answer key
+-- server-side), and re-publishing as a plain lesson clears them. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000ad';
+  v_content uuid;
+  v_item text;
+  v_choices integer;
+  v_correct integer;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-mc@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'MC', null, true, 1,
+    '{"itemType":"multiple_choice","title":"MC","content":"pick","explanation":"e","choices":[{"text":"A","isCorrect":true},{"text":"B","isCorrect":false},{"text":"C","isCorrect":false}]}'::jsonb, null);
+  select out_learning_item_id into v_item from public.publish_user_content(v_content, null);
+
+  select count(*) into v_choices from public.learning_item_choices where learning_item_id = v_item;
+  if v_choices <> 3 then
+    raise exception '#487: MC publish should project 3 choices, got %', v_choices;
+  end if;
+  select count(*) into v_correct from public.learning_item_choices where learning_item_id = v_item and is_correct;
+  if v_correct <> 1 then
+    raise exception '#487: MC publish should mark exactly one correct, got %', v_correct;
+  end if;
+  if not exists (select 1 from public.learning_items where id = v_item and type = 'multiple_choice') then
+    raise exception '#487: MC publish should project a multiple_choice item';
+  end if;
+
+  -- Re-publish as a plain lesson -> projected choices must be cleared.
+  perform public.save_user_content_draft(v_content, 'lesson', 'Plain', null, true, 1,
+    '{"itemType":"lesson","title":"Plain","content":"c","explanation":"e"}'::jsonb, null);
+  perform public.publish_user_content(v_content, null);
+  select count(*) into v_choices from public.learning_item_choices where learning_item_id = v_item;
+  if v_choices <> 0 then
+    raise exception '#487: republishing as a lesson should clear projected choices, got %', v_choices;
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content choices projection smoke OK';
+end $$;
