@@ -786,3 +786,66 @@ begin
   raise notice 'user content projection RLS smoke OK';
 end $$;
 rollback;
+
+-- 26) #487: publish + projection. Save a lesson draft, publish it, and assert
+-- the owner-scoped skill/learning-item projection + primary mapping + version
+-- freeze; then archive (projection deactivated), restore (reactivated), and
+-- delete_all (must not hit the content_version_id RESTRICT FK and must remove
+-- the projected rows). Cleans itself up so seed parity is unaffected.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000ac';
+  v_content uuid;
+  v_skill text;
+  v_item text;
+  v_status text;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-pub@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'Pub Lesson', null, true, 1,
+    '{"itemType":"lesson","title":"Pub Lesson","content":"body","explanation":"expl"}'::jsonb, null);
+
+  select skill_id, learning_item_id into v_skill, v_item
+    from public.publish_user_content(v_content, null);
+
+  if v_skill <> 'user.skill.' || v_content::text then
+    raise exception '#487: publish returned wrong skill id %', v_skill;
+  end if;
+  if not exists (select 1 from public.skills where id = v_skill and owner_user_id = v_uid and source_kind = 'user' and is_active) then
+    raise exception '#487: publish should project an active owner-scoped skill';
+  end if;
+  if not exists (select 1 from public.learning_items where id = v_item and owner_user_id = v_uid and source_kind = 'user' and type = 'lesson') then
+    raise exception '#487: publish should project an owner-scoped learning item';
+  end if;
+  if not exists (select 1 from public.learning_item_skills where learning_item_id = v_item and skill_id = v_skill and is_primary) then
+    raise exception '#487: publish should map the item to its skill as primary';
+  end if;
+  if not exists (select 1 from public.user_content_items where id = v_content and lifecycle_status = 'published' and current_published_version_id is not null and current_draft_version_id is null) then
+    raise exception '#487: publish should mark the item published and clear the draft pointer';
+  end if;
+  if not exists (select 1 from public.user_content_versions where content_item_id = v_content and version_state = 'published') then
+    raise exception '#487: publish should freeze a published version';
+  end if;
+
+  perform public.archive_user_content(v_content);
+  if exists (select 1 from public.skills where content_item_id = v_content and is_active) then
+    raise exception '#487: archive should deactivate the projected skill';
+  end if;
+
+  select lifecycle_status into v_status from public.restore_user_content(v_content);
+  if v_status <> 'published' or not exists (select 1 from public.skills where content_item_id = v_content and is_active) then
+    raise exception '#487: restore should reactivate the published projection';
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  if exists (select 1 from public.skills where content_item_id = v_content)
+     or exists (select 1 from public.learning_items where content_item_id = v_content)
+     or exists (select 1 from public.user_content_items where id = v_content) then
+    raise exception '#487: delete_all should remove the item and its projected rows';
+  end if;
+
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content publish/projection smoke OK';
+end $$;
