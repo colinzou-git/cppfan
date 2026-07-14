@@ -217,7 +217,14 @@ export function LessonEditor({
     <div className="grid gap-4 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <Link href="/my-content" className="text-sm font-bold text-blue-700">← My Content</Link>
-        <span className="text-xs font-semibold text-slate-500">Status: {lifecycle}</span>
+        <div className="flex items-center gap-3">
+          {contentId ? (
+            <Link href={`/my-content/lessons/${contentId}/preview`} className="text-sm font-bold text-blue-700">
+              Preview
+            </Link>
+          ) : null}
+          <span className="text-xs font-semibold text-slate-500">Status: {lifecycle}</span>
+        </div>
       </div>
 
       <label className="grid gap-1 text-sm font-semibold text-slate-700">
