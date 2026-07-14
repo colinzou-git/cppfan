@@ -10,6 +10,7 @@ import {
   restoreContent
 } from "./user-content-actions";
 import { DeleteContentDialog } from "./delete-content-dialog";
+import { buildUserContentZip } from "./user-content-export";
 import type { UserContentLifecycle } from "./user-content-types";
 
 const ERRORS: Record<string, string> = {
@@ -58,11 +59,11 @@ export function ContentRowActions({
       setMessage(ERRORS[result.status] ?? ERRORS.error);
       return;
     }
-    const blob = new Blob([JSON.stringify(result.export, null, 2)], { type: "application/json" });
+    const blob = new Blob([buildUserContentZip(result.export)], { type: "application/zip" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `cppfan-lesson-${contentId}.json`;
+    anchor.download = `cppfan-lesson-${contentId}.zip`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();

@@ -8,6 +8,7 @@
  * the manifest; EXPORT_SCHEMA_VERSION guards its shape.
  */
 
+import { createStoreZip } from "./zip";
 import type { LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
 
 export const EXPORT_SCHEMA_VERSION = 1;
@@ -131,4 +132,18 @@ export function buildUserContentExport(
     publishedPayload,
     markdown: forMarkdown ? buildLessonMarkdown(forMarkdown) : ""
   };
+}
+
+/**
+ * Package an export as a portable ZIP: a schema-versioned `manifest.json` (which
+ * a future import can consume) plus a human-readable `lesson.md`. Binary
+ * attachments are added here once Storage uploads land; external references
+ * already travel inside the manifest.
+ */
+export function buildUserContentZip(data: UserContentExport): Uint8Array<ArrayBuffer> {
+  const encoder = new TextEncoder();
+  return createStoreZip([
+    { name: "manifest.json", data: encoder.encode(JSON.stringify(data, null, 2)) },
+    { name: "lesson.md", data: encoder.encode(data.markdown) }
+  ]);
 }
