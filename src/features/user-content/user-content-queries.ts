@@ -18,6 +18,7 @@ export type UserContentAttachment = {
   visibility: AttachmentVisibility;
   externalUrl: string | null;
   referencedLearningItemId: string | null;
+  storagePath: string | null;
   filename: string | null;
   createdAt: string;
 };
@@ -29,6 +30,7 @@ type AttachmentRow = {
   visibility: AttachmentVisibility;
   external_url: string | null;
   referenced_learning_item_id: string | null;
+  storage_path: string | null;
   filename: string | null;
   created_at: string;
 };
@@ -44,7 +46,7 @@ export async function getAttachmentsForOwner(contentId: string): Promise<UserCon
   }
   const { data, error } = await supabase
     .from("user_content_attachments")
-    .select("id,content_item_id,attachment_kind,visibility,external_url,referenced_learning_item_id,filename,created_at")
+    .select("id,content_item_id,attachment_kind,visibility,external_url,referenced_learning_item_id,storage_path,filename,created_at")
     .eq("content_item_id", contentId)
     .order("created_at", { ascending: true });
   if (error || !data) {
@@ -57,6 +59,7 @@ export async function getAttachmentsForOwner(contentId: string): Promise<UserCon
     visibility: r.visibility,
     externalUrl: r.external_url,
     referencedLearningItemId: r.referenced_learning_item_id,
+    storagePath: r.storage_path,
     filename: r.filename,
     createdAt: r.created_at
   }));
