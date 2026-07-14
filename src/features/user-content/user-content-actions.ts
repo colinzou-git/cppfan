@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
+import { buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { UserContentKind, ValidationIssue } from "./user-content-types";
 
 export type SaveDraftInput = {
@@ -164,4 +165,37 @@ export async function deleteContent(contentId: string, mode: DeleteMode): Promis
     return { status: "error" };
   }
   return callSimpleRpc("delete_user_content", { p_content_id: contentId, p_mode: mode });
+}
+
+export type ExportResult =
+  | { status: "ok"; export: UserContentExport }
+  | { status: "not_found" }
+  | { status: "unconfigured" }
+  | { status: "error" };
+
+/** Build a portable export (schema-versioned manifest + Markdown) for one item. */
+export async function exportContent(contentId: string): Promise<ExportResult> {
+  if (typeof contentId !== "string" || contentId.length === 0) {
+    return { status: "error" };
+  }
+  const detail = await getContentItemForOwner(contentId);
+  if (detail === null) {
+    const probe = await createClient();
+    return probe ? { status: "not_found" } : { status: "unconfigured" };
+  }
+  const data = buildUserContentExport(
+    {
+      id: detail.id,
+      kind: detail.kind,
+      title: detail.title,
+      lifecycleStatus: detail.lifecycleStatus,
+      nativeModuleId: detail.nativeModuleId,
+      draftRevision: detail.draftRevision,
+      updatedAt: detail.updatedAt,
+      publishedAt: detail.publishedAt
+    },
+    detail.draftPayload,
+    detail.publishedPayload
+  );
+  return { status: "ok", export: data };
 }
