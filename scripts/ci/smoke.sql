@@ -1042,3 +1042,62 @@ begin
   delete from auth.users where id in (v_a, v_b);
   raise notice 'user content storage bucket + RLS smoke OK';
 end $$;
+
+-- 31) #487: add_file_attachment records an uploaded-file metadata row for the
+-- owner, validates the storage path lives under <uid>/<contentId>/, and rejects
+-- foreign paths, bad kinds, and out-of-range sizes. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000b2';
+  v_other uuid := '00000000-0000-0000-0000-0000000000b3';
+  v_content uuid;
+  v_att uuid;
+  v_kind text;
+  v_path text;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-file@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'Files', null, true, 1,
+    '{"itemType":"lesson","title":"Files","content":"c","explanation":"e"}'::jsonb, null);
+
+  v_path := v_uid::text || '/' || v_content::text || '/att1/diagram.png';
+  v_att := public.add_file_attachment(v_content, 'image', 'learner_resource', v_path, 'diagram.png', 'image/png', 1234);
+  select attachment_kind, storage_path into v_kind, v_path
+    from public.user_content_attachments where id = v_att and user_id = v_uid;
+  if v_kind <> 'image' then
+    raise exception '#487: file attachment not stored as expected';
+  end if;
+
+  -- Path under another user's namespace is rejected.
+  begin
+    perform public.add_file_attachment(v_content, 'pdf', 'author_source',
+      v_other::text || '/' || v_content::text || '/att2/x.pdf', 'x.pdf', 'application/pdf', 10);
+    raise exception '#487: foreign storage path should be rejected';
+  exception when others then
+    if sqlstate <> '22023' then raise; end if;
+  end;
+
+  -- Non-file kind is rejected by this RPC.
+  begin
+    perform public.add_file_attachment(v_content, 'url', 'author_source',
+      v_uid::text || '/' || v_content::text || '/att3/f', 'f', 'text/plain', 10);
+    raise exception '#487: non-file kind should be rejected';
+  exception when others then
+    if sqlstate <> '22023' then raise; end if;
+  end;
+
+  -- Oversized upload is rejected.
+  begin
+    perform public.add_file_attachment(v_content, 'file', 'author_source',
+      v_uid::text || '/' || v_content::text || '/att4/big', 'big', 'text/plain', 999999999);
+    raise exception '#487: oversized file should be rejected';
+  exception when others then
+    if sqlstate <> '22023' then raise; end if;
+  end;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content file attachment smoke OK';
+end $$;
