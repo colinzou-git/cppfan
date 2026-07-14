@@ -12,6 +12,8 @@ import { MathVisualization } from "./math-visualization";
 import { MaybeCodeLab } from "@/features/code-lab/maybe-code-lab";
 import { isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
 import { AddToReviewButton } from "@/features/review/add-to-review-button";
+import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
+import { isUserLearningItemId } from "@/features/user-content/user-content-id";
 import {
   getPublicCompletionBlanksForItem,
   getPublicParsonsBlocksForItem,
@@ -57,12 +59,15 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-blue-100 text-blue-700">
           <BookOpen className="h-5 w-5" />
         </div>
-        <span
-          className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-600"
-          data-testid="learning-item-type"
-        >
-          {TYPE_LABELS[item.type]}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-600"
+            data-testid="learning-item-type"
+          >
+            {TYPE_LABELS[item.type]}
+          </span>
+          {isUserLearningItemId(item.id) ? <ContentSourceBadge source="user" /> : null}
+        </div>
         <CardTitle className="mt-2">{item.title}</CardTitle>
         <CardDescription>
           {item.difficulty} · about {item.estimated_minutes} min
