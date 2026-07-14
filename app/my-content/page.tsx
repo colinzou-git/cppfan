@@ -4,12 +4,27 @@ import { Button } from "@/components/ui/button";
 import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 import { getMyContentItems } from "@/features/user-content/user-content-queries";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
+import {
+  CONTENT_STATUS_FILTERS,
+  STATUS_FILTER_LABELS,
+  filterByStatus,
+  parseStatusFilter,
+  statusCounts
+} from "@/features/user-content/content-filters";
 
 export const dynamic = "force-dynamic";
 
-export default async function MyContentPage() {
+export default async function MyContentPage({
+  searchParams
+}: {
+  searchParams: Promise<{ status?: string | string[] }>;
+}) {
   await requireOwnerSession("/my-content");
+  const { status } = await searchParams;
+  const filter = parseStatusFilter(status);
   const items = await getMyContentItems();
+  const counts = statusCounts(items);
+  const visible = filterByStatus(items, filter);
 
   return (
     <PageShell className="grid gap-6" size="reading">
@@ -33,24 +48,52 @@ export default async function MyContentPage() {
           </Button>
         </div>
       ) : (
-        <ul className="grid gap-3">
-          {items.map((item) => (
-            <li key={item.id} className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
-              <Link href={`/my-content/lessons/${item.id}/edit`} className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-bold text-slate-900">{item.title || "Untitled lesson"}</span>
-                    <ContentSourceBadge source="user" />
-                  </div>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {item.kind} · {item.lifecycleStatus} · updated {new Date(item.updatedAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className="text-sm font-bold text-blue-700">Edit →</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          <nav aria-label="Filter by status" className="flex flex-wrap gap-2">
+            {CONTENT_STATUS_FILTERS.map((key) => {
+              const active = key === filter;
+              return (
+                <Link
+                  key={key}
+                  href={key === "all" ? "/my-content" : `/my-content?status=${key}`}
+                  aria-current={active ? "page" : undefined}
+                  className={
+                    active
+                      ? "rounded-full bg-slate-900 px-3 py-1 text-sm font-bold text-white"
+                      : "rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-600 hover:border-slate-300"
+                  }
+                >
+                  {STATUS_FILTER_LABELS[key]} ({counts[key]})
+                </Link>
+              );
+            })}
+          </nav>
+
+          {visible.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-sm text-slate-600">
+              No {STATUS_FILTER_LABELS[filter].toLowerCase()} lessons yet.
+            </div>
+          ) : (
+            <ul className="grid gap-3">
+              {visible.map((item) => (
+                <li key={item.id} className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
+                  <Link href={`/my-content/lessons/${item.id}/edit`} className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-bold text-slate-900">{item.title || "Untitled lesson"}</span>
+                        <ContentSourceBadge source="user" />
+                      </div>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {item.kind} · {item.lifecycleStatus} · updated {new Date(item.updatedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold text-blue-700">Edit →</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </PageShell>
   );
