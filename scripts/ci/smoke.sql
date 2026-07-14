@@ -893,3 +893,45 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content choices projection smoke OK';
 end $$;
+
+-- 28) #487: parsons/completion publish projects gradeable blocks/blanks
+-- (answer key server-side). Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000ae';
+  v_content uuid;
+  v_item text;
+  v_blocks integer;
+  v_blanks integer;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-pc@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'P', null, true, 1,
+    '{"itemType":"parsons","title":"P","content":"order","explanation":"e","parsonsBlocks":[{"text":"a","correctOrder":0,"isDistractor":false},{"text":"b","correctOrder":1,"isDistractor":false},{"text":"x","correctOrder":0,"isDistractor":true}]}'::jsonb, null);
+  select out_learning_item_id into v_item from public.publish_user_content(v_content, null);
+  select count(*) into v_blocks from public.learning_item_parsons_blocks where learning_item_id = v_item;
+  if v_blocks <> 3 then
+    raise exception '#487: parsons publish should project 3 blocks, got %', v_blocks;
+  end if;
+  if not exists (select 1 from public.learning_item_parsons_blocks where learning_item_id = v_item and is_distractor) then
+    raise exception '#487: parsons projection should keep the distractor flag';
+  end if;
+  perform public.delete_user_content(v_content, 'delete_all');
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'C', null, true, 1,
+    '{"itemType":"completion","title":"C","content":"fill __","explanation":"e","completionBlanks":[{"position":0,"answer":"int"},{"position":1,"answer":"main"}]}'::jsonb, null);
+  select out_learning_item_id into v_item from public.publish_user_content(v_content, null);
+  select count(*) into v_blanks from public.learning_item_completion_blanks where learning_item_id = v_item;
+  if v_blanks <> 2 then
+    raise exception '#487: completion publish should project 2 blanks, got %', v_blanks;
+  end if;
+  if not exists (select 1 from public.learning_item_completion_blanks where learning_item_id = v_item and answer = 'main') then
+    raise exception '#487: completion projection should keep the answer';
+  end if;
+  perform public.delete_user_content(v_content, 'delete_all');
+
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content parsons/completion projection smoke OK';
+end $$;
