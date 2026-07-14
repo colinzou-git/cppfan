@@ -634,3 +634,44 @@ begin
 
   raise notice 'skill_events event_type integrity smoke OK';
 end $$;
+
+-- 23) #487: private user-created content tables exist, have RLS enabled, and
+-- grant the owning authenticated role full CRUD. Rows are owner-scoped by the
+-- policies created in the migration; two-user isolation is exercised by the
+-- authenticated integration tests once the lifecycle RPCs land.
+do $$
+declare
+  t text;
+  tables text[] := array[
+    'user_content_items', 'user_content_versions', 'user_content_attachments'
+  ];
+  priv text;
+begin
+  foreach t in array tables loop
+    if not exists (
+      select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relname = t
+    ) then
+      raise exception '#487: table public.% is missing', t;
+    end if;
+    if not exists (
+      select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relname = t and c.relrowsecurity
+    ) then
+      raise exception '#487: table public.% must have row level security enabled', t;
+    end if;
+    foreach priv in array array['SELECT', 'INSERT', 'UPDATE', 'DELETE'] loop
+      if not has_table_privilege('authenticated', format('public.%I', t), priv) then
+        raise exception '#487: authenticated should have % on public.%', priv, t;
+      end if;
+    end loop;
+  end loop;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'user_content_items_current_published_version_fk'
+  ) then
+    raise exception '#487: user_content_items current-version FK is missing';
+  end if;
+
+  raise notice 'user content tables smoke OK';
+end $$;
