@@ -1,0 +1,127 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createClient } from "@/lib/supabase/server";
+import { getContentItemForOwner } from "@/features/user-content/user-content-queries";
+import {
+  archiveContent,
+  deleteContent,
+  publishContent,
+  saveLessonDraft
+} from "@/features/user-content/user-content-actions";
+import { CURRENT_LESSON_SCHEMA_VERSION, type LessonPayload } from "@/features/user-content/user-content-types";
+
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/features/user-content/user-content-queries", () => ({ getContentItemForOwner: vi.fn() }));
+
+const mockedCreate = vi.mocked(createClient);
+const mockedDetail = vi.mocked(getContentItemForOwner);
+
+function rpcClient(impl: (fn: string, args: Record<string, unknown>) => { data?: unknown; error?: unknown }) {
+  return { rpc: vi.fn(async (fn: string, args: Record<string, unknown>) => impl(fn, args)) } as unknown as NonNullable<
+    Awaited<ReturnType<typeof createClient>>
+  >;
+}
+
+const validPayload = { itemType: "lesson", title: "T", content: "C", explanation: "E" };
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockedCreate.mockResolvedValue(null);
+});
+
+describe("saveLessonDraft (#487)", () => {
+  it("rejects an invalid payload before touching the backend", async () => {
+    const result = await saveLessonDraft({ title: "", payload: { itemType: "lesson", title: "", content: "", explanation: "" } });
+    expect(result.status).toBe("invalid");
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("reports unconfigured when there is no backend", async () => {
+    const result = await saveLessonDraft({ title: "T", payload: validPayload });
+    expect(result.status).toBe("unconfigured");
+  });
+
+  it("returns the RPC result on success", async () => {
+    mockedCreate.mockResolvedValue(
+      rpcClient(() => ({
+        data: [{ content_id: "c1", draft_version_id: "v1", revision: 1, saved_at: "2026-01-01T00:00:00Z" }],
+        error: null
+      }))
+    );
+    const result = await saveLessonDraft({ title: "T", payload: validPayload });
+    expect(result).toMatchObject({ status: "ok", contentId: "c1", draftVersionId: "v1", revision: 1 });
+  });
+
+  it("maps a 40001 error to a conflict", async () => {
+    mockedCreate.mockResolvedValue(rpcClient(() => ({ data: null, error: { code: "40001" } })));
+    const result = await saveLessonDraft({ contentId: "c1", title: "T", expectedRevision: 1, payload: validPayload });
+    expect(result.status).toBe("conflict");
+  });
+});
+
+describe("publishContent (#487)", () => {
+  function detail(overrides: Partial<LessonPayload>): Awaited<ReturnType<typeof getContentItemForOwner>> {
+    return {
+      id: "c1",
+      kind: "lesson",
+      title: "T",
+      lifecycleStatus: "draft",
+      recommendationEnabled: true,
+      draftRevision: 1,
+      updatedAt: "2026-01-01T00:00:00Z",
+      publishedAt: null,
+      nativeModuleId: null,
+      publishedPayload: null,
+      draftPayload: {
+        schemaVersion: CURRENT_LESSON_SCHEMA_VERSION,
+        itemType: "lesson",
+        title: "T",
+        content: "C",
+        explanation: "E",
+        ...overrides
+      }
+    };
+  }
+
+  it("blocks publishing a draft that fails type-specific validation", async () => {
+    mockedDetail.mockResolvedValue(detail({ itemType: "multiple_choice", choices: [] }));
+    const result = await publishContent({ contentId: "c1" });
+    expect(result.status).toBe("invalid");
+  });
+
+  it("publishes a valid draft and returns the projected ids", async () => {
+    mockedDetail.mockResolvedValue(detail({}));
+    mockedCreate.mockResolvedValue(
+      rpcClient(() => ({
+        data: [{ out_content_id: "c1", out_skill_id: "user.skill.c1", out_learning_item_id: "user.item.c1", out_version_number: 1 }],
+        error: null
+      }))
+    );
+    const result = await publishContent({ contentId: "c1", expectedRevision: 1 });
+    expect(result).toMatchObject({ status: "ok", skillId: "user.skill.c1", learningItemId: "user.item.c1", versionNumber: 1 });
+  });
+
+  it("reports not_found when the item is not visible but the backend is configured", async () => {
+    mockedDetail.mockResolvedValue(null);
+    mockedCreate.mockResolvedValue(rpcClient(() => ({ data: null, error: null })));
+    const result = await publishContent({ contentId: "missing" });
+    expect(result.status).toBe("not_found");
+  });
+});
+
+describe("lifecycle actions (#487)", () => {
+  it("archive/delete report unconfigured without a backend", async () => {
+    expect((await archiveContent("c1")).status).toBe("unconfigured");
+    expect((await deleteContent("c1", "delete_all")).status).toBe("unconfigured");
+  });
+
+  it("rejects a bad delete mode", async () => {
+    const result = await deleteContent("c1", "nuke" as unknown as "delete_all");
+    expect(result.status).toBe("error");
+  });
+
+  it("returns ok when the RPC succeeds", async () => {
+    mockedCreate.mockResolvedValue(rpcClient(() => ({ error: null })));
+    expect((await archiveContent("c1")).status).toBe("ok");
+  });
+});
