@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
 import { buildUserContentExport, type UserContentExport } from "./user-content-export";
-import type { UserContentKind, ValidationIssue } from "./user-content-types";
+import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
 export type SaveDraftInput = {
   contentId?: string | null;
@@ -198,4 +198,69 @@ export async function exportContent(contentId: string): Promise<ExportResult> {
     detail.publishedPayload
   );
   return { status: "ok", export: data };
+}
+
+export type ExternalAttachmentKind = "url" | "github_url" | "lesson_ref";
+
+export type AddAttachmentInput = {
+  contentId: string;
+  kind: ExternalAttachmentKind;
+  visibility: AttachmentVisibility;
+  externalUrl?: string | null;
+  referencedLearningItemId?: string | null;
+  filename?: string | null;
+};
+
+export type AddAttachmentResult =
+  | { status: "ok"; attachmentId: string }
+  | { status: "invalid"; message: string }
+  | { status: "unconfigured" }
+  | { status: "error" };
+
+export async function addExternalAttachment(input: AddAttachmentInput): Promise<AddAttachmentResult> {
+  const kind = input?.kind;
+  if (!["url", "github_url", "lesson_ref"].includes(kind)) {
+    return { status: "invalid", message: "unsupported attachment kind" };
+  }
+  if (!input?.contentId) {
+    return { status: "error" };
+  }
+  if ((kind === "url" || kind === "github_url") && !/^https:\/\//i.test(input.externalUrl ?? "")) {
+    return { status: "invalid", message: "external URLs must be https" };
+  }
+  if (kind === "lesson_ref" && !(input.referencedLearningItemId ?? "").trim()) {
+    return { status: "invalid", message: "a lesson reference needs a learning item id" };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("add_external_attachment", {
+    p_content_id: input.contentId,
+    p_kind: kind,
+    p_visibility: input.visibility,
+    p_external_url: input.externalUrl ?? null,
+    p_referenced_learning_item_id: input.referencedLearningItemId ?? null,
+    p_filename: input.filename ?? null
+  });
+  if (error) {
+    return error.code === "22023" ? { status: "invalid", message: "attachment rejected" } : { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return { status: "ok", attachmentId: data as string };
+}
+
+export async function setAttachmentVisibility(attachmentId: string, visibility: AttachmentVisibility): Promise<LifecycleResult> {
+  if (!attachmentId || !["author_source", "learner_resource"].includes(visibility)) {
+    return { status: "error" };
+  }
+  return callSimpleRpc("set_attachment_visibility", { p_attachment_id: attachmentId, p_visibility: visibility });
+}
+
+export async function removeAttachment(attachmentId: string): Promise<LifecycleResult> {
+  if (!attachmentId) {
+    return { status: "error" };
+  }
+  return callSimpleRpc("delete_attachment", { p_attachment_id: attachmentId });
 }

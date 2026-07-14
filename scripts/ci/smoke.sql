@@ -935,3 +935,58 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content parsons/completion projection smoke OK';
 end $$;
+
+-- 29) #487: external attachment RPCs. Add a URL attachment, reject an http url
+-- and an id-less lesson ref, flip visibility, and delete. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000af';
+  v_content uuid;
+  v_att uuid;
+  v_vis text;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-att@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'Att', null, true, 1,
+    '{"itemType":"lesson","title":"Att","content":"c","explanation":"e"}'::jsonb, null);
+
+  v_att := public.add_external_attachment(v_content, 'url', 'learner_resource', 'https://example.com/x', null, 'ref');
+  if not exists (
+    select 1 from public.user_content_attachments
+      where id = v_att and user_id = v_uid and attachment_kind = 'url'
+        and visibility = 'learner_resource' and external_url = 'https://example.com/x'
+  ) then
+    raise exception '#487: external URL attachment not stored as expected';
+  end if;
+
+  begin
+    perform public.add_external_attachment(v_content, 'url', 'author_source', 'http://insecure', null, null);
+    raise exception '#487: http url should be rejected';
+  exception when others then
+    if sqlstate <> '22023' then raise; end if;
+  end;
+
+  begin
+    perform public.add_external_attachment(v_content, 'lesson_ref', 'author_source', null, null, null);
+    raise exception '#487: lesson_ref without an id should be rejected';
+  exception when others then
+    if sqlstate <> '22023' then raise; end if;
+  end;
+
+  perform public.set_attachment_visibility(v_att, 'author_source');
+  select visibility into v_vis from public.user_content_attachments where id = v_att;
+  if v_vis <> 'author_source' then
+    raise exception '#487: set_attachment_visibility failed';
+  end if;
+
+  perform public.delete_attachment(v_att);
+  if exists (select 1 from public.user_content_attachments where id = v_att) then
+    raise exception '#487: delete_attachment failed';
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content external attachments smoke OK';
+end $$;
