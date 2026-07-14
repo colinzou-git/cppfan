@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { publishContent, saveLessonDraft } from "./user-content-actions";
+import { AiProposalPanel } from "./ai-proposal-panel";
+import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 import type { LessonPayload } from "./user-content-types";
 
@@ -158,6 +160,30 @@ export function LessonEditor({
     return () => window.clearTimeout(handle);
   }, [fields, save]);
 
+  // Apply AI proposal operations the editor's fields support (replace_field for
+  // title/content/explanation/difficulty). Richer ops are proposed but need the
+  // expanded editor to persist, so they are ignored here for now.
+  const applyAiOperations = useCallback(
+    (ops: AuthoringOperation[]) => {
+      const patch: Partial<EditorFields> = {};
+      for (const op of ops) {
+        if (op.type !== "replace_field") {
+          continue;
+        }
+        if (op.field === "title") patch.title = op.value;
+        else if (op.field === "content") patch.content = op.value;
+        else if (op.field === "explanation") patch.explanation = op.value;
+        else if (op.field === "difficulty" && (op.value === "beginner" || op.value === "intermediate" || op.value === "advanced")) {
+          patch.difficulty = op.value;
+        }
+      }
+      if (Object.keys(patch).length > 0) {
+        update(patch);
+      }
+    },
+    [update]
+  );
+
   const publish = useCallback(async () => {
     if (dirtyRef.current || !contentId) {
       await save();
@@ -280,6 +306,8 @@ export function LessonEditor({
           </span>
         ) : null}
       </div>
+
+      <AiProposalPanel contentId={contentId} onApply={applyAiOperations} />
     </div>
   );
 }
