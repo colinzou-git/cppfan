@@ -9,6 +9,7 @@ import {
   publishContent,
   restoreContent
 } from "./user-content-actions";
+import { DeleteContentDialog } from "./delete-content-dialog";
 import type { UserContentLifecycle } from "./user-content-types";
 
 const ERRORS: Record<string, string> = {
@@ -91,6 +92,7 @@ export function ContentRowActions({
       <button type="button" className={btn} disabled={pending} onClick={() => void doExport()}>
         Export
       </button>
+      <DeleteContentDialog contentId={contentId} onDeleted={() => router.refresh()} />
       {message ? <span className="text-xs font-semibold text-rose-700">{message}</span> : null}
     </div>
   );
