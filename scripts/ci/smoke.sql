@@ -743,3 +743,46 @@ begin
 
   raise notice 'user content lifecycle RPC smoke OK';
 end $$;
+
+-- 25) #487: owner-scoped read on the projection tables. Insert two user-owned
+-- skills (owner A and owner B), impersonate A, and confirm A sees only its own
+-- user skill while native (owner-null) skills remain visible. Wrapped in a
+-- rolled-back transaction so nothing persists (seed parity is unaffected).
+begin;
+do $$
+declare
+  v_a uuid := gen_random_uuid();
+  v_b uuid := gen_random_uuid();
+  v_seen_user integer;
+  v_seen_native integer;
+begin
+  insert into auth.users (id) values (v_a), (v_b);
+  insert into public.skills (id, domain, module_id, title, description, learner_goal, order_index, owner_user_id, source_kind)
+  values
+    ('user.skill.smoke-a', 'cpp', 'cpp.user_content', 'Smoke A', 'd', 'g', 1, v_a, 'user'),
+    ('user.skill.smoke-b', 'cpp', 'cpp.user_content', 'Smoke B', 'd', 'g', 1, v_b, 'user');
+
+  perform set_config('app.test_uid', v_a::text, true);
+  set local role authenticated;
+  select count(*) into v_seen_user from public.skills where source_kind = 'user';
+  select count(*) into v_seen_native from public.skills where owner_user_id is null;
+  reset role;
+
+  if v_seen_user <> 1 then
+    raise exception '#487: owner should see exactly its own user skill, saw %', v_seen_user;
+  end if;
+  if v_seen_native < 1 then
+    raise exception '#487: native (owner-null) skills must remain visible to a user, saw %', v_seen_native;
+  end if;
+
+  -- both projection tables carry the ownership/source columns
+  if not exists (
+    select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = 'learning_items' and column_name = 'owner_user_id'
+  ) then
+    raise exception '#487: learning_items.owner_user_id column is missing';
+  end if;
+
+  raise notice 'user content projection RLS smoke OK';
+end $$;
+rollback;
