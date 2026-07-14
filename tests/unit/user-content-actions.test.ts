@@ -2,10 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner } from "@/features/user-content/user-content-queries";
 import {
+  addExternalAttachment,
   archiveContent,
   deleteContent,
   publishContent,
-  saveLessonDraft
+  removeAttachment,
+  saveLessonDraft,
+  setAttachmentVisibility
 } from "@/features/user-content/user-content-actions";
 import { CURRENT_LESSON_SCHEMA_VERSION, type LessonPayload } from "@/features/user-content/user-content-types";
 
@@ -123,5 +126,27 @@ describe("lifecycle actions (#487)", () => {
   it("returns ok when the RPC succeeds", async () => {
     mockedCreate.mockResolvedValue(rpcClient(() => ({ error: null })));
     expect((await archiveContent("c1")).status).toBe("ok");
+  });
+});
+
+describe("attachment actions (#487)", () => {
+  it("validates external URLs and lesson refs before the backend", async () => {
+    expect((await addExternalAttachment({ contentId: "c1", kind: "url", visibility: "author_source", externalUrl: "http://x" })).status).toBe("invalid");
+    expect((await addExternalAttachment({ contentId: "c1", kind: "lesson_ref", visibility: "author_source" })).status).toBe("invalid");
+    expect((await addExternalAttachment({ contentId: "c1", kind: "bogus" as unknown as "url", visibility: "author_source" })).status).toBe("invalid");
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("reports unconfigured, then returns the new id on success", async () => {
+    expect((await addExternalAttachment({ contentId: "c1", kind: "url", visibility: "learner_resource", externalUrl: "https://ok.example" })).status).toBe("unconfigured");
+    mockedCreate.mockResolvedValue(rpcClient(() => ({ data: "att-1", error: null })));
+    const result = await addExternalAttachment({ contentId: "c1", kind: "url", visibility: "learner_resource", externalUrl: "https://ok.example" });
+    expect(result).toMatchObject({ status: "ok", attachmentId: "att-1" });
+  });
+
+  it("guards visibility and delete inputs", async () => {
+    expect((await setAttachmentVisibility("a1", "bad" as unknown as "author_source")).status).toBe("error");
+    expect((await removeAttachment("")).status).toBe("error");
+    expect((await removeAttachment("a1")).status).toBe("unconfigured");
   });
 });

@@ -9,7 +9,58 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { parseLessonPayload } from "./user-content-schema";
-import type { LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
+import type { AttachmentVisibility, LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
+
+export type UserContentAttachment = {
+  id: string;
+  contentItemId: string;
+  kind: "url" | "github_url" | "lesson_ref" | "file" | "image" | "pdf";
+  visibility: AttachmentVisibility;
+  externalUrl: string | null;
+  referencedLearningItemId: string | null;
+  filename: string | null;
+  createdAt: string;
+};
+
+type AttachmentRow = {
+  id: string;
+  content_item_id: string;
+  attachment_kind: UserContentAttachment["kind"];
+  visibility: AttachmentVisibility;
+  external_url: string | null;
+  referenced_learning_item_id: string | null;
+  filename: string | null;
+  created_at: string;
+};
+
+/** The owner's attachments for one content item (RLS keeps them owner-only). */
+export async function getAttachmentsForOwner(contentId: string): Promise<UserContentAttachment[]> {
+  if (typeof contentId !== "string" || contentId.length === 0) {
+    return [];
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return [];
+  }
+  const { data, error } = await supabase
+    .from("user_content_attachments")
+    .select("id,content_item_id,attachment_kind,visibility,external_url,referenced_learning_item_id,filename,created_at")
+    .eq("content_item_id", contentId)
+    .order("created_at", { ascending: true });
+  if (error || !data) {
+    return [];
+  }
+  return (data as AttachmentRow[]).map((r) => ({
+    id: r.id,
+    contentItemId: r.content_item_id,
+    kind: r.attachment_kind,
+    visibility: r.visibility,
+    externalUrl: r.external_url,
+    referencedLearningItemId: r.referenced_learning_item_id,
+    filename: r.filename,
+    createdAt: r.created_at
+  }));
+}
 
 export type UserContentSummary = {
   id: string;
