@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { LearningItemView } from "@/features/learning-items/learning-item-view";
+import { LearnerResources } from "@/features/user-content/learner-resources";
 import { getLearningItemWithDetails } from "@/features/learning-items/learning-item-queries";
 import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
 import { isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
@@ -43,7 +44,10 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
           <p className="mt-1">We couldn’t load it from the database just now. Please refresh or try again shortly.</p>
         </div>
       ) : (
-        <LearningItemView data={result.data} />
+        <>
+          <LearningItemView data={result.data} />
+          <LearnerResources itemId={result.data.item.id} />
+        </>
       )}
     </PageShell>
   );
