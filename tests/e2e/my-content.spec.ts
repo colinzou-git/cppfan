@@ -23,6 +23,7 @@ test.describe("My Content authoring (#487)", () => {
 
     await page.getByPlaceholder("Lesson title").fill("Pointers vs references");
     await page.getByPlaceholder("Teach the concept…").fill("A reference is an alias.");
+    await page.getByPlaceholder(/Why it matters/i).fill("References cannot be null or rebound.");
     await page.getByRole("button", { name: /save draft/i }).click();
 
     await expect(page.getByText(/saved locally only/i)).toBeVisible();
