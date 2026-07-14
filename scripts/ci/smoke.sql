@@ -675,3 +675,71 @@ begin
 
   raise notice 'user content tables smoke OK';
 end $$;
+
+-- 24) #487: user-content lifecycle RPCs. Impersonate a user via the app.test_uid
+-- GUC (the same mechanism the RLS-isolation smoke uses) and drive a real
+-- save -> update -> archive -> restore -> delete round-trip, asserting the
+-- optimistic-concurrency revision increments and the lifecycle transitions.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000ab';
+  v_content uuid;
+  v_rev bigint;
+  v_draft uuid;
+  v_status text;
+  v_versions integer;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-smoke@example.test')
+    on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  -- create
+  select content_id, revision into v_content, v_rev
+    from public.save_user_content_draft(null, 'lesson', 'Smoke Lesson', null, true, 1,
+      '{"itemType":"lesson","title":"Smoke Lesson","content":"c","explanation":"e"}'::jsonb, null);
+  if v_content is null or v_rev <> 1 then
+    raise exception '#487: save_user_content_draft create should return revision 1';
+  end if;
+  if not exists (select 1 from public.user_content_items where id = v_content and user_id = v_uid and draft_revision = 1) then
+    raise exception '#487: created content item row missing or wrong revision';
+  end if;
+
+  -- update (optimistic concurrency: expected revision 1 -> new revision 2, same version updated in place)
+  select revision, draft_version_id into v_rev, v_draft
+    from public.save_user_content_draft(v_content, 'lesson', 'Smoke Lesson v2', null, true, 1,
+      '{"itemType":"lesson","title":"Smoke Lesson v2","content":"c2","explanation":"e2"}'::jsonb, 1);
+  if v_rev <> 2 then
+    raise exception '#487: save update should bump revision to 2, got %', v_rev;
+  end if;
+  select count(*) into v_versions from public.user_content_versions where content_item_id = v_content;
+  if v_versions <> 1 then
+    raise exception '#487: draft update should reuse the single draft version, found % versions', v_versions;
+  end if;
+
+  -- stale revision should be rejected
+  begin
+    perform public.save_user_content_draft(v_content, 'lesson', 'stale', null, true, 1,
+      '{"itemType":"lesson","title":"stale","content":"c","explanation":"e"}'::jsonb, 1);
+    raise exception '#487: stale revision save should have been rejected';
+  exception when others then
+    if sqlstate <> '40001' then raise; end if;
+  end;
+
+  -- archive / restore
+  select lifecycle_status into v_status from public.archive_user_content(v_content);
+  if v_status <> 'archived' then raise exception '#487: archive should set archived'; end if;
+  select lifecycle_status into v_status from public.restore_user_content(v_content);
+  if v_status <> 'draft' then raise exception '#487: restore (no published version) should return to draft'; end if;
+
+  -- delete_all removes the item
+  perform public.delete_user_content(v_content, 'delete_all');
+  if exists (select 1 from public.user_content_items where id = v_content) then
+    raise exception '#487: delete_all should remove the content item';
+  end if;
+
+  -- cleanup impersonation + test user
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+
+  raise notice 'user content lifecycle RPC smoke OK';
+end $$;
