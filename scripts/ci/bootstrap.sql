@@ -42,3 +42,51 @@ grant usage on schema public to anon, authenticated, service_role;
 -- evaluated when we impersonate a user in the RLS-isolation smoke (#96).
 grant usage on schema auth to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
+
+-- Supabase also provides a `storage` schema (buckets/objects tables, the
+-- storage.foldername() path helper, and RLS on storage.objects). A plain
+-- Postgres does not, so stub the minimum the attachment-Storage migration needs:
+-- a bucket registry, an objects table with a name/owner column for owner-scoped
+-- RLS, and foldername(). Extra columns Supabase adds default harmlessly.
+create schema if not exists storage;
+
+create table if not exists storage.buckets (
+  id text primary key,
+  name text not null,
+  owner uuid,
+  public boolean not null default false,
+  file_size_limit bigint,
+  allowed_mime_types text[],
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text references storage.buckets (id),
+  name text,
+  owner uuid,
+  metadata jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_accessed_at timestamptz not null default now()
+);
+
+-- storage.foldername('uid/content/att/file.png') -> {uid,content,att}. Matches
+-- Supabase: returns the path segments before the final filename.
+create or replace function storage.foldername(name text)
+returns text[]
+language sql
+immutable
+as $$
+  select (string_to_array(name, '/'))[1:greatest(array_length(string_to_array(name, '/'), 1) - 1, 0)]
+$$;
+
+-- Supabase ships storage.objects with RLS already enabled; mirror that so the
+-- migration's policies are actually enforced when we impersonate a user in CI.
+alter table storage.objects enable row level security;
+
+grant usage on schema storage to anon, authenticated, service_role;
+grant all on storage.buckets to authenticated, service_role;
+grant all on storage.objects to authenticated, service_role;
+grant execute on function storage.foldername(text) to anon, authenticated, service_role;

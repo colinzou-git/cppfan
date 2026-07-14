@@ -990,3 +990,55 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content external attachments smoke OK';
 end $$;
+
+-- 30) #487: Storage bucket + owner-scoped RLS on storage.objects. The private
+-- bucket exists; foldername() extracts the owner segment; an authenticated user
+-- can insert/read only objects under their own uid path, not another user's.
+do $$
+declare
+  v_a uuid := '00000000-0000-0000-0000-0000000000b0';
+  v_b uuid := '00000000-0000-0000-0000-0000000000b1';
+  v_seen integer;
+  v_public boolean;
+begin
+  select public into v_public from storage.buckets where id = 'user-content-attachments';
+  if v_public is distinct from false then
+    raise exception '#487: user-content-attachments bucket must exist and be private';
+  end if;
+
+  if (storage.foldername(v_a::text || '/c1/att1/file.png')) <> array[v_a::text, 'c1', 'att1'] then
+    raise exception '#487: storage.foldername did not return the owner-namespaced segments';
+  end if;
+
+  insert into auth.users (id) values (v_a), (v_b) on conflict (id) do nothing;
+
+  perform set_config('app.test_uid', v_a::text, true);
+  set local role authenticated;
+
+  -- Owner-namespaced insert is allowed.
+  insert into storage.objects (bucket_id, name, owner)
+  values ('user-content-attachments', v_a::text || '/c1/att1/ok.png', v_a);
+
+  -- Writing under another user's namespace is blocked by RLS.
+  begin
+    insert into storage.objects (bucket_id, name, owner)
+    values ('user-content-attachments', v_b::text || '/c1/att1/nope.png', v_a);
+    raise exception '#487: RLS should block writing under another user path';
+  exception when insufficient_privilege then
+    null; -- expected
+  end;
+
+  -- The owner reads only their own object.
+  select count(*) into v_seen from storage.objects
+    where bucket_id = 'user-content-attachments';
+  if v_seen <> 1 then
+    raise exception '#487: owner saw % storage objects, expected exactly its own 1', v_seen;
+  end if;
+
+  reset role;
+  perform set_config('app.test_uid', '', true);
+
+  delete from storage.objects where owner = v_a;
+  delete from auth.users where id in (v_a, v_b);
+  raise notice 'user content storage bucket + RLS smoke OK';
+end $$;
