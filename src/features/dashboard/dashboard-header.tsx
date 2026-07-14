@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarClock, Code2, FlaskConical, Library, ListChecks, NotebookPen, Settings, Target, UserCircle } from "lucide-react";
+import { CalendarClock, Code2, FlaskConical, Library, ListChecks, NotebookPen, PenLine, Settings, Target, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const links = [
@@ -23,6 +23,7 @@ export function DashboardHeader() {
         <p className="mt-1 text-slate-600">Daily Review, goal learning, mastery, goals, and the skill map.</p>
       </div>
       <div className="flex flex-wrap gap-2 lg:justify-end">
+        <Button asChild><Link href="/my-content/lessons/new"><PenLine className="h-4 w-4" />Create a lesson</Link></Button>
         <Button asChild><Link href="/review"><CalendarClock className="h-4 w-4" />Review</Link></Button>
         {links.map(([href, label, Icon]) => (
           <Button asChild variant="secondary" key={href}>
