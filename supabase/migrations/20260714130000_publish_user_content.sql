@@ -15,7 +15,7 @@ create or replace function public.publish_user_content(
   p_content_id uuid,
   p_expected_revision bigint
 )
-returns table (content_id uuid, skill_id text, learning_item_id text, version_number integer)
+returns table (out_content_id uuid, out_skill_id text, out_learning_item_id text, out_version_number integer)
 language plpgsql
 security definer
 set search_path = public

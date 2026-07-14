@@ -806,7 +806,7 @@ begin
   select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'Pub Lesson', null, true, 1,
     '{"itemType":"lesson","title":"Pub Lesson","content":"body","explanation":"expl"}'::jsonb, null);
 
-  select skill_id, learning_item_id into v_skill, v_item
+  select out_skill_id, out_learning_item_id into v_skill, v_item
     from public.publish_user_content(v_content, null);
 
   if v_skill <> 'user.skill.' || v_content::text then
