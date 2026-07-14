@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { publishContent, saveLessonDraft } from "./user-content-actions";
 import { AiProposalPanel } from "./ai-proposal-panel";
 import { AttachmentManager } from "./attachment-manager";
-import type { UserContentAttachment } from "./user-content-queries";
+import { VersionHistory } from "./version-history";
+import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 import type { LessonPayload } from "./user-content-types";
@@ -62,13 +63,15 @@ export function LessonEditor({
   initialRevision,
   initialPayload,
   initialLifecycle,
-  initialAttachments = []
+  initialAttachments = [],
+  initialVersions = []
 }: {
   initialContentId?: string;
   initialRevision?: number;
   initialPayload?: LessonPayload | null;
   initialLifecycle?: string;
   initialAttachments?: UserContentAttachment[];
+  initialVersions?: ContentVersionSummary[];
 }) {
   const storageKey = `cppfan:user-content:lesson:${initialContentId ?? "new"}:v1`;
   const [fields, setFields] = useState<EditorFields>(() => fieldsFromPayload(initialPayload ?? null));
@@ -317,6 +320,13 @@ export function LessonEditor({
           </span>
         ) : null}
       </div>
+
+      <VersionHistory
+        contentId={contentId}
+        versions={initialVersions}
+        currentRevision={revisionRef.current}
+        onRestored={() => window.location.reload()}
+      />
 
       <AttachmentManager contentId={contentId} initialAttachments={initialAttachments} />
 

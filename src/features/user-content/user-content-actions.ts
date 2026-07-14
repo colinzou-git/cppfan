@@ -31,6 +31,45 @@ export type SaveDraftResult =
   | { status: "unconfigured" }
   | { status: "error" };
 
+/**
+ * Restore a prior version's content as the current draft (#487). Reads the
+ * chosen version's payload (owner-scoped RLS) and re-saves it as a new draft via
+ * the normal draft path, so history is preserved and a fresh draft revision is
+ * created. Publishing that draft later is a separate explicit action.
+ */
+export async function restoreVersionAsDraft(input: {
+  contentId: string;
+  versionNumber: number;
+  expectedRevision?: number | null;
+}): Promise<SaveDraftResult> {
+  if (!input?.contentId || !Number.isInteger(input?.versionNumber)) {
+    return { status: "error" };
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase
+    .from("user_content_versions")
+    .select("payload")
+    .eq("content_item_id", input.contentId)
+    .eq("version_number", input.versionNumber)
+    .maybeSingle();
+  if (error || !data) {
+    return { status: "error" };
+  }
+  const payload = (data as { payload: unknown }).payload;
+  const parsed = parseLessonPayload(payload);
+  const title = parsed.ok ? parsed.value.title : "";
+  return saveLessonDraft({
+    contentId: input.contentId,
+    kind: "lesson",
+    title,
+    expectedRevision: input.expectedRevision ?? null,
+    payload
+  });
+}
+
 export async function saveLessonDraft(input: SaveDraftInput): Promise<SaveDraftResult> {
   const parsed = parseLessonPayload(input?.payload);
   if (!parsed.ok) {
