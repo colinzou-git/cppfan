@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { publishContent, saveLessonDraft } from "./user-content-actions";
 import { AiProposalPanel } from "./ai-proposal-panel";
+import { AttachmentManager } from "./attachment-manager";
+import type { UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 import type { LessonPayload } from "./user-content-types";
@@ -59,12 +61,14 @@ export function LessonEditor({
   initialContentId,
   initialRevision,
   initialPayload,
-  initialLifecycle
+  initialLifecycle,
+  initialAttachments = []
 }: {
   initialContentId?: string;
   initialRevision?: number;
   initialPayload?: LessonPayload | null;
   initialLifecycle?: string;
+  initialAttachments?: UserContentAttachment[];
 }) {
   const storageKey = `cppfan:user-content:lesson:${initialContentId ?? "new"}:v1`;
   const [fields, setFields] = useState<EditorFields>(() => fieldsFromPayload(initialPayload ?? null));
@@ -313,6 +317,8 @@ export function LessonEditor({
           </span>
         ) : null}
       </div>
+
+      <AttachmentManager contentId={contentId} initialAttachments={initialAttachments} />
 
       <AiProposalPanel contentId={contentId} onApply={applyAiOperations} />
     </div>

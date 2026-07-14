@@ -251,6 +251,45 @@ export async function addExternalAttachment(input: AddAttachmentInput): Promise<
   return { status: "ok", attachmentId: data as string };
 }
 
+export type RecordFileAttachmentInput = {
+  contentId: string;
+  kind: "file" | "image" | "pdf";
+  visibility: AttachmentVisibility;
+  storagePath: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+};
+
+/**
+ * Record metadata for a file the client already uploaded to the private Storage
+ * bucket. The add_file_attachment RPC re-checks ownership, the owner-namespaced
+ * path, kind, and size limit, so a bad client call cannot forge a row.
+ */
+export async function recordFileAttachment(input: RecordFileAttachmentInput): Promise<AddAttachmentResult> {
+  if (!input?.contentId || !["file", "image", "pdf"].includes(input?.kind)) {
+    return { status: "invalid", message: "unsupported attachment kind" };
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("add_file_attachment", {
+    p_content_id: input.contentId,
+    p_kind: input.kind,
+    p_visibility: input.visibility,
+    p_storage_path: input.storagePath,
+    p_filename: input.filename,
+    p_mime_type: input.mimeType,
+    p_size_bytes: input.sizeBytes
+  });
+  if (error) {
+    return error.code === "22023" ? { status: "invalid", message: "attachment rejected" } : { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return { status: "ok", attachmentId: data as string };
+}
+
 export async function setAttachmentVisibility(attachmentId: string, visibility: AttachmentVisibility): Promise<LifecycleResult> {
   if (!attachmentId || !["author_source", "learner_resource"].includes(visibility)) {
     return { status: "error" };
