@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { publishLab, saveLabDraft } from "./user-content-actions";
 import { VersionHistory } from "./version-history";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
+import { LabAiProposalPanel } from "./lab-ai-proposal-panel";
+import { applyAcceptedLabOperations, type LabAuthoringOperation } from "./lab-ai-authoring";
 import type { ContentVersionSummary } from "./user-content-queries";
 import {
   LAB_MODES,
@@ -281,6 +283,18 @@ export function LabEditor({
     }
   }, [contentId, save]);
 
+  const applyAiOperations = useCallback(
+    (ops: LabAuthoringOperation[]) => {
+      if (ops.length === 0) {
+        return;
+      }
+      const current = buildLabPayload(fields) as unknown as LabPayload;
+      const applied = applyAcceptedLabOperations(current, ops);
+      update(fieldsFromLabPayload(applied));
+    },
+    [fields, update]
+  );
+
   const codeArea = "min-h-24 rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm";
   const isMilestones = fields.mode === "milestones";
 
@@ -463,6 +477,8 @@ export function LabEditor({
           </div>
         </div>
       )}
+
+      <LabAiProposalPanel contentId={contentId} onApply={applyAiOperations} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>Save draft</Button>
