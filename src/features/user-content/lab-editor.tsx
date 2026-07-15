@@ -5,11 +5,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { publishLab, saveLabDraft } from "./user-content-actions";
 import { VersionHistory } from "./version-history";
+import { ExerciseTestsEditor } from "./exercise-tests-editor";
 import type { ContentVersionSummary } from "./user-content-queries";
 import {
   LAB_MODES,
   EVALUATION_MODES,
   LAB_EDITABLE_FILENAME,
+  type ExerciseTest,
   type LabFixture,
   type LabMilestone,
   type LabPayload
@@ -24,6 +26,7 @@ type MilestoneField = {
   instructions: string;
   objective: string;
   required: boolean;
+  tests: ExerciseTest[];
 };
 
 type LabFields = {
@@ -45,6 +48,7 @@ type LabFields = {
   memoryLimitMb: string;
   fixtures: LabFixture[];
   milestones: MilestoneField[];
+  completionTests: ExerciseTest[];
   selfChecklist: string;
   hints: string;
 };
@@ -79,9 +83,11 @@ export function fieldsFromLabPayload(payload: LabPayload | null): LabFields {
           title: m.title,
           instructions: m.instructions,
           objective: m.objective ?? "",
-          required: m.required
+          required: m.required,
+          tests: m.tests ? m.tests.map((t) => ({ ...t })) : []
         }))
       : [],
+    completionTests: payload?.completion?.tests ? payload.completion.tests.map((t) => ({ ...t })) : [],
     selfChecklist: listToLines(payload?.completion?.selfChecklist),
     hints: listToLines(payload?.completion?.hints)
   };
@@ -101,6 +107,7 @@ export function buildLabPayload(fields: LabFields): Record<string, unknown> {
   if (Number.isInteger(mem) && mem > 0) run.memoryLimitMb = mem;
 
   const completion: Record<string, unknown> = {};
+  if (fields.completionTests.length > 0) completion.tests = fields.completionTests;
   const checklist = linesToList(fields.selfChecklist);
   if (checklist.length > 0) completion.selfChecklist = checklist;
   const hints = linesToList(fields.hints);
@@ -132,7 +139,8 @@ export function buildLabPayload(fields: LabFields): Record<string, unknown> {
             title: m.title,
             instructions: m.instructions,
             ...(m.objective.trim() ? { objective: m.objective.trim() } : {}),
-            required: m.required
+            required: m.required,
+            ...(m.tests.length > 0 ? { tests: m.tests } : {})
           })) as unknown as LabMilestone[]
         }
       : {})
@@ -283,7 +291,7 @@ export function LabEditor({
     update({
       milestones: [
         ...fields.milestones,
-        { id: `m${fields.milestones.length + 1}`, title: "", instructions: "", objective: "", required: true }
+        { id: `m${fields.milestones.length + 1}`, title: "", instructions: "", objective: "", required: true, tests: [] }
       ]
     });
   }
@@ -435,20 +443,24 @@ export function LabEditor({
                 <input type="checkbox" checked={m.required} onChange={(e) => updateMilestone(i, { required: e.target.checked })} />
                 Required to complete the lab
               </label>
+              <ExerciseTestsEditor tests={m.tests} onChange={(tests) => updateMilestone(i, { tests })} />
             </div>
           ))}
           <button type="button" className="justify-self-start text-xs font-bold text-blue-700" onClick={addMilestone} data-testid="lab-add-milestone">+ Add milestone</button>
         </fieldset>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-semibold text-slate-700">
-            Self-check items (one per line)
-            <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.selfChecklist} onChange={(e) => update({ selfChecklist: e.target.value })} />
-          </label>
-          <label className="grid gap-1 text-sm font-semibold text-slate-700">
-            Hints (one per line)
-            <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.hints} onChange={(e) => update({ hints: e.target.value })} />
-          </label>
+        <div className="grid gap-3">
+          <ExerciseTestsEditor tests={fields.completionTests} onChange={(completionTests) => update({ completionTests })} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="grid gap-1 text-sm font-semibold text-slate-700">
+              Self-check items (one per line)
+              <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.selfChecklist} onChange={(e) => update({ selfChecklist: e.target.value })} />
+            </label>
+            <label className="grid gap-1 text-sm font-semibold text-slate-700">
+              Hints (one per line)
+              <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.hints} onChange={(e) => update({ hints: e.target.value })} />
+            </label>
+          </div>
         </div>
       )}
 
