@@ -8,10 +8,11 @@ import { PublishChoiceDialog, type PublishMode } from "./publish-choice-dialog";
 import { AiProposalPanel } from "./ai-proposal-panel";
 import { AttachmentManager } from "./attachment-manager";
 import { VersionHistory } from "./version-history";
+import { ChoicesEditor } from "./choices-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
-import type { LessonPayload } from "./user-content-types";
+import type { LessonChoice, LessonPayload } from "./user-content-types";
 
 const ITEM_TYPES: LearningItemType[] = [
   "lesson",
@@ -32,7 +33,10 @@ type EditorFields = {
   estimatedMinutes: string;
   content: string;
   explanation: string;
+  choices: LessonChoice[];
 };
+
+const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
 
 type SaveState = "idle" | "saving" | "saved" | "local_only" | "conflict" | "invalid" | "error";
 
@@ -43,7 +47,8 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
     difficulty: payload?.difficulty ?? "beginner",
     estimatedMinutes: payload?.estimatedMinutes ? String(payload.estimatedMinutes) : "",
     content: payload?.content ?? "",
-    explanation: payload?.explanation ?? ""
+    explanation: payload?.explanation ?? "",
+    choices: payload?.choices ?? []
   };
 }
 
@@ -55,7 +60,8 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     content: fields.content,
     explanation: fields.explanation,
     difficulty: fields.difficulty,
-    ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {})
+    ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {}),
+    ...(CHOICE_TYPES.has(fields.itemType) && fields.choices.length > 0 ? { choices: fields.choices } : {})
   };
 }
 
@@ -315,6 +321,10 @@ export function LessonEditor({
           placeholder="Why it matters / the key idea…"
         />
       </label>
+
+      {CHOICE_TYPES.has(fields.itemType) ? (
+        <ChoicesEditor choices={fields.choices} onChange={(choices) => update({ choices })} />
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
