@@ -114,7 +114,8 @@ describe("publishExercise (#488)", () => {
         evaluationMode,
         ...(withTests ? { tests: [{ name: "t", input: "", expectedOutput: "", hidden: false }] } : {})
       },
-      publishedPayload: null
+      publishedPayload: null,
+      publishedVersionId: null
     };
   }
 

@@ -26,7 +26,7 @@ export function exerciseHiddenTests(payload: ExercisePayload): CodeTestCase[] {
  */
 export async function resolveUserExerciseExecution(
   itemId: string
-): Promise<{ config: LearningItemCodeLab; hiddenTests: CodeTestCase[] } | null> {
+): Promise<{ config: LearningItemCodeLab; hiddenTests: CodeTestCase[]; publishedVersionId: string | null } | null> {
   if (!isUserLearningItemId(itemId)) {
     return null;
   }
@@ -41,6 +41,7 @@ export async function resolveUserExerciseExecution(
   }
   return {
     config: { ...exercisePayloadToCodeLabConfig(payload), skillTags: [userSkillId(contentId)] },
-    hiddenTests: exerciseHiddenTests(payload)
+    hiddenTests: exerciseHiddenTests(payload),
+    publishedVersionId: detail?.publishedVersionId ?? null
   };
 }

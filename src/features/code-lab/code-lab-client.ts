@@ -25,14 +25,14 @@ async function postJson<T>(url: string, body: unknown, signal?: AbortSignal): Pr
 }
 
 export function runCodeRequest(
-  input: { itemId: string; source: string; stdin?: string },
+  input: { itemId: string; source: string; stdin?: string; contentVersionId?: string },
   signal?: AbortSignal
 ): Promise<CodeRunResult> {
   return postJson<CodeRunResult>("/api/code/run", input, signal);
 }
 
 export function runTestsRequest(
-  input: { itemId: string; source: string },
+  input: { itemId: string; source: string; contentVersionId?: string },
   signal?: AbortSignal
 ): Promise<CodeTestResult> {
   return postJson<CodeTestResult>("/api/code/test", input, signal);

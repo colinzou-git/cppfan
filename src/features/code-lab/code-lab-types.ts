@@ -94,6 +94,12 @@ export type CodeRunResult = {
   note?: string;
   /** Deterministic error-tag classifications for this run (#412). */
   classifications?: CodeTagClassification[];
+  /**
+   * True when a published user exercise (#488) was republished after this tab
+   * loaded, so the run was refused rather than executed against a changed
+   * definition. The client should prompt a reload.
+   */
+  staleDefinition?: boolean;
 };
 
 export type CodeTestCaseResult = {
@@ -120,6 +126,8 @@ export type CodeTestResult = {
   note?: string;
   /** Deterministic error-tag classifications for this test run (#412). */
   classifications?: CodeTagClassification[];
+  /** See CodeRunResult.staleDefinition — the run was refused, not executed (#488). */
+  staleDefinition?: boolean;
 };
 
 export type CodeReviewRequest = {
