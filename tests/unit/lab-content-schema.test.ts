@@ -82,28 +82,20 @@ describe("parseLabPayload (#489)", () => {
     }
   });
 
-  it("parses a completion contract with assertions", () => {
+  it("parses a completion contract with a self-checklist and hints", () => {
     const result = parseLabPayload(
       base({
         completion: {
-          assertions: [
-            { kind: "stdout_contains", value: "OK" },
-            { kind: "file_exists", target: "out.txt", value: "" }
-          ],
-          selfChecklist: ["compiles", "handles empty input"]
+          selfChecklist: ["compiles", "handles empty input"],
+          hints: ["start with parsing"]
         }
       })
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.completion?.assertions).toHaveLength(2);
       expect(result.value.completion?.selfChecklist).toHaveLength(2);
+      expect(result.value.completion?.hints).toHaveLength(1);
     }
-  });
-
-  it("rejects a file assertion with no target", () => {
-    const result = parseLabPayload(base({ completion: { assertions: [{ kind: "file_contains", value: "x" }] } }));
-    expect(result.ok).toBe(false);
   });
 });
 
