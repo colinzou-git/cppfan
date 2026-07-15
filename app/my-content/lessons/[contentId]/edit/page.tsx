@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { LessonEditor } from "@/features/user-content/lesson-editor";
-import { getAttachmentsForOwner, getContentItemForOwner } from "@/features/user-content/user-content-queries";
+import { getAttachmentsForOwner, getContentItemForOwner, getContentVersions } from "@/features/user-content/user-content-queries";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,10 @@ export default async function EditLessonPage({ params }: { params: Promise<{ con
   if (!detail) {
     notFound();
   }
-  const attachments = await getAttachmentsForOwner(contentId);
+  const [attachments, versions] = await Promise.all([
+    getAttachmentsForOwner(contentId),
+    getContentVersions(contentId)
+  ]);
 
   return (
     <PageShell className="grid gap-6" size="reading">
@@ -29,6 +32,7 @@ export default async function EditLessonPage({ params }: { params: Promise<{ con
         initialPayload={detail.draftPayload ?? detail.publishedPayload}
         initialLifecycle={detail.lifecycleStatus}
         initialAttachments={attachments}
+        initialVersions={versions}
       />
     </PageShell>
   );

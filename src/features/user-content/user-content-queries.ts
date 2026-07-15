@@ -111,6 +111,40 @@ function toSummary(row: ItemRow): UserContentSummary {
 }
 
 /** The signed-in user's content items, most-recently-updated first. */
+export type ContentVersionSummary = {
+  versionNumber: number;
+  versionState: "draft" | "published" | "superseded";
+  createdAt: string;
+  publishedAt: string | null;
+};
+
+/** The owner's version history for one content item, newest first. */
+export async function getContentVersions(contentId: string): Promise<ContentVersionSummary[]> {
+  if (typeof contentId !== "string" || contentId.length === 0) {
+    return [];
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return [];
+  }
+  const { data, error } = await supabase
+    .from("user_content_versions")
+    .select("version_number,version_state,created_at,published_at")
+    .eq("content_item_id", contentId)
+    .order("version_number", { ascending: false });
+  if (error || !data) {
+    return [];
+  }
+  return (data as Array<{ version_number: number; version_state: ContentVersionSummary["versionState"]; created_at: string; published_at: string | null }>).map(
+    (r) => ({
+      versionNumber: r.version_number,
+      versionState: r.version_state,
+      createdAt: r.created_at,
+      publishedAt: r.published_at
+    })
+  );
+}
+
 export type SignedAttachment = { id: string; kind: UserContentAttachment["kind"]; filename: string | null; url: string };
 
 /**
