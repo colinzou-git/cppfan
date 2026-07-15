@@ -10,6 +10,7 @@
 
 import { createStoreZip } from "./zip";
 import type { LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
+import type { ExercisePayload } from "./exercise-content-types";
 
 export const EXPORT_SCHEMA_VERSION = 1;
 
@@ -28,8 +29,8 @@ export type UserContentExport = {
   exportSchemaVersion: number;
   exportedAt: string;
   item: ExportItemMeta;
-  draftPayload: LessonPayload | null;
-  publishedPayload: LessonPayload | null;
+  draftPayload: LessonPayload | ExercisePayload | null;
+  publishedPayload: LessonPayload | ExercisePayload | null;
   markdown: string;
 };
 
@@ -117,6 +118,73 @@ export function buildLessonMarkdown(payload: LessonPayload): string {
 }
 
 /** Assemble the full export (manifest + Markdown) from the owner's own data. */
+/** Render an exercise payload as readable Markdown (author-facing: includes the
+ * reference solution and all tests, since export is owner-only). */
+export function buildExerciseMarkdown(payload: ExercisePayload): string {
+  const parts: string[] = [];
+  parts.push(heading(1, payload.title || "Untitled exercise"));
+  const meta = [payload.mode, payload.evaluationMode, payload.difficulty].filter(Boolean).join(" · ");
+  if (meta) {
+    parts.push(`*${meta}*\n\n`);
+  }
+  if (payload.prompt) {
+    parts.push(heading(2, "Prompt"));
+    parts.push(`${payload.prompt}\n\n`);
+  }
+  if (payload.mode === "function" && payload.functionSignature) {
+    parts.push(heading(2, "Function signature"));
+    parts.push(fenced(payload.functionSignature));
+  }
+  if (payload.stdinFormat) {
+    parts.push(heading(2, "Input"));
+    parts.push(`${payload.stdinFormat}\n\n`);
+  }
+  if (payload.stdoutFormat) {
+    parts.push(heading(2, "Output"));
+    parts.push(`${payload.stdoutFormat}\n\n`);
+  }
+  if (payload.starterCode) {
+    parts.push(heading(2, "Starter code"));
+    parts.push(fenced(payload.starterCode));
+  }
+  if (payload.referenceSolution) {
+    parts.push(heading(2, "Reference solution"));
+    parts.push(fenced(payload.referenceSolution));
+  }
+  if (payload.solutionExplanation) {
+    parts.push(heading(2, "Solution explanation"));
+    parts.push(`${payload.solutionExplanation}\n\n`);
+  }
+  if (payload.tests && payload.tests.length > 0) {
+    parts.push(heading(2, "Tests"));
+    for (const test of payload.tests) {
+      parts.push(`- **${test.name}**${test.hidden ? " (hidden)" : ""}\n`);
+      parts.push(`  - in: \`${test.input}\`\n`);
+      parts.push(`  - out: \`${test.expectedOutput}\`\n`);
+    }
+    parts.push("\n");
+  }
+  return parts.join("");
+}
+
+/** Assemble an exercise export (manifest + Markdown), owner-only. */
+export function buildExerciseContentExport(
+  item: ExportItemMeta,
+  draftPayload: ExercisePayload | null,
+  publishedPayload: ExercisePayload | null,
+  now: Date = new Date()
+): UserContentExport {
+  const forMarkdown = publishedPayload ?? draftPayload;
+  return {
+    exportSchemaVersion: EXPORT_SCHEMA_VERSION,
+    exportedAt: now.toISOString(),
+    item,
+    draftPayload,
+    publishedPayload,
+    markdown: forMarkdown ? buildExerciseMarkdown(forMarkdown) : ""
+  };
+}
+
 export function buildUserContentExport(
   item: ExportItemMeta,
   draftPayload: LessonPayload | null,

@@ -81,3 +81,76 @@ describe("buildUserContentExport (#487)", () => {
     expect(result.markdown).toBe("");
   });
 });
+
+import {
+  CURRENT_EXERCISE_SCHEMA_VERSION,
+  type ExercisePayload
+} from "@/features/user-content/exercise-content-types";
+import {
+  buildExerciseContentExport,
+  buildExerciseMarkdown
+} from "@/features/user-content/user-content-export";
+
+function exercise(overrides: Partial<ExercisePayload> = {}): ExercisePayload {
+  return {
+    schemaVersion: CURRENT_EXERCISE_SCHEMA_VERSION,
+    title: "Reverse a line",
+    prompt: "Read a line and print it reversed.",
+    mode: "stdin_program",
+    evaluationMode: "automated_tests",
+    ...overrides
+  };
+}
+
+describe("buildExerciseMarkdown (#488)", () => {
+  it("renders prompt, code, and tests", () => {
+    const md = buildExerciseMarkdown(
+      exercise({
+        starterCode: "int main(){}",
+        referenceSolution: "int main(){ /* solve */ }",
+        stdinFormat: "one line",
+        stdoutFormat: "the reversed line",
+        tests: [
+          { name: "basic", input: "ab\n", expectedOutput: "ba\n", hidden: false },
+          { name: "edge", input: "\n", expectedOutput: "\n", hidden: true }
+        ]
+      })
+    );
+    expect(md).toContain("# Reverse a line");
+    expect(md).toContain("## Prompt");
+    expect(md).toContain("## Starter code");
+    expect(md).toContain("## Reference solution");
+    expect(md).toContain("basic");
+    expect(md).toContain("(hidden)");
+  });
+
+  it("renders the function signature in function mode", () => {
+    const md = buildExerciseMarkdown(exercise({ mode: "function", functionSignature: "int add(int,int)" }));
+    expect(md).toContain("## Function signature");
+    expect(md).toContain("int add(int,int)");
+  });
+});
+
+describe("buildExerciseContentExport (#488)", () => {
+  it("wraps the exercise with a schema-versioned manifest + markdown", () => {
+    const data = buildExerciseContentExport(
+      {
+        id: "e1",
+        kind: "exercise",
+        title: "Reverse",
+        lifecycleStatus: "published",
+        nativeModuleId: null,
+        draftRevision: 1,
+        updatedAt: "2026-07-15T00:00:00Z",
+        publishedAt: "2026-07-15T00:00:00Z"
+      },
+      null,
+      exercise(),
+      new Date("2026-07-15T00:00:00Z")
+    );
+    expect(data.exportSchemaVersion).toBe(EXPORT_SCHEMA_VERSION);
+    expect(data.item.kind).toBe("exercise");
+    expect(data.markdown).toContain("Reverse a line");
+    expect(data.publishedPayload).not.toBeNull();
+  });
+});
