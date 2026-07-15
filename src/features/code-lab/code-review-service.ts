@@ -6,6 +6,7 @@ import {
 } from "@/features/ai-chat/ai-chat-provider";
 import type { CodeReviewRequest } from "./code-lab-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { buildStructuredCodeReviewPrompt } from "./code-feedback-prompts";
 import { parseStructuredCodeFeedback } from "./code-feedback-parser";
 import {
@@ -97,7 +98,7 @@ export async function reviewCode(
     return unavailableFeedback();
   }
 
-  const config = getCodeLabConfigForItem(request.itemId);
+  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
   const messages = buildReviewMessages(request, {
     prompt: config?.prompt ?? "",
     skillTags: config?.skillTags ?? []

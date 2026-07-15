@@ -1,5 +1,6 @@
 import { CODE_LAB_LIMITS } from "./code-lab-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { isUserLearningItemId } from "@/features/user-content/user-content-id";
 import type { CodeBreakpoint, CodeDebugAction, CodeDebugSnapshot } from "./code-debug-types";
 
 /**
@@ -76,7 +77,7 @@ export function validateDebugStartRequest(body: Record<string, unknown>): Parsed
   if (!itemId || itemId.length > 240) {
     return { ok: false, code: "invalid_item", message: "A valid item id is required." };
   }
-  if (!getCodeLabConfigForItem(itemId)) {
+  if (!getCodeLabConfigForItem(itemId) && !isUserLearningItemId(itemId)) {
     return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
   }
 
@@ -146,7 +147,7 @@ export function validateDebugExplainRequest(body: Record<string, unknown>): Pars
   if (!itemId || itemId.length > 240) {
     return { ok: false, code: "invalid_item", message: "A valid item id is required." };
   }
-  if (!getCodeLabConfigForItem(itemId)) {
+  if (!getCodeLabConfigForItem(itemId) && !isUserLearningItemId(itemId)) {
     return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
   }
 

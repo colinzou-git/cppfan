@@ -6,6 +6,7 @@ import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { setExerciseProgress } from "@/features/exercises/exercise-progress";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
 
 /**
@@ -81,7 +82,10 @@ async function recordCodeAttemptSkillEvents(input: {
   const result = input.test ?? input.run;
   if (!result || result.simulated) return false;
 
-  const skillTags = getCodeLabConfigForItem(input.itemId)?.skillTags ?? [];
+  const skillTags =
+    getCodeLabConfigForItem(input.itemId)?.skillTags ??
+    (await resolveUserExerciseExecution(input.itemId))?.config.skillTags ??
+    [];
   if (skillTags.length === 0) return false;
 
   const metadata = codeAttemptMetadata(input);
