@@ -7,6 +7,7 @@ import {
   deleteContent,
   publishContent,
   removeAttachment,
+  saveExerciseDraft,
   saveLessonDraft,
   setAttachmentVisibility
 } from "@/features/user-content/user-content-actions";
@@ -59,6 +60,34 @@ describe("saveLessonDraft (#487)", () => {
     mockedCreate.mockResolvedValue(rpcClient(() => ({ data: null, error: { code: "40001" } })));
     const result = await saveLessonDraft({ contentId: "c1", title: "T", expectedRevision: 1, payload: validPayload });
     expect(result.status).toBe("conflict");
+  });
+});
+
+describe("saveExerciseDraft (#488)", () => {
+  const validExercise = { title: "Reverse", prompt: "Reverse a line.", mode: "stdin_program", evaluationMode: "self_evaluation" };
+
+  it("rejects an invalid exercise payload before touching the backend", async () => {
+    const result = await saveExerciseDraft({ title: "", payload: { prompt: "p" } });
+    expect(result.status).toBe("invalid");
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("reports unconfigured when there is no backend", async () => {
+    const result = await saveExerciseDraft({ title: "Reverse", payload: validExercise });
+    expect(result.status).toBe("unconfigured");
+  });
+
+  it("stamps kind = exercise and returns the RPC result", async () => {
+    let seenKind: unknown;
+    mockedCreate.mockResolvedValue(
+      rpcClient((_fn, args) => {
+        seenKind = args.p_kind;
+        return { data: [{ content_id: "e1", draft_version_id: "v1", revision: 1, saved_at: "2026-01-01T00:00:00Z" }], error: null };
+      })
+    );
+    const result = await saveExerciseDraft({ title: "Reverse", payload: validExercise });
+    expect(seenKind).toBe("exercise");
+    expect(result).toMatchObject({ status: "ok", contentId: "e1", revision: 1 });
   });
 });
 
