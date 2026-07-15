@@ -43,10 +43,11 @@ export async function validateLabPublication(payload: LabPayload): Promise<LabPu
       ? tests.map((t) => ({ name: t.name, stdin: t.input, expectedStdout: t.expectedOutput, matcher: "exact" as const }))
       : [{ name: "compile", matcher: "exact" }];
 
+  const files = (payload.fixtures ?? []).map((f) => ({ name: f.filename, content: f.content }));
   const failures: string[] = [];
   for (const test of cases) {
     const run = await executeRun(
-      buildRunnerInput({ source: reference, stdin: test.stdin ?? "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
+      buildRunnerInput({ source: reference, stdin: test.stdin ?? "", compilerFlags: [...DEFAULT_COMPILER_FLAGS], files })
     );
     if (run.status === "runner_unconfigured") {
       return { status: "skipped" };

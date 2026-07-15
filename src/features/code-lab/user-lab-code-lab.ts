@@ -29,7 +29,12 @@ export function labHiddenTests(payload: LabPayload, milestoneIndex = 0): CodeTes
 export async function resolveUserLabExecution(
   itemId: string,
   milestoneIndex = 0
-): Promise<{ config: LearningItemCodeLab; hiddenTests: CodeTestCase[]; publishedVersionId: string | null } | null> {
+): Promise<{
+  config: LearningItemCodeLab;
+  hiddenTests: CodeTestCase[];
+  publishedVersionId: string | null;
+  files: { name: string; content: string }[];
+} | null> {
   if (!isUserLearningItemId(itemId)) {
     return null;
   }
@@ -45,6 +50,8 @@ export async function resolveUserLabExecution(
   return {
     config: { ...labPayloadToCodeLabConfig(payload, milestoneIndex), skillTags: [userSkillId(contentId)] },
     hiddenTests: labHiddenTests(payload, milestoneIndex),
-    publishedVersionId: detail?.publishedVersionId ?? null
+    publishedVersionId: detail?.publishedVersionId ?? null,
+    // Read-only fixture files mounted alongside main.cpp when the program runs.
+    files: (payload.fixtures ?? []).map((f) => ({ name: f.filename, content: f.content }))
   };
 }

@@ -103,17 +103,20 @@ export async function executeRun(input: RunnerInput): Promise<CodeRunResult> {
 export function buildRunnerInput({
   source,
   stdin,
-  compilerFlags
+  compilerFlags,
+  files
 }: {
   source: string;
   stdin: string;
   compilerFlags: string[];
+  files?: { name: string; content: string }[];
 }): RunnerInput {
   return {
     source,
     stdin,
     compilerFlags,
     timeoutMs: runnerTimeoutMs(),
-    memoryMb: runnerMemoryMb()
+    memoryMb: runnerMemoryMb(),
+    ...(files && files.length > 0 ? { files } : {})
   };
 }

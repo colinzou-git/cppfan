@@ -12,6 +12,8 @@ export type RunnerInput = {
   compilerFlags: string[];
   timeoutMs: number;
   memoryMb: number;
+  /** Extra read-only files mounted alongside main.cpp — e.g. lab fixtures (#489). */
+  files?: { name: string; content: string }[];
 };
 
 export interface CodeRunnerAdapter {
@@ -167,7 +169,7 @@ export class PistonRunner implements CodeRunnerAdapter {
         body: JSON.stringify({
           language: "c++",
           version: this.cppVersion,
-          files: [{ name: "main.cpp", content: input.source }],
+          files: [{ name: "main.cpp", content: input.source }, ...(input.files ?? [])],
           stdin: input.stdin,
           compile_timeout: 10_000,
           run_timeout: input.timeoutMs,
