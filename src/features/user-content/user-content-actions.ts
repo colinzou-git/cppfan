@@ -9,9 +9,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner } from "./user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
-import { parseExercisePayload } from "./exercise-content-schema";
+import { parseExercisePayload, validateExerciseForPublication } from "./exercise-content-schema";
 import { buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
@@ -116,6 +116,56 @@ export async function saveLessonDraft(input: SaveDraftInput): Promise<SaveDraftR
  * the payload with parseExercisePayload and stamps kind = "exercise". Reuses the
  * shared save_user_content_draft RPC (ownership + optimistic concurrency).
  */
+/**
+ * Publish a user-created exercise (#488). Validates the draft with the
+ * exercise rules, then freezes + projects it via the shared publish RPC (which
+ * now accepts kind = 'exercise'). Code Lab execution resolves dynamically.
+ */
+export async function publishExercise(input: { contentId: string; expectedRevision?: number | null }): Promise<PublishResult> {
+  const contentId = typeof input?.contentId === "string" ? input.contentId : "";
+  if (!contentId) {
+    return { status: "error" };
+  }
+  const detail = await getExerciseForOwner(contentId);
+  if (detail === null) {
+    const supabaseProbe = await createClient();
+    return supabaseProbe ? { status: "not_found" } : { status: "unconfigured" };
+  }
+  if (!detail.draftPayload) {
+    return { status: "invalid", issues: [{ field: "payload", message: "there is no draft to publish" }] };
+  }
+  const issues = validateExerciseForPublication(detail.draftPayload);
+  if (issues.length > 0) {
+    return { status: "invalid", issues };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("publish_user_content", {
+    p_content_id: contentId,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { out_content_id: string; out_skill_id: string; out_learning_item_id: string; out_version_number: number }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.out_content_id,
+    skillId: row.out_skill_id,
+    learningItemId: row.out_learning_item_id,
+    versionNumber: Number(row.out_version_number)
+  };
+}
+
 export async function saveExerciseDraft(input: SaveDraftInput): Promise<SaveDraftResult> {
   const parsed = parseExercisePayload(input?.payload);
   if (!parsed.ok) {

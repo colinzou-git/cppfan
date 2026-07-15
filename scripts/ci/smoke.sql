@@ -1254,3 +1254,48 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content recommendation flag smoke OK';
 end $$;
+
+-- 35) #488: publishing an exercise projects an owner-scoped skill + learning
+-- item (worked_example, prompt from the exercise payload), with no lesson-only
+-- child rows. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000b7';
+  v_content uuid;
+  v_item text;
+  v_skill text;
+  v_type text;
+  v_prompt text;
+  v_active boolean;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-ex@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'exercise', 'Reverse', null, true, 1,
+    '{"title":"Reverse","prompt":"Read a line and print it reversed.","mode":"stdin_program","evaluationMode":"self_evaluation"}'::jsonb, null);
+  select out_learning_item_id, out_skill_id into v_item, v_skill from public.publish_user_content(v_content, null);
+
+  select type, prompt, is_active into v_type, v_prompt, v_active
+    from public.learning_items where id = v_item and owner_user_id = v_uid;
+  if v_type <> 'worked_example' or v_active is not true then
+    raise exception '#488: exercise should project an active worked_example item (got %, active=%)', v_type, v_active;
+  end if;
+  if v_prompt <> 'Read a line and print it reversed.' then
+    raise exception '#488: exercise prompt should project from the payload prompt, got %', v_prompt;
+  end if;
+  if not exists (select 1 from public.skills where id = v_skill and owner_user_id = v_uid and is_active) then
+    raise exception '#488: exercise should project an owner-scoped active skill';
+  end if;
+  if not exists (select 1 from public.learning_item_skills where learning_item_id = v_item and skill_id = v_skill and is_primary) then
+    raise exception '#488: exercise item should map to its owner skill as primary';
+  end if;
+  -- no lesson-only children
+  if exists (select 1 from public.learning_item_choices where learning_item_id like v_item || '%') then
+    raise exception '#488: exercise should not project choices';
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content exercise publish smoke OK';
+end $$;

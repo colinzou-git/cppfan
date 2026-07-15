@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner } from "@/features/user-content/user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner } from "@/features/user-content/user-content-queries";
 import {
   addExternalAttachment,
   archiveContent,
   deleteContent,
   publishContent,
   removeAttachment,
+  publishExercise,
   saveExerciseDraft,
   saveLessonDraft,
   setAttachmentVisibility
@@ -15,10 +16,11 @@ import { CURRENT_LESSON_SCHEMA_VERSION, type LessonPayload } from "@/features/us
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/features/user-content/user-content-queries", () => ({ getContentItemForOwner: vi.fn() }));
+vi.mock("@/features/user-content/user-content-queries", () => ({ getContentItemForOwner: vi.fn(), getExerciseForOwner: vi.fn() }));
 
 const mockedCreate = vi.mocked(createClient);
 const mockedDetail = vi.mocked(getContentItemForOwner);
+const mockedExercise = vi.mocked(getExerciseForOwner);
 
 function rpcClient(impl: (fn: string, args: Record<string, unknown>) => { data?: unknown; error?: unknown }) {
   return { rpc: vi.fn(async (fn: string, args: Record<string, unknown>) => impl(fn, args)) } as unknown as NonNullable<
@@ -88,6 +90,49 @@ describe("saveExerciseDraft (#488)", () => {
     const result = await saveExerciseDraft({ title: "Reverse", payload: validExercise });
     expect(seenKind).toBe("exercise");
     expect(result).toMatchObject({ status: "ok", contentId: "e1", revision: 1 });
+  });
+});
+
+describe("publishExercise (#488)", () => {
+  function exerciseDetail(evaluationMode: "self_evaluation" | "automated_tests", withTests = false): Awaited<ReturnType<typeof getExerciseForOwner>> {
+    return {
+      id: "e1",
+      kind: "exercise",
+      title: "Reverse",
+      lifecycleStatus: "draft",
+      recommendationEnabled: true,
+      draftRevision: 1,
+      updatedAt: "2026-01-01T00:00:00Z",
+      publishedAt: null,
+      nativeModuleId: null,
+      draftPayload: {
+        schemaVersion: 1,
+        title: "Reverse",
+        prompt: "Reverse a line.",
+        mode: "stdin_program" as const,
+        evaluationMode,
+        ...(withTests ? { tests: [{ name: "t", input: "", expectedOutput: "", hidden: false }] } : {})
+      },
+      publishedPayload: null
+    };
+  }
+
+  it("blocks publishing when automated evaluation has no tests", async () => {
+    mockedExercise.mockResolvedValue(exerciseDetail("automated_tests"));
+    const result = await publishExercise({ contentId: "e1" });
+    expect(result.status).toBe("invalid");
+  });
+
+  it("publishes a valid exercise via the shared RPC", async () => {
+    mockedExercise.mockResolvedValue(exerciseDetail("self_evaluation"));
+    mockedCreate.mockResolvedValue(
+      rpcClient(() => ({
+        data: [{ out_content_id: "e1", out_skill_id: "user.skill.e1", out_learning_item_id: "user.item.e1", out_version_number: 1 }],
+        error: null
+      }))
+    );
+    const result = await publishExercise({ contentId: "e1" });
+    expect(result).toMatchObject({ status: "ok", learningItemId: "user.item.e1", skillId: "user.skill.e1" });
   });
 });
 

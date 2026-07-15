@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { saveExerciseDraft } from "./user-content-actions";
+import { publishExercise, saveExerciseDraft } from "./user-content-actions";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
 import { CODE_CONTRACT_MODES, EVALUATION_MODES, type ExercisePayload, type ExerciseTest } from "./exercise-content-types";
 
@@ -89,7 +89,7 @@ export function ExerciseEditor({
   const revisionRef = useRef<number | null>(initialRevision ?? null);
   const [state, setState] = useState<SaveState>("idle");
   const [message, setMessage] = useState<string>("");
-  const [lifecycle] = useState<string>(initialLifecycle ?? "draft");
+  const [lifecycle, setLifecycle] = useState<string>(initialLifecycle ?? "draft");
   const dirtyRef = useRef(false);
 
   useEffect(() => {
@@ -174,6 +174,35 @@ export function ExerciseEditor({
     }, 1500);
     return () => window.clearTimeout(handle);
   }, [fields, save]);
+
+  const publish = useCallback(async () => {
+    if (dirtyRef.current || !contentId) {
+      await save();
+    }
+    if (!contentId) {
+      return;
+    }
+    setState("saving");
+    setMessage("Publishing…");
+    const result = await publishExercise({ contentId, expectedRevision: revisionRef.current });
+    if (result.status === "ok") {
+      setLifecycle("published");
+      setState("saved");
+      setMessage("Published.");
+    } else if (result.status === "invalid") {
+      setState("invalid");
+      setMessage(result.issues.map((i) => `${i.field}: ${i.message}`).join("; "));
+    } else if (result.status === "conflict") {
+      setState("conflict");
+      setMessage("This exercise changed elsewhere. Reload before publishing.");
+    } else if (result.status === "unconfigured") {
+      setState("local_only");
+      setMessage("Publishing needs a configured backend.");
+    } else {
+      setState("error");
+      setMessage("Could not publish.");
+    }
+  }, [contentId, save]);
 
   const isFunction = fields.mode === "function";
   const codeArea = "min-h-24 rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm";
@@ -267,11 +296,14 @@ export function ExerciseEditor({
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
           {state === "saving" ? "Saving…" : "Save draft"}
         </Button>
+        <Button type="button" variant="secondary" onClick={() => void publish()} disabled={state === "saving"}>
+          Publish
+        </Button>
         {message ? (
           <span className={state === "error" || state === "conflict" || state === "invalid" ? "text-sm font-semibold text-rose-700" : "text-sm font-semibold text-emerald-700"}>{message}</span>
         ) : null}
       </div>
-      <p className="text-xs text-slate-500">Publishing and Code Lab execution arrive with the learner-integration slice.</p>
+      <p className="text-xs text-slate-500">In-app Code Lab execution for published exercises arrives with the learner-resolver slice.</p>
     </div>
   );
 }
