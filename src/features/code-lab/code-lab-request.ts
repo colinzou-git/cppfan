@@ -9,7 +9,7 @@ import { isUserLearningItemId } from "@/features/user-content/user-content-id";
  */
 
 export type ParsedCodeRequest =
-  | { ok: true; itemId: string; source: string; stdin: string; userQuestion?: string }
+  | { ok: true; itemId: string; source: string; stdin: string; userQuestion?: string; contentVersionId?: string }
   | { ok: false; code: string; message: string };
 
 export function parseBodyRecord(value: unknown): Record<string, unknown> | null {
@@ -51,7 +51,12 @@ export function validateCodeRequest(body: Record<string, unknown>): ParsedCodeRe
   const userQuestion =
     typeof body.userQuestion === "string" ? body.userQuestion.slice(0, 1_000) : undefined;
 
-  return { ok: true, itemId, source, stdin, userQuestion };
+  const contentVersionId =
+    typeof body.contentVersionId === "string" && body.contentVersionId.length <= 100
+      ? body.contentVersionId
+      : undefined;
+
+  return { ok: true, itemId, source, stdin, userQuestion, contentVersionId };
 }
 
 export type ParsedDraftRequest =

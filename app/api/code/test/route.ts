@@ -20,11 +20,18 @@ export async function POST(request: Request) {
   const parsed = validateCodeRequest(body);
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
-  const result = await runTests({ itemId: parsed.itemId, source: parsed.source });
+  const result = await runTests({
+    itemId: parsed.itemId,
+    source: parsed.source,
+    expectedVersionId: parsed.contentVersionId
+  });
 
-  await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, test: result }).catch(
-    () => false
-  );
+  // A refused (stale-definition) test run never executed, so record nothing.
+  if (!result.staleDefinition) {
+    await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, test: result }).catch(
+      () => false
+    );
+  }
 
   return NextResponse.json({ result }, { headers: { "cache-control": "no-store" } });
 }

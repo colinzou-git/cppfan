@@ -38,13 +38,69 @@ function resolvedFlags(itemFlags?: string[]): string[] {
   return itemFlags && itemFlags.length > 0 ? itemFlags : [...DEFAULT_COMPILER_FLAGS];
 }
 
+const DEFINITION_CHANGED_NOTE =
+  "This exercise was republished since you opened it. Reload the page to run against the current definition.";
+
+/**
+ * A run/test whose user-exercise definition changed under it: refused rather
+ * than executed against a different (hidden) test suite (#488). The client
+ * detects `staleDefinition` and prompts a reload.
+ */
+function staleRunResult(): CodeRunResult {
+  return {
+    status: "runner_error",
+    compileOutput: "",
+    stdout: "",
+    stderr: "",
+    exitCode: null,
+    timedOut: false,
+    durationMs: null,
+    memoryKb: null,
+    provider: "none",
+    simulated: false,
+    note: DEFINITION_CHANGED_NOTE,
+    staleDefinition: true
+  };
+}
+
+function staleTestResult(): CodeTestResult {
+  return {
+    status: "runner_error",
+    passed: 0,
+    total: 0,
+    visible: [],
+    hiddenPassed: 0,
+    hiddenTotal: 0,
+    compileOutput: "",
+    provider: "none",
+    simulated: false,
+    note: DEFINITION_CHANGED_NOTE,
+    staleDefinition: true
+  };
+}
+
+/**
+ * True when `itemId` is a user exercise, an expected version was supplied, and
+ * the current published version differs — i.e. the caller's tab is stale.
+ */
+function isStale(expectedVersionId: string | undefined, publishedVersionId: string | null): boolean {
+  return Boolean(expectedVersionId && publishedVersionId && expectedVersionId !== publishedVersionId);
+}
+
 export async function runCode(input: {
   itemId: string;
   source: string;
   stdin?: string;
   compilerFlags?: string[];
+  /** The published version the client loaded; a mismatch refuses the run (#488). */
+  expectedVersionId?: string;
 }): Promise<CodeRunResult> {
-  const config = getCodeLabConfigForItem(input.itemId) ?? (await resolveUserExerciseExecution(input.itemId))?.config ?? null;
+  const staticConfig = getCodeLabConfigForItem(input.itemId);
+  const resolvedUser = staticConfig ? null : await resolveUserExerciseExecution(input.itemId);
+  if (resolvedUser && isStale(input.expectedVersionId, resolvedUser.publishedVersionId)) {
+    return staleRunResult();
+  }
+  const config = staticConfig ?? resolvedUser?.config ?? null;
   const result = await executeRun(
     buildRunnerInput({
       source: input.source,
@@ -69,6 +125,8 @@ export async function runTests(input: {
   source: string;
   includeHidden?: boolean;
   compilerFlags?: string[];
+  /** The published version the client loaded; a mismatch refuses the run (#488). */
+  expectedVersionId?: string;
 }): Promise<CodeTestResult> {
   let config = getCodeLabConfigForItem(input.itemId);
   let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
@@ -77,6 +135,9 @@ export async function runTests(input: {
     const resolved = await resolveUserExerciseExecution(input.itemId);
     if (!resolved) {
       return emptyTestResult("invalid_item");
+    }
+    if (isStale(input.expectedVersionId, resolved.publishedVersionId)) {
+      return staleTestResult();
     }
     config = resolved.config;
     hiddenTests = resolved.hiddenTests;

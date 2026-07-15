@@ -23,13 +23,17 @@ export async function POST(request: Request) {
   const result = await runCode({
     itemId: parsed.itemId,
     source: parsed.source,
-    stdin: parsed.stdin
+    stdin: parsed.stdin,
+    expectedVersionId: parsed.contentVersionId
   });
 
   // Persistence is best-effort and must never block or fail the run response.
-  await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, run: result }).catch(
-    () => false
-  );
+  // A refused (stale-definition) run never executed, so record nothing.
+  if (!result.staleDefinition) {
+    await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, run: result }).catch(
+      () => false
+    );
+  }
 
   return NextResponse.json({ result }, { headers: { "cache-control": "no-store" } });
 }

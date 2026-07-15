@@ -37,6 +37,7 @@ export function CodeLabWorkspace({
   title,
   config,
   sourceVersion = "1",
+  contentVersionId,
   backHref,
   backLabel
 }: {
@@ -45,12 +46,14 @@ export function CodeLabWorkspace({
   config: LearningItemCodeLab;
   /** Item version (updated_at) so saved chat threads invalidate when the item changes. */
   sourceVersion?: string;
+  /** Published version id for a user exercise; run/test refuse a stale tab (#488). */
+  contentVersionId?: string;
   /** Back-link target; defaults to the lesson page. Project labs pass /labs (#439). */
   backHref?: string;
   /** Back-link label; defaults to "Back to lesson". Project labs pass "Back to project labs". */
   backLabel?: string;
 }) {
-  const c = useCodeLabController({ itemId, config });
+  const c = useCodeLabController({ itemId, config, contentVersionId });
   const breakpointState = useCodeBreakpoints(itemId);
   const debug = useCodeDebugger({
     itemId,
@@ -81,6 +84,8 @@ export function CodeLabWorkspace({
     c.handleAction(action);
   }
 
+  const staleDefinition = Boolean(c.runResult?.staleDefinition || c.testResult?.staleDefinition);
+
   const controls = (
     <div className="flex flex-col gap-2">
       <CodeRunControls
@@ -89,6 +94,22 @@ export function CodeLabWorkspace({
         hasError={c.hasRunError}
         runDisabled={c.missingRequired}
       />
+      {staleDefinition ? (
+        <div
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800"
+          role="alert"
+          data-testid="code-lab-stale-definition"
+        >
+          <span>This exercise was republished. Reload to run against the current version.</span>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-md bg-amber-600 px-2 py-1 text-white hover:bg-amber-700"
+          >
+            Reload
+          </button>
+        </div>
+      ) : null}
       {c.error ? (
         <p className="text-xs font-bold text-amber-700" role="alert">
           {c.error}

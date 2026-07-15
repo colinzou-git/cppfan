@@ -32,7 +32,8 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
             itemId={decodedId}
             title={exercise.title}
             config={exercisePayloadToCodeLabConfig(exercise.publishedPayload)}
-            sourceVersion="user-exercise:1"
+            sourceVersion={`user-exercise:${exercise.publishedVersionId ?? "1"}`}
+            contentVersionId={exercise.publishedVersionId ?? undefined}
             backHref="/my-content"
             backLabel="Back to My Content"
           />

@@ -269,6 +269,8 @@ export type UserExerciseDetail = UserContentSummary & {
   nativeModuleId: string | null;
   draftPayload: ExercisePayload | null;
   publishedPayload: ExercisePayload | null;
+  /** Current published version id — used to detect a stale Code Lab tab (#488). */
+  publishedVersionId: string | null;
 };
 
 /** The owner's exercise content item with its draft/published ExercisePayloads (#488). */
@@ -302,6 +304,7 @@ export async function getExerciseForOwner(contentId: string): Promise<UserExerci
     ...toSummary(row),
     nativeModuleId: row.native_module_id,
     draftPayload,
-    publishedPayload
+    publishedPayload,
+    publishedVersionId: row.current_published_version_id ?? null
   };
 }
