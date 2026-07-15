@@ -9,7 +9,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { parseLessonPayload } from "./user-content-schema";
+import { parseExercisePayload } from "./exercise-content-schema";
 import { isLearnerResourceFile } from "./attachment-upload";
+import type { ExercisePayload } from "./exercise-content-types";
 import type { AttachmentVisibility, LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
 
 export type UserContentAttachment = {
@@ -235,6 +237,66 @@ export async function getContentItemForOwner(contentId: string): Promise<UserCon
   const [draftPayload, publishedPayload] = await Promise.all([
     payloadForVersion(supabase, row.current_draft_version_id),
     payloadForVersion(supabase, row.current_published_version_id)
+  ]);
+  return {
+    ...toSummary(row),
+    nativeModuleId: row.native_module_id,
+    draftPayload,
+    publishedPayload
+  };
+}
+
+async function exercisePayloadForVersion(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  versionId: string | null
+): Promise<ExercisePayload | null> {
+  if (!versionId) {
+    return null;
+  }
+  const { data, error } = await supabase
+    .from("user_content_versions")
+    .select("payload")
+    .eq("id", versionId)
+    .maybeSingle();
+  if (error || !data) {
+    return null;
+  }
+  const parsed = parseExercisePayload((data as { payload: unknown }).payload);
+  return parsed.ok ? parsed.value : null;
+}
+
+export type UserExerciseDetail = UserContentSummary & {
+  nativeModuleId: string | null;
+  draftPayload: ExercisePayload | null;
+  publishedPayload: ExercisePayload | null;
+};
+
+/** The owner's exercise content item with its draft/published ExercisePayloads (#488). */
+export async function getExerciseForOwner(contentId: string): Promise<UserExerciseDetail | null> {
+  if (typeof contentId !== "string" || contentId.length === 0) {
+    return null;
+  }
+  const supabase = await createClient();
+  if (!supabase) {
+    return null;
+  }
+  const { data, error } = await supabase
+    .from("user_content_items")
+    .select(
+      "id,kind,title,lifecycle_status,recommendation_enabled,draft_revision,native_module_id,current_draft_version_id,current_published_version_id,updated_at,published_at"
+    )
+    .eq("id", contentId)
+    .maybeSingle();
+  if (error || !data) {
+    return null;
+  }
+  const row = data as ItemRow;
+  if (row.kind !== "exercise") {
+    return null;
+  }
+  const [draftPayload, publishedPayload] = await Promise.all([
+    exercisePayloadForVersion(supabase, row.current_draft_version_id),
+    exercisePayloadForVersion(supabase, row.current_published_version_id)
   ]);
   return {
     ...toSummary(row),

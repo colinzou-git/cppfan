@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
+import { parseExercisePayload } from "./exercise-content-schema";
 import { buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
@@ -84,6 +85,51 @@ export async function saveLessonDraft(input: SaveDraftInput): Promise<SaveDraftR
   const { data, error } = await supabase.rpc("save_user_content_draft", {
     p_content_id: input?.contentId ?? null,
     p_kind: input?.kind ?? "lesson",
+    p_title: title,
+    p_native_module_id: input?.nativeModuleId ?? null,
+    p_recommendation_enabled: input?.recommendationEnabled ?? true,
+    p_schema_version: parsed.value.schemaVersion,
+    p_payload: parsed.value,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { content_id: string; draft_version_id: string; revision: number | string; saved_at: string }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.content_id,
+    draftVersionId: row.draft_version_id,
+    revision: Number(row.revision),
+    savedAt: row.saved_at
+  };
+}
+
+/**
+ * Save a user-created exercise draft (#488). Mirrors saveLessonDraft but bounds
+ * the payload with parseExercisePayload and stamps kind = "exercise". Reuses the
+ * shared save_user_content_draft RPC (ownership + optimistic concurrency).
+ */
+export async function saveExerciseDraft(input: SaveDraftInput): Promise<SaveDraftResult> {
+  const parsed = parseExercisePayload(input?.payload);
+  if (!parsed.ok) {
+    return { status: "invalid", issues: parsed.issues };
+  }
+  const title = typeof input?.title === "string" && input.title.trim().length > 0 ? input.title.trim() : parsed.value.title;
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("save_user_content_draft", {
+    p_content_id: input?.contentId ?? null,
+    p_kind: "exercise",
     p_title: title,
     p_native_module_id: input?.nativeModuleId ?? null,
     p_recommendation_enabled: input?.recommendationEnabled ?? true,
