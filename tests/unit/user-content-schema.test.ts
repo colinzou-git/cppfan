@@ -126,4 +126,34 @@ describe("validateLessonForPublication (#487)", () => {
     expect(validateLessonForPublication(payload({ itemType: "completion", completionBlanks: [{ position: 0, answer: "" }] })).length).toBeGreaterThan(0);
     expect(validateLessonForPublication(payload({ itemType: "completion", completionBlanks: [{ position: 0, answer: "42" }] }))).toEqual([]);
   });
+
+  it("parses supplementary review cards with nested choices", () => {
+    const result = parseLessonPayload(
+      baseLesson({
+        reviewCards: [
+          {
+            prompt: "What does & yield?",
+            explanation: "It takes the address.",
+            choices: [
+              { text: "the address", isCorrect: true },
+              { text: "the value", isCorrect: false }
+            ]
+          }
+        ]
+      })
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.reviewCards).toHaveLength(1);
+      expect(result.value.reviewCards?.[0].prompt).toBe("What does & yield?");
+      expect(result.value.reviewCards?.[0].choices).toHaveLength(2);
+      expect(result.value.reviewCards?.[0].choices[0].isCorrect).toBe(true);
+      expect(result.value.reviewCards?.[0].explanation).toBe("It takes the address.");
+    }
+  });
+
+  it("rejects review cards that are not an array", () => {
+    const result = parseLessonPayload(baseLesson({ reviewCards: "nope" }));
+    expect(result.ok).toBe(false);
+  });
 });

@@ -12,10 +12,11 @@ import { ChoicesEditor } from "./choices-editor";
 import { ParsonsEditor } from "./parsons-editor";
 import { CompletionEditor } from "./completion-editor";
 import { CodeFieldsEditor, type CodeFields } from "./code-fields-editor";
+import { ReviewCardsEditor } from "./review-cards-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
-import type { LessonChoice, LessonCompletionBlank, LessonParsonsBlock, LessonPayload } from "./user-content-types";
+import type { LessonChoice, LessonCompletionBlank, LessonParsonsBlock, LessonPayload, LessonReviewCard } from "./user-content-types";
 
 const ITEM_TYPES: LearningItemType[] = [
   "lesson",
@@ -40,6 +41,7 @@ type EditorFields = {
   parsonsBlocks: LessonParsonsBlock[];
   completionBlanks: LessonCompletionBlank[];
   code: CodeFields;
+  reviewCards: LessonReviewCard[];
 };
 
 const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
@@ -64,7 +66,8 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
       referenceSolution: payload?.referenceSolution ?? "",
       expectedOutput: payload?.expectedOutput ?? "",
       solutionExplanation: payload?.solutionExplanation ?? ""
-    }
+    },
+    reviewCards: payload?.reviewCards ?? []
   };
 }
 
@@ -84,7 +87,8 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     ...(fields.code.starterCode ? { starterCode: fields.code.starterCode } : {}),
     ...(fields.code.referenceSolution ? { referenceSolution: fields.code.referenceSolution } : {}),
     ...(fields.code.expectedOutput ? { expectedOutput: fields.code.expectedOutput } : {}),
-    ...(fields.code.solutionExplanation ? { solutionExplanation: fields.code.solutionExplanation } : {})
+    ...(fields.code.solutionExplanation ? { solutionExplanation: fields.code.solutionExplanation } : {}),
+    ...(fields.reviewCards.length > 0 ? { reviewCards: fields.reviewCards } : {})
   };
 }
 
@@ -360,6 +364,8 @@ export function LessonEditor({
       {CODE_TYPES.has(fields.itemType) ? (
         <CodeFieldsEditor values={fields.code} onChange={(patch) => update({ code: { ...fields.code, ...patch } })} />
       ) : null}
+
+      <ReviewCardsEditor cards={fields.reviewCards} onChange={(reviewCards) => update({ reviewCards })} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
