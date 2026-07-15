@@ -93,4 +93,29 @@ describe("ExerciseCatalogView dates + Study start (#447, #472)", () => {
     renderView();
     expect(screen.getByTestId("exercise-study")).toHaveAttribute("data-exercise-id", "dsa-two-sum-sorted");
   });
+
+  it("shows no source filter for a native-only catalog (#488)", () => {
+    renderView();
+    expect(screen.queryByTestId("exercise-source-filter")).toBeNull();
+  });
+
+  it("shows a source filter and filters groups when user exercises are present (#488)", () => {
+    const userExercise: ExerciseView = {
+      ...exercise,
+      id: "user.item.c1",
+      title: "My reverse exercise",
+      skillTitles: ["strings"],
+      source: "user"
+    };
+    render(<ExerciseCatalogView exercises={[exercise, userExercise]} initialProgress={[]} authenticated />);
+
+    expect(screen.getByTestId("exercise-source-filter")).toBeInTheDocument();
+    expect(screen.getAllByText("User-Created").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Native cppFan").length).toBeGreaterThan(0);
+
+    // filtering to User-Created hides the native "Two pointers" group
+    fireEvent.click(screen.getByRole("button", { name: "User-Created" }));
+    expect(screen.queryByText("Two pointers")).toBeNull();
+    expect(screen.getByText("Your exercises")).toBeInTheDocument();
+  });
 });

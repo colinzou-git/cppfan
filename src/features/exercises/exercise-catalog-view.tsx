@@ -58,6 +58,13 @@ export function ExerciseCatalogView({
     return buildGroupedExerciseView(exercises, progressRows);
   }, [exercises, progress]);
 
+  const [sourceFilter, setSourceFilter] = useState<"all" | "native" | "user">("all");
+  const hasUserGroups = groups.some((g) => g.source === "user");
+  const visibleGroups = useMemo(
+    () => (sourceFilter === "all" ? groups : groups.filter((g) => g.source === sourceFilter)),
+    [groups, sourceFilter]
+  );
+
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(() => groups[0]?.id ?? null);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(
     () => groups[0]?.exercises[0]?.id ?? null
@@ -106,6 +113,30 @@ export function ExerciseCatalogView({
         your C++.
       </p>
 
+      {hasUserGroups ? (
+        <div className="flex flex-wrap gap-2" data-testid="exercise-source-filter" aria-label="Filter by source">
+          {([
+            ["all", "All"],
+            ["native", "Native cppFan"],
+            ["user", "User-Created"]
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={sourceFilter === key}
+              onClick={() => setSourceFilter(key)}
+              className={
+                sourceFilter === key
+                  ? "rounded-full bg-slate-900 px-3 py-1 text-sm font-bold text-white"
+                  : "rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-600 hover:border-slate-300"
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/85" data-testid="exercise-table">
           <div className="grid grid-cols-[1fr_8rem_6rem_6rem] gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -115,7 +146,7 @@ export function ExerciseCatalogView({
             <span>Complete</span>
           </div>
 
-          {groups.map((group) => {
+          {visibleGroups.map((group) => {
             const expanded = expandedGroupId === group.id;
             return (
               <div key={group.id} data-testid="exercise-group" data-group-id={group.id}>
