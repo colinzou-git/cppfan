@@ -24,8 +24,9 @@ describe("learner-page source badge (#487)", () => {
     expect(screen.getByText("User-Created")).toBeTruthy();
   });
 
-  it("does not badge a native item as user-created", () => {
+  it("badges a native item as Native cppFan, not user-created", () => {
     render(<LearningItemView data={data("cpp.program_basics.structure.mc_hello")} />);
+    expect(screen.getByText("Native cppFan")).toBeTruthy();
     expect(screen.queryByText("User-Created")).toBeNull();
   });
 });

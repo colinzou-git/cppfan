@@ -66,7 +66,7 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
           >
             {TYPE_LABELS[item.type]}
           </span>
-          {isUserLearningItemId(item.id) ? <ContentSourceBadge source="user" /> : null}
+          <ContentSourceBadge source={isUserLearningItemId(item.id) ? "user" : "native"} />
         </div>
         <CardTitle className="mt-2">{item.title}</CardTitle>
         <CardDescription>
