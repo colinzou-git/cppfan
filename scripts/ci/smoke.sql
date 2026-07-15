@@ -1299,3 +1299,35 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content exercise publish smoke OK';
 end $$;
+
+-- 36) #488: user_exercise_groups is owner-scoped — an impersonated user reads
+-- only their own groups, cannot see or write another user's. Self-cleaning.
+do $$
+declare
+  v_a uuid := '00000000-0000-0000-0000-0000000000b8';
+  v_b uuid := '00000000-0000-0000-0000-0000000000b9';
+  v_seen integer;
+begin
+  insert into auth.users (id) values (v_a), (v_b) on conflict (id) do nothing;
+  insert into public.user_exercise_groups (user_id, name) values (v_a, 'A group'), (v_b, 'B group');
+
+  perform set_config('app.test_uid', v_a::text, true);
+  set local role authenticated;
+  select count(*) into v_seen from public.user_exercise_groups;
+  if v_seen <> 1 then
+    raise exception '#488: owner saw % exercise groups, expected exactly its own 1', v_seen;
+  end if;
+  -- cannot insert under another user's id (RLS with check).
+  begin
+    insert into public.user_exercise_groups (user_id, name) values (v_b, 'forged');
+    raise exception '#488: RLS should block inserting a group for another user';
+  exception when insufficient_privilege then
+    null; -- expected
+  end;
+  reset role;
+  perform set_config('app.test_uid', '', true);
+
+  delete from public.user_exercise_groups where user_id in (v_a, v_b);
+  delete from auth.users where id in (v_a, v_b);
+  raise notice 'user exercise groups RLS smoke OK';
+end $$;
