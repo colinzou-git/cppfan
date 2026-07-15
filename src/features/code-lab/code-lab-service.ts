@@ -8,6 +8,7 @@ import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { getHiddenTestsForItem } from "./code-lab-hidden-tests";
 import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
+import { resolveUserLabExecution } from "./user-lab-code-lab";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -87,6 +88,15 @@ function isStale(expectedVersionId: string | undefined, publishedVersionId: stri
   return Boolean(expectedVersionId && publishedVersionId && expectedVersionId !== publishedVersionId);
 }
 
+/**
+ * Resolve a published user item's Code Lab execution (config + hidden tests +
+ * version) — an exercise, or failing that a lab. Native items resolve a sync
+ * config and never reach here.
+ */
+async function resolveUserItemExecution(itemId: string) {
+  return (await resolveUserExerciseExecution(itemId)) ?? (await resolveUserLabExecution(itemId));
+}
+
 export async function runCode(input: {
   itemId: string;
   source: string;
@@ -96,7 +106,7 @@ export async function runCode(input: {
   expectedVersionId?: string;
 }): Promise<CodeRunResult> {
   const staticConfig = getCodeLabConfigForItem(input.itemId);
-  const resolvedUser = staticConfig ? null : await resolveUserExerciseExecution(input.itemId);
+  const resolvedUser = staticConfig ? null : await resolveUserItemExecution(input.itemId);
   if (resolvedUser && isStale(input.expectedVersionId, resolvedUser.publishedVersionId)) {
     return staleRunResult();
   }
@@ -131,8 +141,8 @@ export async function runTests(input: {
   let config = getCodeLabConfigForItem(input.itemId);
   let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
   if (!config) {
-    // Published user-created exercises carry no static config; resolve from the DB.
-    const resolved = await resolveUserExerciseExecution(input.itemId);
+    // Published user-created exercises/labs carry no static config; resolve from the DB.
+    const resolved = await resolveUserItemExecution(input.itemId);
     if (!resolved) {
       return emptyTestResult("invalid_item");
     }

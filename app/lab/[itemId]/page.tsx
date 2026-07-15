@@ -6,8 +6,9 @@ import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { getInterviewProblem } from "@/features/interview/problem-catalog";
-import { getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
 import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
+import { labPayloadToCodeLabConfig } from "@/features/user-content/lab-code-lab";
 import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
 
 /**
@@ -23,8 +24,8 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
   // Published user-created exercises (#488) carry no static config; resolve the
   // learner-safe Code Lab (visible tests only) from the owner's published payload.
   if (isUserLearningItemId(decodedId)) {
-    const exContentId = contentIdFromUserItemId(decodedId);
-    const exercise = exContentId ? await getExerciseForOwner(exContentId) : null;
+    const userContentId = contentIdFromUserItemId(decodedId);
+    const exercise = userContentId ? await getExerciseForOwner(userContentId) : null;
     if (exercise?.publishedPayload) {
       return (
         <main className="p-3 xl:p-6">
@@ -34,6 +35,24 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
             config={exercisePayloadToCodeLabConfig(exercise.publishedPayload)}
             sourceVersion={`user-exercise:${exercise.publishedVersionId ?? "1"}`}
             contentVersionId={exercise.publishedVersionId ?? undefined}
+            backHref="/my-content"
+            backLabel="Back to My Content"
+          />
+        </main>
+      );
+    }
+    // Published user labs (#489) resolve the same way; the milestone runner is a
+    // later slice, so this opens the active (single-task / first-milestone) view.
+    const lab = userContentId ? await getLabForOwner(userContentId) : null;
+    if (lab?.publishedPayload) {
+      return (
+        <main className="p-3 xl:p-6">
+          <CodeLabWorkspace
+            itemId={decodedId}
+            title={lab.title}
+            config={labPayloadToCodeLabConfig(lab.publishedPayload)}
+            sourceVersion={`user-lab:${lab.publishedVersionId ?? "1"}`}
+            contentVersionId={lab.publishedVersionId ?? undefined}
             backHref="/my-content"
             backLabel="Back to My Content"
           />

@@ -2,13 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { runCode, runTests } from "@/features/code-lab/code-lab-service";
 import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
 import { resolveUserExerciseExecution } from "@/features/code-lab/user-exercise-code-lab";
+import { resolveUserLabExecution } from "@/features/code-lab/user-lab-code-lab";
 
 // Force the user-exercise path: no static config, a DB-resolved config at v2.
 vi.mock("@/features/code-lab/code-lab-catalog", () => ({ getCodeLabConfigForItem: vi.fn() }));
 vi.mock("@/features/code-lab/user-exercise-code-lab", () => ({ resolveUserExerciseExecution: vi.fn() }));
+// The lab resolver is tried after the exercise resolver.
+vi.mock("@/features/code-lab/user-lab-code-lab", () => ({ resolveUserLabExecution: vi.fn(async () => null) }));
 
 const mockedConfig = vi.mocked(getCodeLabConfigForItem);
 const mockedResolve = vi.mocked(resolveUserExerciseExecution);
+const mockedLabResolve = vi.mocked(resolveUserLabExecution);
 
 const USER_ITEM = "user.item.00000000-0000-0000-0000-000000000001";
 
@@ -54,5 +58,26 @@ describe("stale user-exercise definition (#488)", () => {
     process.env.CODE_RUNNER_PROVIDER = "mock";
     const result = await runCode({ itemId: USER_ITEM, source: "int main(){}" });
     expect(result.staleDefinition).toBeFalsy();
+  });
+});
+
+describe("lab resolution falls back after the exercise resolver (#489)", () => {
+  it("refuses a stale lab run resolved via the lab resolver", async () => {
+    mockedResolve.mockResolvedValue(null); // not an exercise
+    mockedLabResolve.mockResolvedValue({
+      config: {
+        enabled: true,
+        language: "cpp",
+        mode: "stdin",
+        starterCode: "int main(){}",
+        visibleTests: [],
+        skillTags: ["user.skill.lab"]
+      },
+      hiddenTests: [],
+      publishedVersionId: "labv2"
+    });
+    const result = await runTests({ itemId: USER_ITEM, source: "int main(){}", expectedVersionId: "labv1" });
+    expect(result.staleDefinition).toBe(true);
+    expect(mockedLabResolve).toHaveBeenCalled();
   });
 });
