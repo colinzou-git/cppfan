@@ -1,0 +1,17 @@
+{
+  "id": "bit-single-number",
+  "title": "Bit manipulation: the single number",
+  "skill_ids": ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["single_number.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-single-number/work exercises/bit-single-number/tests/tests.cpp -o exercises/bit-single-number/work/run",
+  "test_command": "exercises/bit-single-number/work/run",
+  "required_tests": ["test_single", "test_all_but_one_paired", "test_negatives", "test_order_independent", "test_large"],
+  "hints": [
+    "XOR has two useful properties: x ^ x == 0 and x ^ 0 == x.",
+    "XOR-ing every element cancels each value that appears twice.",
+    "The running XOR of the whole array is the element that appears once."
+  ],
+  "project_lab": "bit-technique-playground"
+}
