@@ -21,6 +21,7 @@ export type ExerciseGroupView = {
   id: string;
   title: string;
   badge: string;
+  source: "native" | "user";
   exercises: ExerciseRowView[];
   progressPct: number;
   startedCount: number;
@@ -28,6 +29,8 @@ export type ExerciseGroupView = {
   startDate: string | null;
   completeDate: string | null;
 };
+
+const USER_GROUP_TITLE = "Your exercises";
 
 // Progress percent per status. `started` is a deliberate midpoint so a group with
 // some work-in-progress reads as partially advanced.
@@ -41,8 +44,12 @@ export function statusProgressPct(status: ExerciseRowStatus): number {
 
 const FALLBACK_GROUP = "General";
 
-/** Primary topic for an exercise: its first practiced skill title, else fallback. */
+/** Primary topic for an exercise: its first practiced skill title, else fallback.
+ * User-created exercises all collect into one "Your exercises" group. */
 function groupTitleFor(exercise: ExerciseView): string {
+  if (exercise.source === "user") {
+    return USER_GROUP_TITLE;
+  }
   return exercise.skillTitles[0] ?? FALLBACK_GROUP;
 }
 
@@ -117,6 +124,7 @@ export function buildGroupedExerciseView(
       id: groupId(title),
       title,
       badge: groupBadge(title),
+      source: rows[0]?.source === "user" ? "user" : "native",
       exercises: rows,
       progressPct,
       startedCount,
@@ -126,7 +134,13 @@ export function buildGroupedExerciseView(
     });
   }
 
-  // Stable, readable ordering: by group title.
-  groups.sort((a, b) => a.title.localeCompare(b.title));
+  // Stable, readable ordering: the owner's "Your exercises" group first, then
+  // native topic groups by title.
+  groups.sort((a, b) => {
+    if (a.source !== b.source) {
+      return a.source === "user" ? -1 : 1;
+    }
+    return a.title.localeCompare(b.title);
+  });
   return groups;
 }
