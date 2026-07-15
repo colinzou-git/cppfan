@@ -74,7 +74,8 @@ describe("lab resolution falls back after the exercise resolver (#489)", () => {
         skillTags: ["user.skill.lab"]
       },
       hiddenTests: [],
-      publishedVersionId: "labv2"
+      publishedVersionId: "labv2",
+      files: []
     });
     const result = await runTests({ itemId: USER_ITEM, source: "int main(){}", expectedVersionId: "labv1" });
     expect(result.staleDefinition).toBe(true);

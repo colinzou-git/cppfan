@@ -94,7 +94,11 @@ function isStale(expectedVersionId: string | undefined, publishedVersionId: stri
  * config and never reach here.
  */
 async function resolveUserItemExecution(itemId: string, milestoneIndex = 0) {
-  return (await resolveUserExerciseExecution(itemId)) ?? (await resolveUserLabExecution(itemId, milestoneIndex));
+  const exercise = await resolveUserExerciseExecution(itemId);
+  if (exercise) {
+    return { ...exercise, files: [] as { name: string; content: string }[] };
+  }
+  return resolveUserLabExecution(itemId, milestoneIndex);
 }
 
 export async function runCode(input: {
@@ -117,7 +121,8 @@ export async function runCode(input: {
     buildRunnerInput({
       source: input.source,
       stdin: input.stdin ?? "",
-      compilerFlags: resolvedFlags(input.compilerFlags ?? config?.compilerFlags)
+      compilerFlags: resolvedFlags(input.compilerFlags ?? config?.compilerFlags),
+      files: resolvedUser?.files
     })
   );
   const { classifications } = classifyCodeAttempt({
@@ -144,6 +149,7 @@ export async function runTests(input: {
 }): Promise<CodeTestResult> {
   let config = getCodeLabConfigForItem(input.itemId);
   let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
+  let files: { name: string; content: string }[] = [];
   if (!config) {
     // Published user-created exercises/labs carry no static config; resolve from the DB.
     const resolved = await resolveUserItemExecution(input.itemId, input.milestoneIndex);
@@ -155,6 +161,7 @@ export async function runTests(input: {
     }
     config = resolved.config;
     hiddenTests = resolved.hiddenTests;
+    files = resolved.files;
   }
 
   const flags = resolvedFlags(input.compilerFlags ?? config.compilerFlags);
@@ -168,7 +175,7 @@ export async function runTests(input: {
 
   for (const test of visibleCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags })
+      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags, files })
     );
     provider = run.provider;
     simulated = run.simulated;
@@ -200,7 +207,7 @@ export async function runTests(input: {
 
   for (const test of hiddenCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags })
+      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags, files })
     );
     provider = run.provider;
     simulated = run.simulated;

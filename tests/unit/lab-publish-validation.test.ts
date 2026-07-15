@@ -74,6 +74,19 @@ describe("validateLabPublication (#489)", () => {
     }
   });
 
+  it("mounts read-only fixtures alongside the reference solution (#489 criterion 4)", async () => {
+    executeRun.mockReset().mockResolvedValue({ status: "success", stdout: "ba\n", compileOutput: "" });
+    await validateLabPublication(
+      lab({
+        referenceSolution: "ok",
+        completion: { tests: [twoTests[0]] },
+        fixtures: [{ filename: "input.txt", content: "seed data" }]
+      })
+    );
+    const arg = executeRun.mock.calls[0][0] as { files?: { name: string; content: string }[] };
+    expect(arg.files).toEqual([{ name: "input.txt", content: "seed data" }]);
+  });
+
   it("passes when the reference solution passes every milestone test", async () => {
     executeRun
       .mockReset()
