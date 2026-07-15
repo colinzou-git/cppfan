@@ -35,9 +35,14 @@ export default async function MyContentPage({
           <h1 className="mt-2 text-3xl font-black text-slate-950">My Content</h1>
           <p className="text-slate-600">Your private lessons. Native and user-created content mix everywhere with source badges.</p>
         </div>
-        <Button asChild>
-          <Link href="/my-content/lessons/new">Create a lesson</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/my-content/lessons/new">Create a lesson</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/my-content/exercises/new">Create Exercise</Link>
+          </Button>
+        </div>
       </header>
 
       {items.length === 0 ? (
