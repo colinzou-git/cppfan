@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { traceCode } from "@/features/code-lab/code-trace-service";
 import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
+import { resolveUserExerciseExecution } from "@/features/code-lab/user-exercise-code-lab";
 import { recordCodeAttempt } from "@/features/code-lab/code-attempt-service";
 import {
   parseBodyRecord,
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
   const parsed = validateCodeRequest(body);
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
-  const config = getCodeLabConfigForItem(parsed.itemId);
+  const config = getCodeLabConfigForItem(parsed.itemId) ?? (await resolveUserExerciseExecution(parsed.itemId))?.config ?? null;
   // Resolve the selected test against VISIBLE tests only and read its expected
   // output server-side, so a hidden test name/expected output can never be
   // smuggled into the AI prompt or the response.

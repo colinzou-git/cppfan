@@ -6,6 +6,7 @@ import {
 import type { CodeTraceRequest, CodeTraceResult, CodeTraceStep } from "./code-trace-types";
 import { CODE_TRACE_DISCLAIMER } from "./code-trace-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { buildTraceMessages } from "./code-trace-prompts";
 import { normalizeCodeErrorTags } from "./code-feedback-parser";
 import {
@@ -61,7 +62,7 @@ export async function traceCode(
   const compileTrace = compileErrorTrace(request);
   if (compileTrace) return compileTrace;
 
-  const config = getCodeLabConfigForItem(request.itemId);
+  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
   const messages = buildTraceMessages(request, {
     prompt: config?.prompt ?? "",
     skillTags: config?.skillTags ?? []

@@ -4,6 +4,7 @@ import {
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { buildExplainMessages } from "./code-debug-explain-prompts";
 import type { CodeDebugExplainRequest, CodeDebugExplainResult } from "./code-debug-types";
 
@@ -21,7 +22,7 @@ export async function explainDebugStep(
   request: CodeDebugExplainRequest,
   signal: AbortSignal
 ): Promise<CodeDebugExplainResult> {
-  const config = getCodeLabConfigForItem(request.itemId);
+  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
   const relatedSkills = config?.skillTags ?? [];
 
   if (!isAiChatEnabled()) {
