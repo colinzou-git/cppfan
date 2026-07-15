@@ -342,3 +342,14 @@ export async function removeAttachment(attachmentId: string): Promise<LifecycleR
   }
   return callSimpleRpc("delete_attachment", { p_attachment_id: attachmentId });
 }
+
+/**
+ * Reset the owner's FSRS review cards for a lesson (#487) — the substantial-edit
+ * "reset affected cards" choice. Owner/content-scoped in the RPC.
+ */
+export async function resetReviewForContent(contentId: string): Promise<LifecycleResult> {
+  if (!contentId) {
+    return { status: "error" };
+  }
+  return callSimpleRpc("reset_review_cards_for_content", { p_content_id: contentId });
+}
