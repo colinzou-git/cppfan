@@ -118,4 +118,24 @@ describe("ExerciseCatalogView dates + Study start (#447, #472)", () => {
     expect(screen.queryByText("Two pointers")).toBeNull();
     expect(screen.getByText("Your exercises")).toBeInTheDocument();
   });
+
+  it("keeps a mixed native+user group visible under both source filters (#488)", () => {
+    const userInNativeGroup: ExerciseView = {
+      ...exercise,
+      id: "user.item.c2",
+      title: "My two-pointer drill",
+      skillTitles: ["ignored"],
+      source: "user",
+      groupName: "Two pointers"
+    };
+    render(
+      <ExerciseCatalogView exercises={[exercise, userInNativeGroup]} initialProgress={[]} authenticated />
+    );
+
+    // "Two pointers" now mixes a native and a user exercise → shown for both.
+    fireEvent.click(screen.getByRole("button", { name: "User-Created" }));
+    expect(screen.getByText("Two pointers")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Native cppFan" }));
+    expect(screen.getByText("Two pointers")).toBeInTheDocument();
+  });
 });

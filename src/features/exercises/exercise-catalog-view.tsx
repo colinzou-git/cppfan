@@ -59,11 +59,12 @@ export function ExerciseCatalogView({
   }, [exercises, progress]);
 
   const [sourceFilter, setSourceFilter] = useState<"all" | "native" | "user">("all");
-  const hasUserGroups = groups.some((g) => g.source === "user");
-  const visibleGroups = useMemo(
-    () => (sourceFilter === "all" ? groups : groups.filter((g) => g.source === sourceFilter)),
-    [groups, sourceFilter]
-  );
+  const hasUserGroups = groups.some((g) => g.hasUser);
+  const visibleGroups = useMemo(() => {
+    if (sourceFilter === "all") return groups;
+    // Row-aware so a group mixing native and user exercises shows under both.
+    return groups.filter((g) => (sourceFilter === "user" ? g.hasUser : g.hasNative));
+  }, [groups, sourceFilter]);
 
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(() => groups[0]?.id ?? null);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(
