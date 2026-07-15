@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { saveExerciseDraft } from "./user-content-actions";
-import { CODE_CONTRACT_MODES, EVALUATION_MODES, type ExercisePayload } from "./exercise-content-types";
+import { ExerciseTestsEditor } from "./exercise-tests-editor";
+import { CODE_CONTRACT_MODES, EVALUATION_MODES, type ExercisePayload, type ExerciseTest } from "./exercise-content-types";
 
 const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
 
@@ -22,6 +23,7 @@ type ExerciseFields = {
   stdinFormat: string;
   stdoutFormat: string;
   functionSignature: string;
+  tests: ExerciseTest[];
 };
 
 type SaveState = "idle" | "saving" | "saved" | "local_only" | "conflict" | "invalid" | "error";
@@ -40,7 +42,8 @@ export function fieldsFromExercisePayload(payload: ExercisePayload | null): Exer
     solutionExplanation: payload?.solutionExplanation ?? "",
     stdinFormat: payload?.stdinFormat ?? "",
     stdoutFormat: payload?.stdoutFormat ?? "",
-    functionSignature: payload?.functionSignature ?? ""
+    functionSignature: payload?.functionSignature ?? "",
+    tests: payload?.tests ? payload.tests.map((t) => ({ ...t })) : []
   };
 }
 
@@ -64,7 +67,8 @@ export function buildExercisePayload(fields: ExerciseFields): Record<string, unk
     ...(fields.solutionExplanation ? { solutionExplanation: fields.solutionExplanation } : {}),
     ...(isFunction && fields.functionSignature ? { functionSignature: fields.functionSignature } : {}),
     ...(!isFunction && fields.stdinFormat ? { stdinFormat: fields.stdinFormat } : {}),
-    ...(!isFunction && fields.stdoutFormat ? { stdoutFormat: fields.stdoutFormat } : {})
+    ...(!isFunction && fields.stdoutFormat ? { stdoutFormat: fields.stdoutFormat } : {}),
+    ...(fields.tests.length > 0 ? { tests: fields.tests } : {})
   };
 }
 
@@ -256,6 +260,8 @@ export function ExerciseEditor({
         Solution explanation
         <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.solutionExplanation} onChange={(e) => update({ solutionExplanation: e.target.value })} placeholder="Why the solution works…" />
       </label>
+
+      <ExerciseTestsEditor tests={fields.tests} onChange={(tests) => update({ tests })} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
