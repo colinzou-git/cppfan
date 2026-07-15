@@ -43,17 +43,17 @@ describe("lab editor field mapping (#489)", () => {
     }
   });
 
-  it("round-trips a milestone lab preserving order and required flags", () => {
+  it("round-trips a milestone lab preserving order, required flags, and per-milestone tests", () => {
     const original: LabPayload = {
       schemaVersion: CURRENT_LAB_SCHEMA_VERSION,
       title: "Build a shell",
       summary: "A tiny shell.",
       taskDescription: "Implement a minimal shell.",
       mode: "milestones",
-      evaluationMode: "self_evaluation",
+      evaluationMode: "automated_tests",
       milestones: [
-        { id: "m1", title: "Read a line", instructions: "Read input.", required: true },
-        { id: "m2", title: "Run a command", instructions: "Exec it.", objective: "process control", required: false }
+        { id: "m1", title: "Read a line", instructions: "Read input.", required: true, tests: [{ name: "t1", input: "hi\n", expectedOutput: "hi\n", hidden: false }] },
+        { id: "m2", title: "Run a command", instructions: "Exec it.", objective: "process control", required: false, tests: [{ name: "t2", input: "", expectedOutput: "ok\n", hidden: true }] }
       ]
     };
     const rebuilt = parseLabPayload(buildLabPayload(fieldsFromLabPayload(original)));
@@ -62,10 +62,30 @@ describe("lab editor field mapping (#489)", () => {
       expect(rebuilt.value.milestones).toHaveLength(2);
       expect(rebuilt.value.milestones?.[0].id).toBe("m1");
       expect(rebuilt.value.milestones?.[0].required).toBe(true);
+      expect(rebuilt.value.milestones?.[0].tests?.[0].name).toBe("t1");
       expect(rebuilt.value.milestones?.[1].required).toBe(false);
       expect(rebuilt.value.milestones?.[1].objective).toBe("process control");
+      expect(rebuilt.value.milestones?.[1].tests?.[0].hidden).toBe(true);
       // single-task completion is dropped in milestone mode
       expect(rebuilt.value.completion).toBeUndefined();
+    }
+  });
+
+  it("round-trips single-task completion tests", () => {
+    const original: LabPayload = {
+      schemaVersion: CURRENT_LAB_SCHEMA_VERSION,
+      title: "Echo",
+      summary: "Echo input.",
+      taskDescription: "Read and echo.",
+      mode: "single_task",
+      evaluationMode: "automated_tests",
+      completion: { tests: [{ name: "basic", input: "hi\n", expectedOutput: "hi\n", hidden: false }] }
+    };
+    const rebuilt = parseLabPayload(buildLabPayload(fieldsFromLabPayload(original)));
+    expect(rebuilt.ok).toBe(true);
+    if (rebuilt.ok) {
+      expect(rebuilt.value.completion?.tests).toHaveLength(1);
+      expect(rebuilt.value.completion?.tests?.[0].name).toBe("basic");
     }
   });
 

@@ -6,9 +6,10 @@ import {
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
 import { getAiProviderPreferenceOverride } from "@/features/ai-chat/provider-preferences";
-import { getAttachmentsForOwner, getContentItemForOwner, getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { getAttachmentsForOwner, getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
 import { generateAuthoringProposal } from "@/features/user-content/ai-authoring-service";
 import { generateExerciseAuthoringProposal } from "@/features/user-content/exercise-ai-authoring-service";
+import { generateLabAuthoringProposal } from "@/features/user-content/lab-ai-authoring-service";
 import type { AuthoringAttachmentRef } from "@/features/user-content/ai-authoring-policy";
 
 export const runtime = "nodejs";
@@ -82,6 +83,36 @@ export async function POST(request: Request) {
       return apiError("provider_error", "The AI provider could not complete the request.", 502);
     } finally {
       clearTimeout(exTimeout);
+    }
+  }
+
+  if (detail.kind === "lab") {
+    const lab = await getLabForOwner(contentId);
+    const labPayload = lab?.draftPayload ?? lab?.publishedPayload;
+    if (!labPayload) {
+      return apiError("no_draft", "There is no lab draft to work from yet.", 400);
+    }
+    const labConfig = getAiProviderConfig(override);
+    const labController = new AbortController();
+    const labTimeout = setTimeout(() => labController.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const result = await generateLabAuthoringProposal({
+        payload: labPayload,
+        instruction,
+        providerKind: labConfig.provider,
+        complete: (messages) => completeAiResponse({ messages, signal: labController.signal })
+      });
+      if (result.status === "ok") {
+        return NextResponse.json({ proposal: result.proposal }, { headers: { "cache-control": "no-store" } });
+      }
+      if (result.status === "invalid") {
+        return apiError("proposal_invalid", result.message, 422);
+      }
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } catch {
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } finally {
+      clearTimeout(labTimeout);
     }
   }
 
