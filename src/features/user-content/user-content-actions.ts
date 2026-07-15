@@ -9,13 +9,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "./user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
 import { parseExercisePayload, validateExerciseForPublication } from "./exercise-content-schema";
 import { parseLabPayload, validateLabForPublication } from "./lab-content-schema";
+import { parseInterviewPayload, validateInterviewForPublication } from "./interview-content-schema";
 import { validateExercisePublication } from "./exercise-publish-validation";
 import { validateLabPublication } from "./lab-publish-validation";
-import { buildExerciseContentExport, buildLabContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
+import { validateInterviewPublication } from "./interview-publish-validation";
+import { buildExerciseContentExport, buildLabContentExport, buildInterviewContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
 export type SaveDraftInput = {
@@ -82,6 +84,16 @@ export async function restoreVersionAsDraft(input: {
       contentId: input.contentId,
       kind: "lab",
       title: parsedLab.ok ? parsedLab.value.title : "",
+      expectedRevision: input.expectedRevision ?? null,
+      payload
+    });
+  }
+  if (detail?.kind === "interview_problem") {
+    const parsedIv = parseInterviewPayload(payload);
+    return saveInterviewDraft({
+      contentId: input.contentId,
+      kind: "interview_problem",
+      title: parsedIv.ok ? parsedIv.value.title : "",
       expectedRevision: input.expectedRevision ?? null,
       payload
     });
@@ -355,6 +367,104 @@ export async function publishLab(input: { contentId: string; expectedRevision?: 
   };
 }
 
+export async function saveInterviewDraft(input: SaveDraftInput): Promise<SaveDraftResult> {
+  const parsed = parseInterviewPayload(input?.payload);
+  if (!parsed.ok) {
+    return { status: "invalid", issues: parsed.issues };
+  }
+  const title = typeof input?.title === "string" && input.title.trim().length > 0 ? input.title.trim() : parsed.value.title;
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("save_user_content_draft", {
+    p_content_id: input?.contentId ?? null,
+    p_kind: "interview_problem",
+    p_title: title,
+    p_native_module_id: input?.nativeModuleId ?? null,
+    p_recommendation_enabled: input?.recommendationEnabled ?? true,
+    p_schema_version: parsed.value.schemaVersion,
+    p_payload: parsed.value,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { content_id: string; draft_version_id: string; revision: number | string; saved_at: string }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.content_id,
+    draftVersionId: row.draft_version_id,
+    revision: Number(row.revision),
+    savedAt: row.saved_at
+  };
+}
+
+export async function publishInterview(input: { contentId: string; expectedRevision?: number | null }): Promise<PublishResult> {
+  const contentId = typeof input?.contentId === "string" ? input.contentId : "";
+  if (!contentId) {
+    return { status: "error" };
+  }
+  const detail = await getInterviewForOwner(contentId);
+  if (detail === null) {
+    const supabaseProbe = await createClient();
+    return supabaseProbe ? { status: "not_found" } : { status: "unconfigured" };
+  }
+  if (!detail.draftPayload) {
+    return { status: "invalid", issues: [{ field: "payload", message: "there is no draft to publish" }] };
+  }
+  const issues = validateInterviewForPublication(detail.draftPayload);
+  if (issues.length > 0) {
+    return { status: "invalid", issues };
+  }
+
+  // Compile/run a supplied judge-backed reference solution against the tests
+  // where a runner is available. Never publish code known to fail.
+  const validation = await validateInterviewPublication(detail.draftPayload);
+  if (validation.status === "compile_error") {
+    return { status: "invalid", issues: [{ field: "referenceSolution", message: "the reference solution does not compile" }] };
+  }
+  if (validation.status === "failed") {
+    return {
+      status: "invalid",
+      issues: [{ field: "tests", message: `the reference solution failed ${validation.failures.length} test(s): ${validation.failures.join(", ")}` }]
+    };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("publish_user_content", {
+    p_content_id: contentId,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { out_content_id: string; out_skill_id: string; out_learning_item_id: string; out_version_number: number }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.out_content_id,
+    skillId: row.out_skill_id,
+    learningItemId: row.out_learning_item_id,
+    versionNumber: Number(row.out_version_number)
+  };
+}
+
 export type PublishResult =
   | { status: "ok"; contentId: string; skillId: string; learningItemId: string; versionNumber: number }
   | { status: "invalid"; issues: ValidationIssue[] }
@@ -486,6 +596,11 @@ export async function exportContent(contentId: string): Promise<ExportResult> {
   if (detail.kind === "lab") {
     const lab = await getLabForOwner(contentId);
     const data = buildLabContentExport(meta, lab?.draftPayload ?? null, lab?.publishedPayload ?? null);
+    return { status: "ok", export: data };
+  }
+  if (detail.kind === "interview_problem") {
+    const interview = await getInterviewForOwner(contentId);
+    const data = buildInterviewContentExport(meta, interview?.draftPayload ?? null, interview?.publishedPayload ?? null);
     return { status: "ok", export: data };
   }
   const data = buildUserContentExport(meta, detail.draftPayload, detail.publishedPayload);

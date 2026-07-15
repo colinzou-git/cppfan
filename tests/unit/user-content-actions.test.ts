@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "@/features/user-content/user-content-queries";
 import {
   addExternalAttachment,
   archiveContent,
@@ -9,9 +9,11 @@ import {
   removeAttachment,
   publishExercise,
   publishLab,
+  publishInterview,
   restoreVersionAsDraft,
   saveExerciseDraft,
   saveLabDraft,
+  saveInterviewDraft,
   saveLessonDraft,
   setAttachmentVisibility
 } from "@/features/user-content/user-content-actions";
@@ -22,13 +24,15 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/features/user-content/user-content-queries", () => ({
   getContentItemForOwner: vi.fn(),
   getExerciseForOwner: vi.fn(),
-  getLabForOwner: vi.fn()
+  getLabForOwner: vi.fn(),
+  getInterviewForOwner: vi.fn()
 }));
 
 const mockedCreate = vi.mocked(createClient);
 const mockedDetail = vi.mocked(getContentItemForOwner);
 const mockedExercise = vi.mocked(getExerciseForOwner);
 const mockedLab = vi.mocked(getLabForOwner);
+const mockedInterview = vi.mocked(getInterviewForOwner);
 
 function rpcClient(impl: (fn: string, args: Record<string, unknown>) => { data?: unknown; error?: unknown }) {
   return { rpc: vi.fn(async (fn: string, args: Record<string, unknown>) => impl(fn, args)) } as unknown as NonNullable<
@@ -331,5 +335,74 @@ describe("saveLabDraft + publishLab (#489)", () => {
     );
     const result = await publishLab({ contentId: "l1" });
     expect(result).toMatchObject({ status: "ok", contentId: "l1", skillId: "user.skill.l1", versionNumber: 1 });
+  });
+});
+
+describe("saveInterviewDraft + publishInterview (#490)", () => {
+  const validInterview = {
+    title: "Two Sum",
+    statement: "Return indices summing to target.",
+    evaluationMode: "self_evaluation"
+  };
+
+  function interviewDetail(overrides: Record<string, unknown> = {}): Awaited<ReturnType<typeof getInterviewForOwner>> {
+    return {
+      id: "i1",
+      kind: "interview_problem",
+      title: "Two Sum",
+      lifecycleStatus: "draft",
+      recommendationEnabled: true,
+      draftRevision: 1,
+      updatedAt: "2026-01-01T00:00:00Z",
+      publishedAt: null,
+      nativeModuleId: null,
+      publishedVersionId: null,
+      draftPayload: {
+        schemaVersion: 1,
+        title: "Two Sum",
+        statement: "Return indices summing to target.",
+        evaluationMode: "self_evaluation" as const,
+        ...(overrides.draft as object ?? {})
+      },
+      publishedPayload: null,
+      ...overrides
+    } as Awaited<ReturnType<typeof getInterviewForOwner>>;
+  }
+
+  it("rejects an invalid interview payload before touching the backend", async () => {
+    const result = await saveInterviewDraft({ title: "", payload: { statement: "s" } });
+    expect(result.status).toBe("invalid");
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("stamps kind = interview_problem and returns the RPC result", async () => {
+    let seenKind: unknown;
+    mockedCreate.mockResolvedValue(
+      rpcClient((_fn, args) => {
+        seenKind = args.p_kind;
+        return { data: [{ content_id: "i1", draft_version_id: "v1", revision: 1, saved_at: "2026-01-01T00:00:00Z" }], error: null };
+      })
+    );
+    const result = await saveInterviewDraft({ title: "Two Sum", payload: validInterview });
+    expect(seenKind).toBe("interview_problem");
+    expect(result).toMatchObject({ status: "ok", contentId: "i1", revision: 1 });
+  });
+
+  it("blocks publishing a judge problem with no tests", async () => {
+    mockedInterview.mockResolvedValue(interviewDetail({ draft: { evaluationMode: "judge" } }));
+    const result = await publishInterview({ contentId: "i1" });
+    expect(result.status).toBe("invalid");
+  });
+
+  it("publishes a valid self-evaluated problem via the RPC", async () => {
+    mockedInterview.mockResolvedValue(interviewDetail());
+    mockedCreate.mockResolvedValue(
+      rpcClient(() => ({
+        data: [{ out_content_id: "i1", out_skill_id: "user.skill.i1", out_learning_item_id: "user.item.i1", out_version_number: 1 }],
+        error: null
+      }))
+    );
+    const result = await publishInterview({ contentId: "i1" });
+    expect(result).toMatchObject({ status: "ok", skillId: "user.skill.i1", versionNumber: 1 });
   });
 });

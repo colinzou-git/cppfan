@@ -221,3 +221,70 @@ describe("buildLabContentExport (#489)", () => {
     expect(data.publishedPayload).not.toBeNull();
   });
 });
+
+import {
+  CURRENT_INTERVIEW_SCHEMA_VERSION,
+  type InterviewProblemPayload
+} from "@/features/user-content/interview-content-types";
+import {
+  buildInterviewContentExport,
+  buildInterviewMarkdown
+} from "@/features/user-content/user-content-export";
+
+function interview(overrides: Partial<InterviewProblemPayload> = {}): InterviewProblemPayload {
+  return {
+    schemaVersion: CURRENT_INTERVIEW_SCHEMA_VERSION,
+    title: "Two Sum",
+    statement: "Return indices summing to target.",
+    evaluationMode: "judge",
+    ...overrides
+  };
+}
+
+describe("buildInterviewMarkdown (#490)", () => {
+  it("renders statement, examples, hints, and code", () => {
+    const md = buildInterviewMarkdown(
+      interview({
+        difficulty: "medium",
+        constraints: "n <= 1e5",
+        targetComplexity: "O(n)",
+        visibleExamples: [{ input: "1 2\n", output: "0 1\n", note: "basic" }],
+        hintLadder: ["Use a hash map."],
+        starterCode: "int main(){}",
+        referenceSolution: "int main(){ /* solve */ }",
+        tests: [{ name: "t", input: "1\n", expectedOutput: "0\n", hidden: true }]
+      })
+    );
+    expect(md).toContain("# Two Sum");
+    expect(md).toContain("## Problem");
+    expect(md).toContain("## Constraints");
+    expect(md).toContain("## Examples");
+    expect(md).toContain("## Hints");
+    expect(md).toContain("## Reference solution");
+    expect(md).toContain("(hidden)");
+  });
+});
+
+describe("buildInterviewContentExport (#490)", () => {
+  it("wraps the problem with a schema-versioned manifest + markdown", () => {
+    const data = buildInterviewContentExport(
+      {
+        id: "i1",
+        kind: "interview_problem",
+        title: "Two Sum",
+        lifecycleStatus: "published",
+        nativeModuleId: null,
+        draftRevision: 1,
+        updatedAt: "2026-07-16T00:00:00Z",
+        publishedAt: "2026-07-16T00:00:00Z"
+      },
+      null,
+      interview(),
+      new Date("2026-07-16T00:00:00Z")
+    );
+    expect(data.exportSchemaVersion).toBe(EXPORT_SCHEMA_VERSION);
+    expect(data.item.kind).toBe("interview_problem");
+    expect(data.markdown).toContain("Two Sum");
+    expect(data.publishedPayload).not.toBeNull();
+  });
+});
