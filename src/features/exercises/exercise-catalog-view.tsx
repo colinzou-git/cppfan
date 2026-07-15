@@ -10,6 +10,7 @@ import type { ExerciseStatus } from "./exercise-evidence";
 import type { ExerciseView } from "./exercise-view";
 import type { ExerciseProgress } from "./exercise-progress";
 import { buildGroupedExerciseView, type ExerciseRowView } from "./exercise-grouped-view";
+import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 
 type Entry = { status: ExerciseStatus; started_at: string | null; completed_at: string | null };
 
@@ -135,6 +136,7 @@ export function ExerciseCatalogView({
                       {group.badge}
                     </span>
                     <span className="truncate font-bold text-slate-900">{group.title}</span>
+                    <ContentSourceBadge source={group.source} />
                   </span>
                   <ProgressCell pct={group.progressPct} />
                   <span className="text-sm text-slate-600">{formatDate(group.startDate)}</span>

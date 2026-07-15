@@ -114,4 +114,16 @@ describe("exercise grouped view (#447)", () => {
     const groups = buildGroupedExerciseView([view("a", ["Zebra"]), view("b", ["Alpha"])], []);
     expect(groups.map((g) => g.title)).toEqual(["Alpha", "Zebra"]);
   });
+
+  it("collects user-created exercises into a badged \"Your exercises\" group, ordered first (#488)", () => {
+    const nativeA: ExerciseView = view("a", ["Arrays"]);
+    const userX: ExerciseView = { ...view("user.item.c1", ["strings"]), source: "user" };
+    const groups = buildGroupedExerciseView([nativeA, userX], []);
+    expect(groups[0].source).toBe("user");
+    expect(groups[0].title).toBe("Your exercises");
+    expect(groups[0].exercises.map((r) => r.id)).toContain("user.item.c1");
+    const native = groups.find((g) => g.title === "Arrays");
+    expect(native?.source).toBe("native");
+  });
+
 });

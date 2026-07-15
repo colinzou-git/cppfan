@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ExerciseCatalogView } from "@/features/exercises/exercise-catalog-view";
 import { ExercisesPageShell } from "@/features/exercises/exercises-page-shell";
 import { buildExerciseCatalogView } from "@/features/exercises/exercise-view";
+import { getMyPublishedExerciseViews } from "@/features/exercises/user-exercise-source";
 import { getExerciseProgressForUser } from "@/features/exercises/exercise-progress";
 
 export const metadata = {
@@ -9,7 +10,7 @@ export const metadata = {
 };
 
 export default async function ExercisesPage() {
-  const exercises = buildExerciseCatalogView();
+  const exercises = [...buildExerciseCatalogView(), ...(await getMyPublishedExerciseViews())];
   const progress = await getExerciseProgressForUser();
 
   let authenticated = false;

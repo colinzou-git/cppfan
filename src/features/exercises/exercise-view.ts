@@ -3,7 +3,7 @@
 import { exerciseCatalog, type Exercise } from "./exercise-catalog";
 import { skillSeed } from "@/features/skills/skill-seed";
 
-export type ExerciseView = Exercise & { skillTitles: string[] };
+export type ExerciseView = Exercise & { skillTitles: string[]; source?: "native" | "user" };
 
 export function buildExerciseCatalogView(): ExerciseView[] {
   const titleById = new Map(skillSeed.map((skill) => [skill.id, skill.title]));
