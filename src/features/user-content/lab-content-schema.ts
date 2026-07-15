@@ -14,7 +14,6 @@ import {
   LAB_EDITABLE_FILENAME,
   type EvaluationMode,
   type ExerciseTest,
-  type LabAssertion,
   type LabCompletionContract,
   type LabFixture,
   type LabMilestone,
@@ -89,35 +88,6 @@ function parseTests(value: unknown, field: string, issues: ValidationIssue[]): E
   return out.length > 0 ? out : undefined;
 }
 
-const ASSERTION_KINDS = ["stdout_contains", "file_exists", "file_contains"] as const;
-
-function parseAssertions(value: unknown, field: string, issues: ValidationIssue[]): LabAssertion[] | undefined {
-  if (value === undefined || value === null) return undefined;
-  if (!Array.isArray(value)) {
-    issues.push({ field, message: `${field} must be an array` });
-    return undefined;
-  }
-  const out: LabAssertion[] = [];
-  value.slice(0, LAB_LIMITS.maxAssertions).forEach((raw, i) => {
-    if (!isRecord(raw)) return;
-    const kind = (ASSERTION_KINDS as readonly string[]).includes(raw.kind as string)
-      ? (raw.kind as LabAssertion["kind"])
-      : null;
-    if (!kind) {
-      issues.push({ field: `${field}[${i}].kind`, message: "unknown assertion kind" });
-      return;
-    }
-    const target = optionalString(raw.target, `${field}[${i}].target`, LAB_LIMITS.titleMaxLength, issues);
-    const val = optionalString(raw.value, `${field}[${i}].value`, F, issues) ?? "";
-    if ((kind === "file_exists" || kind === "file_contains") && !target) {
-      issues.push({ field: `${field}[${i}].target`, message: "a filename target is required for file assertions" });
-      return;
-    }
-    out.push({ kind, ...(target ? { target } : {}), value: val });
-  });
-  return out.length > 0 ? out : undefined;
-}
-
 function parseCompletion(value: unknown, field: string, issues: ValidationIssue[]): LabCompletionContract | undefined {
   if (value === undefined || value === null) return undefined;
   if (!isRecord(value)) {
@@ -127,8 +97,6 @@ function parseCompletion(value: unknown, field: string, issues: ValidationIssue[
   const contract: LabCompletionContract = {};
   const tests = parseTests(value.tests, `${field}.tests`, issues);
   if (tests) contract.tests = tests;
-  const assertions = parseAssertions(value.assertions, `${field}.assertions`, issues);
-  if (assertions) contract.assertions = assertions;
   const aiRubric = optionalString(value.aiRubric, `${field}.aiRubric`, F, issues);
   if (aiRubric) contract.aiRubric = aiRubric;
   const selfChecklist = stringArray(value.selfChecklist, `${field}.selfChecklist`, LAB_LIMITS.maxChecklist, F, issues);
@@ -193,8 +161,6 @@ function parseRunConfig(value: unknown, issues: ValidationIssue[]): LabRunConfig
   if (runtime) run.runtimeLimitMs = runtime;
   const memory = boundedInt(value.memoryLimitMb, LAB_LIMITS.maxMemoryLimitMb);
   if (memory) run.memoryLimitMb = memory;
-  const generated = stringArray(value.expectedGeneratedFiles, "run.expectedGeneratedFiles", LAB_LIMITS.maxFixtures, LAB_LIMITS.titleMaxLength, issues);
-  if (generated) run.expectedGeneratedFiles = generated;
   return Object.keys(run).length > 0 ? run : undefined;
 }
 

@@ -30,7 +30,6 @@ export const LAB_LIMITS = {
   maxHints: 10,
   maxMilestones: 30,
   maxFixtures: 20,
-  maxAssertions: 30,
   maxChecklist: 30,
   maxEstimatedMinutes: 6000,
   maxRuntimeLimitMs: 60000,
@@ -40,20 +39,9 @@ export const LAB_LIMITS = {
 /** A read-only fixture/input file mounted alongside main.cpp (never editable). */
 export type LabFixture = { filename: string; content: string };
 
-/**
- * An assertion on the program's produced output or generated files. `kind`
- * distinguishes a stdout check from an expected generated-file check.
- */
-export type LabAssertion = {
-  kind: "stdout_contains" | "file_exists" | "file_contains";
-  target?: string; // filename for file_* kinds
-  value: string;
-};
-
 /** The completion contract shared by a single-task lab and each milestone. */
 export type LabCompletionContract = {
   tests?: ExerciseTest[];
-  assertions?: LabAssertion[];
   aiRubric?: string;
   selfChecklist?: string[];
   hints?: string[];
@@ -80,7 +68,6 @@ export type LabRunConfig = {
   allowedLibraries?: "standard_only" | "all";
   runtimeLimitMs?: number;
   memoryLimitMb?: number;
-  expectedGeneratedFiles?: string[];
 };
 
 export type LabPayload = {
