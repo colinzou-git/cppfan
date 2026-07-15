@@ -154,3 +154,70 @@ describe("buildExerciseContentExport (#488)", () => {
     expect(data.publishedPayload).not.toBeNull();
   });
 });
+
+import {
+  CURRENT_LAB_SCHEMA_VERSION,
+  type LabPayload
+} from "@/features/user-content/lab-content-types";
+import {
+  buildLabContentExport,
+  buildLabMarkdown
+} from "@/features/user-content/user-content-export";
+
+function lab(overrides: Partial<LabPayload> = {}): LabPayload {
+  return {
+    schemaVersion: CURRENT_LAB_SCHEMA_VERSION,
+    title: "CSV summarizer",
+    summary: "Summarize a CSV.",
+    taskDescription: "Read a CSV and print per-column stats.",
+    mode: "single_task",
+    evaluationMode: "self_evaluation",
+    ...overrides
+  };
+}
+
+describe("buildLabMarkdown (#489)", () => {
+  it("renders summary, task, code, and milestones", () => {
+    const md = buildLabMarkdown(
+      lab({
+        mode: "milestones",
+        starterCode: "int main(){}",
+        referenceSolution: "int main(){ /* solve */ }",
+        milestones: [
+          { id: "m1", title: "Parse", instructions: "Parse the CSV.", required: true },
+          { id: "m2", title: "Stats", instructions: "Compute stats.", required: false }
+        ]
+      })
+    );
+    expect(md).toContain("# CSV summarizer");
+    expect(md).toContain("## Task");
+    expect(md).toContain("## Starter code");
+    expect(md).toContain("## Milestones");
+    expect(md).toContain("Parse");
+    expect(md).toContain("(optional)");
+  });
+});
+
+describe("buildLabContentExport (#489)", () => {
+  it("wraps the lab with a schema-versioned manifest + markdown", () => {
+    const data = buildLabContentExport(
+      {
+        id: "l1",
+        kind: "lab",
+        title: "CSV",
+        lifecycleStatus: "published",
+        nativeModuleId: null,
+        draftRevision: 1,
+        updatedAt: "2026-07-16T00:00:00Z",
+        publishedAt: "2026-07-16T00:00:00Z"
+      },
+      null,
+      lab(),
+      new Date("2026-07-16T00:00:00Z")
+    );
+    expect(data.exportSchemaVersion).toBe(EXPORT_SCHEMA_VERSION);
+    expect(data.item.kind).toBe("lab");
+    expect(data.markdown).toContain("CSV summarizer");
+    expect(data.publishedPayload).not.toBeNull();
+  });
+});

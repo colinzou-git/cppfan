@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner, getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
 import {
   addExternalAttachment,
   archiveContent,
@@ -8,8 +8,10 @@ import {
   publishContent,
   removeAttachment,
   publishExercise,
+  publishLab,
   restoreVersionAsDraft,
   saveExerciseDraft,
+  saveLabDraft,
   saveLessonDraft,
   setAttachmentVisibility
 } from "@/features/user-content/user-content-actions";
@@ -17,11 +19,16 @@ import { CURRENT_LESSON_SCHEMA_VERSION, type LessonPayload } from "@/features/us
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/features/user-content/user-content-queries", () => ({ getContentItemForOwner: vi.fn(), getExerciseForOwner: vi.fn() }));
+vi.mock("@/features/user-content/user-content-queries", () => ({
+  getContentItemForOwner: vi.fn(),
+  getExerciseForOwner: vi.fn(),
+  getLabForOwner: vi.fn()
+}));
 
 const mockedCreate = vi.mocked(createClient);
 const mockedDetail = vi.mocked(getContentItemForOwner);
 const mockedExercise = vi.mocked(getExerciseForOwner);
+const mockedLab = vi.mocked(getLabForOwner);
 
 function rpcClient(impl: (fn: string, args: Record<string, unknown>) => { data?: unknown; error?: unknown }) {
   return { rpc: vi.fn(async (fn: string, args: Record<string, unknown>) => impl(fn, args)) } as unknown as NonNullable<
@@ -251,5 +258,78 @@ describe("attachment actions (#487)", () => {
     expect((await setAttachmentVisibility("a1", "bad" as unknown as "author_source")).status).toBe("error");
     expect((await removeAttachment("")).status).toBe("error");
     expect((await removeAttachment("a1")).status).toBe("unconfigured");
+  });
+});
+
+describe("saveLabDraft + publishLab (#489)", () => {
+  const validLab = {
+    title: "CSV lab",
+    summary: "Summarize a CSV.",
+    taskDescription: "Read a CSV from stdin and print stats.",
+    mode: "single_task",
+    evaluationMode: "self_evaluation"
+  };
+
+  function labDetail(overrides: Record<string, unknown> = {}): Awaited<ReturnType<typeof getLabForOwner>> {
+    return {
+      id: "l1",
+      kind: "lab",
+      title: "CSV lab",
+      lifecycleStatus: "draft",
+      recommendationEnabled: true,
+      draftRevision: 1,
+      updatedAt: "2026-01-01T00:00:00Z",
+      publishedAt: null,
+      nativeModuleId: null,
+      publishedVersionId: null,
+      draftPayload: {
+        schemaVersion: 1,
+        title: "CSV lab",
+        summary: "Summarize a CSV.",
+        taskDescription: "Read a CSV from stdin and print stats.",
+        mode: "single_task" as const,
+        evaluationMode: "self_evaluation" as const,
+        ...(overrides.draft as object ?? {})
+      },
+      publishedPayload: null,
+      ...overrides
+    } as Awaited<ReturnType<typeof getLabForOwner>>;
+  }
+
+  it("rejects an invalid lab payload before touching the backend", async () => {
+    const result = await saveLabDraft({ title: "", payload: { summary: "s" } });
+    expect(result.status).toBe("invalid");
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("stamps kind = lab and returns the RPC result", async () => {
+    let seenKind: unknown;
+    mockedCreate.mockResolvedValue(
+      rpcClient((_fn, args) => {
+        seenKind = args.p_kind;
+        return { data: [{ content_id: "l1", draft_version_id: "v1", revision: 1, saved_at: "2026-01-01T00:00:00Z" }], error: null };
+      })
+    );
+    const result = await saveLabDraft({ title: "CSV lab", payload: validLab });
+    expect(seenKind).toBe("lab");
+    expect(result).toMatchObject({ status: "ok", contentId: "l1", revision: 1 });
+  });
+
+  it("blocks publishing a milestone lab with no milestones", async () => {
+    mockedLab.mockResolvedValue(labDetail({ draft: { mode: "milestones" } }));
+    const result = await publishLab({ contentId: "l1" });
+    expect(result.status).toBe("invalid");
+  });
+
+  it("publishes a valid single-task lab via the RPC", async () => {
+    mockedLab.mockResolvedValue(labDetail());
+    mockedCreate.mockResolvedValue(
+      rpcClient(() => ({
+        data: [{ out_content_id: "l1", out_skill_id: "user.skill.l1", out_learning_item_id: "user.item.l1", out_version_number: 1 }],
+        error: null
+      }))
+    );
+    const result = await publishLab({ contentId: "l1" });
+    expect(result).toMatchObject({ status: "ok", contentId: "l1", skillId: "user.skill.l1", versionNumber: 1 });
   });
 });
