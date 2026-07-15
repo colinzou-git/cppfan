@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { publishExercise, saveExerciseDraft } from "./user-content-actions";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
 import { ExerciseAiProposalPanel } from "./exercise-ai-proposal-panel";
+import { VersionHistory } from "./version-history";
+import type { ContentVersionSummary } from "./user-content-queries";
 import { applyAcceptedExerciseOperations, type ExerciseAuthoringOperation } from "./exercise-ai-authoring";
 import { CODE_CONTRACT_MODES, EVALUATION_MODES, type ExercisePayload, type ExerciseTest } from "./exercise-content-types";
 
@@ -78,12 +80,14 @@ export function ExerciseEditor({
   initialContentId,
   initialRevision,
   initialPayload,
-  initialLifecycle
+  initialLifecycle,
+  initialVersions = []
 }: {
   initialContentId?: string;
   initialRevision?: number;
   initialPayload?: ExercisePayload | null;
   initialLifecycle?: string;
+  initialVersions?: ContentVersionSummary[];
 }) {
   const storageKey = `cppfan:user-content:exercise:${initialContentId ?? "new"}:v1`;
   const [fields, setFields] = useState<ExerciseFields>(() => fieldsFromExercisePayload(initialPayload ?? null));
@@ -305,6 +309,13 @@ export function ExerciseEditor({
       </label>
 
       <ExerciseTestsEditor tests={fields.tests} onChange={(tests) => update({ tests })} />
+
+      <VersionHistory
+        contentId={contentId}
+        versions={initialVersions}
+        currentRevision={revisionRef.current}
+        onRestored={() => window.location.reload()}
+      />
 
       <ExerciseAiProposalPanel contentId={contentId} onApply={applyAiOperations} />
 
