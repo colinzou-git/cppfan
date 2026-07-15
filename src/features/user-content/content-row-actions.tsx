@@ -7,11 +7,12 @@ import {
   archiveContent,
   exportContent,
   publishContent,
+  publishExercise,
   restoreContent
 } from "./user-content-actions";
 import { DeleteContentDialog } from "./delete-content-dialog";
 import { buildUserContentZip } from "./user-content-export";
-import type { UserContentLifecycle } from "./user-content-types";
+import type { UserContentKind, UserContentLifecycle } from "./user-content-types";
 
 const ERRORS: Record<string, string> = {
   conflict: "Changed on another device — reload first.",
@@ -29,14 +30,17 @@ const ERRORS: Record<string, string> = {
  */
 export function ContentRowActions({
   contentId,
+  kind,
   status,
   revision
 }: {
   contentId: string;
+  kind: UserContentKind;
   status: UserContentLifecycle;
   revision: number;
 }) {
   const router = useRouter();
+  const base = kind === "exercise" ? "exercises" : "lessons";
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
 
@@ -74,9 +78,20 @@ export function ContentRowActions({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Link href={`/my-content/lessons/${contentId}/preview`} className={btn}>Preview</Link>
+      <Link href={`/my-content/${base}/${contentId}/preview`} className={btn}>Preview</Link>
       {status === "draft" ? (
-        <button type="button" className={btn} disabled={pending} onClick={() => run(() => publishContent({ contentId, expectedRevision: revision }))}>
+        <button
+          type="button"
+          className={btn}
+          disabled={pending}
+          onClick={() =>
+            run(() =>
+              kind === "exercise"
+                ? publishExercise({ contentId, expectedRevision: revision })
+                : publishContent({ contentId, expectedRevision: revision })
+            )
+          }
+        >
           Publish
         </button>
       ) : null}

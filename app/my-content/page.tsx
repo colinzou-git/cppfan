@@ -83,10 +83,13 @@ export default async function MyContentPage({
             <ul className="grid gap-3">
               {visible.map((item) => (
                 <li key={item.id} className="grid gap-3 rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
-                  <Link href={`/my-content/lessons/${item.id}/edit`} className="flex flex-wrap items-center justify-between gap-3">
+                  <Link
+                    href={`/my-content/${item.kind === "exercise" ? "exercises" : "lessons"}/${item.id}/edit`}
+                    className="flex flex-wrap items-center justify-between gap-3"
+                  >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-bold text-slate-900">{item.title || "Untitled lesson"}</span>
+                        <span className="truncate font-bold text-slate-900">{item.title || (item.kind === "exercise" ? "Untitled exercise" : "Untitled lesson")}</span>
                         <ContentSourceBadge source="user" />
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500">
@@ -95,7 +98,7 @@ export default async function MyContentPage({
                     </div>
                     <span className="text-sm font-bold text-blue-700">Edit →</span>
                   </Link>
-                  <ContentRowActions contentId={item.id} status={item.lifecycleStatus} revision={item.draftRevision} />
+                  <ContentRowActions contentId={item.id} kind={item.kind} status={item.lifecycleStatus} revision={item.draftRevision} />
                 </li>
               ))}
             </ul>
