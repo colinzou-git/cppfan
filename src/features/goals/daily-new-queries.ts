@@ -70,6 +70,9 @@ export async function getDailyNewPlanForGoals(
         .select("id,title,estimated_minutes,order_index")
         .in("id", mappedItemIds)
         .eq("is_active", true)
+        // User content opted out of automatic recommendations (recommendation_enabled
+        // = false) is excluded here but stays directly learnable; native rows are null.
+        .or("recommendation_enabled.is.null,recommendation_enabled.eq.true")
         .order("order_index", { ascending: true })
         .limit(2000);
   if (itemsResult.error) {
