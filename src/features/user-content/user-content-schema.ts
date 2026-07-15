@@ -15,6 +15,7 @@ import {
   type LessonExample,
   type LessonParsonsBlock,
   type LessonPayload,
+  type LessonReviewCard,
   type LessonSections,
   type ParseResult,
   type ValidationIssue
@@ -182,6 +183,38 @@ function parseChoices(value: unknown, issues: ValidationIssue[]): LessonChoice[]
   return out;
 }
 
+function parseReviewCards(value: unknown, issues: ValidationIssue[]): LessonReviewCard[] | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (!Array.isArray(value)) {
+    issues.push({ field: "reviewCards", message: "reviewCards must be an array" });
+    return undefined;
+  }
+  const out: LessonReviewCard[] = [];
+  value.slice(0, LESSON_LIMITS.maxReviewCards).forEach((raw, i) => {
+    if (!isRecord(raw)) {
+      issues.push({ field: `reviewCards[${i}]`, message: "review card must be an object" });
+      return;
+    }
+    const prompt = requiredString(raw.prompt, `reviewCards[${i}].prompt`, LESSON_LIMITS.fieldMaxLength, issues);
+    const choices: LessonChoice[] = [];
+    if (Array.isArray(raw.choices)) {
+      raw.choices.slice(0, LESSON_LIMITS.maxChoices).forEach((rawChoice, j) => {
+        if (!isRecord(rawChoice)) {
+          issues.push({ field: `reviewCards[${i}].choices[${j}]`, message: "choice must be an object" });
+          return;
+        }
+        const text = requiredString(rawChoice.text, `reviewCards[${i}].choices[${j}].text`, LESSON_LIMITS.fieldMaxLength, issues);
+        choices.push({ text, isCorrect: rawChoice.isCorrect === true });
+      });
+    }
+    const explanation = optionalString(raw.explanation, `reviewCards[${i}].explanation`, LESSON_LIMITS.fieldMaxLength, issues);
+    out.push({ prompt, choices, ...(explanation ? { explanation } : {}) });
+  });
+  return out;
+}
+
 function parseParsonsBlocks(value: unknown, issues: ValidationIssue[]): LessonParsonsBlock[] | undefined {
   if (value === undefined || value === null) {
     return undefined;
@@ -313,6 +346,8 @@ export function parseLessonPayload(value: unknown): ParseResult<LessonPayload> {
   if (parsonsBlocks) payload.parsonsBlocks = parsonsBlocks;
   const completionBlanks = parseCompletionBlanks(value.completionBlanks, issues);
   if (completionBlanks) payload.completionBlanks = completionBlanks;
+  const reviewCards = parseReviewCards(value.reviewCards, issues);
+  if (reviewCards) payload.reviewCards = reviewCards;
 
   if (issues.length > 0) {
     return { ok: false, issues };

@@ -64,6 +64,7 @@ export const LESSON_LIMITS = {
   maxChoices: 12,
   maxParsonsBlocks: 40,
   maxCompletionBlanks: 20,
+  maxReviewCards: 20,
   maxEstimatedMinutes: 600
 } as const;
 
@@ -71,6 +72,9 @@ export type LessonChoice = { text: string; isCorrect: boolean };
 export type LessonParsonsBlock = { text: string; correctOrder: number; isDistractor: boolean };
 export type LessonCompletionBlank = { position: number; answer: string };
 export type LessonExample = { input: string; output: string; note?: string };
+/** A supplementary review question. On publish each becomes an independent
+ * multiple-choice FSRS card mapped to the lesson's owner skill. */
+export type LessonReviewCard = { prompt: string; choices: LessonChoice[]; explanation?: string };
 
 /** Optional structured teaching sections (all Markdown). */
 export type LessonSections = {
@@ -110,6 +114,7 @@ export type LessonPayload = {
   choices?: LessonChoice[];
   parsonsBlocks?: LessonParsonsBlock[];
   completionBlanks?: LessonCompletionBlank[];
+  reviewCards?: LessonReviewCard[];
 };
 
 export type ValidationIssue = { field: string; message: string };
