@@ -11,6 +11,7 @@ import { VersionHistory } from "./version-history";
 import { ChoicesEditor } from "./choices-editor";
 import { ParsonsEditor } from "./parsons-editor";
 import { CompletionEditor } from "./completion-editor";
+import { CodeFieldsEditor, type CodeFields } from "./code-fields-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
@@ -38,9 +39,11 @@ type EditorFields = {
   choices: LessonChoice[];
   parsonsBlocks: LessonParsonsBlock[];
   completionBlanks: LessonCompletionBlank[];
+  code: CodeFields;
 };
 
 const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
+const CODE_TYPES = new Set<LearningItemType>(["code_reading", "bug_spotting", "worked_example"]);
 
 type SaveState = "idle" | "saving" | "saved" | "local_only" | "conflict" | "invalid" | "error";
 
@@ -54,7 +57,14 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
     explanation: payload?.explanation ?? "",
     choices: payload?.choices ?? [],
     parsonsBlocks: payload?.parsonsBlocks ?? [],
-    completionBlanks: payload?.completionBlanks ?? []
+    completionBlanks: payload?.completionBlanks ?? [],
+    code: {
+      sampleCode: payload?.sampleCode ?? "",
+      starterCode: payload?.starterCode ?? "",
+      referenceSolution: payload?.referenceSolution ?? "",
+      expectedOutput: payload?.expectedOutput ?? "",
+      solutionExplanation: payload?.solutionExplanation ?? ""
+    }
   };
 }
 
@@ -69,7 +79,12 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {}),
     ...(CHOICE_TYPES.has(fields.itemType) && fields.choices.length > 0 ? { choices: fields.choices } : {}),
     ...(fields.itemType === "parsons" && fields.parsonsBlocks.length > 0 ? { parsonsBlocks: fields.parsonsBlocks } : {}),
-    ...(fields.itemType === "completion" && fields.completionBlanks.length > 0 ? { completionBlanks: fields.completionBlanks } : {})
+    ...(fields.itemType === "completion" && fields.completionBlanks.length > 0 ? { completionBlanks: fields.completionBlanks } : {}),
+    ...(fields.code.sampleCode ? { sampleCode: fields.code.sampleCode } : {}),
+    ...(fields.code.starterCode ? { starterCode: fields.code.starterCode } : {}),
+    ...(fields.code.referenceSolution ? { referenceSolution: fields.code.referenceSolution } : {}),
+    ...(fields.code.expectedOutput ? { expectedOutput: fields.code.expectedOutput } : {}),
+    ...(fields.code.solutionExplanation ? { solutionExplanation: fields.code.solutionExplanation } : {})
   };
 }
 
@@ -340,6 +355,10 @@ export function LessonEditor({
 
       {fields.itemType === "completion" ? (
         <CompletionEditor blanks={fields.completionBlanks} onChange={(completionBlanks) => update({ completionBlanks })} />
+      ) : null}
+
+      {CODE_TYPES.has(fields.itemType) ? (
+        <CodeFieldsEditor values={fields.code} onChange={(patch) => update({ code: { ...fields.code, ...patch } })} />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
