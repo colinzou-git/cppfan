@@ -1101,3 +1101,45 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content file attachment smoke OK';
 end $$;
+
+-- 32) #487: reset_review_cards_for_content resets only the owner's FSRS cards for
+-- the given lesson (whole-lesson item + its review-card items) back to a fresh
+-- new state, and is owner/content scoped. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000b4';
+  v_content uuid;
+  v_item text;
+  v_skill text;
+  v_state text;
+  v_reps integer;
+  v_stab double precision;
+  v_reset integer;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-reset@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'Reset', null, true, 1,
+    '{"itemType":"lesson","title":"Reset","content":"c","explanation":"e"}'::jsonb, null);
+  select out_learning_item_id, out_skill_id into v_item, v_skill
+    from public.publish_user_content(v_content, null);
+
+  insert into public.review_cards (user_id, learning_item_id, skill_id, state, reps, lapses, stability, difficulty)
+    values (v_uid, v_item, v_skill, 'review', 5, 2, 3.2, 4.1);
+
+  v_reset := public.reset_review_cards_for_content(v_content);
+  if v_reset < 1 then
+    raise exception '#487: reset should have touched at least one card';
+  end if;
+
+  select state, reps, stability into v_state, v_reps, v_stab
+    from public.review_cards where user_id = v_uid and learning_item_id = v_item;
+  if v_state <> 'new' or v_reps <> 0 or v_stab <> 0 then
+    raise exception '#487: review card was not reset to a fresh state (state=%, reps=%, stability=%)', v_state, v_reps, v_stab;
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content review reset smoke OK';
+end $$;
