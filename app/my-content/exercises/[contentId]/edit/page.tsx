@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { ExerciseEditor } from "@/features/user-content/exercise-editor";
 import { getContentVersions, getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { getMyExerciseGroups } from "@/features/user-content/exercise-group-queries";
+import { nativeExerciseGroupOptions } from "@/features/exercises/exercise-group-options";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +17,7 @@ export default async function EditExercisePage({ params }: { params: Promise<{ c
     notFound();
   }
   const versions = await getContentVersions(contentId);
+  const customGroups = (await getMyExerciseGroups()).map((g) => ({ id: g.id, title: g.name }));
 
   return (
     <PageShell className="grid gap-6" size="reading">
@@ -29,6 +32,8 @@ export default async function EditExercisePage({ params }: { params: Promise<{ c
         initialPayload={detail.draftPayload ?? detail.publishedPayload}
         initialLifecycle={detail.lifecycleStatus}
         initialVersions={versions}
+        nativeGroups={nativeExerciseGroupOptions()}
+        customGroups={customGroups}
       />
     </PageShell>
   );

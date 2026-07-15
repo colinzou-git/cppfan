@@ -9,7 +9,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseExercisePayload } from "@/features/user-content/exercise-content-schema";
 import { userLearningItemId, userSkillId } from "@/features/user-content/user-content-id";
+import { getMyExerciseGroups } from "@/features/user-content/exercise-group-queries";
+import { nativeExerciseGroupTitle } from "./exercise-group-options";
 import type { ExerciseView } from "./exercise-view";
+
+/**
+ * Resolve a payload `groupId` to a display group title. A slug matching the
+ * native vocabulary places the exercise under that native topic; a UUID matching
+ * an owner custom group uses its name; anything else (unset or a deleted group)
+ * resolves to undefined so the exercise falls back to "Your exercises".
+ */
+function resolveGroupName(
+  groupId: string | undefined,
+  customById: Map<string, string>
+): string | undefined {
+  if (!groupId) return undefined;
+  return nativeExerciseGroupTitle(groupId) ?? customById.get(groupId) ?? undefined;
+}
 
 export async function getMyPublishedExerciseViews(): Promise<ExerciseView[]> {
   const supabase = await createClient();
@@ -25,6 +41,7 @@ export async function getMyPublishedExerciseViews(): Promise<ExerciseView[]> {
     return [];
   }
 
+  const customById = new Map((await getMyExerciseGroups()).map((g) => [g.id, g.name]));
   const views: ExerciseView[] = [];
   for (const item of items as Array<{ id: string; current_published_version_id: string | null }>) {
     if (!item.current_published_version_id) {
@@ -54,7 +71,8 @@ export async function getMyPublishedExerciseViews(): Promise<ExerciseView[]> {
       hints: [],
       projectLab: "",
       source: "user",
-      skillTitles: payload.tags && payload.tags.length > 0 ? payload.tags : [payload.title]
+      skillTitles: payload.tags && payload.tags.length > 0 ? payload.tags : [payload.title],
+      groupName: resolveGroupName(payload.groupId, customById)
     });
   }
   return views;

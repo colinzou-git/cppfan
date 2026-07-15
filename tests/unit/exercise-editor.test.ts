@@ -14,6 +14,25 @@ describe("exercise editor field mapping (#488)", () => {
     expect(payload.title).toBe("");
   });
 
+  it("round-trips a group assignment through fields and back (#488)", () => {
+    const withGroup: ExercisePayload = {
+      schemaVersion: CURRENT_EXERCISE_SCHEMA_VERSION,
+      title: "Grouped",
+      prompt: "A prompt with enough length.",
+      mode: "stdin_program",
+      evaluationMode: "self_evaluation",
+      difficulty: "beginner",
+      groupId: "two-pointers"
+    };
+    const fields = fieldsFromExercisePayload(withGroup);
+    expect(fields.groupId).toBe("two-pointers");
+    expect(buildExercisePayload(fields).groupId).toBe("two-pointers");
+    // An unset group is omitted, not written as an empty string.
+    const ungrouped = fieldsFromExercisePayload({ ...withGroup, groupId: undefined });
+    expect(ungrouped.groupId).toBe("");
+    expect(buildExercisePayload(ungrouped).groupId).toBeUndefined();
+  });
+
   it("round-trips a program-mode payload through fields and back", () => {
     const original: ExercisePayload = {
       schemaVersion: CURRENT_EXERCISE_SCHEMA_VERSION,

@@ -122,8 +122,36 @@ describe("exercise grouped view (#447)", () => {
     expect(groups[0].source).toBe("user");
     expect(groups[0].title).toBe("Your exercises");
     expect(groups[0].exercises.map((r) => r.id)).toContain("user.item.c1");
+    expect(groups[0].hasUser).toBe(true);
+    expect(groups[0].hasNative).toBe(false);
     const native = groups.find((g) => g.title === "Arrays");
     expect(native?.source).toBe("native");
+  });
+
+  it("places a user exercise with a groupName into that named group (#488)", () => {
+    const userX: ExerciseView = {
+      ...view("user.item.c1", ["strings"]),
+      source: "user",
+      groupName: "Sorting drills"
+    };
+    const groups = buildGroupedExerciseView([userX], []);
+    expect(groups[0].title).toBe("Sorting drills");
+    expect(groups[0].hasUser).toBe(true);
+  });
+
+  it("marks a group mixing native and user exercises as hasNative and hasUser (#488)", () => {
+    // A user exercise assigned to a native topic title lands in that group.
+    const nativeA: ExerciseView = view("a", ["Two pointers"]);
+    const userX: ExerciseView = {
+      ...view("user.item.c1", ["ignored"]),
+      source: "user",
+      groupName: "Two pointers"
+    };
+    const groups = buildGroupedExerciseView([nativeA, userX], []);
+    const mixed = groups.find((g) => g.title === "Two pointers");
+    expect(mixed?.exercises).toHaveLength(2);
+    expect(mixed?.hasNative).toBe(true);
+    expect(mixed?.hasUser).toBe(true);
   });
 
 });

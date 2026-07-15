@@ -22,6 +22,11 @@ export type ExerciseGroupView = {
   title: string;
   badge: string;
   source: "native" | "user";
+  // Row-aware membership — a group may mix native and user-created exercises when
+  // a user assigns their exercise to a native topic group. The source filter uses
+  // these so a mixed group appears under both "Native" and "User-Created".
+  hasNative: boolean;
+  hasUser: boolean;
   exercises: ExerciseRowView[];
   progressPct: number;
   startedCount: number;
@@ -47,15 +52,20 @@ const FALLBACK_GROUP = "General";
 /** Primary topic for an exercise: its first practiced skill title, else fallback.
  * User-created exercises all collect into one "Your exercises" group. */
 function groupTitleFor(exercise: ExerciseView): string {
+  // A user exercise assigned to a group (custom name or a native topic title)
+  // lands in that named group; otherwise it collects into "Your exercises".
   if (exercise.source === "user") {
-    return USER_GROUP_TITLE;
+    return exercise.groupName && exercise.groupName.trim().length > 0 ? exercise.groupName : USER_GROUP_TITLE;
   }
   return exercise.skillTitles[0] ?? FALLBACK_GROUP;
 }
 
-function groupId(title: string): string {
+/** Stable slug for a group title — the id native groups are keyed and validated by. */
+export function exerciseGroupSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "general";
 }
+
+const groupId = exerciseGroupSlug;
 
 function groupBadge(title: string): string {
   const initials = title
@@ -125,6 +135,8 @@ export function buildGroupedExerciseView(
       title,
       badge: groupBadge(title),
       source: rows[0]?.source === "user" ? "user" : "native",
+      hasNative: rows.some((r) => r.source !== "user"),
+      hasUser: rows.some((r) => r.source === "user"),
       exercises: rows,
       progressPct,
       startedCount,

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 import { ContentRowActions } from "@/features/user-content/content-row-actions";
 import { getMyContentItems } from "@/features/user-content/user-content-queries";
+import { getMyExerciseGroups } from "@/features/user-content/exercise-group-queries";
+import { ExerciseGroupManager } from "@/features/user-content/exercise-group-manager";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
 import {
   CONTENT_STATUS_FILTERS,
@@ -26,6 +28,7 @@ export default async function MyContentPage({
   const items = await getMyContentItems();
   const counts = statusCounts(items);
   const visible = filterByStatus(items, filter);
+  const exerciseGroups = (await getMyExerciseGroups()).map((g) => ({ id: g.id, name: g.name }));
 
   return (
     <PageShell className="grid gap-6" size="reading">
@@ -44,6 +47,8 @@ export default async function MyContentPage({
           </Button>
         </div>
       </header>
+
+      <ExerciseGroupManager initialGroups={exerciseGroups} />
 
       {items.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-600">

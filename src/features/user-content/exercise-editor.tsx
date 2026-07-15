@@ -21,6 +21,7 @@ type ExerciseFields = {
   difficulty: (typeof DIFFICULTIES)[number];
   estimatedMinutes: string;
   tags: string;
+  groupId: string;
   starterCode: string;
   referenceSolution: string;
   solutionExplanation: string;
@@ -41,6 +42,7 @@ export function fieldsFromExercisePayload(payload: ExercisePayload | null): Exer
     difficulty: payload?.difficulty ?? "beginner",
     estimatedMinutes: payload?.estimatedMinutes ? String(payload.estimatedMinutes) : "",
     tags: payload?.tags ? payload.tags.join(", ") : "",
+    groupId: payload?.groupId ?? "",
     starterCode: payload?.starterCode ?? "",
     referenceSolution: payload?.referenceSolution ?? "",
     solutionExplanation: payload?.solutionExplanation ?? "",
@@ -66,6 +68,7 @@ export function buildExercisePayload(fields: ExerciseFields): Record<string, unk
     difficulty: fields.difficulty,
     ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {}),
     ...(tags.length > 0 ? { tags } : {}),
+    ...(fields.groupId ? { groupId: fields.groupId } : {}),
     ...(fields.starterCode ? { starterCode: fields.starterCode } : {}),
     ...(fields.referenceSolution ? { referenceSolution: fields.referenceSolution } : {}),
     ...(fields.solutionExplanation ? { solutionExplanation: fields.solutionExplanation } : {}),
@@ -76,18 +79,24 @@ export function buildExercisePayload(fields: ExerciseFields): Record<string, unk
   };
 }
 
+export type ExerciseGroupChoice = { id: string; title: string };
+
 export function ExerciseEditor({
   initialContentId,
   initialRevision,
   initialPayload,
   initialLifecycle,
-  initialVersions = []
+  initialVersions = [],
+  nativeGroups = [],
+  customGroups = []
 }: {
   initialContentId?: string;
   initialRevision?: number;
   initialPayload?: ExercisePayload | null;
   initialLifecycle?: string;
   initialVersions?: ContentVersionSummary[];
+  nativeGroups?: ExerciseGroupChoice[];
+  customGroups?: ExerciseGroupChoice[];
 }) {
   const storageKey = `cppfan:user-content:exercise:${initialContentId ?? "new"}:v1`;
   const [fields, setFields] = useState<ExerciseFields>(() => fieldsFromExercisePayload(initialPayload ?? null));
@@ -275,6 +284,32 @@ export function ExerciseEditor({
       <label className="grid gap-1 text-sm font-semibold text-slate-700">
         Tags (comma-separated)
         <input className="rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.tags} onChange={(e) => update({ tags: e.target.value })} placeholder="strings, io" />
+      </label>
+
+      <label className="grid gap-1 text-sm font-semibold text-slate-700">
+        Group
+        <select
+          className="rounded-xl border border-slate-300 px-3 py-2 font-normal"
+          value={fields.groupId}
+          onChange={(e) => update({ groupId: e.target.value })}
+          data-testid="exercise-group-select"
+        >
+          <option value="">Your exercises (ungrouped)</option>
+          {customGroups.length > 0 ? (
+            <optgroup label="Your groups">
+              {customGroups.map((g) => (
+                <option key={g.id} value={g.id}>{g.title}</option>
+              ))}
+            </optgroup>
+          ) : null}
+          {nativeGroups.length > 0 ? (
+            <optgroup label="Topic groups">
+              {nativeGroups.map((g) => (
+                <option key={g.id} value={g.id}>{g.title}</option>
+              ))}
+            </optgroup>
+          ) : null}
+        </select>
       </label>
 
       {isFunction ? (
