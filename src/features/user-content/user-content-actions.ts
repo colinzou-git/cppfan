@@ -61,6 +61,19 @@ export async function restoreVersionAsDraft(input: {
     return { status: "error" };
   }
   const payload = (data as { payload: unknown }).payload;
+  // Restore through the matching kind's draft path so the payload is bounded and
+  // saved with the right validator.
+  const detail = await getContentItemForOwner(input.contentId);
+  if (detail?.kind === "exercise") {
+    const parsedEx = parseExercisePayload(payload);
+    return saveExerciseDraft({
+      contentId: input.contentId,
+      kind: "exercise",
+      title: parsedEx.ok ? parsedEx.value.title : "",
+      expectedRevision: input.expectedRevision ?? null,
+      payload
+    });
+  }
   const parsed = parseLessonPayload(payload);
   const title = parsed.ok ? parsed.value.title : "";
   return saveLessonDraft({

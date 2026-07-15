@@ -8,6 +8,7 @@ import {
   publishContent,
   removeAttachment,
   publishExercise,
+  restoreVersionAsDraft,
   saveExerciseDraft,
   saveLessonDraft,
   setAttachmentVisibility
@@ -121,6 +122,33 @@ describe("publishExercise (#488)", () => {
     mockedExercise.mockResolvedValue(exerciseDetail("automated_tests"));
     const result = await publishExercise({ contentId: "e1" });
     expect(result.status).toBe("invalid");
+  });
+
+  it("restores an exercise version through the exercise draft path", async () => {
+    mockedDetail.mockResolvedValue({ kind: "exercise" } as Awaited<ReturnType<typeof getContentItemForOwner>>);
+    let seenKind: unknown;
+    mockedCreate.mockResolvedValue({
+      rpc: vi.fn(async (_fn: string, args: Record<string, unknown>) => {
+        seenKind = args.p_kind;
+        return { data: [{ content_id: "e1", draft_version_id: "v2", revision: 2, saved_at: "2026-01-01T00:00:00Z" }], error: null };
+      }),
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: { payload: { title: "Reverse", prompt: "P", mode: "stdin_program", evaluationMode: "self_evaluation" } },
+                error: null
+              })
+            })
+          })
+        })
+      })
+    } as unknown as NonNullable<Awaited<ReturnType<typeof createClient>>>);
+
+    const result = await restoreVersionAsDraft({ contentId: "e1", versionNumber: 1, expectedRevision: 1 });
+    expect(seenKind).toBe("exercise");
+    expect(result.status).toBe("ok");
   });
 
   it("publishes a valid exercise via the shared RPC", async () => {

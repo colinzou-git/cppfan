@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { ExerciseEditor } from "@/features/user-content/exercise-editor";
-import { getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { getContentVersions, getExerciseForOwner } from "@/features/user-content/user-content-queries";
 import { requireOwnerSession } from "@/features/user-content/require-owner";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ export default async function EditExercisePage({ params }: { params: Promise<{ c
   if (!detail) {
     notFound();
   }
+  const versions = await getContentVersions(contentId);
 
   return (
     <PageShell className="grid gap-6" size="reading">
@@ -27,6 +28,7 @@ export default async function EditExercisePage({ params }: { params: Promise<{ c
         initialRevision={detail.draftRevision}
         initialPayload={detail.draftPayload ?? detail.publishedPayload}
         initialLifecycle={detail.lifecycleStatus}
+        initialVersions={versions}
       />
     </PageShell>
   );
