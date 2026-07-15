@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Circle, Lock } from "lucide-react";
 import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import type { CodeTestResult } from "@/features/code-lab/code-lab-types";
+import { markUserLabComplete } from "@/features/labs/user-lab-progress";
 import type { LabMilestoneView } from "./lab-code-lab";
 
 /**
@@ -39,6 +40,16 @@ export function LabWorkspace({
     [milestones, passed]
   );
   const labComplete = milestones.length > 0 && requiredRemaining === 0;
+
+  // Persist completion once, when every required milestone has passed, so the lab
+  // records a durable completion + credits the learning loop (best-effort).
+  const persistedRef = useRef(false);
+  useEffect(() => {
+    if (labComplete && !persistedRef.current) {
+      persistedRef.current = true;
+      void markUserLabComplete({ itemId }).catch(() => {});
+    }
+  }, [labComplete, itemId]);
 
   function handleResult(result: { test?: CodeTestResult | null }) {
     const test = result.test;

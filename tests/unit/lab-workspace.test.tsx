@@ -1,7 +1,11 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LabWorkspace } from "@/features/user-content/lab-workspace";
+import { markUserLabComplete } from "@/features/labs/user-lab-progress";
 import type { LabMilestoneView } from "@/features/user-content/lab-code-lab";
+
+vi.mock("@/features/labs/user-lab-progress", () => ({ markUserLabComplete: vi.fn(async () => ({ status: "ok" })) }));
+const mockedComplete = vi.mocked(markUserLabComplete);
 
 // Capture the props the wrapper hands to the workspace, and expose onResult so a
 // test can simulate a passing Test run.
@@ -66,6 +70,9 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     // Only milestone 0 is required; passing it (all cases) completes the lab.
     act(() => onResult({ test: { status: "ok", total: 2, passed: 2, staleDefinition: false } }));
     expect(screen.getByTestId("lab-complete-banner")).toBeInTheDocument();
+    // Completion is persisted once.
+    expect(mockedComplete).toHaveBeenCalledWith({ itemId: "user.item.z" });
+    expect(mockedComplete).toHaveBeenCalledTimes(1);
   });
 
   it("does not complete on a partial pass", () => {
@@ -75,5 +82,6 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     const onResult = lastProps.onResult as (r: { test: unknown }) => void;
     act(() => onResult({ test: { status: "ok", total: 2, passed: 1, staleDefinition: false } }));
     expect(screen.queryByTestId("lab-complete-banner")).toBeNull();
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 });
