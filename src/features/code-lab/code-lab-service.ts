@@ -7,6 +7,7 @@ import type {
 import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { getHiddenTestsForItem } from "./code-lab-hidden-tests";
+import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -43,7 +44,7 @@ export async function runCode(input: {
   stdin?: string;
   compilerFlags?: string[];
 }): Promise<CodeRunResult> {
-  const config = getCodeLabConfigForItem(input.itemId);
+  const config = getCodeLabConfigForItem(input.itemId) ?? (await resolveUserExerciseExecution(input.itemId))?.config ?? null;
   const result = await executeRun(
     buildRunnerInput({
       source: input.source,
@@ -69,14 +70,21 @@ export async function runTests(input: {
   includeHidden?: boolean;
   compilerFlags?: string[];
 }): Promise<CodeTestResult> {
-  const config = getCodeLabConfigForItem(input.itemId);
+  let config = getCodeLabConfigForItem(input.itemId);
+  let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
   if (!config) {
-    return emptyTestResult("invalid_item");
+    // Published user-created exercises carry no static config; resolve from the DB.
+    const resolved = await resolveUserExerciseExecution(input.itemId);
+    if (!resolved) {
+      return emptyTestResult("invalid_item");
+    }
+    config = resolved.config;
+    hiddenTests = resolved.hiddenTests;
   }
 
   const flags = resolvedFlags(input.compilerFlags ?? config.compilerFlags);
   const visibleCases = config.visibleTests ?? [];
-  const hiddenCases = input.includeHidden === false ? [] : getHiddenTestsForItem(input.itemId);
+  const hiddenCases = input.includeHidden === false ? [] : hiddenTests;
 
   const visible: CodeTestCaseResult[] = [];
   let hiddenPassed = 0;

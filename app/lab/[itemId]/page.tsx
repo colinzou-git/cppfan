@@ -6,6 +6,9 @@ import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { getInterviewProblem } from "@/features/interview/problem-catalog";
+import { getExerciseForOwner } from "@/features/user-content/user-content-queries";
+import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
+import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
 
 /**
  * Dedicated full-page Code Lab (#431, #439, #440). Resolves lesson Code Labs,
@@ -16,6 +19,27 @@ import { getInterviewProblem } from "@/features/interview/problem-catalog";
 export default async function CodeLabPage({ params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
   const decodedId = decodeURIComponent(itemId);
+
+  // Published user-created exercises (#488) carry no static config; resolve the
+  // learner-safe Code Lab (visible tests only) from the owner's published payload.
+  if (isUserLearningItemId(decodedId)) {
+    const exContentId = contentIdFromUserItemId(decodedId);
+    const exercise = exContentId ? await getExerciseForOwner(exContentId) : null;
+    if (exercise?.publishedPayload) {
+      return (
+        <main className="p-3 xl:p-6">
+          <CodeLabWorkspace
+            itemId={decodedId}
+            title={exercise.title}
+            config={exercisePayloadToCodeLabConfig(exercise.publishedPayload)}
+            sourceVersion="user-exercise:1"
+            backHref="/my-content"
+            backLabel="Back to My Content"
+          />
+        </main>
+      );
+    }
+  }
 
   const config = getCodeLabConfigForItem(decodedId);
   if (!config) {
