@@ -1375,3 +1375,49 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content lab publish smoke OK';
 end $$;
+
+-- 38) #490: publishing an interview problem projects an owner-scoped skill +
+-- worked_example learning item (prompt from the payload's statement, hard ->
+-- advanced difficulty), with no lesson-only child rows. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000bb';
+  v_content uuid;
+  v_item text;
+  v_skill text;
+  v_type text;
+  v_prompt text;
+  v_level text;
+  v_active boolean;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-iv@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select content_id into v_content from public.save_user_content_draft(null, 'interview_problem', 'Two Sum', null, true, 1,
+    '{"title":"Two Sum","statement":"Return indices summing to target.","evaluationMode":"self_evaluation","difficulty":"hard"}'::jsonb, null);
+  select out_learning_item_id, out_skill_id into v_item, v_skill from public.publish_user_content(v_content, null);
+
+  select type, prompt, is_active into v_type, v_prompt, v_active
+    from public.learning_items where id = v_item and owner_user_id = v_uid;
+  if v_type <> 'worked_example' or v_active is not true then
+    raise exception '#490: interview should project an active worked_example item (got %, active=%)', v_type, v_active;
+  end if;
+  if v_prompt <> 'Return indices summing to target.' then
+    raise exception '#490: interview prompt should project from the payload statement, got %', v_prompt;
+  end if;
+  select level into v_level from public.skills where id = v_skill and owner_user_id = v_uid;
+  if v_level <> 'advanced' then
+    raise exception '#490: interview difficulty hard should map to advanced, got %', v_level;
+  end if;
+  if not exists (select 1 from public.learning_item_skills where learning_item_id = v_item and skill_id = v_skill and is_primary) then
+    raise exception '#490: interview item should map to its owner skill as primary';
+  end if;
+  if exists (select 1 from public.learning_item_choices where learning_item_id like v_item || '%') then
+    raise exception '#490: interview should not project choices';
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content interview publish smoke OK';
+end $$;
