@@ -10,10 +10,11 @@ import { AttachmentManager } from "./attachment-manager";
 import { VersionHistory } from "./version-history";
 import { ChoicesEditor } from "./choices-editor";
 import { ParsonsEditor } from "./parsons-editor";
+import { CompletionEditor } from "./completion-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
-import type { LessonChoice, LessonParsonsBlock, LessonPayload } from "./user-content-types";
+import type { LessonChoice, LessonCompletionBlank, LessonParsonsBlock, LessonPayload } from "./user-content-types";
 
 const ITEM_TYPES: LearningItemType[] = [
   "lesson",
@@ -36,6 +37,7 @@ type EditorFields = {
   explanation: string;
   choices: LessonChoice[];
   parsonsBlocks: LessonParsonsBlock[];
+  completionBlanks: LessonCompletionBlank[];
 };
 
 const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
@@ -51,7 +53,8 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
     content: payload?.content ?? "",
     explanation: payload?.explanation ?? "",
     choices: payload?.choices ?? [],
-    parsonsBlocks: payload?.parsonsBlocks ?? []
+    parsonsBlocks: payload?.parsonsBlocks ?? [],
+    completionBlanks: payload?.completionBlanks ?? []
   };
 }
 
@@ -65,7 +68,8 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     difficulty: fields.difficulty,
     ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {}),
     ...(CHOICE_TYPES.has(fields.itemType) && fields.choices.length > 0 ? { choices: fields.choices } : {}),
-    ...(fields.itemType === "parsons" && fields.parsonsBlocks.length > 0 ? { parsonsBlocks: fields.parsonsBlocks } : {})
+    ...(fields.itemType === "parsons" && fields.parsonsBlocks.length > 0 ? { parsonsBlocks: fields.parsonsBlocks } : {}),
+    ...(fields.itemType === "completion" && fields.completionBlanks.length > 0 ? { completionBlanks: fields.completionBlanks } : {})
   };
 }
 
@@ -332,6 +336,10 @@ export function LessonEditor({
 
       {fields.itemType === "parsons" ? (
         <ParsonsEditor blocks={fields.parsonsBlocks} onChange={(parsonsBlocks) => update({ parsonsBlocks })} />
+      ) : null}
+
+      {fields.itemType === "completion" ? (
+        <CompletionEditor blanks={fields.completionBlanks} onChange={(completionBlanks) => update({ completionBlanks })} />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
