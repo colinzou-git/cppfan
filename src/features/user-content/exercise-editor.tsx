@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { publishExercise, saveExerciseDraft } from "./user-content-actions";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
+import { ExerciseAiProposalPanel } from "./exercise-ai-proposal-panel";
+import { applyAcceptedExerciseOperations, type ExerciseAuthoringOperation } from "./exercise-ai-authoring";
 import { CODE_CONTRACT_MODES, EVALUATION_MODES, type ExercisePayload, type ExerciseTest } from "./exercise-content-types";
 
 const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
@@ -204,6 +206,18 @@ export function ExerciseEditor({
     }
   }, [contentId, save]);
 
+  const applyAiOperations = useCallback(
+    (ops: ExerciseAuthoringOperation[]) => {
+      if (ops.length === 0) {
+        return;
+      }
+      const current = buildExercisePayload(fields) as unknown as ExercisePayload;
+      const applied = applyAcceptedExerciseOperations(current, ops);
+      update(fieldsFromExercisePayload(applied));
+    },
+    [fields, update]
+  );
+
   const isFunction = fields.mode === "function";
   const codeArea = "min-h-24 rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm";
 
@@ -291,6 +305,8 @@ export function ExerciseEditor({
       </label>
 
       <ExerciseTestsEditor tests={fields.tests} onChange={(tests) => update({ tests })} />
+
+      <ExerciseAiProposalPanel contentId={contentId} onApply={applyAiOperations} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
