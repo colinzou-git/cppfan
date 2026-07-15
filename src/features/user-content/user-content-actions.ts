@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner, getExerciseForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
 import { parseExercisePayload, validateExerciseForPublication } from "./exercise-content-schema";
-import { buildUserContentExport, type UserContentExport } from "./user-content-export";
+import { buildExerciseContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
 export type SaveDraftInput = {
@@ -318,20 +318,23 @@ export async function exportContent(contentId: string): Promise<ExportResult> {
     const probe = await createClient();
     return probe ? { status: "not_found" } : { status: "unconfigured" };
   }
-  const data = buildUserContentExport(
-    {
-      id: detail.id,
-      kind: detail.kind,
-      title: detail.title,
-      lifecycleStatus: detail.lifecycleStatus,
-      nativeModuleId: detail.nativeModuleId,
-      draftRevision: detail.draftRevision,
-      updatedAt: detail.updatedAt,
-      publishedAt: detail.publishedAt
-    },
-    detail.draftPayload,
-    detail.publishedPayload
-  );
+  const meta = {
+    id: detail.id,
+    kind: detail.kind,
+    title: detail.title,
+    lifecycleStatus: detail.lifecycleStatus,
+    nativeModuleId: detail.nativeModuleId,
+    draftRevision: detail.draftRevision,
+    updatedAt: detail.updatedAt,
+    publishedAt: detail.publishedAt
+  };
+  if (detail.kind === "exercise") {
+    // The lesson query parses exercise payloads as null; fetch the exercise view.
+    const exercise = await getExerciseForOwner(contentId);
+    const data = buildExerciseContentExport(meta, exercise?.draftPayload ?? null, exercise?.publishedPayload ?? null);
+    return { status: "ok", export: data };
+  }
+  const data = buildUserContentExport(meta, detail.draftPayload, detail.publishedPayload);
   return { status: "ok", export: data };
 }
 
