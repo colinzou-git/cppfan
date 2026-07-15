@@ -1,0 +1,17 @@
+{
+  "id": "dp-unique-paths",
+  "title": "DP: unique grid paths",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.math.combinatorics"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["unique_paths.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-unique-paths/work exercises/dp-unique-paths/tests/tests.cpp -o exercises/dp-unique-paths/work/run",
+  "test_command": "exercises/dp-unique-paths/work/run",
+  "required_tests": ["test_trivial", "test_single_row", "test_small_grid", "test_square", "test_symmetry"],
+  "hints": [
+    "Only right and down moves are allowed, so a cell is reached from above or from the left.",
+    "dp[i][j] = dp[i-1][j] + dp[i][j-1]; the first row and column are all 1.",
+    "Use a 64-bit integer for the count; the answer is dp[m-1][n-1]."
+  ],
+  "project_lab": "dp-technique-playground"
+}

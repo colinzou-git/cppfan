@@ -1,0 +1,17 @@
+{
+  "id": "strings-longest-common-prefix",
+  "title": "Strings: longest common prefix",
+  "skill_ids": ["dsa.strings.manipulation", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["common_prefix.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-longest-common-prefix/work exercises/strings-longest-common-prefix/tests/tests.cpp -o exercises/strings-longest-common-prefix/work/run",
+  "test_command": "exercises/strings-longest-common-prefix/work/run",
+  "required_tests": ["test_empty_input", "test_single", "test_common", "test_no_common", "test_prefix_is_whole_word"],
+  "hints": [
+    "The common prefix is no longer than the shortest string.",
+    "Compare character position by position across all strings; stop at the first mismatch.",
+    "Return an empty string when the list is empty or the first characters already differ."
+  ],
+  "project_lab": "text-technique-playground"
+}

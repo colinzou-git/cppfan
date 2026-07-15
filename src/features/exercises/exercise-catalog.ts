@@ -330,6 +330,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dp-technique-playground"
   },
   {
+    id: "dp-unique-paths",
+    title: "DP: unique grid paths",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.math.combinatorics"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["unique_paths.hpp"],
+    requiredTests: [
+      "test_trivial",
+      "test_single_row",
+      "test_small_grid",
+      "test_square",
+      "test_symmetry"
+    ],
+    hints: [
+      "Only right and down moves are allowed, so a cell is reached from above or from the left.",
+      "dp[i][j] = dp[i-1][j] + dp[i][j-1]; the first row and column are all 1.",
+      "Use a 64-bit integer for the count; the answer is dp[m-1][n-1]."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
+    id: "strings-longest-common-prefix",
+    title: "Strings: longest common prefix",
+    skillIds: ["dsa.strings.manipulation", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["common_prefix.hpp"],
+    requiredTests: [
+      "test_empty_input",
+      "test_single",
+      "test_common",
+      "test_no_common",
+      "test_prefix_is_whole_word"
+    ],
+    hints: [
+      "The common prefix is no longer than the shortest string.",
+      "Compare character position by position across all strings; stop at the first mismatch.",
+      "Return an empty string when the list is empty or the first characters already differ."
+    ],
+    projectLab: "text-technique-playground"
+  },
+  {
     id: "dsa-sort-by-frequency",
     title: "DSA: sort by frequency",
     skillIds: ["dsa.sorting.comparator", "dsa.hashing.lookup"],
