@@ -1143,3 +1143,68 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content review reset smoke OK';
 end $$;
+
+-- 33) #487: publishing projects complete review cards as independent
+-- multiple_choice FSRS items mapped to the owner skill; incomplete/removed cards
+-- do not persist. Self-cleaning.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000b5';
+  v_content uuid;
+  v_item text;
+  v_skill text;
+  v_review text;
+  v_type text;
+  v_choices integer;
+  v_primary boolean;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-review@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  -- One complete review card (projects) and one incomplete card (skipped).
+  select content_id into v_content from public.save_user_content_draft(null, 'lesson', 'RC', null, true, 1,
+    '{"itemType":"lesson","title":"RC","content":"c","explanation":"e","reviewCards":[
+       {"prompt":"Q1","choices":[{"text":"A","isCorrect":true},{"text":"B","isCorrect":false}]},
+       {"prompt":"Q2","choices":[{"text":"only one","isCorrect":false}]}
+     ]}'::jsonb, null);
+  select out_learning_item_id, out_skill_id into v_item, v_skill from public.publish_user_content(v_content, null);
+
+  v_review := v_item || '.review.0';
+  select type into v_type from public.learning_items where id = v_review and owner_user_id = v_uid and is_active;
+  if v_type is distinct from 'multiple_choice' then
+    raise exception '#487: review card 0 not projected as an active multiple_choice item';
+  end if;
+
+  select is_primary into v_primary from public.learning_item_skills where learning_item_id = v_review and skill_id = v_skill;
+  if v_primary is distinct from true then
+    raise exception '#487: review card not mapped as primary to the owner skill';
+  end if;
+
+  select count(*) into v_choices from public.learning_item_choices where learning_item_id = v_review;
+  if v_choices <> 2 then
+    raise exception '#487: review card should have 2 projected choices, found %', v_choices;
+  end if;
+
+  -- The incomplete second card must not project.
+  if exists (select 1 from public.learning_items where id = v_item || '.review.1') then
+    raise exception '#487: incomplete review card should not be projected';
+  end if;
+
+  -- It is enroll-eligible via the native path (multiple_choice + primary skill).
+  if public.enroll_review_card(v_review) is not true then
+    raise exception '#487: projected review card should be review-enrollable';
+  end if;
+
+  -- Re-publish with no review cards: the projected review item is cleaned up.
+  perform public.save_user_content_draft(v_content, 'lesson', 'RC', null, true, 1,
+    '{"itemType":"lesson","title":"RC","content":"c","explanation":"e"}'::jsonb, null);
+  perform public.publish_user_content(v_content, null);
+  if exists (select 1 from public.learning_items where id = v_review) then
+    raise exception '#487: review item should be removed when re-published without it';
+  end if;
+
+  perform public.delete_user_content(v_content, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content review card projection smoke OK';
+end $$;
