@@ -33,6 +33,26 @@ describe("exercise editor field mapping (#488)", () => {
     expect(buildExercisePayload(ungrouped).groupId).toBeUndefined();
   });
 
+  it("round-trips the intentionally-broken starter flag (#488 GAP E)", () => {
+    const broken: ExercisePayload = {
+      schemaVersion: CURRENT_EXERCISE_SCHEMA_VERSION,
+      title: "Fix the bug",
+      prompt: "The starter does not compile — fix it.",
+      mode: "stdin_program",
+      evaluationMode: "self_evaluation",
+      difficulty: "beginner",
+      starterCode: "int main(){ return }",
+      starterIsBroken: true
+    };
+    const fields = fieldsFromExercisePayload(broken);
+    expect(fields.starterIsBroken).toBe(true);
+    expect(buildExercisePayload(fields).starterIsBroken).toBe(true);
+    // Unset defaults to false and is omitted from the payload.
+    const normal = fieldsFromExercisePayload({ ...broken, starterIsBroken: undefined });
+    expect(normal.starterIsBroken).toBe(false);
+    expect(buildExercisePayload(normal).starterIsBroken).toBeUndefined();
+  });
+
   it("round-trips a program-mode payload through fields and back", () => {
     const original: ExercisePayload = {
       schemaVersion: CURRENT_EXERCISE_SCHEMA_VERSION,

@@ -65,4 +65,35 @@ describe("validateExercisePublication (#488)", () => {
     const result = await validateExercisePublication(exercise({ referenceSolution: "ok", tests: twoTests }));
     expect(result.status).toBe("ok");
   });
+
+  it("blocks a starter that does not compile (GAP E)", async () => {
+    executeRun.mockReset().mockResolvedValue({ status: "compile_error", compileOutput: "error", stdout: "" });
+    const result = await validateExercisePublication(exercise({ starterCode: "broken;" }));
+    expect(result.status).toBe("starter_compile_error");
+  });
+
+  it("blocks a broken-marked starter that actually compiles (GAP E)", async () => {
+    executeRun.mockReset().mockResolvedValue({ status: "success", stdout: "", compileOutput: "" });
+    const result = await validateExercisePublication(exercise({ starterCode: "int main(){}", starterIsBroken: true }));
+    expect(result.status).toBe("starter_should_not_compile");
+  });
+
+  it("allows a broken-marked starter that fails to compile (GAP E)", async () => {
+    // starter fails to compile (expected), then no reference solution -> skipped.
+    executeRun.mockReset().mockResolvedValue({ status: "compile_error", compileOutput: "error", stdout: "" });
+    const result = await validateExercisePublication(exercise({ starterCode: "broken;", starterIsBroken: true }));
+    expect(result.status).toBe("skipped");
+  });
+
+  it("compiles a valid starter, then validates the reference (GAP E)", async () => {
+    executeRun
+      .mockReset()
+      .mockResolvedValueOnce({ status: "success", stdout: "", compileOutput: "" }) // starter compiles
+      .mockResolvedValueOnce({ status: "success", stdout: "ba\n", compileOutput: "" }) // t1
+      .mockResolvedValueOnce({ status: "success", stdout: "yx\n", compileOutput: "" }); // t2
+    const result = await validateExercisePublication(
+      exercise({ starterCode: "int main(){}", referenceSolution: "ok", tests: twoTests })
+    );
+    expect(result.status).toBe("ok");
+  });
 });

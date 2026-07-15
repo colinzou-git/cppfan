@@ -156,6 +156,18 @@ export async function publishExercise(input: { contentId: string; expectedRevisi
   // Compile/run the supplied reference solution against the tests where a runner
   // is available (skipped when unconfigured). Never publish code known to fail.
   const validation = await validateExercisePublication(detail.draftPayload);
+  if (validation.status === "starter_compile_error") {
+    return {
+      status: "invalid",
+      issues: [{ field: "starterCode", message: "the starter code does not compile — mark it as an intentionally broken debugging starter if that is expected" }]
+    };
+  }
+  if (validation.status === "starter_should_not_compile") {
+    return {
+      status: "invalid",
+      issues: [{ field: "starterCode", message: "this starter is marked as intentionally broken but it compiles cleanly" }]
+    };
+  }
   if (validation.status === "compile_error") {
     return { status: "invalid", issues: [{ field: "referenceSolution", message: "the reference solution does not compile" }] };
   }

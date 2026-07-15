@@ -55,6 +55,13 @@ export type ExercisePayload = {
   cppStandard?: string;
   editableFilename?: string;
   starterCode?: string;
+  /**
+   * When true, the starter is an intentionally broken debugging exercise and is
+   * expected NOT to compile — publication validates that it fails to compile
+   * rather than requiring it to compile (#488). Default false: a supplied
+   * starter must compile.
+   */
+  starterIsBroken?: boolean;
   sampleCode?: string;
   functionSignature?: string;
   harnessContract?: string;

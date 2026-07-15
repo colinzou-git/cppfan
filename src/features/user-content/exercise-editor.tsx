@@ -23,6 +23,7 @@ type ExerciseFields = {
   tags: string;
   groupId: string;
   starterCode: string;
+  starterIsBroken: boolean;
   referenceSolution: string;
   solutionExplanation: string;
   stdinFormat: string;
@@ -44,6 +45,7 @@ export function fieldsFromExercisePayload(payload: ExercisePayload | null): Exer
     tags: payload?.tags ? payload.tags.join(", ") : "",
     groupId: payload?.groupId ?? "",
     starterCode: payload?.starterCode ?? "",
+    starterIsBroken: payload?.starterIsBroken ?? false,
     referenceSolution: payload?.referenceSolution ?? "",
     solutionExplanation: payload?.solutionExplanation ?? "",
     stdinFormat: payload?.stdinFormat ?? "",
@@ -70,6 +72,7 @@ export function buildExercisePayload(fields: ExerciseFields): Record<string, unk
     ...(tags.length > 0 ? { tags } : {}),
     ...(fields.groupId ? { groupId: fields.groupId } : {}),
     ...(fields.starterCode ? { starterCode: fields.starterCode } : {}),
+    ...(fields.starterIsBroken ? { starterIsBroken: true } : {}),
     ...(fields.referenceSolution ? { referenceSolution: fields.referenceSolution } : {}),
     ...(fields.solutionExplanation ? { solutionExplanation: fields.solutionExplanation } : {}),
     ...(isFunction && fields.functionSignature ? { functionSignature: fields.functionSignature } : {}),
@@ -333,6 +336,15 @@ export function ExerciseEditor({
       <label className="grid gap-1 text-sm font-semibold text-slate-700">
         Starter code
         <textarea className={codeArea} value={fields.starterCode} onChange={(e) => update({ starterCode: e.target.value })} placeholder="Editable starting point for the learner…" />
+      </label>
+      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <input
+          type="checkbox"
+          checked={fields.starterIsBroken}
+          onChange={(e) => update({ starterIsBroken: e.target.checked })}
+          data-testid="exercise-starter-broken"
+        />
+        Starter is intentionally broken (debugging exercise — expected not to compile)
       </label>
       <label className="grid gap-1 text-sm font-semibold text-slate-700">
         Reference solution
