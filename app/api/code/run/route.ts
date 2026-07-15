@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     itemId: parsed.itemId,
     source: parsed.source,
     stdin: parsed.stdin,
-    expectedVersionId: parsed.contentVersionId
+    expectedVersionId: parsed.contentVersionId,
+    milestoneIndex: parsed.milestoneIndex
   });
 
   // Persistence is best-effort and must never block or fail the run response.

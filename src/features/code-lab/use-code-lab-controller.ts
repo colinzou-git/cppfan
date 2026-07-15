@@ -34,6 +34,8 @@ export type CodeLabControllerArgs = {
   /** Published version this tab loaded — sent with run/test so the server can
    * refuse a stale run after a user exercise is republished (#488). */
   contentVersionId?: string;
+  /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
+  milestoneIndex?: number;
   onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
 };
 
@@ -43,7 +45,7 @@ export type CodeLabControllerArgs = {
  * lesson view and the full-page workspace render the same behavior from one
  * source of truth instead of duplicating it.
  */
-export function useCodeLabController({ itemId, config, contentVersionId, onResult }: CodeLabControllerArgs) {
+export function useCodeLabController({ itemId, config, contentVersionId, milestoneIndex, onResult }: CodeLabControllerArgs) {
   const [source, setSource] = useState(config.starterCode);
   // Autosave/resume: hydrates source from the saved draft on mount and persists
   // edits (cross-device when signed in, localStorage otherwise). #431
@@ -175,7 +177,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, onResul
     try {
       if (action === "run") {
         setReview(null);
-        const result = await runCodeRequest({ itemId, source, stdin, contentVersionId });
+        const result = await runCodeRequest({ itemId, source, stdin, contentVersionId, milestoneIndex });
         setRunResult(result);
         runResultRef.current = result;
         updatePredictionComparisons();
@@ -184,7 +186,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, onResul
         onResult?.({ run: result, test: testResultRef.current });
       } else if (action === "test") {
         setReview(null);
-        const result = await runTestsRequest({ itemId, source, contentVersionId });
+        const result = await runTestsRequest({ itemId, source, contentVersionId, milestoneIndex });
         setTestResult(result);
         testResultRef.current = result;
         updatePredictionComparisons();

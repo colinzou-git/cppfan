@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { FormattedContent } from "@/features/learning-items/formatted-content";
-import type { LearningItemCodeLab } from "./code-lab-types";
+import type { CodeRunResult, CodeTestResult, LearningItemCodeLab } from "./code-lab-types";
 import { CodeEditor } from "./code-editor";
 import { CodeRunControls, type CodeAction } from "./code-run-controls";
 import { CodeOutputPanel } from "./code-output-panel";
@@ -38,6 +38,8 @@ export function CodeLabWorkspace({
   config,
   sourceVersion = "1",
   contentVersionId,
+  milestoneIndex,
+  onResult,
   backHref,
   backLabel
 }: {
@@ -48,12 +50,16 @@ export function CodeLabWorkspace({
   sourceVersion?: string;
   /** Published version id for a user exercise; run/test refuse a stale tab (#488). */
   contentVersionId?: string;
+  /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
+  milestoneIndex?: number;
+  /** Notified after each run/test — a lab wrapper uses this to track milestone completion (#489). */
+  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
   /** Back-link target; defaults to the lesson page. Project labs pass /labs (#439). */
   backHref?: string;
   /** Back-link label; defaults to "Back to lesson". Project labs pass "Back to project labs". */
   backLabel?: string;
 }) {
-  const c = useCodeLabController({ itemId, config, contentVersionId });
+  const c = useCodeLabController({ itemId, config, contentVersionId, milestoneIndex, onResult });
   const breakpointState = useCodeBreakpoints(itemId);
   const debug = useCodeDebugger({
     itemId,

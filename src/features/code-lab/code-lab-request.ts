@@ -9,7 +9,7 @@ import { isUserLearningItemId } from "@/features/user-content/user-content-id";
  */
 
 export type ParsedCodeRequest =
-  | { ok: true; itemId: string; source: string; stdin: string; userQuestion?: string; contentVersionId?: string }
+  | { ok: true; itemId: string; source: string; stdin: string; userQuestion?: string; contentVersionId?: string; milestoneIndex?: number }
   | { ok: false; code: string; message: string };
 
 export function parseBodyRecord(value: unknown): Record<string, unknown> | null {
@@ -56,7 +56,12 @@ export function validateCodeRequest(body: Record<string, unknown>): ParsedCodeRe
       ? body.contentVersionId
       : undefined;
 
-  return { ok: true, itemId, source, stdin, userQuestion, contentVersionId };
+  const milestoneIndex =
+    typeof body.milestoneIndex === "number" && Number.isInteger(body.milestoneIndex) && body.milestoneIndex >= 0 && body.milestoneIndex < 1000
+      ? body.milestoneIndex
+      : undefined;
+
+  return { ok: true, itemId, source, stdin, userQuestion, contentVersionId, milestoneIndex };
 }
 
 export type ParsedDraftRequest =

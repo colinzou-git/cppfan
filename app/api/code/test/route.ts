@@ -23,7 +23,8 @@ export async function POST(request: Request) {
   const result = await runTests({
     itemId: parsed.itemId,
     source: parsed.source,
-    expectedVersionId: parsed.contentVersionId
+    expectedVersionId: parsed.contentVersionId,
+    milestoneIndex: parsed.milestoneIndex
   });
 
   // A refused (stale-definition) test run never executed, so record nothing.

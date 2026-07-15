@@ -36,6 +36,31 @@ export function labPrompt(payload: LabPayload, milestoneIndex = 0): string {
   return base;
 }
 
+export type LabMilestoneView = {
+  index: number;
+  label: string;
+  required: boolean;
+  config: LearningItemCodeLab;
+};
+
+/**
+ * Client-safe views for every navigable checkpoint of a lab: one per milestone,
+ * or a single "Task" view for a single-task lab. Each config has visible tests
+ * only, so no later milestone's hidden criteria leak.
+ */
+export function labMilestoneViews(payload: LabPayload): LabMilestoneView[] {
+  if (payload.mode === "milestones") {
+    const list = payload.milestones ?? [];
+    return list.map((m, i) => ({
+      index: i,
+      label: m.title || `Milestone ${i + 1}`,
+      required: m.required,
+      config: labPayloadToCodeLabConfig(payload, i)
+    }));
+  }
+  return [{ index: 0, label: "Task", required: true, config: labPayloadToCodeLabConfig(payload, 0) }];
+}
+
 /** Learner-safe Code Lab config for a published lab (visible tests only). */
 export function labPayloadToCodeLabConfig(payload: LabPayload, milestoneIndex = 0): LearningItemCodeLab {
   const contract = activeLabContract(payload, milestoneIndex);
