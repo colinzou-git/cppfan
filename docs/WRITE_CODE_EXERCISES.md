@@ -119,6 +119,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dsa-count-set-bits` | bit manipulation | `math-technique-playground` |
 | `bit-single-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
 | `dp-longest-increasing-subsequence` | dynamic programming, DP design, array traversal | `dp-technique-playground` |
+| `dp-unique-paths` | dynamic programming, DP design, combinatorics | `dp-technique-playground` |
+| `strings-longest-common-prefix` | string manipulation, array traversal | `text-technique-playground` |
 | `dsa-sort-by-frequency` | custom comparators, hash lookup | `math-technique-playground` |
 | `cpp-string-split` | string parsing, `std::string` | `text-statistics-analyzer` |
 | `dsa-move-zeroes` | two pointers, array traversal | `math-technique-playground` |

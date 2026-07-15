@@ -686,6 +686,92 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"]
   },
+  "dp-unique-paths": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: unique grid paths.
+
+A robot at the top-left of an m x n grid may move only right or down. Print how
+many distinct paths reach the bottom-right cell.
+
+Input format:
+- Two integers m and n (rows and columns), each >= 1.
+
+Output format:
+- The number of paths, then a newline.
+
+3 7 -> 28; 3 3 -> 6; 1 5 -> 1.
+
+AI evaluation rubric:
+- Grid DP (dp[i][j] = dp[i-1][j] + dp[i][j-1]) or the combinatorial formula.
+- Uses a 64-bit count.`,
+    stdin: "3 7\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int m, n;
+  cin >> m >> n;
+  vector<long long> row(n, 1);
+  // TODO: for each subsequent row, row[j] += row[j-1]; print row[n-1].
+  cout << row[n - 1] << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "3x7", stdin: "3 7\n", expectedStdout: "28\n", matcher: "exact" },
+      { name: "Square", stdin: "3 3\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "Single row", stdin: "1 5\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.math.combinatorics"]
+  },
+  "strings-longest-common-prefix": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: longest common prefix.
+
+Print the longest string that is a prefix of every input word. If there is no
+common prefix, print an empty line.
+
+Input format:
+- The first line is n, the number of words.
+- Each of the next n lines has one word (no spaces).
+
+Output format:
+- The longest common prefix, then a newline (an empty line if none).
+
+[flower, flow, flight] -> fl; [dog, cat] -> (empty).
+
+AI evaluation rubric:
+- Compares character positions across all words, stopping at the first mismatch.
+- Handles no-common-prefix (empty output).`,
+    stdin: "3\nflower\nflow\nflight\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> words(n);
+  for (int i = 0; i < n; ++i) cin >> words[i];
+  string prefix;
+  // TODO: build the longest prefix shared by every word.
+  cout << prefix << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Common", stdin: "3\nflower\nflow\nflight\n", expectedStdout: "fl\n", matcher: "exact" },
+      { name: "Whole word", stdin: "3\ngo\ngoto\ngopher\n", expectedStdout: "go\n", matcher: "exact" },
+      { name: "None", stdin: "2\ndog\ncat\n", expectedStdout: "\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.manipulation", "dsa.arrays.traversal"]
+  },
   "dsa-sort-by-frequency": {
     enabled: true,
     language: "cpp",
