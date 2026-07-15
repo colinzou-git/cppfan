@@ -1,5 +1,6 @@
 import { CODE_LAB_LIMITS } from "./code-lab-types";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
+import { isUserLearningItemId } from "@/features/user-content/user-content-id";
 
 /**
  * Shared request validation for the Code Lab API routes (#407). Enforces the
@@ -22,7 +23,7 @@ export function validateCodeRequest(body: Record<string, unknown>): ParsedCodeRe
   if (!itemId || itemId.length > 240) {
     return { ok: false, code: "invalid_item", message: "A valid item id is required." };
   }
-  if (!getCodeLabConfigForItem(itemId)) {
+  if (!getCodeLabConfigForItem(itemId) && !isUserLearningItemId(itemId)) {
     return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
   }
 
@@ -67,7 +68,7 @@ export function validateDraftRequest(body: Record<string, unknown>): ParsedDraft
   if (!itemId || itemId.length > 240) {
     return { ok: false, code: "invalid_item", message: "A valid item id is required." };
   }
-  if (!getCodeLabConfigForItem(itemId)) {
+  if (!getCodeLabConfigForItem(itemId) && !isUserLearningItemId(itemId)) {
     return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
   }
 
@@ -89,7 +90,7 @@ export function validateDraftItemId(itemId: string | null): ParsedDraftRequest {
   if (!trimmed || trimmed.length > 240) {
     return { ok: false, code: "invalid_item", message: "A valid item id is required." };
   }
-  if (!getCodeLabConfigForItem(trimmed)) {
+  if (!getCodeLabConfigForItem(trimmed) && !isUserLearningItemId(trimmed)) {
     return { ok: false, code: "not_code_capable", message: "This item does not have a Code Lab." };
   }
   return { ok: true, itemId: trimmed, source: "" };
