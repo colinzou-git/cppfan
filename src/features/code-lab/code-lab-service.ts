@@ -93,8 +93,8 @@ function isStale(expectedVersionId: string | undefined, publishedVersionId: stri
  * version) — an exercise, or failing that a lab. Native items resolve a sync
  * config and never reach here.
  */
-async function resolveUserItemExecution(itemId: string) {
-  return (await resolveUserExerciseExecution(itemId)) ?? (await resolveUserLabExecution(itemId));
+async function resolveUserItemExecution(itemId: string, milestoneIndex = 0) {
+  return (await resolveUserExerciseExecution(itemId)) ?? (await resolveUserLabExecution(itemId, milestoneIndex));
 }
 
 export async function runCode(input: {
@@ -104,9 +104,11 @@ export async function runCode(input: {
   compilerFlags?: string[];
   /** The published version the client loaded; a mismatch refuses the run (#488). */
   expectedVersionId?: string;
+  /** Active milestone for a user lab (#489). */
+  milestoneIndex?: number;
 }): Promise<CodeRunResult> {
   const staticConfig = getCodeLabConfigForItem(input.itemId);
-  const resolvedUser = staticConfig ? null : await resolveUserItemExecution(input.itemId);
+  const resolvedUser = staticConfig ? null : await resolveUserItemExecution(input.itemId, input.milestoneIndex);
   if (resolvedUser && isStale(input.expectedVersionId, resolvedUser.publishedVersionId)) {
     return staleRunResult();
   }
@@ -137,12 +139,14 @@ export async function runTests(input: {
   compilerFlags?: string[];
   /** The published version the client loaded; a mismatch refuses the run (#488). */
   expectedVersionId?: string;
+  /** Active milestone for a user lab (#489). */
+  milestoneIndex?: number;
 }): Promise<CodeTestResult> {
   let config = getCodeLabConfigForItem(input.itemId);
   let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
   if (!config) {
     // Published user-created exercises/labs carry no static config; resolve from the DB.
-    const resolved = await resolveUserItemExecution(input.itemId);
+    const resolved = await resolveUserItemExecution(input.itemId, input.milestoneIndex);
     if (!resolved) {
       return emptyTestResult("invalid_item");
     }

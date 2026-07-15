@@ -8,7 +8,8 @@ import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { getInterviewProblem } from "@/features/interview/problem-catalog";
 import { getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
 import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
-import { labPayloadToCodeLabConfig } from "@/features/user-content/lab-code-lab";
+import { labMilestoneViews } from "@/features/user-content/lab-code-lab";
+import { LabWorkspace } from "@/features/user-content/lab-workspace";
 import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
 
 /**
@@ -41,17 +42,15 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
         </main>
       );
     }
-    // Published user labs (#489) resolve the same way; the milestone runner is a
-    // later slice, so this opens the active (single-task / first-milestone) view.
+    // Published user labs (#489): a milestone navigator over one shared codebase.
     const lab = userContentId ? await getLabForOwner(userContentId) : null;
     if (lab?.publishedPayload) {
       return (
         <main className="p-3 xl:p-6">
-          <CodeLabWorkspace
+          <LabWorkspace
             itemId={decodedId}
             title={lab.title}
-            config={labPayloadToCodeLabConfig(lab.publishedPayload)}
-            sourceVersion={`user-lab:${lab.publishedVersionId ?? "1"}`}
+            milestones={labMilestoneViews(lab.publishedPayload)}
             contentVersionId={lab.publishedVersionId ?? undefined}
             backHref="/my-content"
             backLabel="Back to My Content"
