@@ -17,6 +17,9 @@ beforeEach(() => {
   mockedConfig.mockReturnValue(null);
   mockedResolve.mockResolvedValue({
     config: {
+      enabled: true,
+      language: "cpp",
+      mode: "stdin",
       starterCode: "int main(){}",
       visibleTests: [{ name: "v", stdin: "", expectedStdout: "x", matcher: "exact" }],
       skillTags: ["user.skill.x"]
