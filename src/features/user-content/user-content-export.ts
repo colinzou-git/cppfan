@@ -11,6 +11,7 @@
 import { createStoreZip } from "./zip";
 import type { LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
 import type { ExercisePayload } from "./exercise-content-types";
+import type { LabPayload } from "./lab-content-types";
 
 export const EXPORT_SCHEMA_VERSION = 1;
 
@@ -29,8 +30,8 @@ export type UserContentExport = {
   exportSchemaVersion: number;
   exportedAt: string;
   item: ExportItemMeta;
-  draftPayload: LessonPayload | ExercisePayload | null;
-  publishedPayload: LessonPayload | ExercisePayload | null;
+  draftPayload: LessonPayload | ExercisePayload | LabPayload | null;
+  publishedPayload: LessonPayload | ExercisePayload | LabPayload | null;
   markdown: string;
 };
 
@@ -165,6 +166,61 @@ export function buildExerciseMarkdown(payload: ExercisePayload): string {
     parts.push("\n");
   }
   return parts.join("");
+}
+
+export function buildLabMarkdown(payload: LabPayload): string {
+  const parts: string[] = [];
+  parts.push(heading(1, payload.title || "Untitled lab"));
+  const meta = [payload.mode, payload.evaluationMode, payload.difficulty].filter(Boolean).join(" · ");
+  if (meta) {
+    parts.push(`*${meta}*\n\n`);
+  }
+  if (payload.summary) {
+    parts.push(`${payload.summary}\n\n`);
+  }
+  if (payload.taskDescription) {
+    parts.push(heading(2, "Task"));
+    parts.push(`${payload.taskDescription}\n\n`);
+  }
+  if (payload.starterCode) {
+    parts.push(heading(2, "Starter code"));
+    parts.push(fenced(payload.starterCode));
+  }
+  if (payload.referenceSolution) {
+    parts.push(heading(2, "Reference solution"));
+    parts.push(fenced(payload.referenceSolution));
+  }
+  if (payload.solutionExplanation) {
+    parts.push(heading(2, "Design explanation"));
+    parts.push(`${payload.solutionExplanation}\n\n`);
+  }
+  if (payload.mode === "milestones" && payload.milestones && payload.milestones.length > 0) {
+    parts.push(heading(2, "Milestones"));
+    payload.milestones.forEach((m, i) => {
+      parts.push(`${i + 1}. **${m.title}**${m.required ? "" : " (optional)"}\n`);
+      if (m.instructions) parts.push(`   - ${m.instructions}\n`);
+    });
+    parts.push("\n");
+  }
+  return parts.join("");
+}
+
+/** Assemble a lab export (manifest + Markdown), owner-only. */
+export function buildLabContentExport(
+  item: ExportItemMeta,
+  draftPayload: LabPayload | null,
+  publishedPayload: LabPayload | null,
+  now: Date = new Date()
+): UserContentExport {
+  const forMarkdown = publishedPayload ?? draftPayload;
+  return {
+    exportSchemaVersion: EXPORT_SCHEMA_VERSION,
+    exportedAt: now.toISOString(),
+    item,
+    draftPayload,
+    publishedPayload,
+    markdown: forMarkdown ? buildLabMarkdown(forMarkdown) : ""
+  };
 }
 
 /** Assemble an exercise export (manifest + Markdown), owner-only. */

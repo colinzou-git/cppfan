@@ -9,11 +9,12 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getContentItemForOwner, getExerciseForOwner } from "./user-content-queries";
+import { getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
 import { parseExercisePayload, validateExerciseForPublication } from "./exercise-content-schema";
+import { parseLabPayload, validateLabForPublication } from "./lab-content-schema";
 import { validateExercisePublication } from "./exercise-publish-validation";
-import { buildExerciseContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
+import { buildExerciseContentExport, buildLabContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
 export type SaveDraftInput = {
@@ -70,6 +71,16 @@ export async function restoreVersionAsDraft(input: {
       contentId: input.contentId,
       kind: "exercise",
       title: parsedEx.ok ? parsedEx.value.title : "",
+      expectedRevision: input.expectedRevision ?? null,
+      payload
+    });
+  }
+  if (detail?.kind === "lab") {
+    const parsedLab = parseLabPayload(payload);
+    return saveLabDraft({
+      contentId: input.contentId,
+      kind: "lab",
+      title: parsedLab.ok ? parsedLab.value.title : "",
       expectedRevision: input.expectedRevision ?? null,
       payload
     });
@@ -245,6 +256,91 @@ export async function saveExerciseDraft(input: SaveDraftInput): Promise<SaveDraf
   };
 }
 
+export async function saveLabDraft(input: SaveDraftInput): Promise<SaveDraftResult> {
+  const parsed = parseLabPayload(input?.payload);
+  if (!parsed.ok) {
+    return { status: "invalid", issues: parsed.issues };
+  }
+  const title = typeof input?.title === "string" && input.title.trim().length > 0 ? input.title.trim() : parsed.value.title;
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("save_user_content_draft", {
+    p_content_id: input?.contentId ?? null,
+    p_kind: "lab",
+    p_title: title,
+    p_native_module_id: input?.nativeModuleId ?? null,
+    p_recommendation_enabled: input?.recommendationEnabled ?? true,
+    p_schema_version: parsed.value.schemaVersion,
+    p_payload: parsed.value,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { content_id: string; draft_version_id: string; revision: number | string; saved_at: string }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.content_id,
+    draftVersionId: row.draft_version_id,
+    revision: Number(row.revision),
+    savedAt: row.saved_at
+  };
+}
+
+export async function publishLab(input: { contentId: string; expectedRevision?: number | null }): Promise<PublishResult> {
+  const contentId = typeof input?.contentId === "string" ? input.contentId : "";
+  if (!contentId) {
+    return { status: "error" };
+  }
+  const detail = await getLabForOwner(contentId);
+  if (detail === null) {
+    const supabaseProbe = await createClient();
+    return supabaseProbe ? { status: "not_found" } : { status: "unconfigured" };
+  }
+  if (!detail.draftPayload) {
+    return { status: "invalid", issues: [{ field: "payload", message: "there is no draft to publish" }] };
+  }
+  const issues = validateLabForPublication(detail.draftPayload);
+  if (issues.length > 0) {
+    return { status: "invalid", issues };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) {
+    return { status: "unconfigured" };
+  }
+  const { data, error } = await supabase.rpc("publish_user_content", {
+    p_content_id: contentId,
+    p_expected_revision: input?.expectedRevision ?? null
+  });
+  if (error) {
+    return error.code === "40001" ? { status: "conflict" } : { status: "error" };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { out_content_id: string; out_skill_id: string; out_learning_item_id: string; out_version_number: number }
+    | undefined;
+  if (!row) {
+    return { status: "error" };
+  }
+  revalidatePath("/my-content");
+  return {
+    status: "ok",
+    contentId: row.out_content_id,
+    skillId: row.out_skill_id,
+    learningItemId: row.out_learning_item_id,
+    versionNumber: Number(row.out_version_number)
+  };
+}
+
 export type PublishResult =
   | { status: "ok"; contentId: string; skillId: string; learningItemId: string; versionNumber: number }
   | { status: "invalid"; issues: ValidationIssue[] }
@@ -371,6 +467,11 @@ export async function exportContent(contentId: string): Promise<ExportResult> {
     // The lesson query parses exercise payloads as null; fetch the exercise view.
     const exercise = await getExerciseForOwner(contentId);
     const data = buildExerciseContentExport(meta, exercise?.draftPayload ?? null, exercise?.publishedPayload ?? null);
+    return { status: "ok", export: data };
+  }
+  if (detail.kind === "lab") {
+    const lab = await getLabForOwner(contentId);
+    const data = buildLabContentExport(meta, lab?.draftPayload ?? null, lab?.publishedPayload ?? null);
     return { status: "ok", export: data };
   }
   const data = buildUserContentExport(meta, detail.draftPayload, detail.publishedPayload);
