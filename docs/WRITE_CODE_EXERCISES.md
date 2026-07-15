@@ -117,6 +117,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `strings-longest-unique-substring` | sliding window, hash lookup | `text-statistics-analyzer` |
 | `dsa-merge-sorted-arrays` | two pointers, array traversal | `math-technique-playground` |
 | `dsa-count-set-bits` | bit manipulation | `math-technique-playground` |
+| `bit-single-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
+| `dp-longest-increasing-subsequence` | dynamic programming, DP design, array traversal | `dp-technique-playground` |
 | `dsa-sort-by-frequency` | custom comparators, hash lookup | `math-technique-playground` |
 | `cpp-string-split` | string parsing, `std::string` | `text-statistics-analyzer` |
 | `dsa-move-zeroes` | two pointers, array traversal | `math-technique-playground` |

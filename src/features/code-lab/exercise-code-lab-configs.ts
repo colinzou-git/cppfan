@@ -596,6 +596,96 @@ int main() {
     ],
     skillTags: ["dsa.math.bit_manipulation"]
   },
+  "bit-single-number": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: the single number.
+
+Every value in the array appears exactly twice, except one value that appears
+once. Print that single value.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The single value that appears once, then a newline.
+
+[2 2 1] -> 1; [4 1 2 1 2] -> 4.
+
+AI evaluation rubric:
+- Uses XOR (O(n) time, O(1) space), not a hash set.
+- Correct with negative values.`,
+    stdin: "5\n4 1 2 1 2\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  int acc = 0;
+  for (int i = 0; i < n; ++i) {
+    int value;
+    cin >> value;
+    // TODO: fold each value into acc with XOR.
+    (void)value;
+  }
+  cout << acc << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Small", stdin: "3\n2 2 1\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "Five values", stdin: "5\n4 1 2 1 2\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "42\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"]
+  },
+  "dp-longest-increasing-subsequence": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: longest increasing subsequence.
+
+Print the length of the longest strictly increasing subsequence of the array.
+A subsequence keeps order but may skip elements.
+
+Input format:
+- The first line is n, the number of values (n may be 0).
+- The second line has n space-separated integers.
+
+Output format:
+- The LIS length, then a newline.
+
+[10 9 2 5 3 7 101 18] -> 4; [5 4 3 2 1] -> 1.
+
+AI evaluation rubric:
+- A correct DP (e.g. dp[i] = longest LIS ending at i), strictly increasing.
+- Handles the empty array (length 0).`,
+    stdin: "8\n10 9 2 5 3 7 101 18\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> nums(n);
+  for (int i = 0; i < n; ++i) cin >> nums[i];
+  // TODO: dp[i] = 1 + max(dp[j]) for j < i with nums[j] < nums[i]; print the max.
+  int best = n == 0 ? 0 : 1;
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "8\n10 9 2 5 3 7 101 18\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Decreasing", stdin: "5\n5 4 3 2 1\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "Empty", stdin: "0\n\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"]
+  },
   "dsa-sort-by-frequency": {
     enabled: true,
     language: "cpp",

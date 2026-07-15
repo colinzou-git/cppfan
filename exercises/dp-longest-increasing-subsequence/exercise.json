@@ -1,0 +1,17 @@
+{
+  "id": "dp-longest-increasing-subsequence",
+  "title": "DP: longest increasing subsequence",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["lis.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-longest-increasing-subsequence/work exercises/dp-longest-increasing-subsequence/tests/tests.cpp -o exercises/dp-longest-increasing-subsequence/work/run",
+  "test_command": "exercises/dp-longest-increasing-subsequence/work/run",
+  "required_tests": ["test_empty", "test_single", "test_strictly_increasing", "test_strictly_decreasing", "test_general", "test_duplicates"],
+  "hints": [
+    "Let dp[i] be the length of the longest increasing subsequence ending at index i.",
+    "dp[i] = 1 + max(dp[j]) over all j < i with nums[j] < nums[i], or 1 if none.",
+    "The answer is the maximum dp value; the subsequence must be strictly increasing."
+  ],
+  "project_lab": "dp-technique-playground"
+}

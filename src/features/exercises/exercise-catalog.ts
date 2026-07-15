@@ -287,6 +287,49 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "bit-single-number",
+    title: "Bit manipulation: the single number",
+    skillIds: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["single_number.hpp"],
+    requiredTests: [
+      "test_single",
+      "test_all_but_one_paired",
+      "test_negatives",
+      "test_order_independent",
+      "test_large"
+    ],
+    hints: [
+      "XOR has two useful properties: x ^ x == 0 and x ^ 0 == x.",
+      "XOR-ing every element cancels each value that appears twice.",
+      "The running XOR of the whole array is the element that appears once."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
+    id: "dp-longest-increasing-subsequence",
+    title: "DP: longest increasing subsequence",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["lis.hpp"],
+    requiredTests: [
+      "test_empty",
+      "test_single",
+      "test_strictly_increasing",
+      "test_strictly_decreasing",
+      "test_general",
+      "test_duplicates"
+    ],
+    hints: [
+      "Let dp[i] be the length of the longest increasing subsequence ending at index i.",
+      "dp[i] = 1 + max(dp[j]) over all j < i with nums[j] < nums[i], or 1 if none.",
+      "The answer is the maximum dp value; the subsequence must be strictly increasing."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
     id: "dsa-sort-by-frequency",
     title: "DSA: sort by frequency",
     skillIds: ["dsa.sorting.comparator", "dsa.hashing.lookup"],
