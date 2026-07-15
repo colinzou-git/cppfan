@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { publishContent, saveLessonDraft } from "./user-content-actions";
+import { publishContent, resetReviewForContent, saveLessonDraft } from "./user-content-actions";
+import { PublishChoiceDialog, type PublishMode } from "./publish-choice-dialog";
 import { AiProposalPanel } from "./ai-proposal-panel";
 import { AttachmentManager } from "./attachment-manager";
 import { VersionHistory } from "./version-history";
@@ -80,6 +81,7 @@ export function LessonEditor({
   const [state, setState] = useState<SaveState>("idle");
   const [message, setMessage] = useState<string>("");
   const [lifecycle, setLifecycle] = useState<string>(initialLifecycle ?? "draft");
+  const [publishOpen, setPublishOpen] = useState(false);
   const dirtyRef = useRef(false);
 
   // Recover any local copy left from a crash/close before the last cloud save.
@@ -191,7 +193,7 @@ export function LessonEditor({
     [update]
   );
 
-  const publish = useCallback(async () => {
+  const runPublish = useCallback(async (mode: PublishMode) => {
     if (dirtyRef.current || !contentId) {
       await save();
     }
@@ -204,7 +206,12 @@ export function LessonEditor({
     if (result.status === "ok") {
       setLifecycle("published");
       setState("saved");
-      setMessage("Published.");
+      if (mode === "reset") {
+        const reset = await resetReviewForContent(contentId);
+        setMessage(reset.status === "ok" ? "Published. Review cards reset." : "Published. Could not reset review cards.");
+      } else {
+        setMessage("Published.");
+      }
     } else if (result.status === "invalid") {
       setState("invalid");
       setMessage(result.issues.map((i) => `${i.field}: ${i.message}`).join("; "));
@@ -219,6 +226,14 @@ export function LessonEditor({
       setMessage("Could not publish.");
     }
   }, [contentId, save]);
+
+  const onPublishClick = useCallback(() => {
+    if (lifecycle === "published") {
+      setPublishOpen(true);
+    } else {
+      void runPublish("continue");
+    }
+  }, [lifecycle, runPublish]);
 
   return (
     <div className="grid gap-4 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm">
@@ -305,7 +320,7 @@ export function LessonEditor({
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>
           {state === "saving" ? "Saving…" : "Save draft"}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => void publish()} disabled={state === "saving"}>
+        <Button type="button" variant="secondary" onClick={onPublishClick} disabled={state === "saving"}>
           Publish
         </Button>
         {message ? (
@@ -320,6 +335,16 @@ export function LessonEditor({
           </span>
         ) : null}
       </div>
+
+      <PublishChoiceDialog
+        open={publishOpen}
+        busy={state === "saving"}
+        onChoose={(mode) => {
+          setPublishOpen(false);
+          void runPublish(mode);
+        }}
+        onCancel={() => setPublishOpen(false)}
+      />
 
       <VersionHistory
         contentId={contentId}
