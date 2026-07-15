@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContentItemForOwner, getExerciseForOwner } from "./user-content-queries";
 import { parseLessonPayload, validateLessonForPublication } from "./user-content-schema";
 import { parseExercisePayload, validateExerciseForPublication } from "./exercise-content-schema";
+import { validateExercisePublication } from "./exercise-publish-validation";
 import { buildExerciseContentExport, buildUserContentExport, type UserContentExport } from "./user-content-export";
 import type { AttachmentVisibility, UserContentKind, ValidationIssue } from "./user-content-types";
 
@@ -137,6 +138,19 @@ export async function publishExercise(input: { contentId: string; expectedRevisi
   const issues = validateExerciseForPublication(detail.draftPayload);
   if (issues.length > 0) {
     return { status: "invalid", issues };
+  }
+
+  // Compile/run the supplied reference solution against the tests where a runner
+  // is available (skipped when unconfigured). Never publish code known to fail.
+  const validation = await validateExercisePublication(detail.draftPayload);
+  if (validation.status === "compile_error") {
+    return { status: "invalid", issues: [{ field: "referenceSolution", message: "the reference solution does not compile" }] };
+  }
+  if (validation.status === "failed") {
+    return {
+      status: "invalid",
+      issues: [{ field: "tests", message: `the reference solution failed ${validation.failures.length} test(s): ${validation.failures.join(", ")}` }]
+    };
   }
 
   const supabase = await createClient();
