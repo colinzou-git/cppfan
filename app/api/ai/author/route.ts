@@ -6,8 +6,9 @@ import {
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
 import { getAiProviderPreferenceOverride } from "@/features/ai-chat/provider-preferences";
-import { getAttachmentsForOwner, getContentItemForOwner } from "@/features/user-content/user-content-queries";
+import { getAttachmentsForOwner, getContentItemForOwner, getExerciseForOwner } from "@/features/user-content/user-content-queries";
 import { generateAuthoringProposal } from "@/features/user-content/ai-authoring-service";
+import { generateExerciseAuthoringProposal } from "@/features/user-content/exercise-ai-authoring-service";
 import type { AuthoringAttachmentRef } from "@/features/user-content/ai-authoring-policy";
 
 export const runtime = "nodejs";
@@ -51,8 +52,39 @@ export async function POST(request: Request) {
 
   const detail = await getContentItemForOwner(contentId);
   if (!detail) {
-    return apiError("not_found", "That lesson was not found.", 404);
+    return apiError("not_found", "That content was not found.", 404);
   }
+
+  if (detail.kind === "exercise") {
+    const exercise = await getExerciseForOwner(contentId);
+    const exPayload = exercise?.draftPayload ?? exercise?.publishedPayload;
+    if (!exPayload) {
+      return apiError("no_draft", "There is no exercise draft to work from yet.", 400);
+    }
+    const exConfig = getAiProviderConfig(override);
+    const exController = new AbortController();
+    const exTimeout = setTimeout(() => exController.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const result = await generateExerciseAuthoringProposal({
+        payload: exPayload,
+        instruction,
+        providerKind: exConfig.provider,
+        complete: (messages) => completeAiResponse({ messages, signal: exController.signal })
+      });
+      if (result.status === "ok") {
+        return NextResponse.json({ proposal: result.proposal }, { headers: { "cache-control": "no-store" } });
+      }
+      if (result.status === "invalid") {
+        return apiError("proposal_invalid", result.message, 422);
+      }
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } catch {
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } finally {
+      clearTimeout(exTimeout);
+    }
+  }
+
   const payload = detail.draftPayload ?? detail.publishedPayload;
   if (!payload) {
     return apiError("no_draft", "There is no lesson draft to work from yet.", 400);
