@@ -7,11 +7,14 @@ import { CapstoneTracksView } from "@/features/labs/capstone-tracks-view";
 import { buildCapstoneTrackView } from "@/features/labs/capstone-view";
 import { getProjectProgressForUser } from "@/features/labs/project-progress";
 import { ProjectCard } from "@/features/labs/project-card";
+import { getMyPublishedLabViews } from "@/features/labs/user-lab-source";
+import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 
 export default async function LabsPage() {
   const tracks = buildCapstoneTrackView();
   const projectProgress = await getProjectProgressForUser();
   const statusByProject = new Map(projectProgress.map((row) => [row.project_id, row.status]));
+  const userLabs = await getMyPublishedLabViews();
 
   let authenticated = false;
   const supabase = await createClient();
@@ -36,6 +39,12 @@ export default async function LabsPage() {
           Small, guided C++ projects to apply what you learn. Each project is one codebase you edit,
           run, and test in the Code Lab — milestones are checkpoints inside it.
         </p>
+        <Link
+          href="/my-content/labs/new"
+          className="mt-3 inline-block rounded-xl bg-slate-900 px-3 py-2 text-sm font-bold text-white"
+        >
+          Create a lab
+        </Link>
       </header>
 
       <CapstoneTracksView
@@ -44,8 +53,25 @@ export default async function LabsPage() {
         authenticated={authenticated}
       />
 
+      {userLabs.length > 0 ? (
+        <section className="grid gap-3" aria-label="Your labs" data-testid="user-labs-section">
+          <h2 className="flex items-center gap-2 text-xl font-black text-slate-900">
+            Your labs
+            <ContentSourceBadge source="user" />
+          </h2>
+          <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3" data-testid="user-labs-grid">
+            {userLabs.map((lab) => (
+              <ProjectCard key={lab.id} project={lab} completionStatus={statusByProject.get(lab.id)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid gap-3" aria-label="More projects">
-        <h2 className="text-xl font-black text-slate-900">More projects</h2>
+        <h2 className="flex items-center gap-2 text-xl font-black text-slate-900">
+          More projects
+          <ContentSourceBadge source="native" />
+        </h2>
         <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3" data-testid="project-labs-grid">
           {projectLabs.map((lab) => (
             <ProjectCard
