@@ -9,10 +9,11 @@ import { AiProposalPanel } from "./ai-proposal-panel";
 import { AttachmentManager } from "./attachment-manager";
 import { VersionHistory } from "./version-history";
 import { ChoicesEditor } from "./choices-editor";
+import { ParsonsEditor } from "./parsons-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import type { AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
-import type { LessonChoice, LessonPayload } from "./user-content-types";
+import type { LessonChoice, LessonParsonsBlock, LessonPayload } from "./user-content-types";
 
 const ITEM_TYPES: LearningItemType[] = [
   "lesson",
@@ -34,6 +35,7 @@ type EditorFields = {
   content: string;
   explanation: string;
   choices: LessonChoice[];
+  parsonsBlocks: LessonParsonsBlock[];
 };
 
 const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
@@ -48,7 +50,8 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
     estimatedMinutes: payload?.estimatedMinutes ? String(payload.estimatedMinutes) : "",
     content: payload?.content ?? "",
     explanation: payload?.explanation ?? "",
-    choices: payload?.choices ?? []
+    choices: payload?.choices ?? [],
+    parsonsBlocks: payload?.parsonsBlocks ?? []
   };
 }
 
@@ -61,7 +64,8 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     explanation: fields.explanation,
     difficulty: fields.difficulty,
     ...(Number.isInteger(minutes) && minutes > 0 ? { estimatedMinutes: minutes } : {}),
-    ...(CHOICE_TYPES.has(fields.itemType) && fields.choices.length > 0 ? { choices: fields.choices } : {})
+    ...(CHOICE_TYPES.has(fields.itemType) && fields.choices.length > 0 ? { choices: fields.choices } : {}),
+    ...(fields.itemType === "parsons" && fields.parsonsBlocks.length > 0 ? { parsonsBlocks: fields.parsonsBlocks } : {})
   };
 }
 
@@ -324,6 +328,10 @@ export function LessonEditor({
 
       {CHOICE_TYPES.has(fields.itemType) ? (
         <ChoicesEditor choices={fields.choices} onChange={(choices) => update({ choices })} />
+      ) : null}
+
+      {fields.itemType === "parsons" ? (
+        <ParsonsEditor blocks={fields.parsonsBlocks} onChange={(parsonsBlocks) => update({ parsonsBlocks })} />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
