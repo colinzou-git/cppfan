@@ -14,7 +14,7 @@ import { CompletionEditor } from "./completion-editor";
 import { CodeFieldsEditor, type CodeFields } from "./code-fields-editor";
 import { ReviewCardsEditor } from "./review-cards-editor";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
-import type { AuthoringOperation } from "./ai-authoring-proposal";
+import { applyAcceptedOperations, type AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 import type { LessonChoice, LessonCompletionBlank, LessonParsonsBlock, LessonPayload, LessonReviewCard } from "./user-content-types";
 
@@ -202,28 +202,19 @@ export function LessonEditor({
     return () => window.clearTimeout(handle);
   }, [fields, save]);
 
-  // Apply AI proposal operations the editor's fields support (replace_field for
-  // title/content/explanation/difficulty). Richer ops are proposed but need the
-  // expanded editor to persist, so they are ignored here for now.
+  // Apply accepted AI proposal operations onto the current payload (covering
+  // replace_field, sections, objectives/tags, choices, parsons/completion, and
+  // review cards), then fold the result back into the editor fields.
   const applyAiOperations = useCallback(
     (ops: AuthoringOperation[]) => {
-      const patch: Partial<EditorFields> = {};
-      for (const op of ops) {
-        if (op.type !== "replace_field") {
-          continue;
-        }
-        if (op.field === "title") patch.title = op.value;
-        else if (op.field === "content") patch.content = op.value;
-        else if (op.field === "explanation") patch.explanation = op.value;
-        else if (op.field === "difficulty" && (op.value === "beginner" || op.value === "intermediate" || op.value === "advanced")) {
-          patch.difficulty = op.value;
-        }
+      if (ops.length === 0) {
+        return;
       }
-      if (Object.keys(patch).length > 0) {
-        update(patch);
-      }
+      const current = buildPayload(fields) as unknown as LessonPayload;
+      const applied = applyAcceptedOperations(current, ops);
+      update(fieldsFromPayload(applied));
     },
-    [update]
+    [fields, update]
   );
 
   const runPublish = useCallback(async (mode: PublishMode) => {

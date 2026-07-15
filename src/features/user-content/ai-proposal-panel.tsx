@@ -21,6 +21,8 @@ export function describeOperation(op: AuthoringOperation): string {
       return `Add Parsons block: "${op.text}"${op.isDistractor ? " (distractor)" : ""}`;
     case "add_completion_blank":
       return `Add completion answer: "${op.answer}"`;
+    case "add_review_card":
+      return `Add review question: "${op.prompt}" (${op.choices.length} choice${op.choices.length === 1 ? "" : "s"})`;
     default:
       return "Change";
   }

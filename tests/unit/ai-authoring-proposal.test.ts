@@ -91,6 +91,36 @@ describe("applyAcceptedOperations (#487)", () => {
     expect(next.completionBlanks?.[0].answer).toBe("int");
   });
 
+  it("parses and applies an add_review_card operation", () => {
+    const parsed = parseAuthoringProposal(
+      JSON.stringify({
+        summary: "add a quiz",
+        operations: [
+          {
+            type: "add_review_card",
+            prompt: "What does & return?",
+            explanation: "It takes the address.",
+            choices: [
+              { text: "the address", isCorrect: true },
+              { text: "the value", isCorrect: false }
+            ]
+          }
+        ]
+      })
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      const op = parsed.value.operations[0];
+      expect(op.type).toBe("add_review_card");
+      const next = applyAcceptedOperations(lesson(), parsed.value.operations);
+      expect(next.reviewCards).toHaveLength(1);
+      expect(next.reviewCards?.[0].prompt).toBe("What does & return?");
+      expect(next.reviewCards?.[0].choices).toHaveLength(2);
+      expect(next.reviewCards?.[0].choices[0].isCorrect).toBe(true);
+      expect(next.reviewCards?.[0].explanation).toBe("It takes the address.");
+    }
+  });
+
   it("applies only the accepted subset", () => {
     const parsed = parseAuthoringProposal(
       JSON.stringify({

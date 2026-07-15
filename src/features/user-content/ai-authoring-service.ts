@@ -29,7 +29,17 @@ function fakeAuthoringProposal(instruction: string): AuthoringProposal {
   return {
     summary: "Draft suggestion (fake provider for local testing).",
     operations: [
-      { id: "op-0", type: "append_section", section: "summary", value: `Suggested from your request: ${instruction.slice(0, 200)}` }
+      { id: "op-0", type: "append_section", section: "summary", value: `Suggested from your request: ${instruction.slice(0, 200)}` },
+      {
+        id: "op-1",
+        type: "add_review_card",
+        prompt: "Sample review question generated for local testing?",
+        choices: [
+          { text: "Yes", isCorrect: true },
+          { text: "No", isCorrect: false }
+        ],
+        explanation: "A deterministic review card from the fake provider."
+      }
     ]
   };
 }
