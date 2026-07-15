@@ -1208,3 +1208,49 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content review card projection smoke OK';
 end $$;
+
+-- 34) #487: recommendation_enabled projects to the learning item so auto
+-- recommendations can exclude opted-out user content while it stays learnable.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-0000000000b6';
+  v_on uuid;
+  v_off uuid;
+  v_item_on text;
+  v_item_off text;
+  v_rec_on boolean;
+  v_rec_off boolean;
+  v_active_off boolean;
+begin
+  insert into auth.users (id, email) values (v_uid, 'uc-rec@example.test') on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  -- recommendation_enabled = true
+  select content_id into v_on from public.save_user_content_draft(null, 'lesson', 'RecOn', null, true, 1,
+    '{"itemType":"lesson","title":"RecOn","content":"c","explanation":"e"}'::jsonb, null);
+  select out_learning_item_id into v_item_on from public.publish_user_content(v_on, null);
+
+  -- recommendation_enabled = false
+  select content_id into v_off from public.save_user_content_draft(null, 'lesson', 'RecOff', null, false, 1,
+    '{"itemType":"lesson","title":"RecOff","content":"c","explanation":"e"}'::jsonb, null);
+  select out_learning_item_id into v_item_off from public.publish_user_content(v_off, null);
+
+  select recommendation_enabled into v_rec_on from public.learning_items where id = v_item_on;
+  select recommendation_enabled, is_active into v_rec_off, v_active_off from public.learning_items where id = v_item_off;
+
+  if v_rec_on is not true then
+    raise exception '#487: recommendation_enabled should project as true, got %', v_rec_on;
+  end if;
+  if v_rec_off is not false then
+    raise exception '#487: recommendation_enabled should project as false, got %', v_rec_off;
+  end if;
+  if v_active_off is not true then
+    raise exception '#487: opted-out content must stay learnable (is_active true)';
+  end if;
+
+  perform public.delete_user_content(v_on, 'delete_all');
+  perform public.delete_user_content(v_off, 'delete_all');
+  perform set_config('app.test_uid', '', false);
+  delete from auth.users where id = v_uid;
+  raise notice 'user content recommendation flag smoke OK';
+end $$;
