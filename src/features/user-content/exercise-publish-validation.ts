@@ -18,13 +18,46 @@ export type ExercisePublishValidation =
   | { status: "ok" }
   | { status: "skipped" }
   | { status: "compile_error"; output: string }
+  | { status: "starter_compile_error"; output: string }
+  | { status: "starter_should_not_compile" }
   | { status: "failed"; failures: string[] };
 
 /**
- * Validate a supplied reference solution against the exercise's tests. Returns
- * "skipped" when there is no reference solution or the runner is unconfigured.
+ * Validate a supplied starter's compile contract (#488 GAP E). A normal starter
+ * must compile; a starter marked `starterIsBroken` (a debugging exercise) must
+ * NOT compile. Returns null when there is nothing to enforce or the runner is
+ * unconfigured, so publishing still works where no runner exists.
+ */
+async function validateStarterContract(payload: ExercisePayload): Promise<ExercisePublishValidation | null> {
+  const starter = payload.starterCode?.trim();
+  if (!starter) {
+    return null;
+  }
+  const run = await executeRun(
+    buildRunnerInput({ source: starter, stdin: "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
+  );
+  if (run.status === "runner_unconfigured") {
+    return null;
+  }
+  const compiled = run.status !== "compile_error";
+  if (payload.starterIsBroken) {
+    // The declared contract is "expected to fail to compile".
+    return compiled ? { status: "starter_should_not_compile" } : null;
+  }
+  return compiled ? null : { status: "starter_compile_error", output: run.compileOutput };
+}
+
+/**
+ * Validate a supplied starter (compile contract) and reference solution (must
+ * compile and pass all supplied tests). Returns "skipped" when there is nothing
+ * to validate or the runner is unconfigured.
  */
 export async function validateExercisePublication(payload: ExercisePayload): Promise<ExercisePublishValidation> {
+  const starterResult = await validateStarterContract(payload);
+  if (starterResult) {
+    return starterResult;
+  }
+
   const reference = payload.referenceSolution?.trim();
   if (!reference) {
     return { status: "skipped" };

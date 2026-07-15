@@ -185,6 +185,10 @@ export function parseExercisePayload(value: unknown): ParseResult<ExercisePayloa
     }
   }
 
+  if (value.starterIsBroken === true) {
+    payload.starterIsBroken = true;
+  }
+
   const examples = parseExamples(value.examples, issues);
   if (examples) payload.examples = examples;
   const tests = parseTests(value.tests, issues);

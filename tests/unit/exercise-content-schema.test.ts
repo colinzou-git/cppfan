@@ -66,6 +66,15 @@ describe("parseExercisePayload (#488)", () => {
     }
   });
 
+  it("parses the intentionally-broken starter flag only when strictly true (#488 GAP E)", () => {
+    const on = parseExercisePayload(base({ starterCode: "int main(){ x }", starterIsBroken: true }));
+    expect(on.ok && on.value.starterIsBroken).toBe(true);
+    const off = parseExercisePayload(base({ starterCode: "int main(){}", starterIsBroken: "yes" }));
+    expect(off.ok && off.value.starterIsBroken).toBeUndefined();
+    const absent = parseExercisePayload(base({ starterCode: "int main(){}" }));
+    expect(absent.ok && absent.value.starterIsBroken).toBeUndefined();
+  });
+
   it("falls back to safe defaults for unknown mode / evaluationMode", () => {
     const result = parseExercisePayload(base({ mode: "wat", evaluationMode: "wat" }));
     expect(result.ok).toBe(true);
