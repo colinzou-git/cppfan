@@ -69,8 +69,12 @@ export function ExercisesPageShell({ children }: { children: React.ReactNode }) 
             <Code2 className="h-7 w-7 text-blue-700" />
             Exercises
           </h1>
-          {/* Top-right intentionally clean (#447). */}
-          <div aria-hidden="true" />
+          <Link
+            href="/my-content/exercises/new"
+            className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800"
+          >
+            Create an exercise
+          </Link>
         </header>
         {children}
       </main>
