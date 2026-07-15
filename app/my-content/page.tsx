@@ -45,6 +45,9 @@ export default async function MyContentPage({
           <Button asChild variant="secondary">
             <Link href="/my-content/exercises/new">Create Exercise</Link>
           </Button>
+          <Button asChild variant="secondary">
+            <Link href="/my-content/labs/new">Create Lab</Link>
+          </Button>
         </div>
       </header>
 
