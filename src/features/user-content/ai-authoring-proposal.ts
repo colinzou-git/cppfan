@@ -11,6 +11,7 @@
 
 import {
   LESSON_LIMITS,
+  type LessonChoice,
   type LessonPayload,
   type LessonSections,
   type ParseResult,
@@ -49,7 +50,8 @@ export type AuthoringOperation =
   | { type: "set_tags"; value: string[] }
   | { type: "add_choice"; text: string; isCorrect: boolean }
   | { type: "add_parsons_block"; text: string; correctOrder: number; isDistractor: boolean }
-  | { type: "add_completion_blank"; position: number; answer: string };
+  | { type: "add_completion_blank"; position: number; answer: string }
+  | { type: "add_review_card"; prompt: string; choices: LessonChoice[]; explanation?: string };
 
 export type IdentifiedOperation = AuthoringOperation & { id: string };
 
@@ -141,6 +143,26 @@ function parseOperation(raw: unknown): AuthoringOperation | null {
         ? null
         : { type: "add_completion_blank", position: Number.isInteger(position) && position >= 0 ? position : 0, answer };
     }
+    case "add_review_card": {
+      const prompt = boundedString(raw.prompt, F);
+      if (prompt === null) {
+        return null;
+      }
+      const choices: LessonChoice[] = [];
+      if (Array.isArray(raw.choices)) {
+        raw.choices.slice(0, LESSON_LIMITS.maxChoices).forEach((rawChoice) => {
+          if (!isRecord(rawChoice)) {
+            return;
+          }
+          const text = boundedString(rawChoice.text, F);
+          if (text !== null) {
+            choices.push({ text, isCorrect: rawChoice.isCorrect === true });
+          }
+        });
+      }
+      const explanation = boundedString(raw.explanation, F);
+      return { type: "add_review_card", prompt, choices, ...(explanation ? { explanation } : {}) };
+    }
     default:
       return null;
   }
@@ -217,6 +239,12 @@ export function applyAcceptedOperations(payload: LessonPayload, operations: Auth
         break;
       case "add_completion_blank":
         next.completionBlanks = [...(next.completionBlanks ?? []), { position: op.position, answer: op.answer }];
+        break;
+      case "add_review_card":
+        next.reviewCards = [
+          ...(next.reviewCards ?? []),
+          { prompt: op.prompt, choices: op.choices.map((c) => ({ ...c })), ...(op.explanation ? { explanation: op.explanation } : {}) }
+        ];
         break;
       default:
         break;

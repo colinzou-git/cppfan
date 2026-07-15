@@ -47,8 +47,10 @@ function systemPrompt(): string {
     '- { "type": "add_choice", "text": string, "isCorrect": boolean }',
     '- { "type": "add_parsons_block", "text": string, "correctOrder": number, "isDistractor": boolean }',
     '- { "type": "add_completion_blank", "position": number, "answer": string }',
+    '- { "type": "add_review_card", "prompt": string, "choices": [{ "text": string, "isCorrect": boolean }], "explanation"?: string }',
     "For difficulty use only beginner, intermediate, or advanced.",
     "Only propose interactive operations (add_choice/add_parsons_block/add_completion_blank) that match the lesson's item type.",
+    "add_review_card adds a supplementary multiple-choice review question (>=2 choices, exactly one or more correct); it applies to any lesson.",
     "Keep C++ technically correct; do not invent cppFan state, hidden tests, or claim your changes affect grading, mastery, or scheduling.",
     "Base your work only on the lesson draft and attachments provided here."
   ].join("\n");
