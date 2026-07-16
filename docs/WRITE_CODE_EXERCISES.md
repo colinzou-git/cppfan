@@ -143,6 +143,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `stack-daily-temperatures` | stack (monotonic), array traversal | `stack-technique-playground` |
 | `array-container-most-water` | array two pointers, Big-O | `array-technique-playground` |
 | `math-count-primes` | number theory (sieve), array traversal | `math-technique-playground` |
+| `dp-max-product-subarray` | dynamic programming, array traversal | `dp-technique-playground` |
+| `stack-next-greater-element` | stack (monotonic), array traversal | `stack-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

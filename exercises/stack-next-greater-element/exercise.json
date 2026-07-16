@@ -1,0 +1,17 @@
+{
+  "id": "stack-next-greater-element",
+  "title": "Stack: next greater element",
+  "skill_ids": ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["next_greater.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/stack-next-greater-element/work exercises/stack-next-greater-element/tests/tests.cpp -o exercises/stack-next-greater-element/work/run",
+  "test_command": "exercises/stack-next-greater-element/work/run",
+  "required_tests": ["test_basic", "test_increasing", "test_decreasing", "test_single", "test_duplicates"],
+  "hints": [
+    "For each element, find the first element to its RIGHT that is strictly greater; use -1 when none exists.",
+    "Keep a monotonic (decreasing) stack of INDICES whose next-greater has not been found.",
+    "When the current value exceeds the value at the stack top, pop and record the current value as its answer; then push the current index."
+  ],
+  "project_lab": "stack-technique-playground"
+}
