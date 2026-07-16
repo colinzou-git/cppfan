@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
-import { getInterviewProblem, getInterviewProblems } from "@/features/interview/problem-catalog";
+import { getInterviewProblems } from "@/features/interview/problem-catalog";
+import { resolveInterviewProblem } from "@/features/interview/interview-problem-resolver";
 import { getCurrentSession } from "@/features/interview/interview-session-store";
 import { getJudgeIoDescription } from "@/features/interview/judge-test-suites";
 import {
@@ -27,7 +28,8 @@ export default async function InterviewSessionPage({
   // fresh session on that problem unless the saved session is already on it.
   const requested = await searchParams;
   const requestedId = typeof requested.problem === "string" ? requested.problem : undefined;
-  const requestedProblem = requestedId ? getInterviewProblem(requestedId) : null;
+  // Resolve native OR the owner's published user problem (#490).
+  const requestedProblem = requestedId ? await resolveInterviewProblem(requestedId) : null;
 
   // Resume the saved session, or start a fresh practice session on the requested
   // (or first) catalog problem.
@@ -38,7 +40,7 @@ export default async function InterviewSessionPage({
       ? createSession({ problemId: requestedProblem.id, mode: "practice", durationMinutes: 45 })
       : saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes: 45 });
 
-  const problem = getInterviewProblem(state.problemId) ?? problems[0] ?? null;
+  const problem = (await resolveInterviewProblem(state.problemId)) ?? problems[0] ?? null;
   const judgeIoDescription = problem ? getJudgeIoDescription(problem.id) : null;
 
   let authenticated = false;
