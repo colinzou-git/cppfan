@@ -2691,6 +2691,92 @@ int main() {
     ],
     skillTags: ["dsa.techniques.prefix_sums", "dsa.arrays.traversal", "dsa.complexity.big_o"]
   },
+  "array-plus-one": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Arrays: plus one.
+
+The input is a non-negative integer stored one decimal digit per value, most
+significant digit first (e.g. "1 2 9" is 129). Print the digits of that number
+plus one, space-separated.
+
+Input format:
+- The first line is n, the number of digits.
+- The second line has n space-separated digits (each 0..9).
+
+Output format:
+- The incremented number's digits, space-separated, then a newline.
+
+[1 2 9] -> "1 3 0"; [9 9 9] -> "1 0 0 0".
+
+AI evaluation rubric:
+- Propagates the carry right-to-left; prepends a 1 when the number was all nines.`,
+    stdin: "3\n1 2 9\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> d(n);
+  for (auto& x : d) cin >> x;
+  // TODO: add one to the last digit, carry left, and prepend 1 if needed.
+  for (size_t i = 0; i < d.size(); ++i) cout << (i ? " " : "") << d[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Carry", stdin: "3\n1 2 9\n", expectedStdout: "1 3 0\n", matcher: "exact" },
+      { name: "All nines", stdin: "3\n9 9 9\n", expectedStdout: "1 0 0 0\n", matcher: "exact" },
+      { name: "No carry", stdin: "3\n1 2 3\n", expectedStdout: "1 2 4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.traversal", "dsa.arrays.indexing"]
+  },
+  "matrix-transpose": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Matrix: transpose.
+
+Print the transpose of an m x n matrix: the value at (row r, col c) moves to
+(row c, col r), producing an n x m matrix.
+
+Input format:
+- The first line has two integers m and n (rows and columns).
+- The next m lines each have n space-separated integers.
+
+Output format:
+- The transposed matrix: n lines of m space-separated integers each.
+
+[[1 2 3] [4 5 6]] -> [[1 4] [2 5] [3 6]].
+
+AI evaluation rubric:
+- Builds an n x m result and copies result[c][r] = matrix[r][c].`,
+    stdin: "2 3\n1 2 3\n4 5 6\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int m, n;
+  cin >> m >> n;
+  vector<vector<int>> a(m, vector<int>(n));
+  for (int r = 0; r < m; ++r)
+    for (int c = 0; c < n; ++c) cin >> a[r][c];
+  // TODO: build the n x m transpose and print it, one row per line.
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Rectangular", stdin: "2 3\n1 2 3\n4 5 6\n", expectedStdout: "1 4\n2 5\n3 6\n", matcher: "exact" },
+      { name: "Square", stdin: "2 2\n1 2\n3 4\n", expectedStdout: "1 3\n2 4\n", matcher: "exact" },
+      { name: "Single row", stdin: "1 3\n1 2 3\n", expectedStdout: "1\n2\n3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.indexing", "dsa.arrays.traversal"]
+  },
   "sliding-window-min-size-subarray": {
     enabled: true,
     language: "cpp",

@@ -1231,6 +1231,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "array-plus-one",
+    title: "Arrays: plus one",
+    skillIds: ["dsa.arrays.traversal", "dsa.arrays.indexing"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["plus_one.hpp"],
+    requiredTests: [
+      "test_no_carry",
+      "test_single_carry",
+      "test_all_nines",
+      "test_single_digit",
+      "test_middle_carry"
+    ],
+    hints: [
+      "Walk the digits from least significant (the last index) to most significant.",
+      "Add one to the last digit; while a digit becomes 10, set it to 0 and carry into the next digit to the left.",
+      "If a carry survives past the first digit (the number was all nines), insert a 1 at the front."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
+    id: "matrix-transpose",
+    title: "Matrix: transpose",
+    skillIds: ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["transpose.hpp"],
+    requiredTests: [
+      "test_square",
+      "test_rectangular",
+      "test_single_row",
+      "test_single_column",
+      "test_empty"
+    ],
+    hints: [
+      "If the input is m rows by n columns, the transpose is n rows by m columns.",
+      "The element at (row r, column c) moves to (row c, column r).",
+      "Size the output as n rows of m columns first, then copy result[c][r] = matrix[r][c]."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
     id: "sliding-window-min-size-subarray",
     title: "Sliding window: minimum size subarray sum",
     skillIds: ["dsa.techniques.sliding_window", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],

@@ -1,0 +1,17 @@
+{
+  "id": "matrix-transpose",
+  "title": "Matrix: transpose",
+  "skill_ids": ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["transpose.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/matrix-transpose/work exercises/matrix-transpose/tests/tests.cpp -o exercises/matrix-transpose/work/run",
+  "test_command": "exercises/matrix-transpose/work/run",
+  "required_tests": ["test_square", "test_rectangular", "test_single_row", "test_single_column", "test_empty"],
+  "hints": [
+    "If the input is m rows by n columns, the transpose is n rows by m columns.",
+    "The element at (row r, column c) moves to (row c, column r).",
+    "Size the output as n rows of m columns first, then copy result[c][r] = matrix[r][c]."
+  ],
+  "project_lab": "array-technique-playground"
+}
