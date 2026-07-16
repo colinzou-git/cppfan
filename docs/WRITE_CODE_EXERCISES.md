@@ -137,6 +137,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `tree-sum-values` | tree traversal, pointers | `tree-technique-playground` |
 | `tree-count-leaves` | tree traversal, pointers | `tree-technique-playground` |
 | `strings-reverse-vowels` | string manipulation, two pointers | `text-processing-playground` |
+| `stack-evaluate-rpn` | stack, array traversal | `stack-technique-playground` |
+| `array-majority-element` | array traversal, Big-O (Boyer-Moore) | `array-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |
