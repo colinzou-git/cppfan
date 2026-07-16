@@ -665,6 +665,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "tree-technique-playground"
   },
   {
+    id: "linked-list-palindrome",
+    title: "Linked list: palindrome check",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["is_palindrome.hpp"],
+    requiredTests: [
+      "test_even",
+      "test_odd",
+      "test_not",
+      "test_single",
+      "test_empty"
+    ],
+    hints: [
+      "The simplest approach copies the values into a vector, then checks it with two pointers from both ends.",
+      "For O(1) extra space, find the middle with slow/fast pointers and reverse the second half, then compare.",
+      "An empty list and a single node are palindromes."
+    ],
+    projectLab: "linked-list-technique-playground"
+  },
+  {
+    id: "tree-validate-bst",
+    title: "Binary tree: validate a BST",
+    skillIds: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["is_valid_bst.hpp"],
+    requiredTests: [
+      "test_valid",
+      "test_invalid_right",
+      "test_invalid_deep",
+      "test_single",
+      "test_duplicates"
+    ],
+    hints: [
+      "It is not enough to compare a node with its direct children; every node must lie within a range inherited from its ancestors.",
+      "Recurse with an open interval (low, high): the left child tightens the upper bound, the right child tightens the lower bound.",
+      "Use a wide 64-bit range so int values at the extremes still validate; equal values are NOT allowed in a strict BST."
+    ],
+    projectLab: "tree-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
