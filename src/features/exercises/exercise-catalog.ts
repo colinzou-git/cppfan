@@ -539,6 +539,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "stack-technique-playground"
   },
   {
+    id: "strings-atoi",
+    title: "Strings: string to integer (atoi)",
+    skillIds: ["dsa.strings.parsing", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["str_to_int.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_leading_spaces",
+      "test_trailing_junk",
+      "test_no_digits",
+      "test_overflow"
+    ],
+    hints: [
+      "Skip leading spaces, then read one optional '+' or '-' sign.",
+      "Read consecutive digits into the result; stop at the first non-digit.",
+      "Clamp the result to the 32-bit signed range [-2147483648, 2147483647] as you accumulate, so overflow never wraps."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
+    id: "dp-partition-equal-subset-sum",
+    title: "DP: partition equal subset sum",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 35,
+    editableFiles: ["can_partition.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_false",
+      "test_single",
+      "test_empty",
+      "test_all_equal"
+    ],
+    hints: [
+      "The array can be split into two equal-sum halves only if the total sum is even; each half must equal sum/2.",
+      "This reduces to subset sum: can any subset add up to target = sum/2?",
+      "Use a boolean DP over reachable sums: dp[t] is true if some subset totals t. For each number, update t from target down to the number."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],

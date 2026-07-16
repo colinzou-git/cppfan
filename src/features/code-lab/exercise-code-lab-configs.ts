@@ -1141,6 +1141,94 @@ int main() {
     ],
     skillTags: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"]
   },
+  "strings-atoi": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: string to integer (atoi).
+
+Parse the input line as a 32-bit signed integer (like C's atoi).
+
+Input format:
+- One line: the string to parse (it may contain spaces and other text).
+
+Output format:
+- The parsed integer, then a newline.
+
+"   -42" -> -42; "4193 with words" -> 4193; "words" -> 0.
+
+AI evaluation rubric:
+- Skips leading spaces, reads an optional sign, then digits until a non-digit.
+- Clamps to [-2147483648, 2147483647] instead of overflowing.`,
+    stdin: "   -42\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+  string s;
+  getline(cin, s);
+  long long value = 0;
+  int sign = 1;
+  size_t i = 0;
+  // TODO: skip spaces, read sign, accumulate digits, clamp to the int range.
+  (void)sign; (void)i;
+  cout << value << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "42\n", expectedStdout: "42\n", matcher: "exact" },
+      { name: "Leading spaces + sign", stdin: "   -42\n", expectedStdout: "-42\n", matcher: "exact" },
+      { name: "Trailing words", stdin: "4193 with words\n", expectedStdout: "4193\n", matcher: "exact" },
+      { name: "No digits", stdin: "words and 987\n", expectedStdout: "0\n", matcher: "exact" },
+      { name: "Overflow clamp", stdin: "99999999999\n", expectedStdout: "2147483647\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.parsing", "dsa.complexity.big_o"]
+  },
+  "dp-partition-equal-subset-sum": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: partition equal subset sum.
+
+Print whether the array can be split into two subsets with equal sums.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated non-negative integers.
+
+Output format:
+- "true" or "false", then a newline.
+
+[1 5 11 5] -> true ({11} and {1,5,5}); [1 2 3 5] -> false (odd total).
+
+AI evaluation rubric:
+- Returns false immediately when the total sum is odd.
+- Runs a boolean subset-sum DP up to sum/2 (O(n * sum)).`,
+    stdin: "4\n1 5 11 5\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  bool result = false;
+  // TODO: if the total is even, run a boolean subset-sum DP up to sum/2.
+  cout << (result ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Splittable", stdin: "4\n1 5 11 5\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Odd total", stdin: "4\n1 2 3 5\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Pair", stdin: "2\n3 3\n", expectedStdout: "true\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",

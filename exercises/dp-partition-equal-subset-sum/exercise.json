@@ -1,0 +1,17 @@
+{
+  "id": "dp-partition-equal-subset-sum",
+  "title": "DP: partition equal subset sum",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "editable_files": ["can_partition.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-partition-equal-subset-sum/work exercises/dp-partition-equal-subset-sum/tests/tests.cpp -o exercises/dp-partition-equal-subset-sum/work/run",
+  "test_command": "exercises/dp-partition-equal-subset-sum/work/run",
+  "required_tests": ["test_basic", "test_false", "test_single", "test_empty", "test_all_equal"],
+  "hints": [
+    "The array can be split into two equal-sum halves only if the total sum is even; each half must equal sum/2.",
+    "This reduces to subset sum: can any subset add up to target = sum/2?",
+    "Use a boolean DP over reachable sums: dp[t] is true if some subset totals t. For each number, update t from target down to the number."
+  ],
+  "project_lab": "dp-technique-playground"
+}
