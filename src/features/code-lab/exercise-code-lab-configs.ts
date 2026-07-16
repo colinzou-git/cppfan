@@ -3592,6 +3592,101 @@ int main() {
     ],
     skillTags: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"]
   },
+  "backtracking-permutations": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Backtracking: all permutations.
+
+Print every permutation (ordering) of the given distinct integers, one per line,
+space-separated, in sorted (lexicographic) order.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated distinct integers.
+
+Output format:
+- Each permutation on its own line, values space-separated, sorted overall.
+
+[1 2] -> "1 2" then "2 1".
+
+AI evaluation rubric:
+- Backtracks over unused elements; sorts input + result for a stable order.`,
+    stdin: "2\n1 2\n",
+    starterCode: `#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  sort(a.begin(), a.end());
+  vector<vector<int>> result;
+  // TODO: backtrack over unused indices to fill result with every ordering.
+  sort(result.begin(), result.end());
+  for (auto& p : result) {
+    for (size_t i = 0; i < p.size(); ++i) cout << (i ? " " : "") << p[i];
+    cout << "\\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Two elements", stdin: "2\n1 2\n", expectedStdout: "1 2\n2 1\n", matcher: "exact" },
+      { name: "Three (normalized)", stdin: "3\n2 1 3\n", expectedStdout: "1 2 3\n1 3 2\n2 1 3\n2 3 1\n3 1 2\n3 2 1\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n5\n", expectedStdout: "5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"]
+  },
+  "backtracking-generate-parentheses": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Backtracking: generate parentheses.
+
+Print every combination of n pairs of well-formed parentheses, one per line, in
+sorted order.
+
+Input format:
+- One line with the integer n (0 <= n).
+
+Output format:
+- Each valid combination on its own line, sorted. n = 0 prints one empty line.
+
+n = 2 -> "(())" then "()()".
+
+AI evaluation rubric:
+- Adds '(' while open < n and ')' only while close < open; sorts the result.`,
+    stdin: "2\n",
+    starterCode: `#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> result;
+  string cur;
+  // TODO: backtrack over open/close counts, recording strings of length 2*n.
+  sort(result.begin(), result.end());
+  for (auto& s : result) cout << s << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "n=2", stdin: "2\n", expectedStdout: "(())\n()()\n", matcher: "exact" },
+      { name: "n=1", stdin: "1\n", expectedStdout: "()\n", matcher: "exact" },
+      { name: "n=3", stdin: "3\n", expectedStdout: "((()))\n(()())\n(())()\n()(())\n()()()\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"]
+  },
   "backtracking-combination-sum": {
     enabled: true,
     language: "cpp",

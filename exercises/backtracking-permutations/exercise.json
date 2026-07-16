@@ -1,0 +1,17 @@
+{
+  "id": "backtracking-permutations",
+  "title": "Backtracking: all permutations",
+  "skill_ids": ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["permutations.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/backtracking-permutations/work exercises/backtracking-permutations/tests/tests.cpp -o exercises/backtracking-permutations/work/run",
+  "test_command": "exercises/backtracking-permutations/work/run",
+  "required_tests": ["test_empty", "test_single", "test_two", "test_three_count", "test_lexicographic"],
+  "hints": [
+    "Sort the input first so the collected permutations come out in a stable, lexicographic order.",
+    "Track which indices are already used; at each step, try every unused element, recurse, then undo the choice.",
+    "The base case is when the current permutation has the same length as the input; record a copy of it."
+  ],
+  "project_lab": "backtracking-technique-playground"
+}

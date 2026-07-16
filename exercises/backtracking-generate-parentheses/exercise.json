@@ -1,0 +1,17 @@
+{
+  "id": "backtracking-generate-parentheses",
+  "title": "Backtracking: generate parentheses",
+  "skill_ids": ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["generate_parentheses.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/backtracking-generate-parentheses/work exercises/backtracking-generate-parentheses/tests/tests.cpp -o exercises/backtracking-generate-parentheses/work/run",
+  "test_command": "exercises/backtracking-generate-parentheses/work/run",
+  "required_tests": ["test_zero", "test_one", "test_two", "test_three_count", "test_sorted"],
+  "hints": [
+    "Track how many '(' and ')' you have placed. Add '(' while open < n, and add ')' only while close < open.",
+    "The base case is a string of length 2*n — every such string built under those rules is valid.",
+    "Sort the result at the end for a stable order."
+  ],
+  "project_lab": "backtracking-technique-playground"
+}
