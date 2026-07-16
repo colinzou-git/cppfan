@@ -123,6 +123,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `bit-hamming-distance` | bit manipulation | `bit-technique-playground` |
 | `array-plus-one` | array traversal, indexing | `array-technique-playground` |
 | `matrix-transpose` | array indexing, traversal | `array-technique-playground` |
+| `strings-roman-to-integer` | string parsing, manipulation | `text-processing-playground` |
+| `math-gcd` | number theory (Euclid) | `math-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

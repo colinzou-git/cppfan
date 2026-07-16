@@ -392,6 +392,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "text-processing-playground"
   },
   {
+    id: "strings-roman-to-integer",
+    title: "Strings: Roman numeral to integer",
+    skillIds: ["dsa.strings.parsing", "dsa.strings.manipulation"],
+    difficulty: "beginner",
+    estimatedMinutes: 25,
+    editableFiles: ["roman_to_integer.hpp"],
+    requiredTests: [
+      "test_simple",
+      "test_subtractive",
+      "test_mixed",
+      "test_large",
+      "test_single"
+    ],
+    hints: [
+      "Map each symbol to its value: I=1, V=5, X=10, L=50, C=100, D=500, M=1000.",
+      "Scan left to right; normally add each value, but when a smaller value sits directly before a larger one, subtract it (e.g. IV = 4).",
+      "Compare the current symbol's value to the NEXT symbol's value to decide add vs. subtract."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
+    id: "math-gcd",
+    title: "Math: greatest common divisor",
+    skillIds: ["dsa.math.number_theory"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["gcd.hpp"],
+    requiredTests: [
+      "test_coprime",
+      "test_common_factor",
+      "test_multiple",
+      "test_with_zero",
+      "test_equal"
+    ],
+    hints: [
+      "Euclid's algorithm: gcd(a, b) == gcd(b, a % b), stopping when the second value reaches 0.",
+      "The loop form: while b != 0, replace (a, b) with (b, a % b); the answer is a.",
+      "gcd(x, 0) == x, so a value paired with zero returns itself."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "dp-edit-distance",
     title: "DP: edit distance",
     skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms"],
