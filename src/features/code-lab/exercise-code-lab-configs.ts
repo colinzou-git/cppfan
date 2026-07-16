@@ -1646,6 +1646,101 @@ int main() {
     ],
     skillTags: ["dsa.math.bit_manipulation", "dsa.complexity.big_o"]
   },
+  "math-happy-number": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Math: happy number.
+
+Print whether n is a happy number: repeatedly replacing n with the sum of the
+squares of its digits eventually reaches 1.
+
+Input format:
+- One line with the integer n (n >= 1).
+
+Output format:
+- "true" or "false", then a newline.
+
+19 -> true (19->82->68->100->1); 2 -> false.
+
+AI evaluation rubric:
+- Sums squared digits each step; detects the non-terminating cycle with a
+  visited set or Floyd's slow/fast pointers.`,
+    stdin: "19\n",
+    starterCode: `#include <iostream>
+#include <unordered_set>
+using namespace std;
+
+int square_digit_sum(int n) {
+  int s = 0;
+  while (n > 0) { int d = n % 10; s += d * d; n /= 10; }
+  return s;
+}
+
+bool is_happy(int n) {
+  // TODO: iterate square_digit_sum; true if it reaches 1, false on a cycle.
+  (void)n;
+  return false;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  cout << (is_happy(n) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Happy", stdin: "19\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Seven", stdin: "7\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Unhappy", stdin: "2\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.number_theory", "dsa.arrays.traversal"]
+  },
+  "strings-length-of-last-word": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: length of last word.
+
+Print the length of the last word in the input line. Words are runs of
+non-space characters; trailing spaces are ignored.
+
+Input format:
+- One line of text (it may contain leading, trailing, and multiple spaces).
+
+Output format:
+- The length of the last word, then a newline (0 if there are no words).
+
+"Hello World" -> 5; "   fly me   to   the moon  " -> 4.
+
+AI evaluation rubric:
+- Scans from the end: skips trailing spaces, then counts the last word.`,
+    stdin: "Hello World\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+int last_word_length(const string& s) {
+  // TODO: from the end, skip trailing spaces, then count the last word's characters.
+  (void)s;
+  return 0;
+}
+
+int main() {
+  string s;
+  getline(cin, s);
+  cout << last_word_length(s) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "Hello World\n", expectedStdout: "5\n", matcher: "exact" },
+      { name: "Trailing spaces", stdin: "   fly me   to   the moon  \n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "No words", stdin: "     \n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.parsing", "dsa.arrays.traversal"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",

@@ -749,6 +749,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "bit-technique-playground"
   },
   {
+    id: "math-happy-number",
+    title: "Math: happy number",
+    skillIds: ["dsa.math.number_theory", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["is_happy.hpp"],
+    requiredTests: [
+      "test_happy",
+      "test_unhappy",
+      "test_one",
+      "test_seven",
+      "test_small_unhappy"
+    ],
+    hints: [
+      "Repeatedly replace the number with the sum of the squares of its digits.",
+      "A number is happy if this process reaches 1; otherwise it loops forever.",
+      "Detect the loop with a visited set, or with Floyd's slow/fast cycle detection."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
+    id: "strings-length-of-last-word",
+    title: "Strings: length of last word",
+    skillIds: ["dsa.strings.parsing", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["last_word_length.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_trailing_spaces",
+      "test_multiple_spaces",
+      "test_single_word",
+      "test_no_words"
+    ],
+    hints: [
+      "Scan from the END of the string; first skip any trailing spaces.",
+      "Then count consecutive non-space characters until you hit a space or the start.",
+      "If the string is empty or all spaces, the answer is 0."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],

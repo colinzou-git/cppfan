@@ -155,6 +155,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `tree-validate-bst` | BST search, tree traversal, pointers | `tree-technique-playground` |
 | `linked-list-remove-nth-from-end` | linked list, pointers | `linked-list-technique-playground` |
 | `bit-reverse-bits` | bit manipulation, Big-O | `bit-technique-playground` |
+| `math-happy-number` | number theory, array traversal | `math-technique-playground` |
+| `strings-length-of-last-word` | string parsing, array traversal | `text-processing-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |
