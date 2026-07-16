@@ -120,6 +120,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `bit-single-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
 | `bit-missing-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
+| `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
+| `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |
 | `dp-longest-increasing-subsequence` | dynamic programming, DP design, array traversal | `dp-technique-playground` |
 | `dp-unique-paths` | dynamic programming, DP design, combinatorics | `dp-technique-playground` |
 | `strings-longest-common-prefix` | string manipulation, array traversal | `text-technique-playground` |
