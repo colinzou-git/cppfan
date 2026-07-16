@@ -1,0 +1,17 @@
+{
+  "id": "strings-reverse-words",
+  "title": "Strings: reverse the word order",
+  "skill_ids": ["dsa.strings.manipulation", "dsa.strings.parsing"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["reverse_words.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-reverse-words/work exercises/strings-reverse-words/tests/tests.cpp -o exercises/strings-reverse-words/work/run",
+  "test_command": "exercises/strings-reverse-words/work/run",
+  "required_tests": ["test_basic", "test_extra_spaces", "test_single_word", "test_empty", "test_leading_trailing"],
+  "hints": [
+    "Split the input into words, treating any run of spaces as one separator and ignoring leading/trailing spaces.",
+    "Collect the words into a vector, then join them back in reverse order with a single space between each.",
+    "std::istringstream with operator>> skips whitespace and yields one word at a time."
+  ],
+  "project_lab": "text-processing-playground"
+}

@@ -308,6 +308,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "bit-technique-playground"
   },
   {
+    id: "bit-missing-number",
+    title: "Bit manipulation: the missing number",
+    skillIds: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["missing_number.hpp"],
+    requiredTests: [
+      "test_missing_middle",
+      "test_missing_zero",
+      "test_missing_last",
+      "test_single",
+      "test_large"
+    ],
+    hints: [
+      "The array holds n distinct values drawn from 0..n, so exactly one of those n+1 values is missing.",
+      "XOR every index 0..n together, then XOR in every array value; pairs cancel and the missing value remains.",
+      "Start the accumulator at n so the top index is included without a separate pass."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
+    id: "strings-reverse-words",
+    title: "Strings: reverse the word order",
+    skillIds: ["dsa.strings.manipulation", "dsa.strings.parsing"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["reverse_words.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_extra_spaces",
+      "test_single_word",
+      "test_empty",
+      "test_leading_trailing"
+    ],
+    hints: [
+      "Split the input into words, treating any run of spaces as one separator and ignoring leading/trailing spaces.",
+      "Collect the words into a vector, then join them back in reverse order with a single space between each.",
+      "std::istringstream with operator>> skips whitespace and yields one word at a time."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
     id: "dp-longest-increasing-subsequence",
     title: "DP: longest increasing subsequence",
     skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],

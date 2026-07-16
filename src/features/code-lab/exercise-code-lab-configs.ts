@@ -642,6 +642,103 @@ int main() {
     ],
     skillTags: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"]
   },
+  "bit-missing-number": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: the missing number.
+
+The array holds n distinct integers drawn from the range 0..n (inclusive), so
+exactly one value in that range is missing. Print the missing value.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The missing value in 0..n, then a newline.
+
+[3 0 1] -> 2; [0 1 2] -> 3.
+
+AI evaluation rubric:
+- Uses XOR or the arithmetic sum (O(n) time, O(1) space), not a hash set.
+- Handles a missing 0 and a missing n.`,
+    stdin: "3\n3 0 1\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  int acc = n;
+  for (int i = 0; i < n; ++i) {
+    int value;
+    cin >> value;
+    // TODO: fold i and value into acc with XOR.
+    (void)value;
+    (void)i;
+  }
+  cout << acc << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Missing middle", stdin: "3\n3 0 1\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "Missing last", stdin: "3\n0 1 2\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Missing zero", stdin: "3\n1 2 3\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"]
+  },
+  "strings-reverse-words": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: reverse the word order.
+
+Reverse the ORDER of the words in a sentence (not the letters within each word).
+Words are runs of non-space characters; collapse any run of spaces to a single
+separator and drop leading and trailing spaces.
+
+Input format:
+- One line of text (which may contain multiple, leading, or trailing spaces).
+
+Output format:
+- The words in reverse order, single-spaced, then a newline. An input with no
+  words prints an empty line.
+
+"the sky is blue" -> "blue is sky the".
+
+AI evaluation rubric:
+- Splits on whitespace runs and ignores leading/trailing spaces.
+- Joins with single spaces and no trailing space.`,
+    stdin: "the sky is blue\n",
+    starterCode: `#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  string line;
+  getline(cin, line);
+  istringstream in(line);
+  vector<string> words;
+  string word;
+  while (in >> word) {
+    words.push_back(word);
+  }
+  // TODO: print words in reverse order, single-spaced, then a newline.
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "the sky is blue\n", expectedStdout: "blue is sky the\n", matcher: "exact" },
+      { name: "Extra spaces", stdin: "a good   example\n", expectedStdout: "example good a\n", matcher: "exact" },
+      { name: "Trimmed", stdin: "  hello world  \n", expectedStdout: "world hello\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.manipulation", "dsa.strings.parsing"]
+  },
   "dp-longest-increasing-subsequence": {
     enabled: true,
     language: "cpp",

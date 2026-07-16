@@ -118,6 +118,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dsa-merge-sorted-arrays` | two pointers, array traversal | `math-technique-playground` |
 | `dsa-count-set-bits` | bit manipulation | `math-technique-playground` |
 | `bit-single-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
+| `bit-missing-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
+| `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-longest-increasing-subsequence` | dynamic programming, DP design, array traversal | `dp-technique-playground` |
 | `dp-unique-paths` | dynamic programming, DP design, combinatorics | `dp-technique-playground` |
 | `strings-longest-common-prefix` | string manipulation, array traversal | `text-technique-playground` |
