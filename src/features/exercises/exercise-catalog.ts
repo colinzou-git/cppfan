@@ -497,6 +497,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dp-technique-playground"
   },
   {
+    id: "dp-max-product-subarray",
+    title: "DP: maximum product subarray",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["max_product.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_negatives",
+      "test_zero",
+      "test_single",
+      "test_all_negative"
+    ],
+    hints: [
+      "A negative number flips the largest and smallest running products, so track BOTH the max and the min ending at each index.",
+      "At each element x: new_max = max(x, x*max, x*min); new_min = min(x, x*max, x*min).",
+      "The answer is the best new_max seen across the whole array (never empty)."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
+    id: "stack-next-greater-element",
+    title: "Stack: next greater element",
+    skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["next_greater.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_increasing",
+      "test_decreasing",
+      "test_single",
+      "test_duplicates"
+    ],
+    hints: [
+      "For each element, find the first element to its RIGHT that is strictly greater; use -1 when none exists.",
+      "Keep a monotonic (decreasing) stack of INDICES whose next-greater has not been found.",
+      "When the current value exceeds the value at the stack top, pop and record the current value as its answer; then push the current index."
+    ],
+    projectLab: "stack-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],

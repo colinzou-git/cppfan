@@ -1,0 +1,17 @@
+{
+  "id": "dp-max-product-subarray",
+  "title": "DP: maximum product subarray",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["max_product.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-max-product-subarray/work exercises/dp-max-product-subarray/tests/tests.cpp -o exercises/dp-max-product-subarray/work/run",
+  "test_command": "exercises/dp-max-product-subarray/work/run",
+  "required_tests": ["test_basic", "test_negatives", "test_zero", "test_single", "test_all_negative"],
+  "hints": [
+    "A negative number flips the largest and smallest running products, so track BOTH the max and the min ending at each index.",
+    "At each element x: new_max = max(x, x*max, x*min); new_min = min(x, x*max, x*min).",
+    "The answer is the best new_max seen across the whole array (never empty)."
+  ],
+  "project_lab": "dp-technique-playground"
+}

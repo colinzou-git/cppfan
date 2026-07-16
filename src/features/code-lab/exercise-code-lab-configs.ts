@@ -1052,6 +1052,95 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.indexing"]
   },
+  "dp-max-product-subarray": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: maximum product subarray.
+
+Print the largest product of any contiguous non-empty subarray.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The maximum subarray product, then a newline.
+
+[2 3 -2 4] -> 6; [-2 3 -4] -> 24.
+
+AI evaluation rubric:
+- Tracks BOTH running max and min (negatives flip them); O(n) single pass.`,
+    stdin: "4\n2 3 -2 4\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  int best = a[0], curMax = a[0], curMin = a[0];
+  // TODO: for each next x, recompute curMax/curMin from x, x*curMax, x*curMin.
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "4\n2 3 -2 4\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "Two negatives", stdin: "3\n-2 3 -4\n", expectedStdout: "24\n", matcher: "exact" },
+      { name: "All negative", stdin: "4\n-1 -3 -10 -2\n", expectedStdout: "60\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"]
+  },
+  "stack-next-greater-element": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Stack: next greater element.
+
+For each element, print the first element to its right that is strictly greater,
+or -1 if there is none.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The next-greater value for each element, space-separated, then a newline.
+
+[2 1 2 4 3] -> "4 2 4 -1 -1".
+
+AI evaluation rubric:
+- Monotonic stack of indices (O(n)); resolves an index when a larger value
+  arrives.`,
+    stdin: "5\n2 1 2 4 3\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  vector<int> ans(n, -1);
+  vector<int> st;  // indices awaiting a greater element
+  // TODO: for each i, resolve stack indices with a smaller value, then push i.
+  for (int i = 0; i < n; ++i) cout << (i ? " " : "") << ans[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "5\n2 1 2 4 3\n", expectedStdout: "4 2 4 -1 -1\n", matcher: "exact" },
+      { name: "Increasing", stdin: "4\n1 2 3 4\n", expectedStdout: "2 3 4 -1\n", matcher: "exact" },
+      { name: "Decreasing", stdin: "4\n4 3 2 1\n", expectedStdout: "-1 -1 -1 -1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",
