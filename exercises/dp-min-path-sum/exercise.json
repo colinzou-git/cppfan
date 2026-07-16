@@ -1,0 +1,17 @@
+{
+  "id": "dp-min-path-sum",
+  "title": "DP: minimum path sum",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.arrays.indexing"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["min_path_sum.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-min-path-sum/work exercises/dp-min-path-sum/tests/tests.cpp -o exercises/dp-min-path-sum/work/run",
+  "test_command": "exercises/dp-min-path-sum/work/run",
+  "required_tests": ["test_classic", "test_single_cell", "test_single_row", "test_single_column", "test_two_by_two"],
+  "hints": [
+    "You may only move right or down, so the cost to reach a cell is its value plus the cheaper of the cell above and the cell to its left.",
+    "dp[r][c] = grid[r][c] + min(dp[r-1][c], dp[r][c-1]); the first row and column have only one incoming direction.",
+    "Fill row by row; the answer is dp at the bottom-right corner."
+  ],
+  "project_lab": "dp-technique-playground"
+}

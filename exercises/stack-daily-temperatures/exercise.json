@@ -1,0 +1,17 @@
+{
+  "id": "stack-daily-temperatures",
+  "title": "Stack: daily temperatures",
+  "skill_ids": ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["daily_temperatures.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/stack-daily-temperatures/work exercises/stack-daily-temperatures/tests/tests.cpp -o exercises/stack-daily-temperatures/work/run",
+  "test_command": "exercises/stack-daily-temperatures/work/run",
+  "required_tests": ["test_classic", "test_increasing", "test_decreasing", "test_single", "test_plateau"],
+  "hints": [
+    "For each day, you want the number of days until a strictly WARMER day (0 if none).",
+    "Keep a stack of INDICES whose warmer day has not been found yet.",
+    "When today is warmer than the temperature at the stack's top index, pop it and set answer[popped] = today - popped; then push today's index."
+  ],
+  "project_lab": "stack-technique-playground"
+}

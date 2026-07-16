@@ -476,6 +476,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dp-technique-playground"
   },
   {
+    id: "dp-min-path-sum",
+    title: "DP: minimum path sum",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.arrays.indexing"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["min_path_sum.hpp"],
+    requiredTests: [
+      "test_classic",
+      "test_single_cell",
+      "test_single_row",
+      "test_single_column",
+      "test_two_by_two"
+    ],
+    hints: [
+      "You may only move right or down, so the cost to reach a cell is its value plus the cheaper of the cell above and the cell to its left.",
+      "dp[r][c] = grid[r][c] + min(dp[r-1][c], dp[r][c-1]); the first row and column have only one incoming direction.",
+      "Fill row by row; the answer is dp at the bottom-right corner."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
+    id: "stack-daily-temperatures",
+    title: "Stack: daily temperatures",
+    skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["daily_temperatures.hpp"],
+    requiredTests: [
+      "test_classic",
+      "test_increasing",
+      "test_decreasing",
+      "test_single",
+      "test_plateau"
+    ],
+    hints: [
+      "For each day, you want the number of days until a strictly WARMER day (0 if none).",
+      "Keep a stack of INDICES whose warmer day has not been found yet.",
+      "When today is warmer than the temperature at the stack's top index, pop it and set answer[popped] = today - popped; then push today's index."
+    ],
+    projectLab: "stack-technique-playground"
+  },
+  {
     id: "dp-longest-increasing-subsequence",
     title: "DP: longest increasing subsequence",
     skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],

@@ -1007,6 +1007,96 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dynamic_programming", "dsa.strings.searching"]
   },
+  "dp-min-path-sum": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: minimum path sum.
+
+Starting at the top-left of a grid of non-negative costs and moving only right or
+down, print the minimum total cost to reach the bottom-right cell.
+
+Input format:
+- The first line has two integers m and n (rows and columns).
+- The next m lines each have n space-separated non-negative integers.
+
+Output format:
+- The minimum path sum, then a newline.
+
+[[1 3 1] [1 5 1] [4 2 1]] -> 7.
+
+AI evaluation rubric:
+- dp[r][c] = grid + min(up, left); first row/column have a single direction.`,
+    stdin: "3 3\n1 3 1\n1 5 1\n4 2 1\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int m, n;
+  cin >> m >> n;
+  vector<vector<int>> g(m, vector<int>(n));
+  for (int r = 0; r < m; ++r)
+    for (int c = 0; c < n; ++c) cin >> g[r][c];
+  vector<vector<int>> dp(m, vector<int>(n, 0));
+  // TODO: fill dp[r][c] = g[r][c] + min(up, left); print dp[m-1][n-1].
+  cout << dp[m - 1][n - 1] << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "3 3\n1 3 1\n1 5 1\n4 2 1\n", expectedStdout: "7\n", matcher: "exact" },
+      { name: "Single row", stdin: "1 3\n1 2 3\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "2x2", stdin: "2 2\n1 2\n1 1\n", expectedStdout: "3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.indexing"]
+  },
+  "stack-daily-temperatures": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Stack: daily temperatures.
+
+For each day, print the number of days to wait for a strictly warmer day (0 if
+none).
+
+Input format:
+- The first line is n, the number of days.
+- The second line has n space-separated temperatures.
+
+Output format:
+- The wait-days for each day, space-separated, then a newline.
+
+[73 74 75 71 69 72 76 73] -> "1 1 4 2 1 1 0 0".
+
+AI evaluation rubric:
+- Monotonic stack of indices (O(n)); answer[popped] = i - popped when warmer.`,
+    stdin: "8\n73 74 75 71 69 72 76 73\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> t(n);
+  for (auto& x : t) cin >> x;
+  vector<int> ans(n, 0);
+  vector<int> st;  // indices awaiting a warmer day
+  // TODO: for each i, resolve stack indices with a smaller temp, then push i.
+  for (int i = 0; i < n; ++i) cout << (i ? " " : "") << ans[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "8\n73 74 75 71 69 72 76 73\n", expectedStdout: "1 1 4 2 1 1 0 0\n", matcher: "exact" },
+      { name: "Increasing", stdin: "4\n30 40 50 60\n", expectedStdout: "1 1 1 0\n", matcher: "exact" },
+      { name: "Decreasing", stdin: "4\n60 50 40 30\n", expectedStdout: "0 0 0 0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"]
+  },
   "dp-longest-increasing-subsequence": {
     enabled: true,
     language: "cpp",
