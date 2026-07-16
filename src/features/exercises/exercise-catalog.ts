@@ -2323,6 +2323,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "tree-technique-playground"
   },
   {
+    id: "tree-count-leaves",
+    title: "Binary tree: count leaves",
+    skillIds: ["dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["count_leaves.hpp"],
+    requiredTests: [
+      "test_full",
+      "test_single",
+      "test_empty",
+      "test_skewed",
+      "test_unbalanced"
+    ],
+    hints: [
+      "A leaf is a node with no left AND no right child.",
+      "Base case: nullptr has 0 leaves; a node with both children null counts as 1 leaf.",
+      "Otherwise recurse: count_leaves(left) + count_leaves(right)."
+    ],
+    projectLab: "tree-technique-playground"
+  },
+  {
+    id: "strings-reverse-vowels",
+    title: "Strings: reverse only the vowels",
+    skillIds: ["dsa.strings.manipulation", "dsa.arrays.two_pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["reverse_vowels.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_mixed_case",
+      "test_no_vowels",
+      "test_all_vowels",
+      "test_empty"
+    ],
+    hints: [
+      "Vowels are a, e, i, o, u in BOTH lowercase and uppercase; consonants stay in place.",
+      "Two pointers from the ends: advance each until it lands on a vowel, then swap the two vowels and step inward.",
+      "Stop when the left pointer meets or passes the right pointer."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
     id: "heap-merge-k-sorted-lists",
     title: "Heaps: merge k sorted lists",
     skillIds: ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"],

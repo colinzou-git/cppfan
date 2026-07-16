@@ -1,0 +1,17 @@
+{
+  "id": "strings-reverse-vowels",
+  "title": "Strings: reverse only the vowels",
+  "skill_ids": ["dsa.strings.manipulation", "dsa.arrays.two_pointers"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["reverse_vowels.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-reverse-vowels/work exercises/strings-reverse-vowels/tests/tests.cpp -o exercises/strings-reverse-vowels/work/run",
+  "test_command": "exercises/strings-reverse-vowels/work/run",
+  "required_tests": ["test_basic", "test_mixed_case", "test_no_vowels", "test_all_vowels", "test_empty"],
+  "hints": [
+    "Vowels are a, e, i, o, u in BOTH lowercase and uppercase; consonants stay in place.",
+    "Two pointers from the ends: advance each until it lands on a vowel, then swap the two vowels and step inward.",
+    "Stop when the left pointer meets or passes the right pointer."
+  ],
+  "project_lab": "text-processing-playground"
+}
