@@ -1,0 +1,17 @@
+{
+  "id": "dp-coin-change-ways",
+  "title": "DP: coin change (count combinations)",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["count_ways.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-coin-change-ways/work exercises/dp-coin-change-ways/tests/tests.cpp -o exercises/dp-coin-change-ways/work/run",
+  "test_command": "exercises/dp-coin-change-ways/work/run",
+  "required_tests": ["test_basic", "test_none", "test_zero", "test_single_coin", "test_multiple"],
+  "hints": [
+    "Count combinations (order does not matter), so iterate coins on the OUTER loop and amounts on the inner loop.",
+    "ways[0] = 1 (one way to make 0: pick nothing); ways[t] starts at 0.",
+    "For each coin c, add ways[t - c] to ways[t] for every t from c up to amount."
+  ],
+  "project_lab": "dp-technique-playground"
+}

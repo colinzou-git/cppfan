@@ -1,0 +1,17 @@
+{
+  "id": "bit-single-number-ii",
+  "title": "Bit manipulation: single number (appears three times)",
+  "skill_ids": ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["single_number.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-single-number-ii/work exercises/bit-single-number-ii/tests/tests.cpp -o exercises/bit-single-number-ii/work/run",
+  "test_command": "exercises/bit-single-number-ii/work/run",
+  "required_tests": ["test_basic", "test_bigger", "test_negatives", "test_single", "test_order_independent"],
+  "hints": [
+    "Every value except one appears exactly three times, so plain XOR no longer isolates the answer.",
+    "Count how many array values have each bit set; that count is a multiple of 3 for the tripled numbers.",
+    "For each of the 32 bit positions, if the count of set bits is not divisible by 3, that bit belongs to the unique number."
+  ],
+  "project_lab": "bit-technique-playground"
+}
