@@ -1582,6 +1582,36 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "math-technique-playground"
   },
   {
+    id: "backtracking-permutations",
+    title: "Backtracking: all permutations",
+    skillIds: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["permutations.hpp"],
+    requiredTests: ["test_empty", "test_single", "test_two", "test_three_count", "test_lexicographic"],
+    hints: [
+      "Sort the input first so the collected permutations come out in a stable, lexicographic order.",
+      "Track which indices are already used; at each step, try every unused element, recurse, then undo the choice.",
+      "The base case is when the current permutation has the same length as the input; record a copy of it."
+    ],
+    projectLab: "backtracking-technique-playground"
+  },
+  {
+    id: "backtracking-generate-parentheses",
+    title: "Backtracking: generate parentheses",
+    skillIds: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.combinatorics"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["generate_parentheses.hpp"],
+    requiredTests: ["test_zero", "test_one", "test_two", "test_three_count", "test_sorted"],
+    hints: [
+      "Track how many '(' and ')' you have placed. Add '(' while open < n, and add ')' only while close < open.",
+      "The base case is a string of length 2*n — every such string built under those rules is valid.",
+      "Sort the result at the end for a stable order."
+    ],
+    projectLab: "backtracking-technique-playground"
+  },
+  {
     id: "backtracking-combination-sum",
     title: "Backtracking: combination sum",
     skillIds: ["dsa.recursion.base_case", "dsa.complexity.recursion_choice", "dsa.math.generate_combinations"],
