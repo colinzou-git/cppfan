@@ -12,6 +12,7 @@ import { createStoreZip } from "./zip";
 import type { LessonPayload, UserContentKind, UserContentLifecycle } from "./user-content-types";
 import type { ExercisePayload } from "./exercise-content-types";
 import type { LabPayload } from "./lab-content-types";
+import type { InterviewProblemPayload } from "./interview-content-types";
 
 export const EXPORT_SCHEMA_VERSION = 1;
 
@@ -30,8 +31,8 @@ export type UserContentExport = {
   exportSchemaVersion: number;
   exportedAt: string;
   item: ExportItemMeta;
-  draftPayload: LessonPayload | ExercisePayload | LabPayload | null;
-  publishedPayload: LessonPayload | ExercisePayload | LabPayload | null;
+  draftPayload: LessonPayload | ExercisePayload | LabPayload | InterviewProblemPayload | null;
+  publishedPayload: LessonPayload | ExercisePayload | LabPayload | InterviewProblemPayload | null;
   markdown: string;
 };
 
@@ -203,6 +204,73 @@ export function buildLabMarkdown(payload: LabPayload): string {
     parts.push("\n");
   }
   return parts.join("");
+}
+
+export function buildInterviewMarkdown(payload: InterviewProblemPayload): string {
+  const parts: string[] = [];
+  parts.push(heading(1, payload.title || "Untitled interview problem"));
+  const meta = [payload.evaluationMode, payload.difficulty, payload.group, payload.roleRelevance].filter(Boolean).join(" · ");
+  if (meta) {
+    parts.push(`*${meta}*\n\n`);
+  }
+  if (payload.statement) {
+    parts.push(heading(2, "Problem"));
+    parts.push(`${payload.statement}\n\n`);
+  }
+  if (payload.constraints) {
+    parts.push(heading(2, "Constraints"));
+    parts.push(`${payload.constraints}\n\n`);
+  }
+  if (payload.targetComplexity) {
+    parts.push(heading(2, "Target complexity"));
+    parts.push(`${payload.targetComplexity}\n\n`);
+  }
+  if (payload.visibleExamples && payload.visibleExamples.length > 0) {
+    parts.push(heading(2, "Examples"));
+    for (const example of payload.visibleExamples) {
+      parts.push(`- in: \`${example.input}\` → out: \`${example.output}\`${example.note ? ` (${example.note})` : ""}\n`);
+    }
+    parts.push("\n");
+  }
+  if (payload.hintLadder && payload.hintLadder.length > 0) {
+    parts.push(heading(2, "Hints"));
+    payload.hintLadder.forEach((hint, i) => parts.push(`${i + 1}. ${hint}\n`));
+    parts.push("\n");
+  }
+  if (payload.starterCode) {
+    parts.push(heading(2, "Starter code"));
+    parts.push(fenced(payload.starterCode));
+  }
+  if (payload.referenceSolution) {
+    parts.push(heading(2, "Reference solution"));
+    parts.push(fenced(payload.referenceSolution));
+  }
+  if (payload.tests && payload.tests.length > 0) {
+    parts.push(heading(2, "Tests"));
+    for (const test of payload.tests) {
+      parts.push(`- **${test.name}**${test.hidden ? " (hidden)" : ""}\n`);
+    }
+    parts.push("\n");
+  }
+  return parts.join("");
+}
+
+/** Assemble an interview-problem export (manifest + Markdown), owner-only. */
+export function buildInterviewContentExport(
+  item: ExportItemMeta,
+  draftPayload: InterviewProblemPayload | null,
+  publishedPayload: InterviewProblemPayload | null,
+  now: Date = new Date()
+): UserContentExport {
+  const forMarkdown = publishedPayload ?? draftPayload;
+  return {
+    exportSchemaVersion: EXPORT_SCHEMA_VERSION,
+    exportedAt: now.toISOString(),
+    item,
+    draftPayload,
+    publishedPayload,
+    markdown: forMarkdown ? buildInterviewMarkdown(forMarkdown) : ""
+  };
 }
 
 /** Assemble a lab export (manifest + Markdown), owner-only. */
