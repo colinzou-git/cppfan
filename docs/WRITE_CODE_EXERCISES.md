@@ -149,6 +149,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dp-partition-equal-subset-sum` | dynamic programming, array traversal | `dp-technique-playground` |
 | `bit-single-number-ii` | bit manipulation, array traversal | `bit-technique-playground` |
 | `dp-coin-change-ways` | dynamic programming, array traversal | `dp-technique-playground` |
+| `linked-list-merge-two-sorted` | linked list, pointers | `linked-list-technique-playground` |
+| `tree-path-sum` | tree traversal, pointers | `tree-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |
