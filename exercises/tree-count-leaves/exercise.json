@@ -1,0 +1,17 @@
+{
+  "id": "tree-count-leaves",
+  "title": "Binary tree: count leaves",
+  "skill_ids": ["dsa.trees.traversal", "cpp.references.pointers"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["count_leaves.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/tree-count-leaves/work exercises/tree-count-leaves/tests/tests.cpp -o exercises/tree-count-leaves/work/run",
+  "test_command": "exercises/tree-count-leaves/work/run",
+  "required_tests": ["test_full", "test_single", "test_empty", "test_skewed", "test_unbalanced"],
+  "hints": [
+    "A leaf is a node with no left AND no right child.",
+    "Base case: nullptr has 0 leaves; a node with both children null counts as 1 leaf.",
+    "Otherwise recurse: count_leaves(left) + count_leaves(right)."
+  ],
+  "project_lab": "tree-technique-playground"
+}

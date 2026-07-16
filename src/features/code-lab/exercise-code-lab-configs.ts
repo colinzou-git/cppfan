@@ -5719,6 +5719,116 @@ int main() {
     ],
     skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
   },
+  "tree-count-leaves": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Binary tree: count leaves.
+
+Print the number of leaf nodes (nodes with no children) in a binary tree.
+
+Input format:
+- The first line is n, the number of level-order tokens.
+- The second line has n space-separated tokens: integers, or X for a missing
+  child.
+
+Output format:
+- The number of leaves, then a newline.
+
+[1 2 3 4 5 6 7] -> 4.
+
+AI evaluation rubric:
+- Returns 1 when both children are null; 0 for null; else sums the subtrees.`,
+    stdin: "7\n1 2 3 4 5 6 7\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+int count_leaves(T* root) {
+  // TODO: 0 for null; 1 when both children null; else sum of the two subtrees.
+  (void)root;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n > 0 && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  cout << count_leaves(root) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Full", stdin: "7\n1 2 3 4 5 6 7\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Unbalanced", stdin: "7\n3 9 20 X X 15 7\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
+  },
+  "strings-reverse-vowels": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: reverse only the vowels.
+
+Reverse only the vowels of a string, leaving every other character in place.
+Vowels are a, e, i, o, u in both lower- and uppercase.
+
+Input format:
+- One line with the string.
+
+Output format:
+- The string with its vowels reversed, then a newline.
+
+"hello" -> "holle"; "leetcode" -> "leotcede".
+
+AI evaluation rubric:
+- Two pointers from the ends; swap vowel pairs; consonants keep their positions.`,
+    stdin: "hello\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+bool is_vowel(char c) {
+  switch (c) {
+    case 'a': case 'e': case 'i': case 'o': case 'u':
+    case 'A': case 'E': case 'I': case 'O': case 'U': return true;
+    default: return false;
+  }
+}
+
+int main() {
+  string s;
+  getline(cin, s);
+  int i = 0, j = (int)s.size() - 1;
+  // TODO: advance i/j to vowels, swap, and move inward until i >= j.
+  cout << s << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "hello\n", expectedStdout: "holle\n", matcher: "exact" },
+      { name: "Longer", stdin: "leetcode\n", expectedStdout: "leotcede\n", matcher: "exact" },
+      { name: "All vowels", stdin: "aeiou\n", expectedStdout: "uoiea\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.manipulation", "dsa.arrays.two_pointers"]
+  },
   "heap-merge-k-sorted-lists": {
     enabled: true,
     language: "cpp",
