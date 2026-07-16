@@ -1,0 +1,17 @@
+{
+  "id": "tree-validate-bst",
+  "title": "Binary tree: validate a BST",
+  "skill_ids": ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["is_valid_bst.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/tree-validate-bst/work exercises/tree-validate-bst/tests/tests.cpp -o exercises/tree-validate-bst/work/run",
+  "test_command": "exercises/tree-validate-bst/work/run",
+  "required_tests": ["test_valid", "test_invalid_right", "test_invalid_deep", "test_single", "test_duplicates"],
+  "hints": [
+    "It is not enough to compare a node with its direct children; every node must lie within a range inherited from its ancestors.",
+    "Recurse with an open interval (low, high): the left child tightens the upper bound, the right child tightens the lower bound.",
+    "Use a wide 64-bit range so int values at the extremes still validate; equal values are NOT allowed in a strict BST."
+  ],
+  "project_lab": "tree-technique-playground"
+}

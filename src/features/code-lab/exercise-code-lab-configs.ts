@@ -1440,6 +1440,120 @@ int main() {
     ],
     skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
   },
+  "linked-list-palindrome": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Linked list: palindrome check.
+
+Print whether a singly linked list reads the same forwards and backwards.
+
+Input format:
+- The first line is n, the number of nodes.
+- The second line has n space-separated node values.
+
+Output format:
+- "true" or "false", then a newline.
+
+[1 2 2 1] -> true; [1 2 3] -> false.
+
+AI evaluation rubric:
+- Compares the value sequence against its reverse (vector two-pointer is fine;
+  O(1) space reverses the second half). Empty/single lists are palindromes.`,
+    stdin: "4\n1 2 2 1\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+bool is_palindrome(ListNode* head) {
+  // TODO: compare the value sequence against its reverse.
+  (void)head;
+  return false;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  ListNode* head = nullptr;
+  ListNode** tail = &head;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  cout << (is_palindrome(head) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Even palindrome", stdin: "4\n1 2 2 1\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Odd palindrome", stdin: "5\n1 2 3 2 1\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not a palindrome", stdin: "3\n1 2 3\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers"]
+  },
+  "tree-validate-bst": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Binary tree: validate a BST.
+
+Print whether the tree is a valid binary search tree (every node's left subtree
+is strictly smaller and right subtree strictly larger).
+
+Input format:
+- The first line is n, the number of level-order tokens.
+- The second line has n space-separated tokens: integers, or X for a missing
+  child.
+
+Output format:
+- "true" or "false", then a newline.
+
+[2 1 3] -> true; [5 1 4 X X 3 6] -> false.
+
+AI evaluation rubric:
+- Carries an inherited (low, high) range, not just parent/child comparisons.
+- Uses a wide 64-bit range; rejects equal values (strict BST).`,
+    stdin: "3\n2 1 3\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+bool valid(T* node, long long low, long long high) {
+  // TODO: null is valid; else check low < v < high and recurse with tighter bounds.
+  (void)node; (void)low; (void)high;
+  return false;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n > 0 && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  cout << (valid(root, -4000000000LL, 4000000000LL) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Valid", stdin: "3\n2 1 3\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Invalid right", stdin: "7\n5 1 4 X X 3 6\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Invalid deep", stdin: "7\n10 5 15 X X 6 20\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",

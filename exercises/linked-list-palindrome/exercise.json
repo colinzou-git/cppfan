@@ -1,0 +1,17 @@
+{
+  "id": "linked-list-palindrome",
+  "title": "Linked list: palindrome check",
+  "skill_ids": ["dsa.trees.linked_list", "cpp.references.pointers"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["is_palindrome.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-palindrome/work exercises/linked-list-palindrome/tests/tests.cpp -o exercises/linked-list-palindrome/work/run",
+  "test_command": "exercises/linked-list-palindrome/work/run",
+  "required_tests": ["test_even", "test_odd", "test_not", "test_single", "test_empty"],
+  "hints": [
+    "The simplest approach copies the values into a vector, then checks it with two pointers from both ends.",
+    "For O(1) extra space, find the middle with slow/fast pointers and reverse the second half, then compare.",
+    "An empty list and a single node are palindromes."
+  ],
+  "project_lab": "linked-list-technique-playground"
+}
