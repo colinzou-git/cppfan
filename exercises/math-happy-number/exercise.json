@@ -1,0 +1,17 @@
+{
+  "id": "math-happy-number",
+  "title": "Math: happy number",
+  "skill_ids": ["dsa.math.number_theory", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["is_happy.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/math-happy-number/work exercises/math-happy-number/tests/tests.cpp -o exercises/math-happy-number/work/run",
+  "test_command": "exercises/math-happy-number/work/run",
+  "required_tests": ["test_happy", "test_unhappy", "test_one", "test_seven", "test_small_unhappy"],
+  "hints": [
+    "Repeatedly replace the number with the sum of the squares of its digits.",
+    "A number is happy if this process reaches 1; otherwise it loops forever.",
+    "Detect the loop with a visited set, or with Floyd's slow/fast cycle detection."
+  ],
+  "project_lab": "math-technique-playground"
+}

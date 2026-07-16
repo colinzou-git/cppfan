@@ -1,0 +1,17 @@
+{
+  "id": "strings-length-of-last-word",
+  "title": "Strings: length of last word",
+  "skill_ids": ["dsa.strings.parsing", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["last_word_length.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-length-of-last-word/work exercises/strings-length-of-last-word/tests/tests.cpp -o exercises/strings-length-of-last-word/work/run",
+  "test_command": "exercises/strings-length-of-last-word/work/run",
+  "required_tests": ["test_basic", "test_trailing_spaces", "test_multiple_spaces", "test_single_word", "test_no_words"],
+  "hints": [
+    "Scan from the END of the string; first skip any trailing spaces.",
+    "Then count consecutive non-space characters until you hit a space or the start.",
+    "If the string is empty or all spaces, the answer is 0."
+  ],
+  "project_lab": "text-processing-playground"
+}
