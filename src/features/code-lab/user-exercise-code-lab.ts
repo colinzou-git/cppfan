@@ -14,9 +14,12 @@ import type { CodeTestCase, LearningItemCodeLab } from "./code-lab-types";
 
 /** Hidden tests (with I/O) for grading a user exercise — server-side only. */
 export function exerciseHiddenTests(payload: ExercisePayload): CodeTestCase[] {
+  // Function mode grades trimmed (the generated harness prints a trailing
+  // newline); stdin/program mode stays byte-exact (#607).
+  const matcher = payload.mode === "function" ? ("trimmed" as const) : ("exact" as const);
   return (payload.tests ?? [])
     .filter((t) => t.hidden)
-    .map((t) => ({ name: t.name, stdin: t.input, expectedStdout: t.expectedOutput, matcher: "exact" as const }));
+    .map((t) => ({ name: t.name, stdin: t.input, expectedStdout: t.expectedOutput, matcher }));
 }
 
 /**

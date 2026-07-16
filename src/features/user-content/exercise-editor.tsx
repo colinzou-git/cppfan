@@ -319,6 +319,12 @@ export function ExerciseEditor({
         <label className="grid gap-1 text-sm font-semibold text-slate-700">
           Function signature
           <input className="rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm" value={fields.functionSignature} onChange={(e) => update({ functionSignature: e.target.value })} placeholder="std::string solve(std::string input)" />
+          <span className="text-xs font-normal text-slate-500">
+            Learners implement just this function (no <code>main</code>). Supported types: int, long long,
+            double, bool, char, std::string, and std::vector of those. Each test&rsquo;s <em>input</em> lists the
+            arguments in order (a vector is a count then its elements); <em>expected output</em> is the returned
+            value (a vector prints space-separated, a bool as <code>true</code>/<code>false</code>).
+          </span>
         </label>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
