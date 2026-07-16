@@ -133,6 +133,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `strings-longest-palindrome-buildable` | char frequency, palindrome | `text-processing-playground` |
 | `linked-list-remove-elements` | linked list, pointers | `linked-list-technique-playground` |
 | `linked-list-middle-node` | linked list, pointers | `linked-list-technique-playground` |
+| `tree-max-depth` | tree traversal, pointers | `tree-technique-playground` |
+| `tree-sum-values` | tree traversal, pointers | `tree-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

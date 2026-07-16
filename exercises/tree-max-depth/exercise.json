@@ -1,0 +1,17 @@
+{
+  "id": "tree-max-depth",
+  "title": "Binary tree: maximum depth",
+  "skill_ids": ["dsa.trees.traversal", "cpp.references.pointers"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["max_depth.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/tree-max-depth/work exercises/tree-max-depth/tests/tests.cpp -o exercises/tree-max-depth/work/run",
+  "test_command": "exercises/tree-max-depth/work/run",
+  "required_tests": ["test_balanced", "test_left_skewed", "test_single", "test_empty", "test_unbalanced"],
+  "hints": [
+    "The depth is measured in NODES: an empty tree is 0, a single node is 1.",
+    "Recurse: the depth of a node is 1 + the larger of its left and right subtree depths.",
+    "A null child contributes depth 0, so the base case returns 0 for nullptr."
+  ],
+  "project_lab": "tree-technique-playground"
+}

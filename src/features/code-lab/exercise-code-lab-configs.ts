@@ -5593,6 +5593,132 @@ int main() {
     ],
     skillTags: ["dsa.trees.tree_diameter", "dsa.trees.traversal", "cpp.references.pointers"]
   },
+  "tree-max-depth": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Binary tree: maximum depth.
+
+Print the maximum depth (in nodes) of a binary tree along the longest
+root-to-leaf path. An empty tree is 0; a single node is 1.
+
+Input format:
+- The first line is n, the number of level-order tokens.
+- The second line has n space-separated tokens: integers, or X for a missing
+  child.
+
+Output format:
+- The maximum depth, then a newline.
+
+[3 9 20 X X 15 7] -> 3.
+
+AI evaluation rubric:
+- Recurses 1 + max(depth(left), depth(right)); null contributes 0.`,
+    stdin: "7\n3 9 20 X X 15 7\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+int max_depth(T* root) {
+  // TODO: return 0 for null, else 1 + max of the two subtree depths.
+  (void)root;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n > 0 && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  cout << max_depth(root) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Unbalanced", stdin: "7\n3 9 20 X X 15 7\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "Left chain", stdin: "5\n1 2 X 3 X\n", expectedStdout: "3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
+  },
+  "tree-sum-values": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Binary tree: sum of values.
+
+Print the sum of all node values in a binary tree. An empty tree sums to 0.
+
+Input format:
+- The first line is n, the number of level-order tokens.
+- The second line has n space-separated tokens: integers, or X for a missing
+  child.
+
+Output format:
+- The total sum, then a newline.
+
+[1 2 3 4 5 6 7] -> 28.
+
+AI evaluation rubric:
+- Recurses root->val + sum(left) + sum(right); null contributes 0.`,
+    stdin: "7\n1 2 3 4 5 6 7\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+int tree_sum(T* root) {
+  // TODO: return 0 for null, else root->v + tree_sum(l) + tree_sum(r).
+  (void)root;
+  return 0;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n > 0 && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  cout << tree_sum(root) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Complete", stdin: "7\n1 2 3 4 5 6 7\n", expectedStdout: "28\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "42\n", matcher: "exact" },
+      { name: "Negatives", stdin: "6\n5 -3 8 X X -2\n", expectedStdout: "8\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
+  },
   "heap-merge-k-sorted-lists": {
     enabled: true,
     language: "cpp",

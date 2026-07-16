@@ -2281,6 +2281,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dictionary-autocomplete"
   },
   {
+    id: "tree-max-depth",
+    title: "Binary tree: maximum depth",
+    skillIds: ["dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["max_depth.hpp"],
+    requiredTests: [
+      "test_balanced",
+      "test_left_skewed",
+      "test_single",
+      "test_empty",
+      "test_unbalanced"
+    ],
+    hints: [
+      "The depth is measured in NODES: an empty tree is 0, a single node is 1.",
+      "Recurse: the depth of a node is 1 + the larger of its left and right subtree depths.",
+      "A null child contributes depth 0, so the base case returns 0 for nullptr."
+    ],
+    projectLab: "tree-technique-playground"
+  },
+  {
+    id: "tree-sum-values",
+    title: "Binary tree: sum of values",
+    skillIds: ["dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["tree_sum.hpp"],
+    requiredTests: [
+      "test_balanced",
+      "test_single",
+      "test_empty",
+      "test_negatives",
+      "test_skewed"
+    ],
+    hints: [
+      "The sum of a tree is the node's own value plus the sums of its two subtrees.",
+      "Base case: a null node contributes 0.",
+      "Recurse: return root->val + tree_sum(root->left) + tree_sum(root->right)."
+    ],
+    projectLab: "tree-technique-playground"
+  },
+  {
     id: "heap-merge-k-sorted-lists",
     title: "Heaps: merge k sorted lists",
     skillIds: ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"],
