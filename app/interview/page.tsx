@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Target, Code2 } from "lucide-react";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { groupInterviewProblems } from "@/features/interview/interview-catalog-view";
+import { getMyPublishedInterviewViews } from "@/features/interview/user-interview-source";
+import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 
 export const metadata = { title: "Interview practice — cppFan" };
 
@@ -23,8 +25,9 @@ const NAV_LINKS = [
   ["/interview/progress", "Weekly progress →", "progress-link"]
 ] as const;
 
-export default function InterviewPage() {
+export default async function InterviewPage() {
   const groups = groupInterviewProblems();
+  const userProblems = await getMyPublishedInterviewViews();
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -40,8 +43,54 @@ export default function InterviewPage() {
           {NAV_LINKS.map(([href, label, testId]) => (
             <Link href={href} className="text-sm font-bold text-blue-700" data-testid={testId} key={href}>{label}</Link>
           ))}
+          <Link href="/my-content/interview/new" className="text-sm font-bold text-blue-700" data-testid="create-interview-link">
+            Create an interview problem →
+          </Link>
         </div>
       </header>
+
+      {userProblems.length > 0 ? (
+        <section className="grid gap-3" data-testid="user-interview-section">
+          <h2 className="flex items-center gap-2 text-lg font-black text-slate-900">
+            Your interview problems
+            <ContentSourceBadge source="user" />
+          </h2>
+          <div className="grid gap-3">
+            {userProblems.map((problem) => (
+              <article key={problem.id} className="grid gap-2 rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm" data-testid="user-interview-problem" data-problem-id={problem.id}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-bold text-slate-900">{problem.title}</h3>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${DIFFICULTY_STYLE[problem.difficulty] ?? "bg-slate-100 text-slate-600"}`}>{problem.difficulty}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{problem.roleRelevance}</span>
+                </div>
+                <p className="whitespace-pre-wrap text-sm text-slate-700">{problem.statement}</p>
+                {problem.patternTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {problem.patternTags.map((tag) => <span key={tag} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-900">{tag}</span>)}
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/lab/${encodeURIComponent(problem.id)}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700"
+                    data-testid="user-interview-code"
+                  >
+                    <Code2 className="h-4 w-4" aria-hidden="true" />
+                    Code
+                  </Link>
+                  <Link
+                    href={`/interview/session?problem=${encodeURIComponent(problem.id)}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                    data-testid="user-interview-timed-session"
+                  >
+                    Timed session
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-6" data-testid="interview-catalog">
         {groups.map((group) => (
