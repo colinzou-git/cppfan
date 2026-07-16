@@ -623,6 +623,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dp-technique-playground"
   },
   {
+    id: "linked-list-merge-two-sorted",
+    title: "Linked list: merge two sorted lists",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["merge_two.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_one_empty",
+      "test_both_empty",
+      "test_duplicates",
+      "test_disjoint"
+    ],
+    hints: [
+      "Use a dummy head node so you never special-case the first insertion.",
+      "Walk both lists with a tail pointer; append whichever current node is smaller and advance that list.",
+      "When one list runs out, attach the remainder of the other list directly."
+    ],
+    projectLab: "linked-list-technique-playground"
+  },
+  {
+    id: "tree-path-sum",
+    title: "Binary tree: root-to-leaf path sum",
+    skillIds: ["dsa.trees.traversal", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["has_path_sum.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_missing",
+      "test_single",
+      "test_empty",
+      "test_negatives"
+    ],
+    hints: [
+      "A leaf is a node with no children; only complete root-to-leaf paths count.",
+      "Subtract the current node's value from the target and recurse into each child.",
+      "At a leaf, succeed when the remaining target equals the leaf's value. An empty tree is always false."
+    ],
+    projectLab: "tree-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],

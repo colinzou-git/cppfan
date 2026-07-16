@@ -1319,6 +1319,127 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"]
   },
+  "linked-list-merge-two-sorted": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Linked list: merge two sorted lists.
+
+Merge two ascending sorted singly linked lists into one ascending sorted list
+and print its values.
+
+Input format:
+- The first line is n, the length of list A, then n values.
+- The next line is m, the length of list B, then m values.
+
+Output format:
+- The merged values, space-separated, then a newline (empty line if both lists
+  are empty).
+
+A [1 3 5], B [2 4 6] -> "1 2 3 4 5 6".
+
+AI evaluation rubric:
+- Uses a dummy head and a tail pointer; splices smaller node each step, then
+  attaches the leftover tail. O(n + m).`,
+    stdin: "3 1 3 5\n3 2 4 6\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+ListNode* merge_two(ListNode* a, ListNode* b) {
+  // TODO: splice nodes from a and b in sorted order; attach the leftover tail.
+  (void)a; (void)b;
+  return nullptr;
+}
+
+static ListNode* read_list() {
+  int n; cin >> n;
+  ListNode* head = nullptr; ListNode** tail = &head;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  return head;
+}
+
+int main() {
+  ListNode* a = read_list();
+  ListNode* b = read_list();
+  bool first = true;
+  for (ListNode* c = merge_two(a, b); c; c = c->next) { cout << (first ? "" : " ") << c->val; first = false; }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "3 1 3 5\n3 2 4 6\n", expectedStdout: "1 2 3 4 5 6\n", matcher: "exact" },
+      { name: "One empty", stdin: "0\n3 0 7 9\n", expectedStdout: "0 7 9\n", matcher: "exact" },
+      { name: "Duplicates", stdin: "3 1 2 2\n2 2 3\n", expectedStdout: "1 2 2 2 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers"]
+  },
+  "tree-path-sum": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Binary tree: root-to-leaf path sum.
+
+Print whether the tree has a root-to-LEAF path whose node values sum to a
+target.
+
+Input format:
+- The first line has two integers: n (number of level-order tokens) and target.
+- The second line has n space-separated tokens: integers, or X for a missing
+  child.
+
+Output format:
+- "true" or "false", then a newline.
+
+Tree [5 4 8 11 X 13 4 7 2], target 22 -> true (5->4->11->2).
+
+AI evaluation rubric:
+- Recurses subtracting each node's value; succeeds only at a leaf.
+- Empty tree returns false.`,
+    stdin: "9 22\n5 4 8 11 X 13 4 7 2\n",
+    starterCode: `#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct T { int v; T* l; T* r; T(int x) : v(x), l(0), r(0) {} };
+
+bool has_path_sum(T* root, int target) {
+  // TODO: at a leaf, check target == v; otherwise recurse with target - v.
+  (void)root; (void)target;
+  return false;
+}
+
+int main() {
+  int n, target;
+  cin >> n >> target;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  T* root = nullptr;
+  if (n > 0 && tok[0] != "X") {
+    root = new T(stoi(tok[0]));
+    queue<T*> q; q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < tok.size()) {
+      T* x = q.front(); q.pop();
+      if (i < tok.size()) { if (tok[i] != "X") { x->l = new T(stoi(tok[i])); q.push(x->l); } ++i; }
+      if (i < tok.size()) { if (tok[i] != "X") { x->r = new T(stoi(tok[i])); q.push(x->r); } ++i; }
+    }
+  }
+  cout << (has_path_sum(root, target) ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Has path", stdin: "9 22\n5 4 8 11 X 13 4 7 2\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "No path", stdin: "9 100\n5 4 8 11 X 13 4 7 2\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Empty", stdin: "1 0\nX\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.traversal", "cpp.references.pointers"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",
