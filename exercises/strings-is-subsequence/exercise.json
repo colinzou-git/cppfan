@@ -1,0 +1,17 @@
+{
+  "id": "strings-is-subsequence",
+  "title": "Strings: is subsequence",
+  "skill_ids": ["dsa.strings.manipulation", "dsa.arrays.two_pointers"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["is_subsequence.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-is-subsequence/work exercises/strings-is-subsequence/tests/tests.cpp -o exercises/strings-is-subsequence/work/run",
+  "test_command": "exercises/strings-is-subsequence/work/run",
+  "required_tests": ["test_true", "test_false", "test_empty_s", "test_equal", "test_order_matters"],
+  "hints": [
+    "A subsequence keeps the relative order of characters but may skip some of t.",
+    "Use two pointers: advance through t, and each time t[j] matches the next needed s[i], advance i.",
+    "s is a subsequence exactly when i reaches the end of s after scanning t."
+  ],
+  "project_lab": "text-processing-playground"
+}

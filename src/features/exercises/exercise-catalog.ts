@@ -1336,6 +1336,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "array-technique-playground"
   },
   {
+    id: "matrix-spiral-order",
+    title: "Matrix: spiral order",
+    skillIds: ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["spiral_order.hpp"],
+    requiredTests: [
+      "test_square",
+      "test_rectangular",
+      "test_single_row",
+      "test_single_column",
+      "test_empty"
+    ],
+    hints: [
+      "Keep four boundaries: top, bottom, left, right. Walk the top row left-to-right, the right column top-to-bottom, then shrink inward.",
+      "After each edge, move the boundary inward (top++, right--, bottom--, left++).",
+      "Guard the bottom row and left column with top <= bottom and left <= right so a thin remaining strip is not visited twice."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
+    id: "strings-is-subsequence",
+    title: "Strings: is subsequence",
+    skillIds: ["dsa.strings.manipulation", "dsa.arrays.two_pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["is_subsequence.hpp"],
+    requiredTests: [
+      "test_true",
+      "test_false",
+      "test_empty_s",
+      "test_equal",
+      "test_order_matters"
+    ],
+    hints: [
+      "A subsequence keeps the relative order of characters but may skip some of t.",
+      "Use two pointers: advance through t, and each time t[j] matches the next needed s[i], advance i.",
+      "s is a subsequence exactly when i reaches the end of s after scanning t."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
     id: "math-integer-sqrt",
     title: "Math: integer square root",
     skillIds: ["dsa.searching.binary_search", "dsa.math.number_theory"],

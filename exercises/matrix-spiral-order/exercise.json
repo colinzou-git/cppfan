@@ -1,0 +1,17 @@
+{
+  "id": "matrix-spiral-order",
+  "title": "Matrix: spiral order",
+  "skill_ids": ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["spiral_order.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/matrix-spiral-order/work exercises/matrix-spiral-order/tests/tests.cpp -o exercises/matrix-spiral-order/work/run",
+  "test_command": "exercises/matrix-spiral-order/work/run",
+  "required_tests": ["test_square", "test_rectangular", "test_single_row", "test_single_column", "test_empty"],
+  "hints": [
+    "Keep four boundaries: top, bottom, left, right. Walk the top row left-to-right, the right column top-to-bottom, then shrink inward.",
+    "After each edge, move the boundary inward (top++, right--, bottom--, left++).",
+    "Guard the bottom row and left column with top <= bottom and left <= right so a thin remaining strip is not visited twice."
+  ],
+  "project_lab": "array-technique-playground"
+}

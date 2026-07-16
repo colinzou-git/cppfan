@@ -2913,6 +2913,96 @@ int main() {
     ],
     skillTags: ["dsa.arrays.indexing", "dsa.arrays.traversal"]
   },
+  "matrix-spiral-order": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Matrix: spiral order.
+
+Print the elements of an m x n matrix in clockwise spiral order (starting at the
+top-left), space-separated on one line.
+
+Input format:
+- The first line has two integers m and n.
+- The next m lines each have n space-separated integers.
+
+Output format:
+- The values in spiral order, space-separated, then a newline.
+
+[[1 2 3] [4 5 6] [7 8 9]] -> "1 2 3 6 9 8 7 4 5".
+
+AI evaluation rubric:
+- Peels layers with top/bottom/left/right boundaries; guards the bottom row and
+  left column so a thin strip is not revisited.`,
+    stdin: "3\n1 2 3\n4 5 6\n7 8 9\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int m, n;
+  cin >> m >> n;
+  vector<vector<int>> a(m, vector<int>(n));
+  for (int r = 0; r < m; ++r)
+    for (int c = 0; c < n; ++c) cin >> a[r][c];
+  vector<int> out;
+  // TODO: walk the spiral (top row, right col, bottom row, left col), shrinking.
+  for (size_t i = 0; i < out.size(); ++i) cout << (i ? " " : "") << out[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "3x3", stdin: "3 3\n1 2 3\n4 5 6\n7 8 9\n", expectedStdout: "1 2 3 6 9 8 7 4 5\n", matcher: "exact" },
+      { name: "Rectangular", stdin: "3 4\n1 2 3 4\n5 6 7 8\n9 10 11 12\n", expectedStdout: "1 2 3 4 8 12 11 10 9 5 6 7\n", matcher: "exact" },
+      { name: "Single row", stdin: "1 3\n1 2 3\n", expectedStdout: "1 2 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.indexing", "dsa.arrays.traversal"]
+  },
+  "strings-is-subsequence": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: is subsequence.
+
+Print whether string s is a subsequence of string t: s can be formed by deleting
+zero or more characters of t without reordering the rest.
+
+Input format:
+- The first line is s.
+- The second line is t.
+
+Output format:
+- "true" or "false", then a newline.
+
+s="abc", t="ahbgdc" -> true; s="axc", t="ahbgdc" -> false.
+
+AI evaluation rubric:
+- Two-pointer scan of t, advancing through s on each match; s empty is always
+  true.`,
+    stdin: "abc\nahbgdc\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+  string s, t;
+  getline(cin, s);
+  getline(cin, t);
+  size_t i = 0;
+  // TODO: scan t; advance i on each match; s is a subsequence iff i == s.size().
+  bool ok = (i == s.size());
+  cout << (ok ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Subsequence", stdin: "abc\nahbgdc\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not a subsequence", stdin: "axc\nahbgdc\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Empty s", stdin: "\nabc\n", expectedStdout: "true\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.manipulation", "dsa.arrays.two_pointers"]
+  },
   "math-integer-sqrt": {
     enabled: true,
     language: "cpp",
