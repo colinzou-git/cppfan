@@ -1,0 +1,28 @@
+{
+  "id": "linked-list-remove-elements",
+  "title": "Linked list: remove elements",
+  "skill_ids": [
+    "dsa.trees.linked_list",
+    "cpp.references.pointers"
+  ],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": [
+    "remove_elements.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-remove-elements/work exercises/linked-list-remove-elements/tests/tests.cpp -o exercises/linked-list-remove-elements/work/run",
+  "test_command": "exercises/linked-list-remove-elements/work/run",
+  "required_tests": [
+    "test_removes_middle",
+    "test_removes_head",
+    "test_removes_all",
+    "test_removes_none",
+    "test_empty"
+  ],
+  "hints": [
+    "A dummy node before the head makes removing the real head the same as any other node.",
+    "Walk with a 'prev' pointer; when the next node's value equals val, unlink it (prev->next = prev->next->next) and delete it.",
+    "Only advance prev when you did NOT remove, so consecutive matches are all handled."
+  ],
+  "project_lab": "linked-list-technique-playground"
+}
