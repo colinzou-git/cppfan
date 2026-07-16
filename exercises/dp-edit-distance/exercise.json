@@ -1,0 +1,17 @@
+{
+  "id": "dp-edit-distance",
+  "title": "DP: edit distance",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["edit_distance.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-edit-distance/work exercises/dp-edit-distance/tests/tests.cpp -o exercises/dp-edit-distance/work/run",
+  "test_command": "exercises/dp-edit-distance/work/run",
+  "required_tests": ["test_equal", "test_one_empty", "test_replace", "test_mixed", "test_classic"],
+  "hints": [
+    "Let dp[i][j] be the edit distance between the first i chars of a and the first j chars of b.",
+    "Base cases: dp[i][0] = i (delete all) and dp[0][j] = j (insert all).",
+    "If a[i-1] == b[j-1], dp[i][j] = dp[i-1][j-1]; otherwise 1 + min(insert dp[i][j-1], delete dp[i-1][j], replace dp[i-1][j-1])."
+  ],
+  "project_lab": "dp-technique-playground"
+}

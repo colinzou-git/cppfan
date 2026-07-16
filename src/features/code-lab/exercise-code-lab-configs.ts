@@ -739,6 +739,105 @@ int main() {
     ],
     skillTags: ["dsa.strings.manipulation", "dsa.strings.parsing"]
   },
+  "dp-edit-distance": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: edit distance.
+
+Print the minimum number of single-character edits (insert, delete, or replace)
+needed to turn string a into string b (Levenshtein distance).
+
+Input format:
+- The first line is string a (may be empty).
+- The second line is string b (may be empty).
+
+Output format:
+- The edit distance, then a newline.
+
+"horse" -> "ros" is 3; "cat" -> "cut" is 1.
+
+AI evaluation rubric:
+- Fills a 2D dp table (O(n*m)); correct base cases dp[i][0]=i, dp[0][j]=j.
+- Uses min of insert/delete/replace when characters differ.`,
+    stdin: "horse\nros\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  string a, b;
+  getline(cin, a);
+  getline(cin, b);
+  int n = (int)a.size(), m = (int)b.size();
+  vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+  // TODO: initialize base cases and fill the table, then print dp[n][m].
+  cout << dp[n][m] << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "horse\nros\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Replace one", stdin: "cat\ncut\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "One empty", stdin: "abc\n\n", expectedStdout: "3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms"]
+  },
+  "dp-word-break": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: word break.
+
+Given a string s and a dictionary of words, print whether s can be segmented
+into a sequence of one or more dictionary words. Words may be reused.
+
+Input format:
+- The first line is the string s.
+- The second line has the dictionary words, space-separated.
+
+Output format:
+- "true" or "false", then a newline.
+
+s="leetcode", dict={leet, code} -> true.
+
+AI evaluation rubric:
+- Builds dp over prefixes (dp[i] = s[0..i) segmentable), dp[0] true.
+- Uses an unordered_set for O(1) dictionary lookups.`,
+    stdin: "leetcode\nleet code\n",
+    starterCode: `#include <iostream>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <vector>
+using namespace std;
+
+int main() {
+  string s, dictLine;
+  getline(cin, s);
+  getline(cin, dictLine);
+  istringstream in(dictLine);
+  unordered_set<string> words;
+  string w;
+  while (in >> w) words.insert(w);
+
+  int n = (int)s.size();
+  vector<char> dp(n + 1, false);
+  dp[0] = true;
+  // TODO: for each i, if some j<i has dp[j] and s[j..i) in words, set dp[i].
+  cout << (dp[n] ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Segmentable", stdin: "leetcode\nleet code\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Reused word", stdin: "applepenapple\napple pen\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not segmentable", stdin: "catsandog\ncats dog sand and cat\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.strings.searching"]
+  },
   "dp-longest-increasing-subsequence": {
     enabled: true,
     language: "cpp",

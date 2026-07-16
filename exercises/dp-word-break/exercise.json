@@ -1,0 +1,17 @@
+{
+  "id": "dp-word-break",
+  "title": "DP: word break",
+  "skill_ids": ["dsa.techniques.dynamic_programming", "dsa.strings.searching"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 30,
+  "editable_files": ["word_break.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/dp-word-break/work exercises/dp-word-break/tests/tests.cpp -o exercises/dp-word-break/work/run",
+  "test_command": "exercises/dp-word-break/work/run",
+  "required_tests": ["test_simple", "test_reuse", "test_unbreakable", "test_empty", "test_full_word"],
+  "hints": [
+    "Let dp[i] mean 'the first i characters of s can be segmented into dictionary words'. dp[0] is true.",
+    "For each end i, scan every split point j < i: if dp[j] is true and s[j..i) is in the dictionary, set dp[i] true.",
+    "Store the dictionary in an unordered_set for O(1) membership; the answer is dp[s.size()]."
+  ],
+  "project_lab": "dp-technique-playground"
+}

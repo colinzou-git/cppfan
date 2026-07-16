@@ -350,6 +350,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "text-processing-playground"
   },
   {
+    id: "dp-edit-distance",
+    title: "DP: edit distance",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_forms"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["edit_distance.hpp"],
+    requiredTests: [
+      "test_equal",
+      "test_one_empty",
+      "test_replace",
+      "test_mixed",
+      "test_classic"
+    ],
+    hints: [
+      "Let dp[i][j] be the edit distance between the first i chars of a and the first j chars of b.",
+      "Base cases: dp[i][0] = i (delete all) and dp[0][j] = j (insert all).",
+      "If a[i-1] == b[j-1], dp[i][j] = dp[i-1][j-1]; otherwise 1 + min(insert dp[i][j-1], delete dp[i-1][j], replace dp[i-1][j-1])."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
+    id: "dp-word-break",
+    title: "DP: word break",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.strings.searching"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["word_break.hpp"],
+    requiredTests: [
+      "test_simple",
+      "test_reuse",
+      "test_unbreakable",
+      "test_empty",
+      "test_full_word"
+    ],
+    hints: [
+      "Let dp[i] mean 'the first i characters of s can be segmented into dictionary words'. dp[0] is true.",
+      "For each end i, scan every split point j < i: if dp[j] is true and s[j..i) is in the dictionary, set dp[i] true.",
+      "Store the dictionary in an unordered_set for O(1) membership; the answer is dp[s.size()]."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
     id: "dp-longest-increasing-subsequence",
     title: "DP: longest increasing subsequence",
     skillIds: ["dsa.techniques.dynamic_programming", "dsa.techniques.dp_design", "dsa.arrays.traversal"],
