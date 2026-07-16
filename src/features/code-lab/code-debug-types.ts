@@ -110,10 +110,19 @@ export type CodeDebugExplainRequest = {
   source: string;
   snapshot: CodeDebugSnapshot;
   userQuestion?: string;
+  /** Published version the client loaded; a mismatch refuses the explain as stale (#611). */
+  contentVersionId?: string;
+  /** Active milestone for a multi-milestone user lab (#611). */
+  milestoneIndex?: number;
 };
 
 export type CodeDebugExplainResult = {
   status: "ok" | "unavailable";
   explanation: string;
   relatedSkills?: string[];
+  /**
+   * True when the loaded user-content version changed under the learner, so the
+   * explanation was refused rather than run against a new definition (#611).
+   */
+  staleDefinition?: boolean;
 };

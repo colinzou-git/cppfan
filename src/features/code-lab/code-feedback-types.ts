@@ -42,6 +42,12 @@ export type StructuredCodeFeedback = {
   /** Friendly, learner-facing message; always present and safe to display. */
   learnerMessage: string;
   evidenceStrength: "weak_ai_inference";
+  /**
+   * True when the loaded user-content version changed under the learner, so
+   * review was refused rather than run against a new definition (#611). Mirrors
+   * Run/Test's staleDefinition; the client prompts a reload.
+   */
+  staleDefinition?: boolean;
 };
 
 /** Weak-evidence projection consumed by later remediation/mastery work. */

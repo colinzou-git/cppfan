@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { traceCode } from "@/features/code-lab/code-trace-service";
-import { getCodeLabConfigForItem } from "@/features/code-lab/code-lab-catalog";
-import { resolveUserExerciseExecution } from "@/features/code-lab/user-exercise-code-lab";
+import { resolveCodeLabItem } from "@/features/code-lab/code-lab-item-resolver";
 import { recordCodeAttempt } from "@/features/code-lab/code-attempt-service";
 import {
   parseBodyRecord,
@@ -32,7 +31,13 @@ export async function POST(request: Request) {
   const parsed = validateCodeRequest(body);
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
-  const config = getCodeLabConfigForItem(parsed.itemId) ?? (await resolveUserExerciseExecution(parsed.itemId))?.config ?? null;
+  // Resolve config through the one shared resolver so labs/interviews (and the
+  // active milestone) map their visible tests correctly, not just exercises.
+  const resolvedItem = await resolveCodeLabItem({
+    itemId: parsed.itemId,
+    milestoneIndex: parsed.milestoneIndex
+  });
+  const config = resolvedItem.status === "ok" ? resolvedItem.item.config : null;
   // Resolve the selected test against VISIBLE tests only and read its expected
   // output server-side, so a hidden test name/expected output can never be
   // smuggled into the AI prompt or the response.
@@ -66,7 +71,9 @@ export async function POST(request: Request) {
         selectedActualOutput,
         lastRunResult: asObject<CodeRunResult>(body.lastRunResult) ?? null,
         lastTestResult: asObject<CodeTestResult>(body.lastTestResult) ?? null,
-        userQuestion: parsed.userQuestion
+        userQuestion: parsed.userQuestion,
+        contentVersionId: parsed.contentVersionId,
+        milestoneIndex: parsed.milestoneIndex
       },
       controller.signal
     );

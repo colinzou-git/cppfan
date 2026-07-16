@@ -139,7 +139,15 @@ export function validateDebugStopRequest(body: Record<string, unknown>): ParsedD
 }
 
 export type ParsedDebugExplain =
-  | { ok: true; itemId: string; source: string; snapshot: CodeDebugSnapshot; userQuestion?: string }
+  | {
+      ok: true;
+      itemId: string;
+      source: string;
+      snapshot: CodeDebugSnapshot;
+      userQuestion?: string;
+      contentVersionId?: string;
+      milestoneIndex?: number;
+    }
   | { ok: false; code: string; message: string };
 
 export function validateDebugExplainRequest(body: Record<string, unknown>): ParsedDebugExplain {
@@ -171,5 +179,26 @@ export function validateDebugExplainRequest(body: Record<string, unknown>): Pars
   const userQuestion =
     typeof body.userQuestion === "string" ? body.userQuestion.slice(0, 1_000) : undefined;
 
-  return { ok: true, itemId, source, snapshot: snapshot as CodeDebugSnapshot, userQuestion };
+  const contentVersionId =
+    typeof body.contentVersionId === "string" && body.contentVersionId.length <= 100
+      ? body.contentVersionId
+      : undefined;
+
+  const milestoneIndex =
+    typeof body.milestoneIndex === "number" &&
+    Number.isInteger(body.milestoneIndex) &&
+    body.milestoneIndex >= 0 &&
+    body.milestoneIndex < 1000
+      ? body.milestoneIndex
+      : undefined;
+
+  return {
+    ok: true,
+    itemId,
+    source,
+    snapshot: snapshot as CodeDebugSnapshot,
+    userQuestion,
+    contentVersionId,
+    milestoneIndex
+  };
 }

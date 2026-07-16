@@ -5,8 +5,7 @@ import {
 } from "@/features/ai-chat/ai-chat-provider";
 import type { CodeTraceRequest, CodeTraceResult, CodeTraceStep } from "./code-trace-types";
 import { CODE_TRACE_DISCLAIMER } from "./code-trace-types";
-import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
+import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
 import { buildTraceMessages } from "./code-trace-prompts";
 import { normalizeCodeErrorTags } from "./code-feedback-parser";
 import {
@@ -62,10 +61,27 @@ export async function traceCode(
   const compileTrace = compileErrorTrace(request);
   if (compileTrace) return compileTrace;
 
-  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
+  // One shared resolver: native or any user-created executable kind, at the
+  // active milestone, refused when the loaded version is stale (#611).
+  const resolved = await resolveCodeLabItem({
+    itemId: request.itemId,
+    expectedContentVersionId: request.contentVersionId,
+    milestoneIndex: request.milestoneIndex
+  });
+  if (resolved.status === "stale_definition") {
+    return {
+      status: "unavailable",
+      steps: [],
+      confidence: "low",
+      disclaimer: CODE_TRACE_DISCLAIMER,
+      message: CODE_LAB_STALE_NOTE,
+      staleDefinition: true
+    };
+  }
+  const item = resolved.status === "ok" ? resolved.item : null;
   const messages = buildTraceMessages(request, {
-    prompt: config?.prompt ?? "",
-    skillTags: config?.skillTags ?? []
+    prompt: item?.prompt ?? "",
+    skillTags: item?.skillTags ?? []
   });
 
   try {

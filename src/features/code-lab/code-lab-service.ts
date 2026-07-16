@@ -6,10 +6,7 @@ import type {
 } from "./code-lab-types";
 import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { getHiddenTestsForItem } from "./code-lab-hidden-tests";
-import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
-import { resolveUserLabExecution } from "./user-lab-code-lab";
-import { resolveUserInterviewExecution } from "./user-interview-code-lab";
+import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -40,11 +37,8 @@ function resolvedFlags(itemFlags?: string[]): string[] {
   return itemFlags && itemFlags.length > 0 ? itemFlags : [...DEFAULT_COMPILER_FLAGS];
 }
 
-const DEFINITION_CHANGED_NOTE =
-  "This exercise was republished since you opened it. Reload the page to run against the current definition.";
-
 /**
- * A run/test whose user-exercise definition changed under it: refused rather
+ * A run/test whose user-content definition changed under it: refused rather
  * than executed against a different (hidden) test suite (#488). The client
  * detects `staleDefinition` and prompts a reload.
  */
@@ -60,7 +54,7 @@ function staleRunResult(): CodeRunResult {
     memoryKb: null,
     provider: "none",
     simulated: false,
-    note: DEFINITION_CHANGED_NOTE,
+    note: CODE_LAB_STALE_NOTE,
     staleDefinition: true
   };
 }
@@ -76,30 +70,9 @@ function staleTestResult(): CodeTestResult {
     compileOutput: "",
     provider: "none",
     simulated: false,
-    note: DEFINITION_CHANGED_NOTE,
+    note: CODE_LAB_STALE_NOTE,
     staleDefinition: true
   };
-}
-
-/**
- * True when `itemId` is a user exercise, an expected version was supplied, and
- * the current published version differs — i.e. the caller's tab is stale.
- */
-function isStale(expectedVersionId: string | undefined, publishedVersionId: string | null): boolean {
-  return Boolean(expectedVersionId && publishedVersionId && expectedVersionId !== publishedVersionId);
-}
-
-/**
- * Resolve a published user item's Code Lab execution (config + hidden tests +
- * version) — an exercise, or failing that a lab. Native items resolve a sync
- * config and never reach here.
- */
-async function resolveUserItemExecution(itemId: string, milestoneIndex = 0) {
-  const exercise = await resolveUserExerciseExecution(itemId);
-  if (exercise) {
-    return { ...exercise, files: [] as { name: string; content: string }[] };
-  }
-  return (await resolveUserLabExecution(itemId, milestoneIndex)) ?? (await resolveUserInterviewExecution(itemId));
 }
 
 export async function runCode(input: {
@@ -112,18 +85,24 @@ export async function runCode(input: {
   /** Active milestone for a user lab (#489). */
   milestoneIndex?: number;
 }): Promise<CodeRunResult> {
-  const staticConfig = getCodeLabConfigForItem(input.itemId);
-  const resolvedUser = staticConfig ? null : await resolveUserItemExecution(input.itemId, input.milestoneIndex);
-  if (resolvedUser && isStale(input.expectedVersionId, resolvedUser.publishedVersionId)) {
+  const resolved = await resolveCodeLabItem({
+    itemId: input.itemId,
+    expectedContentVersionId: input.expectedVersionId,
+    milestoneIndex: input.milestoneIndex
+  });
+  if (resolved.status === "stale_definition") {
     return staleRunResult();
   }
-  const config = staticConfig ?? resolvedUser?.config ?? null;
+  // An unpublished/unknown user item resolves not_found; historically Run still
+  // executes the raw source with no config, so preserve that.
+  const item = resolved.status === "ok" ? resolved.item : null;
+  const config = item?.config ?? null;
   const result = await executeRun(
     buildRunnerInput({
       source: input.source,
       stdin: input.stdin ?? "",
       compilerFlags: resolvedFlags(input.compilerFlags ?? config?.compilerFlags),
-      files: resolvedUser?.files
+      files: item?.files
     })
   );
   const { classifications } = classifyCodeAttempt({
@@ -148,22 +127,18 @@ export async function runTests(input: {
   /** Active milestone for a user lab (#489). */
   milestoneIndex?: number;
 }): Promise<CodeTestResult> {
-  let config = getCodeLabConfigForItem(input.itemId);
-  let hiddenTests = config ? getHiddenTestsForItem(input.itemId) : [];
-  let files: { name: string; content: string }[] = [];
-  if (!config) {
-    // Published user-created exercises/labs carry no static config; resolve from the DB.
-    const resolved = await resolveUserItemExecution(input.itemId, input.milestoneIndex);
-    if (!resolved) {
-      return emptyTestResult("invalid_item");
-    }
-    if (isStale(input.expectedVersionId, resolved.publishedVersionId)) {
-      return staleTestResult();
-    }
-    config = resolved.config;
-    hiddenTests = resolved.hiddenTests;
-    files = resolved.files;
+  const resolved = await resolveCodeLabItem({
+    itemId: input.itemId,
+    expectedContentVersionId: input.expectedVersionId,
+    milestoneIndex: input.milestoneIndex
+  });
+  if (resolved.status === "stale_definition") {
+    return staleTestResult();
   }
+  if (resolved.status === "not_found") {
+    return emptyTestResult("invalid_item");
+  }
+  const { config, hiddenTests, files } = resolved.item;
 
   const flags = resolvedFlags(input.compilerFlags ?? config.compilerFlags);
   const visibleCases = config.visibleTests ?? [];

@@ -5,8 +5,7 @@ import {
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
 import type { CodeReviewRequest } from "./code-lab-types";
-import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
+import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
 import { buildStructuredCodeReviewPrompt } from "./code-feedback-prompts";
 import { parseStructuredCodeFeedback } from "./code-feedback-parser";
 import {
@@ -36,6 +35,21 @@ function unavailableFeedback(): StructuredCodeFeedback {
     confidence: "low",
     learnerMessage: UNAVAILABLE_MESSAGE,
     evidenceStrength: "weak_ai_inference"
+  };
+}
+
+/** Refuse review against a definition that changed under the learner (#611). */
+function staleFeedback(): StructuredCodeFeedback {
+  return {
+    schemaVersion: CODE_FEEDBACK_SCHEMA_VERSION,
+    status: "unavailable",
+    summary: "",
+    errorTags: [],
+    relatedSkills: [],
+    confidence: "low",
+    learnerMessage: CODE_LAB_STALE_NOTE,
+    evidenceStrength: "weak_ai_inference",
+    staleDefinition: true
   };
 }
 
@@ -98,10 +112,20 @@ export async function reviewCode(
     return unavailableFeedback();
   }
 
-  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
+  // One shared resolver: native or any user-created executable kind, at the
+  // active milestone, refused when the loaded version is stale (#611).
+  const resolved = await resolveCodeLabItem({
+    itemId: request.itemId,
+    expectedContentVersionId: request.contentVersionId,
+    milestoneIndex: request.milestoneIndex
+  });
+  if (resolved.status === "stale_definition") {
+    return staleFeedback();
+  }
+  const item = resolved.status === "ok" ? resolved.item : null;
   const messages = buildReviewMessages(request, {
-    prompt: config?.prompt ?? "",
-    skillTags: config?.skillTags ?? []
+    prompt: item?.prompt ?? "",
+    skillTags: item?.skillTags ?? []
   });
 
   try {

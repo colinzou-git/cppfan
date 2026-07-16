@@ -148,7 +148,9 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
         selectedInput: traceSource.kind === "stdin" ? stdin : undefined,
         selectedActualOutput: runResultRef.current?.stdout,
         lastRunResult: runResultRef.current,
-        lastTestResult: testResultRef.current
+        lastTestResult: testResultRef.current,
+        contentVersionId,
+        milestoneIndex
       });
       setTrace(result);
     } catch (caught) {
@@ -205,7 +207,9 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
           userQuestion:
             action === "explain"
               ? "Explain the compiler or runtime error in beginner-friendly terms."
-              : undefined
+              : undefined,
+          contentVersionId,
+          milestoneIndex
         });
         setReview(result);
       }

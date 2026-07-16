@@ -34,7 +34,9 @@ export async function POST(request: Request) {
         itemId: parsed.itemId,
         source: parsed.source,
         snapshot: parsed.snapshot,
-        userQuestion: parsed.userQuestion
+        userQuestion: parsed.userQuestion,
+        contentVersionId: parsed.contentVersionId,
+        milestoneIndex: parsed.milestoneIndex
       },
       controller.signal
     );
