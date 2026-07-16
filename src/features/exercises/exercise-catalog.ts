@@ -2004,7 +2004,9 @@ export const exerciseCatalog: Exercise[] = [
       "test_two_lines",
       "test_flat",
       "test_increasing",
-      "test_valley"
+      "test_valley",
+      "test_empty_and_single",
+      "test_area_exceeds_int_max"
     ],
     hints: [
       "The water between lines i and j holds min(height[i], height[j]) * (j - i).",
@@ -2647,7 +2649,7 @@ export const exerciseCatalog: Exercise[] = [
     difficulty: "advanced",
     estimatedMinutes: 35,
     editableFiles: ["min_capacity.hpp"],
-    requiredTests: ["test_ten_packages_five_days", "test_three_days", "test_four_days", "test_one_day_is_total", "test_days_ge_packages_is_max", "test_empty"],
+    requiredTests: ["test_ten_packages_five_days", "test_three_days", "test_four_days", "test_one_day_is_total", "test_days_ge_packages_is_max", "test_empty", "test_days_le_zero", "test_total_exceeds_int_max"],
     hints: [
       "The answer lies between the heaviest single package and the sum of all weights.",
       "Write a helper that counts how many days a given capacity needs (greedily fill each day).",

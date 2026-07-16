@@ -7,7 +7,7 @@
   "editable_files": ["most_water.hpp"],
   "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-container-most-water/work exercises/array-container-most-water/tests/tests.cpp -o exercises/array-container-most-water/work/run",
   "test_command": "exercises/array-container-most-water/work/run",
-  "required_tests": ["test_classic", "test_two_lines", "test_flat", "test_increasing", "test_valley"],
+  "required_tests": ["test_classic", "test_two_lines", "test_flat", "test_increasing", "test_valley", "test_empty_and_single", "test_area_exceeds_int_max"],
   "hints": [
     "The water between lines i and j holds min(height[i], height[j]) * (j - i).",
     "Start two pointers at the ends; the area is limited by the SHORTER line, so move that pointer inward to look for a taller one.",

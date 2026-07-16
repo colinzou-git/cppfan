@@ -4443,8 +4443,9 @@ int main() {
   cin >> n;
   vector<int> h(n);
   for (auto& x : h) cin >> x;
-  int i = 0, j = n - 1, best = 0;
-  // TODO: track max min(h[i],h[j])*(j-i); move the shorter side inward.
+  int i = 0, j = n - 1;
+  long long best = 0;  // the area can exceed INT_MAX; use 64-bit
+  // TODO: track max 1LL*min(h[i],h[j])*(j-i); move the shorter side inward.
   cout << best << "\\n";
   return 0;
 }
@@ -6362,7 +6363,9 @@ int main() {
   int days;
   cin >> days;
   // TODO: binary-search the minimum feasible capacity.
-  cout << 0 << "\\n";
+  // The total weight can exceed INT_MAX, so use long long for the bounds/answer.
+  long long answer = 0;
+  cout << answer << "\\n";
   return 0;
 }
 `,

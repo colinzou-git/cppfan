@@ -8,14 +8,20 @@
 
 // Minimum daily capacity so that all packages (shipped in order) fit within
 // `days` days. Binary search on the answer: capacity in [max weight, total].
-inline int min_capacity(const std::vector<int>& weights, int days) {
-  if (weights.empty()) {
+//
+// Contract:
+//  - package weights are positive; a meaningful schedule needs `days >= 1`.
+//  - returns 0 when there are no packages or `days <= 0`.
+//  - the total package weight (and therefore the answer) may exceed INT_MAX, so
+//    capacities are carried in 64-bit (long long) to avoid signed overflow.
+inline long long min_capacity(const std::vector<int>& weights, int days) {
+  if (weights.empty() || days <= 0) {
     return 0;
   }
-  int lo = *std::max_element(weights.begin(), weights.end());
-  int hi = std::accumulate(weights.begin(), weights.end(), 0);
+  long long lo = *std::max_element(weights.begin(), weights.end());
+  long long hi = std::accumulate(weights.begin(), weights.end(), 0LL);
 
-  auto days_needed = [&weights](int capacity) {
+  auto days_needed = [&weights](long long capacity) {
     int used = 1;
     long long load = 0;
     for (int w : weights) {
@@ -29,7 +35,7 @@ inline int min_capacity(const std::vector<int>& weights, int days) {
   };
 
   while (lo < hi) {
-    const int mid = lo + (hi - lo) / 2;
+    const long long mid = lo + (hi - lo) / 2;
     if (days_needed(mid) <= days) {
       hi = mid;
     } else {
