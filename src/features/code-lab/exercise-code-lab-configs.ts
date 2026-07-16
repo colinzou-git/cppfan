@@ -689,6 +689,86 @@ int main() {
     ],
     skillTags: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"]
   },
+  "bit-power-of-two": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: power of two.
+
+Print whether the given integer is a power of two (1, 2, 4, 8, ...).
+
+Input format:
+- One line with the integer n.
+
+Output format:
+- "true" or "false", then a newline.
+
+16 -> true; 6 -> false; 0 -> false.
+
+AI evaluation rubric:
+- Uses the n > 0 && (n & (n - 1)) == 0 trick (O(1)), not a loop dividing by 2.
+- Rejects zero and negatives.`,
+    stdin: "16\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  bool result = false;
+  // TODO: set result to true iff n > 0 and n has exactly one set bit.
+  cout << (result ? "true" : "false") << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Power", stdin: "16\n", expectedStdout: "true\n", matcher: "exact" },
+      { name: "Not a power", stdin: "6\n", expectedStdout: "false\n", matcher: "exact" },
+      { name: "Zero", stdin: "0\n", expectedStdout: "false\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation"]
+  },
+  "bit-hamming-distance": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: Hamming distance.
+
+Print the number of bit positions at which the two given non-negative integers
+differ.
+
+Input format:
+- One line with two space-separated integers a and b.
+
+Output format:
+- The Hamming distance, then a newline.
+
+1 and 4 -> 2; 0 and 255 -> 8.
+
+AI evaluation rubric:
+- Computes popcount(a ^ b); counts set bits (e.g. x &= x - 1), not per-bit shifts
+  with an off-by-one.`,
+    stdin: "1 4\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int a, b;
+  cin >> a >> b;
+  unsigned int diff = (unsigned)a ^ (unsigned)b;
+  int count = 0;
+  // TODO: count the set bits of diff (clear the lowest bit each step).
+  cout << count << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "1 4\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "All byte bits", stdin: "0 255\n", expectedStdout: "8\n", matcher: "exact" },
+      { name: "Equal", stdin: "7 7\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation"]
+  },
   "strings-reverse-words": {
     enabled: true,
     language: "cpp",

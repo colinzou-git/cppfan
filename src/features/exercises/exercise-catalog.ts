@@ -329,6 +329,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "bit-technique-playground"
   },
   {
+    id: "bit-power-of-two",
+    title: "Bit manipulation: power of two",
+    skillIds: ["dsa.math.bit_manipulation"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["power_of_two.hpp"],
+    requiredTests: [
+      "test_powers",
+      "test_non_powers",
+      "test_one",
+      "test_zero_and_negative",
+      "test_large"
+    ],
+    hints: [
+      "A power of two has exactly one set bit in its binary form.",
+      "For n > 0, the expression n & (n - 1) clears the lowest set bit; it is zero exactly when only one bit was set.",
+      "Guard the sign first: zero and negatives are never powers of two."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
+    id: "bit-hamming-distance",
+    title: "Bit manipulation: Hamming distance",
+    skillIds: ["dsa.math.bit_manipulation"],
+    difficulty: "beginner",
+    estimatedMinutes: 15,
+    editableFiles: ["hamming_distance.hpp"],
+    requiredTests: [
+      "test_classic",
+      "test_equal",
+      "test_zero_and_value",
+      "test_all_bits",
+      "test_one_bit"
+    ],
+    hints: [
+      "The Hamming distance is the number of bit positions where the two numbers differ.",
+      "XOR sets a bit exactly where the operands differ, so hamming(a, b) = popcount(a ^ b).",
+      "Count set bits by repeatedly clearing the lowest one with x &= x - 1, or use an unsigned accumulator."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
     id: "strings-reverse-words",
     title: "Strings: reverse the word order",
     skillIds: ["dsa.strings.manipulation", "dsa.strings.parsing"],

@@ -1,0 +1,17 @@
+{
+  "id": "bit-hamming-distance",
+  "title": "Bit manipulation: Hamming distance",
+  "skill_ids": ["dsa.math.bit_manipulation"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["hamming_distance.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-hamming-distance/work exercises/bit-hamming-distance/tests/tests.cpp -o exercises/bit-hamming-distance/work/run",
+  "test_command": "exercises/bit-hamming-distance/work/run",
+  "required_tests": ["test_classic", "test_equal", "test_zero_and_value", "test_all_bits", "test_one_bit"],
+  "hints": [
+    "The Hamming distance is the number of bit positions where the two numbers differ.",
+    "XOR sets a bit exactly where the operands differ, so hamming(a, b) = popcount(a ^ b).",
+    "Count set bits by repeatedly clearing the lowest one with x &= x - 1, or use an unsigned accumulator."
+  ],
+  "project_lab": "bit-technique-playground"
+}
