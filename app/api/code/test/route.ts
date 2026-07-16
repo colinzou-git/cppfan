@@ -27,8 +27,9 @@ export async function POST(request: Request) {
     milestoneIndex: parsed.milestoneIndex
   });
 
-  // A refused (stale-definition) test run never executed, so record nothing.
-  if (!result.staleDefinition) {
+  // A refused test run (stale definition or unavailable item) never executed,
+  // so record no attempt/mastery evidence (#614).
+  if (!result.staleDefinition && !result.itemUnavailable) {
     await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, test: result }).catch(
       () => false
     );

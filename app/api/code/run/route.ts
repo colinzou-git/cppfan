@@ -29,8 +29,9 @@ export async function POST(request: Request) {
   });
 
   // Persistence is best-effort and must never block or fail the run response.
-  // A refused (stale-definition) run never executed, so record nothing.
-  if (!result.staleDefinition) {
+  // A refused run (stale definition or unavailable item) never executed, so
+  // record no attempt/mastery evidence (#614).
+  if (!result.staleDefinition && !result.itemUnavailable) {
     await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, run: result }).catch(
       () => false
     );
