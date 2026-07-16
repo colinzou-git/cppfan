@@ -1,0 +1,17 @@
+{
+  "id": "strings-roman-to-integer",
+  "title": "Strings: Roman numeral to integer",
+  "skill_ids": ["dsa.strings.parsing", "dsa.strings.manipulation"],
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "editable_files": ["roman_to_integer.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-roman-to-integer/work exercises/strings-roman-to-integer/tests/tests.cpp -o exercises/strings-roman-to-integer/work/run",
+  "test_command": "exercises/strings-roman-to-integer/work/run",
+  "required_tests": ["test_simple", "test_subtractive", "test_mixed", "test_large", "test_single"],
+  "hints": [
+    "Map each symbol to its value: I=1, V=5, X=10, L=50, C=100, D=500, M=1000.",
+    "Scan left to right; normally add each value, but when a smaller value sits directly before a larger one, subtract it (e.g. IV = 4).",
+    "Compare the current symbol's value to the NEXT symbol's value to decide add vs. subtract."
+  ],
+  "project_lab": "text-processing-playground"
+}

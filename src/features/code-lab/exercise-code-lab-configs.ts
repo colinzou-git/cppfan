@@ -819,6 +819,95 @@ int main() {
     ],
     skillTags: ["dsa.strings.manipulation", "dsa.strings.parsing"]
   },
+  "strings-roman-to-integer": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: Roman numeral to integer.
+
+Convert a valid uppercase Roman numeral to its integer value.
+
+Symbols: I=1, V=5, X=10, L=50, C=100, D=500, M=1000. Add each value, except when a
+smaller value sits directly before a larger one, in which case subtract it
+(IV = 4, IX = 9, XL = 40, CM = 900, ...).
+
+Input format:
+- One line with the Roman numeral.
+
+Output format:
+- The integer value, then a newline.
+
+"LVIII" -> 58; "MCMXCIV" -> 1994.
+
+AI evaluation rubric:
+- Compares each symbol's value to the next to decide add vs. subtract.`,
+    stdin: "MCMXCIV\n",
+    starterCode: `#include <iostream>
+#include <string>
+using namespace std;
+
+int value(char c) {
+  switch (c) {
+    case 'I': return 1; case 'V': return 5; case 'X': return 10;
+    case 'L': return 50; case 'C': return 100; case 'D': return 500;
+    case 'M': return 1000; default: return 0;
+  }
+}
+
+int main() {
+  string s;
+  getline(cin, s);
+  int total = 0;
+  // TODO: add each value, subtracting when the next symbol is larger.
+  cout << total << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed", stdin: "LVIII\n", expectedStdout: "58\n", matcher: "exact" },
+      { name: "Large", stdin: "MCMXCIV\n", expectedStdout: "1994\n", matcher: "exact" },
+      { name: "Subtractive", stdin: "IX\n", expectedStdout: "9\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.parsing", "dsa.strings.manipulation"]
+  },
+  "math-gcd": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Math: greatest common divisor.
+
+Print the greatest common divisor of two non-negative integers using Euclid's
+algorithm.
+
+Input format:
+- One line with two space-separated integers a and b (not both zero).
+
+Output format:
+- gcd(a, b), then a newline.
+
+12 and 18 -> 6; 13 and 7 -> 1.
+
+AI evaluation rubric:
+- Uses the Euclid loop gcd(a,b)=gcd(b,a%b) (O(log min)), not a factor scan.`,
+    stdin: "12 18\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int a, b;
+  cin >> a >> b;
+  // TODO: while b != 0, replace (a, b) with (b, a % b); print a.
+  cout << a << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Common factor", stdin: "12 18\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "Coprime", stdin: "13 7\n", expectedStdout: "1\n", matcher: "exact" },
+      { name: "With zero", stdin: "7 0\n", expectedStdout: "7\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.number_theory"]
+  },
   "dp-edit-distance": {
     enabled: true,
     language: "cpp",

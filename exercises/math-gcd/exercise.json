@@ -1,0 +1,17 @@
+{
+  "id": "math-gcd",
+  "title": "Math: greatest common divisor",
+  "skill_ids": ["dsa.math.number_theory"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["gcd.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/math-gcd/work exercises/math-gcd/tests/tests.cpp -o exercises/math-gcd/work/run",
+  "test_command": "exercises/math-gcd/work/run",
+  "required_tests": ["test_coprime", "test_common_factor", "test_multiple", "test_with_zero", "test_equal"],
+  "hints": [
+    "Euclid's algorithm: gcd(a, b) == gcd(b, a % b), stopping when the second value reaches 0.",
+    "The loop form: while b != 0, replace (a, b) with (b, a % b); the answer is a.",
+    "gcd(x, 0) == x, so a value paired with zero returns itself."
+  ],
+  "project_lab": "math-technique-playground"
+}
