@@ -1,0 +1,17 @@
+{
+  "id": "bit-missing-number",
+  "title": "Bit manipulation: the missing number",
+  "skill_ids": ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["missing_number.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-missing-number/work exercises/bit-missing-number/tests/tests.cpp -o exercises/bit-missing-number/work/run",
+  "test_command": "exercises/bit-missing-number/work/run",
+  "required_tests": ["test_missing_middle", "test_missing_zero", "test_missing_last", "test_single", "test_large"],
+  "hints": [
+    "The array holds n distinct values drawn from 0..n, so exactly one of those n+1 values is missing.",
+    "XOR every index 0..n together, then XOR in every array value; pairs cancel and the missing value remains.",
+    "Start the accumulator at n so the top index is included without a separate pass."
+  ],
+  "project_lab": "bit-technique-playground"
+}
