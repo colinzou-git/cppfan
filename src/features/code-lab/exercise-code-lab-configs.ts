@@ -3327,6 +3327,112 @@ int main() {
     ],
     skillTags: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.trees.list_vs_vector"]
   },
+  "linked-list-remove-elements": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Linked list: remove elements.
+
+Remove every node whose value equals val from a singly linked list and print the
+remaining values.
+
+Input format:
+- The first line is n, the number of nodes.
+- The second line has n space-separated node values.
+- The third line is val.
+
+Output format:
+- The remaining values in order, space-separated (empty line if none), then a
+  newline.
+
+[1 2 6 3 6], val=6 -> "1 2 3".
+
+AI evaluation rubric:
+- Uses a dummy head; unlinks and deletes matches; advances prev only on no-match.`,
+    stdin: "5\n1 2 6 3 6\n6\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+ListNode* remove_elements(ListNode* head, int val) {
+  // TODO: use a dummy node; unlink and delete nodes whose value is val.
+  (void)val;
+  return head;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  ListNode* head = nullptr;
+  ListNode** tail = &head;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  int val;
+  cin >> val;
+  head = remove_elements(head, val);
+  bool first = true;
+  for (ListNode* c = head; c; c = c->next) { cout << (first ? "" : " ") << c->val; first = false; }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Remove middle", stdin: "5\n1 2 6 3 6\n6\n", expectedStdout: "1 2 3\n", matcher: "exact" },
+      { name: "Remove head", stdin: "4\n7 7 1 2\n7\n", expectedStdout: "1 2\n", matcher: "exact" },
+      { name: "Remove all", stdin: "3\n5 5 5\n5\n", expectedStdout: "\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers"]
+  },
+  "linked-list-middle-node": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Linked list: middle node.
+
+Print the values from the MIDDLE node of a singly linked list to the end. For an
+even number of nodes, the middle is the second of the two middle nodes.
+
+Input format:
+- The first line is n, the number of nodes.
+- The second line has n space-separated node values.
+
+Output format:
+- The values from the middle node to the end, space-separated, then a newline.
+
+[1 2 3 4 5] -> "3 4 5"; [1 2 3 4 5 6] -> "4 5 6".
+
+AI evaluation rubric:
+- Uses slow/fast pointers in one pass; slow lands on the (second) middle.`,
+    stdin: "5\n1 2 3 4 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+ListNode* middle_node(ListNode* head) {
+  // TODO: advance slow by 1 and fast by 2; return slow when fast runs out.
+  return head;
+}
+
+int main() {
+  int n;
+  cin >> n;
+  ListNode* head = nullptr;
+  ListNode** tail = &head;
+  for (int i = 0; i < n; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  bool first = true;
+  for (ListNode* c = middle_node(head); c; c = c->next) { cout << (first ? "" : " ") << c->val; first = false; }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Odd length", stdin: "5\n1 2 3 4 5\n", expectedStdout: "3 4 5\n", matcher: "exact" },
+      { name: "Even length", stdin: "6\n1 2 3 4 5 6\n", expectedStdout: "4 5 6\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "42\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers"]
+  },
   "linked-list-detect-cycle": {
     enabled: true,
     language: "cpp",

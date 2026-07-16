@@ -1,0 +1,17 @@
+{
+  "id": "linked-list-middle-node",
+  "title": "Linked list: middle node",
+  "skill_ids": ["dsa.trees.linked_list", "cpp.references.pointers"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["middle_node.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-middle-node/work exercises/linked-list-middle-node/tests/tests.cpp -o exercises/linked-list-middle-node/work/run",
+  "test_command": "exercises/linked-list-middle-node/work/run",
+  "required_tests": ["test_odd_length", "test_even_length", "test_single", "test_two", "test_five"],
+  "hints": [
+    "Use two pointers: a slow one advancing one step and a fast one advancing two steps.",
+    "When fast reaches the end (fast == nullptr or fast->next == nullptr), slow is at the middle.",
+    "For an even length this returns the SECOND of the two middle nodes."
+  ],
+  "project_lab": "linked-list-technique-playground"
+}

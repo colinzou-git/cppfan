@@ -131,6 +131,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `strings-is-subsequence` | string manipulation, two pointers | `text-processing-playground` |
 | `array-rotate-right` | array two pointers, indexing | `array-technique-playground` |
 | `strings-longest-palindrome-buildable` | char frequency, palindrome | `text-processing-playground` |
+| `linked-list-remove-elements` | linked list, pointers | `linked-list-technique-playground` |
+| `linked-list-middle-node` | linked list, pointers | `linked-list-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

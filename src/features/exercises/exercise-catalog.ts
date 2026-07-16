@@ -1529,6 +1529,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "note-manager"
   },
   {
+    id: "linked-list-remove-elements",
+    title: "Linked list: remove elements",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["remove_elements.hpp"],
+    requiredTests: [
+      "test_removes_middle",
+      "test_removes_head",
+      "test_removes_all",
+      "test_removes_none",
+      "test_empty"
+    ],
+    hints: [
+      "A dummy node before the head makes removing the real head the same as any other node.",
+      "Walk with a 'prev' pointer; when the next node's value equals val, unlink it (prev->next = prev->next->next) and delete it.",
+      "Only advance prev when you did NOT remove, so consecutive matches are all handled."
+    ],
+    projectLab: "linked-list-technique-playground"
+  },
+  {
+    id: "linked-list-middle-node",
+    title: "Linked list: middle node",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["middle_node.hpp"],
+    requiredTests: [
+      "test_odd_length",
+      "test_even_length",
+      "test_single",
+      "test_two",
+      "test_five"
+    ],
+    hints: [
+      "Use two pointers: a slow one advancing one step and a fast one advancing two steps.",
+      "When fast reaches the end (fast == nullptr or fast->next == nullptr), slow is at the middle.",
+      "For an even length this returns the SECOND of the two middle nodes."
+    ],
+    projectLab: "linked-list-technique-playground"
+  },
+  {
     id: "linked-list-detect-cycle",
     title: "Linked list: detect a cycle",
     skillIds: ["dsa.trees.linked_list", "cpp.references.pointers", "dsa.graphs.cycle_detection"],
