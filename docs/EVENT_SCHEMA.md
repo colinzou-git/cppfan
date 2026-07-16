@@ -81,13 +81,15 @@ If the production **Deploy database migrations** workflow fails on the
 is a manual, one-time, auditable step (it touches production data, so it is not
 run by CI):
 
-1. Inspect the offending values first (read-only):
+1. Inspect the offending values first with the read-only inspector. It runs in a
+   `read only` transaction that always rolls back, so it is safe to point at
+   production. Report 1 groups each invalid value with a count and whether the
+   reconciliation script already has a safe mapping for it; Report 2 lists the
+   affected rows for forensic context:
 
-   ```sql
-   select event_type, count(*)
-   from public.skill_events
-   where event_type not in ( /* the stable allowlist */ )
-   group by event_type order by count(*) desc;
+   ```bash
+   psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
+     -f scripts/db/inspect-invalid-skill-event-types.sql
    ```
 
 2. Run the reconciliation script against production:
