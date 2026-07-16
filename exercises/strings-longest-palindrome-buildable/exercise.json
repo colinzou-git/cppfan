@@ -1,0 +1,17 @@
+{
+  "id": "strings-longest-palindrome-buildable",
+  "title": "Strings: longest buildable palindrome",
+  "skill_ids": ["dsa.strings.char_frequency", "dsa.strings.palindrome"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["longest_palindrome.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/strings-longest-palindrome-buildable/work exercises/strings-longest-palindrome-buildable/tests/tests.cpp -o exercises/strings-longest-palindrome-buildable/work/run",
+  "test_command": "exercises/strings-longest-palindrome-buildable/work/run",
+  "required_tests": ["test_mixed_case", "test_all_pairs", "test_single_char", "test_one_odd", "test_empty"],
+  "hints": [
+    "A palindrome uses each character an even number of times, plus at most one character in the exact center.",
+    "Count each character's frequency; add the largest even number <= its count (freq / 2 * 2) to the length.",
+    "If ANY character had an odd count, you can place one of them in the center, so add 1 to the total."
+  ],
+  "project_lab": "text-processing-playground"
+}

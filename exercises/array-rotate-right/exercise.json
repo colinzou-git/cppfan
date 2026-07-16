@@ -1,0 +1,17 @@
+{
+  "id": "array-rotate-right",
+  "title": "Arrays: rotate right by k",
+  "skill_ids": ["dsa.arrays.two_pointers", "dsa.arrays.indexing"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["rotate_right.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-rotate-right/work exercises/array-rotate-right/tests/tests.cpp -o exercises/array-rotate-right/work/run",
+  "test_command": "exercises/array-rotate-right/work/run",
+  "required_tests": ["test_basic", "test_k_zero", "test_k_wraps", "test_single", "test_full_cycle"],
+  "hints": [
+    "Rotating right by k moves each element to index (i + k) % n; reduce k modulo n first so large k is cheap.",
+    "The reversal trick: reverse the whole array, then reverse the first k elements, then reverse the rest.",
+    "Guard the empty array so k % n does not divide by zero."
+  ],
+  "project_lab": "array-technique-playground"
+}

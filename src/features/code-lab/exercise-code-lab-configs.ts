@@ -2824,6 +2824,97 @@ int main() {
     ],
     skillTags: ["dsa.arrays.traversal", "dsa.arrays.indexing"]
   },
+  "array-rotate-right": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Arrays: rotate right by k.
+
+Print the array rotated to the right by k positions: each element at index i
+moves to (i + k) % n. k may be larger than n.
+
+Input format:
+- The first line has two integers n and k.
+- The second line has n space-separated integers.
+
+Output format:
+- The rotated array, space-separated, then a newline.
+
+[1 2 3 4 5], k=2 -> "4 5 1 2 3".
+
+AI evaluation rubric:
+- Reduces k modulo n; rotates in O(n) (e.g. three reversals), not k single shifts.`,
+    stdin: "5 2\n1 2 3 4 5\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n, k;
+  cin >> n >> k;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  if (n > 0) {
+    k %= n;
+    // TODO: rotate a right by k (e.g. reverse all, reverse first k, reverse rest).
+  }
+  for (size_t i = 0; i < a.size(); ++i) cout << (i ? " " : "") << a[i];
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "5 2\n1 2 3 4 5\n", expectedStdout: "4 5 1 2 3\n", matcher: "exact" },
+      { name: "k wraps", stdin: "3 7\n1 2 3\n", expectedStdout: "3 1 2\n", matcher: "exact" },
+      { name: "k=0", stdin: "3 0\n1 2 3\n", expectedStdout: "1 2 3\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.two_pointers", "dsa.arrays.indexing"]
+  },
+  "strings-longest-palindrome-buildable": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Strings: longest buildable palindrome.
+
+Print the length of the longest palindrome that can be built from the characters
+of the input string (case-sensitive). You need not use every character.
+
+Input format:
+- One line with the string.
+
+Output format:
+- The maximum palindrome length, then a newline.
+
+"abccccdd" -> 7; "abc" -> 1.
+
+AI evaluation rubric:
+- Sums freq/2*2 across characters and adds 1 if any character had an odd count.`,
+    stdin: "abccccdd\n",
+    starterCode: `#include <array>
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+  string s;
+  getline(cin, s);
+  array<int, 256> freq{};
+  for (unsigned char c : s) ++freq[c];
+  int length = 0;
+  bool hasOdd = false;
+  // TODO: add freq/2*2 for each char; set hasOdd if any count is odd.
+  cout << length + (hasOdd ? 1 : 0) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Mixed", stdin: "abccccdd\n", expectedStdout: "7\n", matcher: "exact" },
+      { name: "One odd", stdin: "aaabb\n", expectedStdout: "5\n", matcher: "exact" },
+      { name: "All distinct", stdin: "abc\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.strings.char_frequency", "dsa.strings.palindrome"]
+  },
   "matrix-transpose": {
     enabled: true,
     language: "cpp",
