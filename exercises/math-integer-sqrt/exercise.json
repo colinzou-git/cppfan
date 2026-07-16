@@ -1,0 +1,17 @@
+{
+  "id": "math-integer-sqrt",
+  "title": "Math: integer square root",
+  "skill_ids": ["dsa.searching.binary_search", "dsa.math.number_theory"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["integer_sqrt.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/math-integer-sqrt/work exercises/math-integer-sqrt/tests/tests.cpp -o exercises/math-integer-sqrt/work/run",
+  "test_command": "exercises/math-integer-sqrt/work/run",
+  "required_tests": ["test_perfect_squares", "test_non_squares", "test_zero_one", "test_large", "test_boundary"],
+  "hints": [
+    "Return the largest integer r such that r*r <= x (the floor of the real square root).",
+    "Binary search r in [0, x]; compare r*r to x using a 64-bit product so it does not overflow.",
+    "Move the lower bound up when mid*mid <= x, keeping the best candidate seen so far."
+  ],
+  "project_lab": "math-technique-playground"
+}

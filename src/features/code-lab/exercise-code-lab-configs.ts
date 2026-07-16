@@ -2866,6 +2866,92 @@ int main() {
     ],
     skillTags: ["dsa.arrays.indexing", "dsa.arrays.traversal"]
   },
+  "matrix-rotate-image": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Matrix: rotate image 90 degrees.
+
+Print the n x n matrix rotated 90 degrees clockwise. Element (r, c) moves to
+(c, n-1-r).
+
+Input format:
+- The first line is n.
+- The next n lines each have n space-separated integers.
+
+Output format:
+- The rotated matrix: n lines of n space-separated integers each.
+
+[[1 2 3] [4 5 6] [7 8 9]] -> [[7 4 1] [8 5 2] [9 6 3]].
+
+AI evaluation rubric:
+- Maps result[c][n-1-r] = matrix[r][c] (or transpose + reverse rows).`,
+    stdin: "3\n1 2 3\n4 5 6\n7 8 9\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<vector<int>> a(n, vector<int>(n));
+  for (int r = 0; r < n; ++r)
+    for (int c = 0; c < n; ++c) cin >> a[r][c];
+  vector<vector<int>> out(n, vector<int>(n, 0));
+  // TODO: fill out[c][n-1-r] = a[r][c], then print row by row.
+  for (int r = 0; r < n; ++r) {
+    for (int c = 0; c < n; ++c) cout << (c ? " " : "") << out[r][c];
+    cout << "\\n";
+  }
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "3x3", stdin: "3\n1 2 3\n4 5 6\n7 8 9\n", expectedStdout: "7 4 1\n8 5 2\n9 6 3\n", matcher: "exact" },
+      { name: "2x2", stdin: "2\n1 2\n3 4\n", expectedStdout: "3 1\n4 2\n", matcher: "exact" },
+      { name: "1x1", stdin: "1\n42\n", expectedStdout: "42\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.indexing", "dsa.arrays.traversal"]
+  },
+  "math-integer-sqrt": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Math: integer square root.
+
+Print floor(sqrt(x)) for a non-negative integer x: the largest r with r*r <= x.
+Use integer arithmetic only (no std::sqrt).
+
+Input format:
+- One line with the integer x.
+
+Output format:
+- The integer square root, then a newline.
+
+8 -> 2; 144 -> 12.
+
+AI evaluation rubric:
+- Binary searches r in [0, x] with a 64-bit product to avoid overflow.`,
+    stdin: "8\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+int main() {
+  int x;
+  cin >> x;
+  long long lo = 0, hi = x, best = 0;
+  // TODO: binary search the largest r with (long long)r*r <= x.
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Non-square", stdin: "8\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "Perfect square", stdin: "144\n", expectedStdout: "12\n", matcher: "exact" },
+      { name: "Zero", stdin: "0\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.searching.binary_search", "dsa.math.number_theory"]
+  },
   "sliding-window-min-size-subarray": {
     enabled: true,
     language: "cpp",
