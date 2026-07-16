@@ -1294,6 +1294,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "array-technique-playground"
   },
   {
+    id: "array-rotate-right",
+    title: "Arrays: rotate right by k",
+    skillIds: ["dsa.arrays.two_pointers", "dsa.arrays.indexing"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["rotate_right.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_k_zero",
+      "test_k_wraps",
+      "test_single",
+      "test_full_cycle"
+    ],
+    hints: [
+      "Rotating right by k moves each element to index (i + k) % n; reduce k modulo n first so large k is cheap.",
+      "The reversal trick: reverse the whole array, then reverse the first k elements, then reverse the rest.",
+      "Guard the empty array so k % n does not divide by zero."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
+    id: "strings-longest-palindrome-buildable",
+    title: "Strings: longest buildable palindrome",
+    skillIds: ["dsa.strings.char_frequency", "dsa.strings.palindrome"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["longest_palindrome.hpp"],
+    requiredTests: [
+      "test_mixed_case",
+      "test_all_pairs",
+      "test_single_char",
+      "test_one_odd",
+      "test_empty"
+    ],
+    hints: [
+      "A palindrome uses each character an even number of times, plus at most one character in the exact center.",
+      "Count each character's frequency; add the largest even number <= its count (freq / 2 * 2) to the length.",
+      "If ANY character had an odd count, you can place one of them in the center, so add 1 to the total."
+    ],
+    projectLab: "text-processing-playground"
+  },
+  {
     id: "matrix-transpose",
     title: "Matrix: transpose",
     skillIds: ["dsa.arrays.indexing", "dsa.arrays.traversal"],
