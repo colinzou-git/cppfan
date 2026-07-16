@@ -1315,6 +1315,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "array-technique-playground"
   },
   {
+    id: "matrix-rotate-image",
+    title: "Matrix: rotate image 90 degrees",
+    skillIds: ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["rotate_image.hpp"],
+    requiredTests: [
+      "test_2x2",
+      "test_3x3",
+      "test_1x1",
+      "test_empty",
+      "test_values"
+    ],
+    hints: [
+      "Rotating an n x n matrix 90 degrees clockwise sends element (r, c) to (c, n-1-r).",
+      "Build a fresh n x n result and copy result[c][n-1-r] = matrix[r][c].",
+      "Equivalently: transpose the matrix, then reverse each row."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
+    id: "math-integer-sqrt",
+    title: "Math: integer square root",
+    skillIds: ["dsa.searching.binary_search", "dsa.math.number_theory"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["integer_sqrt.hpp"],
+    requiredTests: [
+      "test_perfect_squares",
+      "test_non_squares",
+      "test_zero_one",
+      "test_large",
+      "test_boundary"
+    ],
+    hints: [
+      "Return the largest integer r such that r*r <= x (the floor of the real square root).",
+      "Binary search r in [0, x]; compare r*r to x using a 64-bit product so it does not overflow.",
+      "Move the lower bound up when mid*mid <= x, keeping the best candidate seen so far."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "sliding-window-min-size-subarray",
     title: "Sliding window: minimum size subarray sum",
     skillIds: ["dsa.techniques.sliding_window", "dsa.arrays.two_pointers", "dsa.complexity.big_o"],

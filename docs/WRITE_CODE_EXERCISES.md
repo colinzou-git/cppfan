@@ -125,6 +125,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `matrix-transpose` | array indexing, traversal | `array-technique-playground` |
 | `strings-roman-to-integer` | string parsing, manipulation | `text-processing-playground` |
 | `math-gcd` | number theory (Euclid) | `math-technique-playground` |
+| `matrix-rotate-image` | array indexing, traversal | `array-technique-playground` |
+| `math-integer-sqrt` | binary search, number theory | `math-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

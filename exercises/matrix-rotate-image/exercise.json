@@ -1,0 +1,17 @@
+{
+  "id": "matrix-rotate-image",
+  "title": "Matrix: rotate image 90 degrees",
+  "skill_ids": ["dsa.arrays.indexing", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["rotate_image.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/matrix-rotate-image/work exercises/matrix-rotate-image/tests/tests.cpp -o exercises/matrix-rotate-image/work/run",
+  "test_command": "exercises/matrix-rotate-image/work/run",
+  "required_tests": ["test_2x2", "test_3x3", "test_1x1", "test_empty", "test_values"],
+  "hints": [
+    "Rotating an n x n matrix 90 degrees clockwise sends element (r, c) to (c, n-1-r).",
+    "Build a fresh n x n result and copy result[c][n-1-r] = matrix[r][c].",
+    "Equivalently: transpose the matrix, then reverse each row."
+  ],
+  "project_lab": "array-technique-playground"
+}
