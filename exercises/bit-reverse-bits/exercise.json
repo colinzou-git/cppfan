@@ -1,0 +1,17 @@
+{
+  "id": "bit-reverse-bits",
+  "title": "Bit manipulation: reverse 32 bits",
+  "skill_ids": ["dsa.math.bit_manipulation", "dsa.complexity.big_o"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["reverse_bits.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-reverse-bits/work exercises/bit-reverse-bits/tests/tests.cpp -o exercises/bit-reverse-bits/work/run",
+  "test_command": "exercises/bit-reverse-bits/work/run",
+  "required_tests": ["test_example", "test_zero", "test_all_ones", "test_one", "test_high_bit"],
+  "hints": [
+    "Process all 32 bit positions; build the result one bit at a time.",
+    "Shift the result left by one, OR in the lowest bit of the input, then shift the input right.",
+    "Work with an unsigned 32-bit type so the shifts do not sign-extend."
+  ],
+  "project_lab": "bit-technique-playground"
+}

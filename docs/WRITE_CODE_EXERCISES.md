@@ -153,6 +153,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `tree-path-sum` | tree traversal, pointers | `tree-technique-playground` |
 | `linked-list-palindrome` | linked list, pointers | `linked-list-technique-playground` |
 | `tree-validate-bst` | BST search, tree traversal, pointers | `tree-technique-playground` |
+| `linked-list-remove-nth-from-end` | linked list, pointers | `linked-list-technique-playground` |
+| `bit-reverse-bits` | bit manipulation, Big-O | `bit-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

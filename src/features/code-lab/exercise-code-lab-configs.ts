@@ -1554,6 +1554,98 @@ int main() {
     ],
     skillTags: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"]
   },
+  "linked-list-remove-nth-from-end": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Linked list: remove the nth node from the end.
+
+Remove the nth node counting from the END (1-based) and print the resulting
+list values.
+
+Input format:
+- The first line has two integers: the list length k, then n.
+- The second line has k space-separated node values.
+
+Output format:
+- The remaining values, space-separated, then a newline (empty line if the
+  list becomes empty).
+
+[1 2 3 4 5], n=2 -> "1 2 3 5"; [1], n=1 -> "".
+
+AI evaluation rubric:
+- Dummy head + two pointers with a gap of n, in one pass. Deletes the node.`,
+    stdin: "5 2\n1 2 3 4 5\n",
+    starterCode: `#include <iostream>
+using namespace std;
+
+struct ListNode { int val; ListNode* next; ListNode(int v) : val(v), next(nullptr) {} };
+
+ListNode* remove_nth(ListNode* head, int n) {
+  // TODO: two-pointer gap of n; splice out and delete the target node.
+  (void)n;
+  return head;
+}
+
+int main() {
+  int k, n;
+  cin >> k >> n;
+  ListNode* head = nullptr;
+  ListNode** tail = &head;
+  for (int i = 0; i < k; ++i) { int x; cin >> x; *tail = new ListNode(x); tail = &(*tail)->next; }
+  bool first = true;
+  for (ListNode* c = remove_nth(head, n); c; c = c->next) { cout << (first ? "" : " ") << c->val; first = false; }
+  cout << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Middle", stdin: "5 2\n1 2 3 4 5\n", expectedStdout: "1 2 3 5\n", matcher: "exact" },
+      { name: "Head", stdin: "3 3\n1 2 3\n", expectedStdout: "2 3\n", matcher: "exact" },
+      { name: "Becomes empty", stdin: "1 1\n42\n", expectedStdout: "\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.trees.linked_list", "cpp.references.pointers"]
+  },
+  "bit-reverse-bits": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: reverse 32 bits.
+
+Print the unsigned value whose 32-bit pattern is the reverse of the input.
+
+Input format:
+- One line with the unsigned integer n (0 to 4294967295).
+
+Output format:
+- The bit-reversed value, then a newline.
+
+43261596 -> 964176192; 1 -> 2147483648.
+
+AI evaluation rubric:
+- Loops 32 times: result = (result << 1) | (n & 1); n >>= 1.
+- Uses an unsigned 32-bit type so shifts do not sign-extend.`,
+    stdin: "43261596\n",
+    starterCode: `#include <cstdint>
+#include <iostream>
+using namespace std;
+
+int main() {
+  uint32_t n;
+  cin >> n;
+  uint32_t result = 0;
+  // TODO: for 32 iterations, shift result left, OR in n's lowest bit, shift n right.
+  cout << result << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Example", stdin: "43261596\n", expectedStdout: "964176192\n", matcher: "exact" },
+      { name: "One", stdin: "1\n", expectedStdout: "2147483648\n", matcher: "exact" },
+      { name: "Zero", stdin: "0\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation", "dsa.complexity.big_o"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",
