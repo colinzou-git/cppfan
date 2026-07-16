@@ -3,6 +3,7 @@ import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { ContentSourceBadge } from "@/features/user-content/content-source-badge";
 import { ContentRowActions } from "@/features/user-content/content-row-actions";
+import { userContentKindConfig } from "@/features/user-content/user-content-kind-config";
 import { getMyContentItems } from "@/features/user-content/user-content-queries";
 import { getMyExerciseGroups } from "@/features/user-content/exercise-group-queries";
 import { ExerciseGroupManager } from "@/features/user-content/exercise-group-manager";
@@ -88,19 +89,21 @@ export default async function MyContentPage({
 
           {visible.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-sm text-slate-600">
-              No {STATUS_FILTER_LABELS[filter].toLowerCase()} lessons yet.
+              No {STATUS_FILTER_LABELS[filter].toLowerCase()} content yet.
             </div>
           ) : (
             <ul className="grid gap-3">
-              {visible.map((item) => (
+              {visible.map((item) => {
+                const config = userContentKindConfig(item.kind);
+                return (
                 <li key={item.id} className="grid gap-3 rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm">
                   <Link
-                    href={`/my-content/${item.kind === "exercise" ? "exercises" : "lessons"}/${item.id}/edit`}
+                    href={`/my-content/${config.routeSegment}/${item.id}/edit`}
                     className="flex flex-wrap items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-bold text-slate-900">{item.title || (item.kind === "exercise" ? "Untitled exercise" : "Untitled lesson")}</span>
+                        <span className="truncate font-bold text-slate-900">{item.title || config.untitledLabel}</span>
                         <ContentSourceBadge source="user" />
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500">
@@ -111,7 +114,8 @@ export default async function MyContentPage({
                   </Link>
                   <ContentRowActions contentId={item.id} kind={item.kind} status={item.lifecycleStatus} revision={item.draftRevision} />
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </>

@@ -3,13 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  archiveContent,
-  exportContent,
-  publishContent,
-  publishExercise,
-  restoreContent
-} from "./user-content-actions";
+import { archiveContent, exportContent, restoreContent } from "./user-content-actions";
+import { userContentKindConfig } from "./user-content-kind-config";
 import { DeleteContentDialog } from "./delete-content-dialog";
 import { buildUserContentZip } from "./user-content-export";
 import type { UserContentKind, UserContentLifecycle } from "./user-content-types";
@@ -17,7 +12,7 @@ import type { UserContentKind, UserContentLifecycle } from "./user-content-types
 const ERRORS: Record<string, string> = {
   conflict: "Changed on another device — reload first.",
   invalid: "Not ready: check required fields.",
-  not_found: "That lesson was not found.",
+  not_found: "That content was not found.",
   unconfigured: "Needs a configured backend.",
   error: "Something went wrong. Try again."
 };
@@ -40,7 +35,7 @@ export function ContentRowActions({
   revision: number;
 }) {
   const router = useRouter();
-  const base = kind === "exercise" ? "exercises" : "lessons";
+  const config = userContentKindConfig(kind);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
 
@@ -67,7 +62,7 @@ export function ContentRowActions({
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `cppfan-lesson-${contentId}.zip`;
+    anchor.download = `cppfan-${config.exportSlug}-${contentId}.zip`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -78,19 +73,13 @@ export function ContentRowActions({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Link href={`/my-content/${base}/${contentId}/preview`} className={btn}>Preview</Link>
+      <Link href={`/my-content/${config.routeSegment}/${contentId}/preview`} className={btn}>Preview</Link>
       {status === "draft" ? (
         <button
           type="button"
           className={btn}
           disabled={pending}
-          onClick={() =>
-            run(() =>
-              kind === "exercise"
-                ? publishExercise({ contentId, expectedRevision: revision })
-                : publishContent({ contentId, expectedRevision: revision })
-            )
-          }
+          onClick={() => run(() => config.publish({ contentId, expectedRevision: revision }))}
         >
           Publish
         </button>
