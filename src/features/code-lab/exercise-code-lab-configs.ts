@@ -1229,6 +1229,96 @@ int main() {
     ],
     skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"]
   },
+  "bit-single-number-ii": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Bit manipulation: single number (appears three times).
+
+Every value appears exactly three times except one, which appears once.
+Print that unique value.
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The value that appears once, then a newline.
+
+[2 2 3 2] -> 3; [0 1 0 1 0 1 99] -> 99.
+
+AI evaluation rubric:
+- Counts set bits per position mod 3 (O(n), O(1) extra), not XOR.
+- Handles negatives via the 32-bit two's-complement pattern.`,
+    stdin: "4\n2 2 3 2\n",
+    starterCode: `#include <cstdint>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  uint32_t result = 0;
+  // TODO: for each of the 32 bit positions, sum the set bits mod 3.
+  cout << (int)result << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "4\n2 2 3 2\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Bigger", stdin: "7\n0 1 0 1 0 1 99\n", expectedStdout: "99\n", matcher: "exact" },
+      { name: "Negative", stdin: "4\n-2 -2 -2 5\n", expectedStdout: "5\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"]
+  },
+  "dp-coin-change-ways": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `DP: coin change (count combinations).
+
+Print how many distinct combinations of coins (unlimited supply of each) sum
+exactly to a target amount. Order does not matter.
+
+Input format:
+- The first line has two integers: n (number of coin types) and amount.
+- The second line has n space-separated coin denominations.
+
+Output format:
+- The number of combinations, then a newline.
+
+coins [1 2 5], amount 5 -> 4; coins [2], amount 3 -> 0.
+
+AI evaluation rubric:
+- Loops coins on the OUTER loop so 1+2 and 2+1 are not double-counted.
+- ways[0] = 1; adds ways[t - coin] to ways[t].`,
+    stdin: "3 5\n1 2 5\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n, amount;
+  cin >> n >> amount;
+  vector<int> coins(n);
+  for (auto& c : coins) cin >> c;
+  vector<long long> ways(amount + 1, 0);
+  ways[0] = 1;
+  // TODO: for each coin, add ways[t - coin] to ways[t] for t from coin to amount.
+  cout << ways[amount] << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "3 5\n1 2 5\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Impossible", stdin: "1 3\n2\n", expectedStdout: "0\n", matcher: "exact" },
+      { name: "Multiple", stdin: "3 4\n1 2 3\n", expectedStdout: "4\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"]
+  },
   "stack-daily-temperatures": {
     enabled: true,
     language: "cpp",

@@ -147,6 +147,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `stack-next-greater-element` | stack (monotonic), array traversal | `stack-technique-playground` |
 | `strings-atoi` | string parsing, Big-O | `text-processing-playground` |
 | `dp-partition-equal-subset-sum` | dynamic programming, array traversal | `dp-technique-playground` |
+| `bit-single-number-ii` | bit manipulation, array traversal | `bit-technique-playground` |
+| `dp-coin-change-ways` | dynamic programming, array traversal | `dp-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

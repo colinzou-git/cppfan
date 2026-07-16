@@ -581,6 +581,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "dp-technique-playground"
   },
   {
+    id: "bit-single-number-ii",
+    title: "Bit manipulation: single number (appears three times)",
+    skillIds: ["dsa.math.bit_manipulation", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["single_number.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_bigger",
+      "test_negatives",
+      "test_single",
+      "test_order_independent"
+    ],
+    hints: [
+      "Every value except one appears exactly three times, so plain XOR no longer isolates the answer.",
+      "Count how many array values have each bit set; that count is a multiple of 3 for the tripled numbers.",
+      "For each of the 32 bit positions, if the count of set bits is not divisible by 3, that bit belongs to the unique number."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
+    id: "dp-coin-change-ways",
+    title: "DP: coin change (count combinations)",
+    skillIds: ["dsa.techniques.dynamic_programming", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 30,
+    editableFiles: ["count_ways.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_none",
+      "test_zero",
+      "test_single_coin",
+      "test_multiple"
+    ],
+    hints: [
+      "Count combinations (order does not matter), so iterate coins on the OUTER loop and amounts on the inner loop.",
+      "ways[0] = 1 (one way to make 0: pick nothing); ways[t] starts at 0.",
+      "For each coin c, add ways[t - c] to ways[t] for every t from c up to amount."
+    ],
+    projectLab: "dp-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
