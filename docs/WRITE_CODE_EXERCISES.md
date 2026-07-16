@@ -127,6 +127,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `math-gcd` | number theory (Euclid) | `math-technique-playground` |
 | `matrix-rotate-image` | array indexing, traversal | `array-technique-playground` |
 | `math-integer-sqrt` | binary search, number theory | `math-technique-playground` |
+| `matrix-spiral-order` | array indexing, traversal | `array-technique-playground` |
+| `strings-is-subsequence` | string manipulation, two pointers | `text-processing-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |
