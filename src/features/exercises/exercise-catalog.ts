@@ -707,6 +707,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "tree-technique-playground"
   },
   {
+    id: "linked-list-remove-nth-from-end",
+    title: "Linked list: remove the nth node from the end",
+    skillIds: ["dsa.trees.linked_list", "cpp.references.pointers"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["remove_nth.hpp"],
+    requiredTests: [
+      "test_middle",
+      "test_head",
+      "test_tail",
+      "test_single",
+      "test_second_of_two"
+    ],
+    hints: [
+      "Use a dummy node before the head so removing the first node needs no special case.",
+      "Advance a lead pointer n steps first, then move lead and a trailing pointer together until lead reaches the end.",
+      "The trailing pointer now sits just before the target; splice it out and delete the removed node."
+    ],
+    projectLab: "linked-list-technique-playground"
+  },
+  {
+    id: "bit-reverse-bits",
+    title: "Bit manipulation: reverse 32 bits",
+    skillIds: ["dsa.math.bit_manipulation", "dsa.complexity.big_o"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["reverse_bits.hpp"],
+    requiredTests: [
+      "test_example",
+      "test_zero",
+      "test_all_ones",
+      "test_one",
+      "test_high_bit"
+    ],
+    hints: [
+      "Process all 32 bit positions; build the result one bit at a time.",
+      "Shift the result left by one, OR in the lowest bit of the input, then shift the input right.",
+      "Work with an unsigned 32-bit type so the shifts do not sign-extend."
+    ],
+    projectLab: "bit-technique-playground"
+  },
+  {
     id: "stack-daily-temperatures",
     title: "Stack: daily temperatures",
     skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],

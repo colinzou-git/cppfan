@@ -1,0 +1,17 @@
+{
+  "id": "linked-list-remove-nth-from-end",
+  "title": "Linked list: remove the nth node from the end",
+  "skill_ids": ["dsa.trees.linked_list", "cpp.references.pointers"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["remove_nth.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/linked-list-remove-nth-from-end/work exercises/linked-list-remove-nth-from-end/tests/tests.cpp -o exercises/linked-list-remove-nth-from-end/work/run",
+  "test_command": "exercises/linked-list-remove-nth-from-end/work/run",
+  "required_tests": ["test_middle", "test_head", "test_tail", "test_single", "test_second_of_two"],
+  "hints": [
+    "Use a dummy node before the head so removing the first node needs no special case.",
+    "Advance a lead pointer n steps first, then move lead and a trailing pointer together until lead reaches the end.",
+    "The trailing pointer now sits just before the target; splice it out and delete the removed node."
+  ],
+  "project_lab": "linked-list-technique-playground"
+}
