@@ -69,4 +69,23 @@ describe("stable skill event names", () => {
       expect(present.has(name)).toBe(true);
     }
   });
+
+  it("read-only inspector allowlist covers every stable name (#441)", () => {
+    const sql = readRepoFile("scripts/db/inspect-invalid-skill-event-types.sql");
+    // The inspector must never mutate: it runs read-only and always rolls back.
+    expect(sql).toMatch(/set transaction read only/i);
+    expect(sql).toMatch(/rollback/i);
+    const present = new Set(singleQuotedIdents(sql));
+    for (const name of SKILL_EVENT_NAMES) {
+      expect(present.has(name)).toBe(true);
+    }
+  });
+
+  it("reconciliation script allowlist covers every stable name (#441)", () => {
+    const sql = readRepoFile("scripts/db/reconcile-invalid-skill-event-types.sql");
+    const present = new Set(singleQuotedIdents(sql));
+    for (const name of SKILL_EVENT_NAMES) {
+      expect(present.has(name)).toBe(true);
+    }
+  });
 });
