@@ -119,6 +119,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `dsa-count-set-bits` | bit manipulation | `math-technique-playground` |
 | `bit-single-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
 | `bit-missing-number` | bit manipulation (XOR), array traversal | `bit-technique-playground` |
+| `bit-power-of-two` | bit manipulation | `bit-technique-playground` |
+| `bit-hamming-distance` | bit manipulation | `bit-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

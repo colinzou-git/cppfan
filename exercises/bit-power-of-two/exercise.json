@@ -1,0 +1,17 @@
+{
+  "id": "bit-power-of-two",
+  "title": "Bit manipulation: power of two",
+  "skill_ids": ["dsa.math.bit_manipulation"],
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "editable_files": ["power_of_two.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/bit-power-of-two/work exercises/bit-power-of-two/tests/tests.cpp -o exercises/bit-power-of-two/work/run",
+  "test_command": "exercises/bit-power-of-two/work/run",
+  "required_tests": ["test_powers", "test_non_powers", "test_one", "test_zero_and_negative", "test_large"],
+  "hints": [
+    "A power of two has exactly one set bit in its binary form.",
+    "For n > 0, the expression n & (n - 1) clears the lowest set bit; it is zero exactly when only one bit was set.",
+    "Guard the sign first: zero and negatives are never powers of two."
+  ],
+  "project_lab": "bit-technique-playground"
+}
