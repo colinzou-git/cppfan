@@ -6,10 +6,11 @@ import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { getInterviewProblem } from "@/features/interview/problem-catalog";
-import { getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
+import { getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "@/features/user-content/user-content-queries";
 import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
 import { labMilestoneViews } from "@/features/user-content/lab-code-lab";
 import { LabWorkspace } from "@/features/user-content/lab-workspace";
+import { interviewPayloadToCodeLabConfig } from "@/features/user-content/interview-code-lab";
 import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
 
 /**
@@ -52,6 +53,24 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
             title={lab.title}
             milestones={labMilestoneViews(lab.publishedPayload)}
             contentVersionId={lab.publishedVersionId ?? undefined}
+            backHref="/my-content"
+            backLabel="Back to My Content"
+          />
+        </main>
+      );
+    }
+    // Published user interview problems (#490): visible-only config; hidden tests
+    // + reference stay server-side per the fixed reveal policy.
+    const interview = userContentId ? await getInterviewForOwner(userContentId) : null;
+    if (interview?.publishedPayload) {
+      return (
+        <main className="p-3 xl:p-6">
+          <CodeLabWorkspace
+            itemId={decodedId}
+            title={interview.title}
+            config={interviewPayloadToCodeLabConfig(interview.publishedPayload)}
+            sourceVersion={`user-interview:${interview.publishedVersionId ?? "1"}`}
+            contentVersionId={interview.publishedVersionId ?? undefined}
             backHref="/my-content"
             backLabel="Back to My Content"
           />

@@ -8,6 +8,7 @@ import { setExerciseProgress } from "@/features/exercises/exercise-progress";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { resolveUserLabExecution } from "./user-lab-code-lab";
+import { resolveUserInterviewExecution } from "./user-interview-code-lab";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
 
 /**
@@ -87,6 +88,7 @@ async function recordCodeAttemptSkillEvents(input: {
     getCodeLabConfigForItem(input.itemId)?.skillTags ??
     (await resolveUserExerciseExecution(input.itemId))?.config.skillTags ??
     (await resolveUserLabExecution(input.itemId))?.config.skillTags ??
+    (await resolveUserInterviewExecution(input.itemId))?.config.skillTags ??
     [];
   if (skillTags.length === 0) return false;
 

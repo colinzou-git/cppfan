@@ -9,6 +9,7 @@ import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { getHiddenTestsForItem } from "./code-lab-hidden-tests";
 import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
 import { resolveUserLabExecution } from "./user-lab-code-lab";
+import { resolveUserInterviewExecution } from "./user-interview-code-lab";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -98,7 +99,7 @@ async function resolveUserItemExecution(itemId: string, milestoneIndex = 0) {
   if (exercise) {
     return { ...exercise, files: [] as { name: string; content: string }[] };
   }
-  return resolveUserLabExecution(itemId, milestoneIndex);
+  return (await resolveUserLabExecution(itemId, milestoneIndex)) ?? (await resolveUserInterviewExecution(itemId));
 }
 
 export async function runCode(input: {
