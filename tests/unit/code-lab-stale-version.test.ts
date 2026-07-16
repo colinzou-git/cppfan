@@ -7,8 +7,9 @@ import { resolveUserLabExecution } from "@/features/code-lab/user-lab-code-lab";
 // Force the user-exercise path: no static config, a DB-resolved config at v2.
 vi.mock("@/features/code-lab/code-lab-catalog", () => ({ getCodeLabConfigForItem: vi.fn() }));
 vi.mock("@/features/code-lab/user-exercise-code-lab", () => ({ resolveUserExerciseExecution: vi.fn() }));
-// The lab resolver is tried after the exercise resolver.
+// The lab + interview resolvers are tried after the exercise resolver.
 vi.mock("@/features/code-lab/user-lab-code-lab", () => ({ resolveUserLabExecution: vi.fn(async () => null) }));
+vi.mock("@/features/code-lab/user-interview-code-lab", () => ({ resolveUserInterviewExecution: vi.fn(async () => null) }));
 
 const mockedConfig = vi.mocked(getCodeLabConfigForItem);
 const mockedResolve = vi.mocked(resolveUserExerciseExecution);
