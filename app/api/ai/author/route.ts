@@ -6,10 +6,11 @@ import {
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
 import { getAiProviderPreferenceOverride } from "@/features/ai-chat/provider-preferences";
-import { getAttachmentsForOwner, getContentItemForOwner, getExerciseForOwner, getLabForOwner } from "@/features/user-content/user-content-queries";
+import { getAttachmentsForOwner, getContentItemForOwner, getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "@/features/user-content/user-content-queries";
 import { generateAuthoringProposal } from "@/features/user-content/ai-authoring-service";
 import { generateExerciseAuthoringProposal } from "@/features/user-content/exercise-ai-authoring-service";
 import { generateLabAuthoringProposal } from "@/features/user-content/lab-ai-authoring-service";
+import { generateInterviewAuthoringProposal } from "@/features/user-content/interview-ai-authoring-service";
 import type { AuthoringAttachmentRef } from "@/features/user-content/ai-authoring-policy";
 
 export const runtime = "nodejs";
@@ -113,6 +114,36 @@ export async function POST(request: Request) {
       return apiError("provider_error", "The AI provider could not complete the request.", 502);
     } finally {
       clearTimeout(labTimeout);
+    }
+  }
+
+  if (detail.kind === "interview_problem") {
+    const interview = await getInterviewForOwner(contentId);
+    const ivPayload = interview?.draftPayload ?? interview?.publishedPayload;
+    if (!ivPayload) {
+      return apiError("no_draft", "There is no interview-problem draft to work from yet.", 400);
+    }
+    const ivConfig = getAiProviderConfig(override);
+    const ivController = new AbortController();
+    const ivTimeout = setTimeout(() => ivController.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const result = await generateInterviewAuthoringProposal({
+        payload: ivPayload,
+        instruction,
+        providerKind: ivConfig.provider,
+        complete: (messages) => completeAiResponse({ messages, signal: ivController.signal })
+      });
+      if (result.status === "ok") {
+        return NextResponse.json({ proposal: result.proposal }, { headers: { "cache-control": "no-store" } });
+      }
+      if (result.status === "invalid") {
+        return apiError("proposal_invalid", result.message, 422);
+      }
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } catch {
+      return apiError("provider_error", "The AI provider could not complete the request.", 502);
+    } finally {
+      clearTimeout(ivTimeout);
     }
   }
 

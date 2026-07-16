@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { publishInterview, saveInterviewDraft } from "./user-content-actions";
 import { VersionHistory } from "./version-history";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
+import { InterviewAiProposalPanel } from "./interview-ai-proposal-panel";
+import { applyAcceptedInterviewOperations, type InterviewAuthoringOperation } from "./interview-ai-authoring";
 import type { ContentVersionSummary } from "./user-content-queries";
 import {
   INTERVIEW_DIFFICULTIES,
@@ -249,6 +251,18 @@ export function InterviewEditor({
     }
   }, [contentId, save]);
 
+  const applyAiOperations = useCallback(
+    (ops: InterviewAuthoringOperation[]) => {
+      if (ops.length === 0) {
+        return;
+      }
+      const current = buildInterviewPayload(fields) as unknown as InterviewProblemPayload;
+      const applied = applyAcceptedInterviewOperations(current, ops);
+      update(fieldsFromInterviewPayload(applied));
+    },
+    [fields, update]
+  );
+
   const codeArea = "min-h-24 rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm";
 
   function updateExample(index: number, patch: Partial<VisibleExample>) {
@@ -375,6 +389,8 @@ export function InterviewEditor({
         AI evaluation rubric
         <textarea className="min-h-20 rounded-xl border border-slate-300 px-3 py-2 font-normal" value={fields.aiRubric} onChange={(e) => update({ aiRubric: e.target.value })} placeholder="What should AI evaluation check? (required for judge + AI)" />
       </label>
+
+      <InterviewAiProposalPanel contentId={contentId} onApply={applyAiOperations} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={() => void save()} disabled={state === "saving"}>Save draft</Button>
