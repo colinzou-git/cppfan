@@ -1,0 +1,17 @@
+{
+  "id": "math-count-primes",
+  "title": "Math: count primes below n",
+  "skill_ids": ["dsa.math.number_theory", "dsa.arrays.traversal"],
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "editable_files": ["count_primes.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/math-count-primes/work exercises/math-count-primes/tests/tests.cpp -o exercises/math-count-primes/work/run",
+  "test_command": "exercises/math-count-primes/work/run",
+  "required_tests": ["test_small", "test_ten", "test_none", "test_edge", "test_larger"],
+  "hints": [
+    "Count primes strictly less than n. Numbers below 2 have zero primes.",
+    "Sieve of Eratosthenes: mark multiples of each prime starting at p*p as composite.",
+    "Only sieve while p*p < n; then count the values still marked prime in [2, n)."
+  ],
+  "project_lab": "math-technique-playground"
+}
