@@ -1615,6 +1615,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "task-queue-lab"
   },
   {
+    id: "stack-evaluate-rpn",
+    title: "Stack: evaluate Reverse Polish Notation",
+    skillIds: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["evaluate_rpn.hpp"],
+    requiredTests: [
+      "test_basic",
+      "test_precedence_free",
+      "test_division_truncates",
+      "test_single",
+      "test_negatives"
+    ],
+    hints: [
+      "Scan the tokens left to right, pushing numbers onto a stack.",
+      "On an operator, pop the top two values (the second popped is the LEFT operand), apply the op, and push the result.",
+      "Integer division truncates toward zero, which is what C++ int division already does."
+    ],
+    projectLab: "stack-technique-playground"
+  },
+  {
+    id: "array-majority-element",
+    title: "Arrays: majority element",
+    skillIds: ["dsa.arrays.traversal", "dsa.complexity.big_o"],
+    difficulty: "beginner",
+    estimatedMinutes: 20,
+    editableFiles: ["majority_element.hpp"],
+    requiredTests: [
+      "test_simple",
+      "test_single",
+      "test_all_same",
+      "test_exact_majority",
+      "test_negatives"
+    ],
+    hints: [
+      "The majority element appears more than n/2 times, so it is guaranteed to exist.",
+      "Boyer-Moore voting: keep a candidate and a count; on a match count++, otherwise count--.",
+      "When count hits 0, adopt the current element as the new candidate. The final candidate is the answer."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
     id: "tree-lowest-common-ancestor-bst",
     title: "Trees: lowest common ancestor in a BST",
     skillIds: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],

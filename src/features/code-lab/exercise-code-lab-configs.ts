@@ -3545,6 +3545,94 @@ int main() {
     ],
     skillTags: ["dsa.stacks.basic_stack", "cpp.stl.adapters", "dsa.complexity.amortized"]
   },
+  "stack-evaluate-rpn": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Stack: evaluate Reverse Polish Notation.
+
+Evaluate a postfix (RPN) arithmetic expression. Tokens are integers or one of the
+operators + - * / . Print the integer result.
+
+Input format:
+- The first line is n, the number of tokens.
+- The second line has n space-separated tokens.
+
+Output format:
+- The evaluated result, then a newline.
+
+["2","1","+","3","*"] -> 9.
+
+AI evaluation rubric:
+- Uses a stack; the second popped operand is the LEFT one; int division truncates
+  toward zero.`,
+    stdin: "5\n2 1 + 3 *\n",
+    starterCode: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<string> tok(n);
+  for (auto& t : tok) cin >> t;
+  vector<int> st;
+  // TODO: push numbers; on an operator pop two (right then left), apply, push.
+  cout << (st.empty() ? 0 : st.back()) << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Basic", stdin: "5\n2 1 + 3 *\n", expectedStdout: "9\n", matcher: "exact" },
+      { name: "Division", stdin: "5\n4 13 5 / +\n", expectedStdout: "6\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n42\n", expectedStdout: "42\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.stacks.basic_stack", "dsa.arrays.traversal"]
+  },
+  "array-majority-element": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Arrays: majority element.
+
+Print the majority element: the value that appears more than n/2 times (it is
+guaranteed to exist).
+
+Input format:
+- The first line is n, the number of values.
+- The second line has n space-separated integers.
+
+Output format:
+- The majority element, then a newline.
+
+[2 2 1 1 1 2 2] -> 2.
+
+AI evaluation rubric:
+- Uses Boyer-Moore voting (O(n) time, O(1) space), not a frequency map/sort.`,
+    stdin: "7\n2 2 1 1 1 2 2\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> a(n);
+  for (auto& x : a) cin >> x;
+  int candidate = 0, count = 0;
+  // TODO: Boyer-Moore voting; adopt a new candidate when count hits 0.
+  cout << candidate << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Seven values", stdin: "7\n2 2 1 1 1 2 2\n", expectedStdout: "2\n", matcher: "exact" },
+      { name: "Three", stdin: "3\n3 2 3\n", expectedStdout: "3\n", matcher: "exact" },
+      { name: "Single", stdin: "1\n7\n", expectedStdout: "7\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.traversal", "dsa.complexity.big_o"]
+  },
   "tree-lowest-common-ancestor-bst": {
     enabled: true,
     language: "cpp",

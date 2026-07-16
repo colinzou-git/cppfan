@@ -1,0 +1,17 @@
+{
+  "id": "array-majority-element",
+  "title": "Arrays: majority element",
+  "skill_ids": ["dsa.arrays.traversal", "dsa.complexity.big_o"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["majority_element.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-majority-element/work exercises/array-majority-element/tests/tests.cpp -o exercises/array-majority-element/work/run",
+  "test_command": "exercises/array-majority-element/work/run",
+  "required_tests": ["test_simple", "test_single", "test_all_same", "test_exact_majority", "test_negatives"],
+  "hints": [
+    "The majority element appears more than n/2 times, so it is guaranteed to exist.",
+    "Boyer-Moore voting: keep a candidate and a count; on a match count++, otherwise count--.",
+    "When count hits 0, adopt the current element as the new candidate. The final candidate is the answer."
+  ],
+  "project_lab": "array-technique-playground"
+}
