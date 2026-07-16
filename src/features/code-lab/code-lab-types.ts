@@ -136,6 +136,10 @@ export type CodeReviewRequest = {
   lastRunResult?: CodeRunResult | null;
   lastTestResult?: CodeTestResult | null;
   userQuestion?: string;
+  /** Published version the client loaded; a mismatch refuses review as stale (#611). */
+  contentVersionId?: string;
+  /** Active milestone for a multi-milestone user lab (#611). */
+  milestoneIndex?: number;
 };
 
 // Structured AI review output now lives in StructuredCodeFeedback

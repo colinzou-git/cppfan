@@ -43,7 +43,9 @@ export async function POST(request: Request) {
         source: parsed.source,
         lastRunResult: asObject<CodeRunResult>(body.lastRunResult) ?? null,
         lastTestResult: asObject<CodeTestResult>(body.lastTestResult) ?? null,
-        userQuestion: parsed.userQuestion
+        userQuestion: parsed.userQuestion,
+        contentVersionId: parsed.contentVersionId,
+        milestoneIndex: parsed.milestoneIndex
       },
       controller.signal
     );

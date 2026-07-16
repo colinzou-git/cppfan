@@ -5,10 +5,7 @@ import { isMissingObjectError } from "@/lib/supabase/errors";
 import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events/event-service";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { setExerciseProgress } from "@/features/exercises/exercise-progress";
-import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
-import { resolveUserLabExecution } from "./user-lab-code-lab";
-import { resolveUserInterviewExecution } from "./user-interview-code-lab";
+import { resolveCodeLabItem } from "./code-lab-item-resolver";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
 
 /**
@@ -84,12 +81,10 @@ async function recordCodeAttemptSkillEvents(input: {
   const result = input.test ?? input.run;
   if (!result || result.simulated) return false;
 
-  const skillTags =
-    getCodeLabConfigForItem(input.itemId)?.skillTags ??
-    (await resolveUserExerciseExecution(input.itemId))?.config.skillTags ??
-    (await resolveUserLabExecution(input.itemId))?.config.skillTags ??
-    (await resolveUserInterviewExecution(input.itemId))?.config.skillTags ??
-    [];
+  // One shared resolver for skill tags too, so labs/interviews credit mastery
+  // like exercises and native items (#611).
+  const resolved = await resolveCodeLabItem({ itemId: input.itemId });
+  const skillTags = resolved.status === "ok" ? resolved.item.skillTags : [];
   if (skillTags.length === 0) return false;
 
   const metadata = codeAttemptMetadata(input);

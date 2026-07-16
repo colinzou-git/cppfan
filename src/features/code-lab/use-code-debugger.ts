@@ -35,6 +35,10 @@ export type UseCodeDebuggerArgs = {
   source: string;
   stdin: string;
   breakpoints: CodeBreakpoint[];
+  /** Published version loaded; threaded to the explain call for stale checks (#611). */
+  contentVersionId?: string;
+  /** Active milestone for a multi-milestone user lab (#611). */
+  milestoneIndex?: number;
 };
 
 export type UseCodeDebugger = {
@@ -74,7 +78,14 @@ function nextWatchId(): string {
   return `watch-${watchCounter}`;
 }
 
-export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeDebuggerArgs): UseCodeDebugger {
+export function useCodeDebugger({
+  itemId,
+  source,
+  stdin,
+  breakpoints,
+  contentVersionId,
+  milestoneIndex
+}: UseCodeDebuggerArgs): UseCodeDebugger {
   const [snapshot, setSnapshot] = useState<CodeDebugSnapshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +171,14 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
       if (!snapshot) return;
       setExplaining(true);
       try {
-        const result = await explainDebugRequest({ itemId, source, snapshot, userQuestion });
+        const result = await explainDebugRequest({
+          itemId,
+          source,
+          snapshot,
+          userQuestion,
+          contentVersionId,
+          milestoneIndex
+        });
         setExplanation(result);
       } catch (caught) {
         setExplanation({ status: "unavailable", explanation: errorMessage(caught) });
@@ -168,7 +186,7 @@ export function useCodeDebugger({ itemId, source, stdin, breakpoints }: UseCodeD
         setExplaining(false);
       }
     },
-    [itemId, source, snapshot]
+    [itemId, source, snapshot, contentVersionId, milestoneIndex]
   );
 
   const addWatch = useCallback((expression: string) => {

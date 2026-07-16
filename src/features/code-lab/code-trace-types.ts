@@ -23,6 +23,10 @@ export type CodeTraceRequest = {
   lastRunResult?: CodeRunResult | null;
   lastTestResult?: CodeTestResult | null;
   userQuestion?: string;
+  /** Published version the client loaded; a mismatch refuses the trace as stale (#611). */
+  contentVersionId?: string;
+  /** Active milestone for a multi-milestone user lab (#611). */
+  milestoneIndex?: number;
 };
 
 export type CodeTraceStep = {
@@ -47,6 +51,11 @@ export type CodeTraceResult = {
   message?: string;
   /** Structured weak-evidence feedback derived from the trace (#410). */
   feedback?: StructuredCodeFeedback;
+  /**
+   * True when the loaded user-content version changed under the learner, so the
+   * trace was refused rather than run against a new definition (#611).
+   */
+  staleDefinition?: boolean;
 };
 
 export const CODE_TRACE_DISCLAIMER =

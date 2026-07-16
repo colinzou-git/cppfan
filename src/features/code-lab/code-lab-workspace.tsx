@@ -65,7 +65,9 @@ export function CodeLabWorkspace({
     itemId,
     source: c.source,
     stdin: c.stdin,
-    breakpoints: breakpointState.breakpoints
+    breakpoints: breakpointState.breakpoints,
+    contentVersionId,
+    milestoneIndex
   });
   const [tab, setTab] = useState<DockTab>("output");
   const [aiFullscreen, setAiFullscreen] = useState(false);

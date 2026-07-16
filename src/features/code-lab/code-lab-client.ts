@@ -45,6 +45,8 @@ export function reviewCodeRequest(
     lastRunResult?: CodeRunResult | null;
     lastTestResult?: CodeTestResult | null;
     userQuestion?: string;
+    contentVersionId?: string;
+    milestoneIndex?: number;
   },
   signal?: AbortSignal
 ): Promise<StructuredCodeFeedback> {
@@ -60,6 +62,8 @@ export function traceCodeRequest(
     selectedActualOutput?: string;
     lastRunResult?: CodeRunResult | null;
     lastTestResult?: CodeTestResult | null;
+    contentVersionId?: string;
+    milestoneIndex?: number;
   },
   signal?: AbortSignal
 ): Promise<CodeTraceResult> {

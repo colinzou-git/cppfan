@@ -3,8 +3,7 @@ import {
   completeAiResponse,
   isAiChatEnabled
 } from "@/features/ai-chat/ai-chat-provider";
-import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { resolveUserExerciseExecution } from "./user-exercise-code-lab";
+import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
 import { buildExplainMessages } from "./code-debug-explain-prompts";
 import type { CodeDebugExplainRequest, CodeDebugExplainResult } from "./code-debug-types";
 
@@ -22,15 +21,25 @@ export async function explainDebugStep(
   request: CodeDebugExplainRequest,
   signal: AbortSignal
 ): Promise<CodeDebugExplainResult> {
-  const config = getCodeLabConfigForItem(request.itemId) ?? (await resolveUserExerciseExecution(request.itemId))?.config ?? null;
-  const relatedSkills = config?.skillTags ?? [];
+  // One shared resolver: native or any user-created executable kind, at the
+  // active milestone, refused when the loaded version is stale (#611).
+  const resolved = await resolveCodeLabItem({
+    itemId: request.itemId,
+    expectedContentVersionId: request.contentVersionId,
+    milestoneIndex: request.milestoneIndex
+  });
+  if (resolved.status === "stale_definition") {
+    return { status: "unavailable", explanation: CODE_LAB_STALE_NOTE, relatedSkills: [], staleDefinition: true };
+  }
+  const item = resolved.status === "ok" ? resolved.item : null;
+  const relatedSkills = item?.skillTags ?? [];
 
   if (!isAiChatEnabled()) {
     return { status: "unavailable", explanation: UNAVAILABLE_MESSAGE, relatedSkills };
   }
 
   const messages = buildExplainMessages(request, {
-    prompt: config?.prompt ?? "",
+    prompt: item?.prompt ?? "",
     skillTags: relatedSkills
   });
 
