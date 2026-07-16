@@ -75,6 +75,48 @@ function staleTestResult(): CodeTestResult {
   };
 }
 
+const ITEM_UNAVAILABLE_NOTE =
+  "This exercise is no longer available. Return to the catalog or reload if it was recently republished.";
+
+/**
+ * The item could not be resolved (unknown id, or a user item that was archived /
+ * deleted / unpublished). Run and Test return the SAME non-success signal before
+ * touching the runner, so a missing item can never look like a successful run or
+ * a valid zero-test pass (#614).
+ */
+function unavailableRunResult(): CodeRunResult {
+  return {
+    status: "runner_error",
+    compileOutput: "",
+    stdout: "",
+    stderr: "",
+    exitCode: null,
+    timedOut: false,
+    durationMs: null,
+    memoryKb: null,
+    provider: "none",
+    simulated: false,
+    note: ITEM_UNAVAILABLE_NOTE,
+    itemUnavailable: true
+  };
+}
+
+function unavailableTestResult(): CodeTestResult {
+  return {
+    status: "runner_error",
+    passed: 0,
+    total: 0,
+    visible: [],
+    hiddenPassed: 0,
+    hiddenTotal: 0,
+    compileOutput: "",
+    provider: "none",
+    simulated: false,
+    note: ITEM_UNAVAILABLE_NOTE,
+    itemUnavailable: true
+  };
+}
+
 export async function runCode(input: {
   itemId: string;
   source: string;
@@ -93,21 +135,24 @@ export async function runCode(input: {
   if (resolved.status === "stale_definition") {
     return staleRunResult();
   }
-  // An unpublished/unknown user item resolves not_found; historically Run still
-  // executes the raw source with no config, so preserve that.
-  const item = resolved.status === "ok" ? resolved.item : null;
-  const config = item?.config ?? null;
+  // An unknown/unpublished item is refused BEFORE the runner, identically to
+  // Test, so Run can never compile arbitrary source without a task context (#614).
+  if (resolved.status === "not_found") {
+    return unavailableRunResult();
+  }
+  const item = resolved.item;
+  const config = item.config;
   const result = await executeRun(
     buildRunnerInput({
       source: input.source,
       stdin: input.stdin ?? "",
-      compilerFlags: resolvedFlags(input.compilerFlags ?? config?.compilerFlags),
-      files: item?.files
+      compilerFlags: resolvedFlags(input.compilerFlags ?? config.compilerFlags),
+      files: item.files
     })
   );
   const { classifications } = classifyCodeAttempt({
     runResult: result,
-    skillTags: config?.skillTags ?? []
+    skillTags: config.skillTags ?? []
   });
   return classifications.length > 0 ? { ...result, classifications } : result;
 }
@@ -136,7 +181,7 @@ export async function runTests(input: {
     return staleTestResult();
   }
   if (resolved.status === "not_found") {
-    return emptyTestResult("invalid_item");
+    return unavailableTestResult();
   }
   const { config, hiddenTests, files } = resolved.item;
 
@@ -219,19 +264,4 @@ function withClassifications(
     boundaryChecklists: config ? getBoundaryChecklistsForCodeLab(config) : []
   });
   return classifications.length > 0 ? { ...result, classifications } : result;
-}
-
-function emptyTestResult(note: string): CodeTestResult {
-  return {
-    status: "ok",
-    passed: 0,
-    total: 0,
-    visible: [],
-    hiddenPassed: 0,
-    hiddenTotal: 0,
-    compileOutput: "",
-    provider: "none",
-    simulated: false,
-    note
-  };
 }

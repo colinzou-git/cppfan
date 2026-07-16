@@ -64,6 +64,9 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
   const [tracePending, setTracePending] = useState(false);
   const [traceSource, setTraceSource] = useState<TraceSource>({ kind: "stdin" });
   const [error, setError] = useState<string | null>(null);
+  // Latched once Run or Test reports the item is gone, so both tabs agree and the
+  // actions can be disabled after the first definitive unavailable response (#614).
+  const [itemUnavailable, setItemUnavailable] = useState(false);
   const runResultRef = useRef<CodeRunResult | null>(null);
   const testResultRef = useRef<CodeTestResult | null>(null);
 
@@ -173,7 +176,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
   }
 
   async function handleAction(action: CodeAction) {
-    if ((action === "run" || action === "test") && missingRequired) return;
+    if ((action === "run" || action === "test") && (missingRequired || itemUnavailable)) return;
     setBusy(action);
     setError(null);
     try {
@@ -182,22 +185,32 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
         const result = await runCodeRequest({ itemId, source, stdin, contentVersionId, milestoneIndex });
         setRunResult(result);
         runResultRef.current = result;
-        updatePredictionComparisons();
-        applyClassifications(result.classifications ?? []);
-        updateScaffold(result.classifications ?? [], undefined);
-        onResult?.({ run: result, test: testResultRef.current });
+        // An unavailable item never executed: show the message but record no
+        // mastery/scaffold/remediation evidence and don't signal completion (#614).
+        if (result.itemUnavailable) {
+          setItemUnavailable(true);
+        } else {
+          updatePredictionComparisons();
+          applyClassifications(result.classifications ?? []);
+          updateScaffold(result.classifications ?? [], undefined);
+          onResult?.({ run: result, test: testResultRef.current });
+        }
       } else if (action === "test") {
         setReview(null);
         const result = await runTestsRequest({ itemId, source, contentVersionId, milestoneIndex });
         setTestResult(result);
         testResultRef.current = result;
-        updatePredictionComparisons();
-        applyClassifications(result.classifications ?? []);
-        updateScaffold(
-          result.classifications ?? [],
-          result.total > 0 ? result.passed / result.total : undefined
-        );
-        onResult?.({ run: runResultRef.current, test: result });
+        if (result.itemUnavailable) {
+          setItemUnavailable(true);
+        } else {
+          updatePredictionComparisons();
+          applyClassifications(result.classifications ?? []);
+          updateScaffold(
+            result.classifications ?? [],
+            result.total > 0 ? result.passed / result.total : undefined
+          );
+          onResult?.({ run: runResultRef.current, test: result });
+        }
       } else {
         const result = await reviewCodeRequest({
           itemId,
@@ -247,6 +260,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
     comparisons,
     requireBeforeRun,
     missingRequired,
+    itemUnavailable,
     checklists,
     remediation,
     scaffold,

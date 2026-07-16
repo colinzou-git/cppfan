@@ -100,8 +100,27 @@ export function CodeLabWorkspace({
         busy={c.busy}
         onAction={onAction}
         hasError={c.hasRunError}
-        runDisabled={c.missingRequired}
+        runDisabled={c.missingRequired || c.itemUnavailable}
       />
+      {c.itemUnavailable ? (
+        <div
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-800"
+          role="alert"
+          data-testid="code-lab-item-unavailable"
+        >
+          <span>This exercise is no longer available. Return to the catalog or reload if it was recently republished.</span>
+          <Link href={resolvedBackHref} className="rounded-md bg-rose-600 px-2 py-1 text-white hover:bg-rose-700">
+            {resolvedBackLabel}
+          </Link>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-md border border-rose-400 px-2 py-1 text-rose-800 hover:bg-rose-100"
+          >
+            Reload
+          </button>
+        </div>
+      ) : null}
       {staleDefinition ? (
         <div
           className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800"
