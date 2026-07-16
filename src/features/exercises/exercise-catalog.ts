@@ -1699,6 +1699,48 @@ export const exerciseCatalog: Exercise[] = [
     projectLab: "array-technique-playground"
   },
   {
+    id: "array-container-most-water",
+    title: "Arrays: container with most water",
+    skillIds: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["most_water.hpp"],
+    requiredTests: [
+      "test_classic",
+      "test_two_lines",
+      "test_flat",
+      "test_increasing",
+      "test_valley"
+    ],
+    hints: [
+      "The water between lines i and j holds min(height[i], height[j]) * (j - i).",
+      "Start two pointers at the ends; the area is limited by the SHORTER line, so move that pointer inward to look for a taller one.",
+      "Track the maximum area as you go; stop when the pointers meet."
+    ],
+    projectLab: "array-technique-playground"
+  },
+  {
+    id: "math-count-primes",
+    title: "Math: count primes below n",
+    skillIds: ["dsa.math.number_theory", "dsa.arrays.traversal"],
+    difficulty: "intermediate",
+    estimatedMinutes: 25,
+    editableFiles: ["count_primes.hpp"],
+    requiredTests: [
+      "test_small",
+      "test_ten",
+      "test_none",
+      "test_edge",
+      "test_larger"
+    ],
+    hints: [
+      "Count primes strictly less than n. Numbers below 2 have zero primes.",
+      "Sieve of Eratosthenes: mark multiples of each prime starting at p*p as composite.",
+      "Only sieve while p*p < n; then count the values still marked prime in [2, n)."
+    ],
+    projectLab: "math-technique-playground"
+  },
+  {
     id: "tree-lowest-common-ancestor-bst",
     title: "Trees: lowest common ancestor in a BST",
     skillIds: ["dsa.trees.bst_search", "dsa.trees.traversal", "cpp.references.pointers"],

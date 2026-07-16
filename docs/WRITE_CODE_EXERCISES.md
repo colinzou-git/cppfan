@@ -141,6 +141,8 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `array-majority-element` | array traversal, Big-O (Boyer-Moore) | `array-technique-playground` |
 | `dp-min-path-sum` | dynamic programming, array indexing | `dp-technique-playground` |
 | `stack-daily-temperatures` | stack (monotonic), array traversal | `stack-technique-playground` |
+| `array-container-most-water` | array two pointers, Big-O | `array-technique-playground` |
+| `math-count-primes` | number theory (sieve), array traversal | `math-technique-playground` |
 | `strings-reverse-words` | string manipulation, parsing | `text-processing-playground` |
 | `dp-edit-distance` | dynamic programming, DP forms | `dp-technique-playground` |
 | `dp-word-break` | dynamic programming, string searching | `dp-technique-playground` |

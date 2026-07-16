@@ -1,0 +1,19 @@
+# Arrays: container with most water
+
+Each element is a vertical line height. Choose **two** lines that, together with
+the x-axis, form a container holding the **most water**. Return that maximum area.
+
+Implement `most_water` in `most_water.hpp`:
+
+```cpp
+int most_water(const std::vector<int>& height);
+```
+
+Approach — two pointers (O(n)):
+- The water between lines `i` and `j` is `min(height[i], height[j]) * (j - i)`.
+- Start at the ends. The area is limited by the **shorter** line, so move that
+  pointer inward to look for a taller one; track the maximum.
+
+Example: `{1,8,6,2,5,4,8,3,7}` → `49`.
+
+Only edit `most_water.hpp`. Do not change the interface or the tests.

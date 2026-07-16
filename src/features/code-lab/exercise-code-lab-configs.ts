@@ -3723,6 +3723,89 @@ int main() {
     ],
     skillTags: ["dsa.arrays.traversal", "dsa.complexity.big_o"]
   },
+  "array-container-most-water": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Arrays: container with most water.
+
+Each value is a vertical line height. Print the maximum water area between two
+lines: min(height[i], height[j]) * (j - i).
+
+Input format:
+- The first line is n, the number of lines.
+- The second line has n space-separated heights.
+
+Output format:
+- The maximum area, then a newline.
+
+[1 8 6 2 5 4 8 3 7] -> 49.
+
+AI evaluation rubric:
+- Two pointers from the ends (O(n)); moves the shorter side inward, not O(n^2).`,
+    stdin: "9\n1 8 6 2 5 4 8 3 7\n",
+    starterCode: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<int> h(n);
+  for (auto& x : h) cin >> x;
+  int i = 0, j = n - 1, best = 0;
+  // TODO: track max min(h[i],h[j])*(j-i); move the shorter side inward.
+  cout << best << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Classic", stdin: "9\n1 8 6 2 5 4 8 3 7\n", expectedStdout: "49\n", matcher: "exact" },
+      { name: "Valley", stdin: "5\n5 1 1 1 5\n", expectedStdout: "20\n", matcher: "exact" },
+      { name: "Two lines", stdin: "2\n1 1\n", expectedStdout: "1\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.arrays.two_pointers", "dsa.complexity.big_o"]
+  },
+  "math-count-primes": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: `Math: count primes below n.
+
+Print the number of prime numbers strictly less than n.
+
+Input format:
+- One line with the integer n.
+
+Output format:
+- The count of primes in [2, n), then a newline.
+
+n = 10 -> 4 (2, 3, 5, 7); n = 100 -> 25.
+
+AI evaluation rubric:
+- Uses the Sieve of Eratosthenes (mark from p*p); n <= 2 yields 0.`,
+    stdin: "10\n",
+    starterCode: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+  int n;
+  cin >> n;
+  int count = 0;
+  // TODO: sieve [0, n); mark composites from p*p; count the remaining primes.
+  cout << count << "\\n";
+  return 0;
+}
+`,
+    visibleTests: [
+      { name: "Below 10", stdin: "10\n", expectedStdout: "4\n", matcher: "exact" },
+      { name: "Below 100", stdin: "100\n", expectedStdout: "25\n", matcher: "exact" },
+      { name: "None", stdin: "2\n", expectedStdout: "0\n", matcher: "exact" }
+    ],
+    skillTags: ["dsa.math.number_theory", "dsa.arrays.traversal"]
+  },
   "tree-lowest-common-ancestor-bst": {
     enabled: true,
     language: "cpp",
