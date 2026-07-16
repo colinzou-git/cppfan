@@ -1,0 +1,17 @@
+{
+  "id": "array-plus-one",
+  "title": "Arrays: plus one",
+  "skill_ids": ["dsa.arrays.traversal", "dsa.arrays.indexing"],
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "editable_files": ["plus_one.hpp"],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/array-plus-one/work exercises/array-plus-one/tests/tests.cpp -o exercises/array-plus-one/work/run",
+  "test_command": "exercises/array-plus-one/work/run",
+  "required_tests": ["test_no_carry", "test_single_carry", "test_all_nines", "test_single_digit", "test_middle_carry"],
+  "hints": [
+    "Walk the digits from least significant (the last index) to most significant.",
+    "Add one to the last digit; while a digit becomes 10, set it to 0 and carry into the next digit to the left.",
+    "If a carry survives past the first digit (the number was all nines), insert a 1 at the front."
+  ],
+  "project_lab": "array-technique-playground"
+}
