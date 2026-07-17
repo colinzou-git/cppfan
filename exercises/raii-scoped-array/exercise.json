@@ -7,7 +7,7 @@
   "editable_files": ["scoped_array.hpp"],
   "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I exercises/raii-scoped-array/work exercises/raii-scoped-array/tests/tests.cpp -o exercises/raii-scoped-array/work/run",
   "test_command": "exercises/raii-scoped-array/work/run",
-  "required_tests": ["test_basic_storage", "test_live_count_returns_to_baseline", "test_move_transfers_ownership"],
+  "required_tests": ["test_basic_storage", "test_live_count_returns_to_baseline", "test_move_transfers_ownership", "test_move_assignment_transfers_ownership"],
   "hints": [
     "Allocate with `new int[size]()` so elements start at 0; free with `delete[]`.",
     "Increment a static counter in the constructor and decrement it in the destructor — but only when this object still owns memory.",

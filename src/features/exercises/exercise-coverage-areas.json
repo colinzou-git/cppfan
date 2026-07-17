@@ -1,0 +1,76 @@
+[
+  {
+    "id": "cpp-basics-control",
+    "title": "C++ I/O, values, functions, and control flow",
+    "minimumExercises": 4,
+    "skillPrefixes": ["cpp.program_basics", "cpp.values_types", "cpp.control_flow", "cpp.functions"]
+  },
+  {
+    "id": "cpp-references-pointers-const",
+    "title": "References, pointers, const, and lifetime",
+    "minimumExercises": 4,
+    "skillPrefixes": ["cpp.references", "cpp.pointers", "cpp.const", "cpp.memory"]
+  },
+  {
+    "id": "cpp-classes-raii-value-semantics",
+    "title": "Classes, constructors, invariants, RAII, and value semantics",
+    "minimumExercises": 6,
+    "skillPrefixes": [
+      "cpp.structs_classes",
+      "cpp.classes",
+      "cpp.oop",
+      "cpp.constructors",
+      "cpp.raii",
+      "cpp.value_semantics",
+      "cpp.smart_pointers"
+    ]
+  },
+  {
+    "id": "cpp-stl",
+    "title": "STL containers, iterators, algorithms, and lambdas",
+    "minimumExercises": 8,
+    "skillPrefixes": ["cpp.stl"]
+  },
+  {
+    "id": "cpp-templates-utilities-modern",
+    "title": "Templates, utilities, optional/variant, and modern C++",
+    "minimumExercises": 6,
+    "skillPrefixes": ["cpp.templates", "cpp.utilities", "cpp.modern"]
+  },
+  {
+    "id": "cpp-tooling-concurrency",
+    "title": "Debugging, testing, exceptions, and concurrency",
+    "minimumExercises": 5,
+    "skillPrefixes": ["cpp.tooling", "cpp.debugging", "cpp.testing", "cpp.concurrency"]
+  },
+  {
+    "id": "dsa-arrays-strings-hashing",
+    "title": "Arrays, strings, and hash maps",
+    "minimumExercises": 10,
+    "skillPrefixes": ["dsa.arrays", "dsa.strings", "dsa.hashing"]
+  },
+  {
+    "id": "dsa-techniques-search",
+    "title": "Two pointers, sliding window, and binary search",
+    "minimumExercises": 6,
+    "skillPrefixes": ["dsa.techniques", "dsa.searching"]
+  },
+  {
+    "id": "dsa-stacks-recursion",
+    "title": "Stacks, queues, and recursion/backtracking",
+    "minimumExercises": 4,
+    "skillPrefixes": ["dsa.stacks", "dsa.queues", "dsa.recursion"]
+  },
+  {
+    "id": "dsa-trees-graphs",
+    "title": "Linked lists, trees, heaps, DSU, and graphs",
+    "minimumExercises": 6,
+    "skillPrefixes": ["dsa.trees", "dsa.graphs", "dsa.linked_lists", "dsa.heaps", "dsa.dsu"]
+  },
+  {
+    "id": "dsa-math-sorting-dp",
+    "title": "Math, sorting, greedy, and dynamic programming",
+    "minimumExercises": 6,
+    "skillPrefixes": ["dsa.math", "dsa.sorting", "dsa.greedy", "dsa.dp", "dsa.bit"]
+  }
+]

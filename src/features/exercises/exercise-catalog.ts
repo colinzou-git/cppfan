@@ -969,7 +969,7 @@ export const exerciseCatalog: Exercise[] = [
     difficulty: "intermediate",
     estimatedMinutes: 30,
     editableFiles: ["scoped_array.hpp"],
-    requiredTests: ["test_basic_storage", "test_live_count_returns_to_baseline", "test_move_transfers_ownership"],
+    requiredTests: ["test_basic_storage", "test_live_count_returns_to_baseline", "test_move_transfers_ownership", "test_move_assignment_transfers_ownership"],
     hints: [
       "Allocate with `new int[size]()` so elements start at 0; free with `delete[]`.",
       "Increment a static counter in the constructor and decrement it in the destructor — but only when this object still owns memory.",

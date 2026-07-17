@@ -135,6 +135,12 @@ jobs:
       - name: Verify C++ exercise packages
         run: bash scripts/exercises/verify-all.sh
 
+      # #473: the catalog must keep meaningful coverage of every required area and
+      # its generated report must be committed & current. Dependency-free node
+      # script, so no pnpm install is needed in this job.
+      - name: Check exercise catalog coverage
+        run: node scripts/exercises/report-coverage.mjs --check
+
       # #98: compile-check the structured curriculum code examples — positive
       # examples compile clean under their declared standard with -Wall -Wextra
       # -Wpedantic -Werror and match their output contract; bug-spotting examples
