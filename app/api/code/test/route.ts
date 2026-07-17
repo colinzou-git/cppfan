@@ -30,9 +30,13 @@ export async function POST(request: Request) {
   // A refused test run (stale definition or unavailable item) never executed,
   // so record no attempt/mastery evidence (#614).
   if (!result.staleDefinition && !result.itemUnavailable) {
-    await recordCodeAttempt({ itemId: parsed.itemId, source: parsed.source, test: result }).catch(
-      () => false
-    );
+    await recordCodeAttempt({
+      itemId: parsed.itemId,
+      source: parsed.source,
+      test: result,
+      contentVersionId: parsed.contentVersionId,
+      milestoneIndex: parsed.milestoneIndex
+    }).catch(() => false);
   }
 
   return NextResponse.json({ result }, { headers: { "cache-control": "no-store" } });

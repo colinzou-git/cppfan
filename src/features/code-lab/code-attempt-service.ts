@@ -21,6 +21,10 @@ export async function recordCodeAttempt(input: {
   run?: CodeRunResult | null;
   test?: CodeTestResult | null;
   aiReviewRequested?: boolean;
+  /** Immutable published version the browser loaded + server validated (#612). */
+  contentVersionId?: string | null;
+  /** Active milestone for a user lab attempt (#612). */
+  milestoneIndex?: number | null;
 }): Promise<boolean> {
   const supabase = await createClient();
   if (!supabase) return false;
@@ -34,6 +38,10 @@ export async function recordCodeAttempt(input: {
   const { error } = await supabase.from("code_lab_attempts").insert({
     user_id: user.id,
     learning_item_id: input.itemId,
+    // Immutable definition identity, so history/completion can distinguish an
+    // attempt made against an old published version from the current one (#612).
+    content_version_id: input.contentVersionId ?? null,
+    milestone_index: input.milestoneIndex ?? null,
     source_code: input.source,
     language: "cpp",
     run_status: runStatus,
@@ -77,6 +85,8 @@ async function recordCodeAttemptSkillEvents(input: {
   run?: CodeRunResult | null;
   test?: CodeTestResult | null;
   aiReviewRequested?: boolean;
+  contentVersionId?: string | null;
+  milestoneIndex?: number | null;
 }): Promise<boolean> {
   const result = input.test ?? input.run;
   if (!result || result.simulated) return false;
@@ -113,15 +123,21 @@ function isPassingRealTestAttempt(test: CodeTestResult | null | undefined): bool
   return Boolean(test && !test.simulated && test.status === "ok" && test.total > 0 && test.passed === test.total);
 }
 
-function codeAttemptMetadata(input: {
+export function codeAttemptMetadata(input: {
   itemId: string;
   run?: CodeRunResult | null;
   test?: CodeTestResult | null;
   aiReviewRequested?: boolean;
+  contentVersionId?: string | null;
+  milestoneIndex?: number | null;
 }): Record<string, unknown> {
   const result = input.test ?? input.run;
   return {
     itemId: input.itemId,
+    // Immutable definition identity travels with the evidence (#612), so a
+    // version-aware pass query can exclude an old-version pass.
+    contentVersionId: input.contentVersionId ?? null,
+    milestoneIndex: input.milestoneIndex ?? null,
     provider: result?.provider ?? "none",
     simulated: result?.simulated ?? false,
     runStatus: input.run?.status ?? input.test?.status ?? "ok",
