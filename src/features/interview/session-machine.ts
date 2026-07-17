@@ -27,6 +27,14 @@ export const SESSION_DURATIONS: SessionDuration[] = [35, 45, 50];
 export type SessionState = {
   sessionId: string | null;
   problemId: string;
+  /**
+   * Immutable published content version this session is bound to (#612): the
+   * user_content_versions.id for a user problem, or null for a native problem.
+   * Re-derived from the current publication on load, so judge submissions and
+   * prior-exposure evidence reference the version actually in front of the
+   * learner, not the schema version (which stays 1 across publications).
+   */
+  contentVersionId?: string | null;
   mode: SessionMode;
   durationMinutes: SessionDuration;
   phaseIndex: number;
@@ -52,6 +60,7 @@ export function createSession(input: {
   durationMinutes: SessionDuration;
   sessionId?: string | null;
   startedAt?: string | null;
+  contentVersionId?: string | null;
 }): SessionState {
   if (!SESSION_DURATIONS.includes(input.durationMinutes)) {
     throw new Error(`unsupported session duration: ${input.durationMinutes}`);
@@ -59,6 +68,7 @@ export function createSession(input: {
   return {
     sessionId: input.sessionId ?? null,
     problemId: input.problemId,
+    contentVersionId: input.contentVersionId ?? null,
     mode: input.mode,
     durationMinutes: input.durationMinutes,
     phaseIndex: 0,

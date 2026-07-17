@@ -15,6 +15,7 @@
 
 import { createSession, type SessionDuration, type SessionState } from "./session-machine";
 import type { InterviewProblem } from "./problem-catalog";
+import type { ResolvedInterviewProblemRef } from "./interview-problem-resolver";
 
 export type SessionFallbackResult = {
   state: SessionState;
@@ -25,10 +26,10 @@ export type SessionFallbackResult = {
 
 export async function resolveSessionWithFallback(input: {
   saved: SessionState | null;
-  requestedProblem: InterviewProblem | null;
+  requestedProblem: ResolvedInterviewProblemRef | null;
   fallbackProblemId: string;
   durationMinutes: SessionDuration;
-  resolve: (id: string) => Promise<InterviewProblem | null>;
+  resolve: (id: string) => Promise<ResolvedInterviewProblemRef | null>;
 }): Promise<SessionFallbackResult> {
   const { saved, requestedProblem, fallbackProblemId, durationMinutes, resolve } = input;
 
@@ -36,19 +37,23 @@ export async function resolveSessionWithFallback(input: {
   // the saved session is already on it; otherwise resume the saved session, or
   // start fresh on the fallback problem.
   let state: SessionState =
-    requestedProblem && (!saved || saved.problemId !== requestedProblem.id)
-      ? createSession({ problemId: requestedProblem.id, mode: "practice", durationMinutes })
+    requestedProblem && (!saved || saved.problemId !== requestedProblem.problem.id)
+      ? createSession({ problemId: requestedProblem.problem.id, mode: "practice", durationMinutes })
       : (saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes }));
 
-  let problem = await resolve(state.problemId);
+  let ref = await resolve(state.problemId);
   let staleReplaced = false;
 
-  if (!problem && fallbackProblemId && fallbackProblemId !== state.problemId) {
+  if (!ref && fallbackProblemId && fallbackProblemId !== state.problemId) {
     // The chosen problem is gone: replace the WHOLE session, not just the display.
     state = createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes });
-    problem = await resolve(state.problemId);
+    ref = await resolve(state.problemId);
     staleReplaced = true;
   }
 
-  return { state, problem, staleReplaced };
+  // Bind the session to the immutable published version actually in front of the
+  // learner (#612), so judge submissions / prior-exposure reference it.
+  state = { ...state, contentVersionId: ref?.contentVersionId ?? null };
+
+  return { state, problem: ref?.problem ?? null, staleReplaced };
 }
