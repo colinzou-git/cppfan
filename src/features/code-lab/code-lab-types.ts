@@ -100,6 +100,13 @@ export type CodeRunResult = {
    * definition. The client should prompt a reload.
    */
   staleDefinition?: boolean;
+  /**
+   * True when the item could not be resolved (unknown id, or a user item that
+   * was archived/deleted/unpublished), so the run was refused before the runner
+   * (#614). Run and Test return the same signal; the client shows a recovery
+   * message and does not treat it as a valid result.
+   */
+  itemUnavailable?: boolean;
 };
 
 export type CodeTestCaseResult = {
@@ -128,6 +135,8 @@ export type CodeTestResult = {
   classifications?: CodeTagClassification[];
   /** See CodeRunResult.staleDefinition — the run was refused, not executed (#488). */
   staleDefinition?: boolean;
+  /** See CodeRunResult.itemUnavailable — Test refuses an unresolved item too (#614). */
+  itemUnavailable?: boolean;
 };
 
 export type CodeReviewRequest = {
