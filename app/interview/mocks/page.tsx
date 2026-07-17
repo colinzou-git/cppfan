@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Timer } from "lucide-react";
 import { buildMockPackView } from "@/features/interview/mock-pack-view";
+import { getReconciledPersonalMockPacks } from "@/features/interview/personal-mock-pack-store";
+import { PersonalMockPacks } from "@/features/interview/personal-mock-packs";
 
 export const metadata = {
   title: "Mock interview packs — cppFan"
@@ -12,8 +14,10 @@ const CATEGORY_LABEL: Record<string, string> = {
   cpp_debugging: "C++ debugging"
 };
 
-export default function MockPacksPage() {
+export default async function MockPacksPage() {
   const packs = buildMockPackView();
+  // The learner's own mock packs (#613), reconciled against current problems.
+  const personalPacks = await getReconciledPersonalMockPacks();
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -62,6 +66,8 @@ export default function MockPacksPage() {
           </article>
         ))}
       </div>
+
+      <PersonalMockPacks packs={personalPacks} />
     </main>
   );
 }
