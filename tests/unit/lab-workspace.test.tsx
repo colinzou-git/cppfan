@@ -17,9 +17,10 @@ vi.mock("@/features/code-lab/code-lab-workspace", () => ({
   }
 }));
 
-function view(index: number, label: string, required: boolean): LabMilestoneView {
+function view(index: number, label: string, required: boolean, milestoneId?: string): LabMilestoneView {
   return {
     index,
+    milestoneId: milestoneId ?? `m-${label.toLowerCase()}`,
     label,
     required,
     config: { enabled: true, language: "cpp", mode: "stdin", starterCode: "int main(){}", visibleTests: [] }

@@ -38,6 +38,9 @@ export function labPrompt(payload: LabPayload, milestoneIndex = 0): string {
 
 export type LabMilestoneView = {
   index: number;
+  /** Stable milestone id from the published definition (#610/#612). Progress is
+   * keyed by this, not the array index, so reordering never reinterprets a pass. */
+  milestoneId: string;
   label: string;
   required: boolean;
   config: LearningItemCodeLab;
@@ -53,12 +56,13 @@ export function labMilestoneViews(payload: LabPayload): LabMilestoneView[] {
     const list = payload.milestones ?? [];
     return list.map((m, i) => ({
       index: i,
+      milestoneId: m.id || `milestone-${i}`,
       label: m.title || `Milestone ${i + 1}`,
       required: m.required,
       config: labPayloadToCodeLabConfig(payload, i)
     }));
   }
-  return [{ index: 0, label: "Task", required: true, config: labPayloadToCodeLabConfig(payload, 0) }];
+  return [{ index: 0, milestoneId: "task", label: "Task", required: true, config: labPayloadToCodeLabConfig(payload, 0) }];
 }
 
 /** Learner-safe Code Lab config for a published lab (visible tests only). */

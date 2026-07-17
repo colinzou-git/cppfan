@@ -39,13 +39,15 @@ export function LabWorkspace({
   backLabel?: string;
 }) {
   const [active, setActive] = useState(0);
-  const [passed, setPassed] = useState<Record<number, boolean>>({});
+  // Passes are keyed by STABLE milestone id (#610/#612), so reordering or
+  // republishing milestones never reinterprets which checkpoint a pass belongs to.
+  const [passed, setPassed] = useState<Record<string, boolean>>({});
   const [saveState, setSaveState] = useState<CompletionSaveState>("idle");
   const activeView = milestones[active] ?? milestones[0];
   const isSingleTask = milestones.length === 1 && milestones[0]?.label === "Task";
 
   const requiredRemaining = useMemo(
-    () => milestones.filter((m) => m.required && !passed[m.index]).length,
+    () => milestones.filter((m) => m.required && !passed[m.milestoneId]).length,
     [milestones, passed]
   );
   const labComplete = milestones.length > 0 && requiredRemaining === 0;
@@ -82,7 +84,7 @@ export function LabWorkspace({
     if (!test || test.staleDefinition) return;
     // A checkpoint passes when every case (visible + hidden) passes.
     if (test.status === "ok" && test.total > 0 && test.passed === test.total) {
-      setPassed((prev) => (prev[activeView.index] ? prev : { ...prev, [activeView.index]: true }));
+      setPassed((prev) => (prev[activeView.milestoneId] ? prev : { ...prev, [activeView.milestoneId]: true }));
     }
   }
 
@@ -96,7 +98,7 @@ export function LabWorkspace({
         >
           {milestones.map((m) => {
             const isActive = m.index === active;
-            const done = passed[m.index];
+            const done = passed[m.milestoneId];
             return (
               <button
                 key={m.index}
