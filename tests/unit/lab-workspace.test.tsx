@@ -58,7 +58,7 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     expect(lastProps.contentVersionId).toBe("v9");
   });
 
-  it("shows the complete banner once every required milestone passes", () => {
+  it("shows the complete banner only after completion is durably saved (#610)", async () => {
     render(
       <LabWorkspace
         itemId="user.item.z"
@@ -69,10 +69,34 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     const onResult = lastProps.onResult as (r: { test: unknown }) => void;
     // Only milestone 0 is required; passing it (all cases) completes the lab.
     act(() => onResult({ test: { status: "ok", total: 2, passed: 2, staleDefinition: false } }));
-    expect(screen.getByTestId("lab-complete-banner")).toBeInTheDocument();
-    // Completion is persisted once.
+    // Banner appears only once the save resolves ok.
+    expect(await screen.findByTestId("lab-complete-banner")).toBeInTheDocument();
     expect(mockedComplete).toHaveBeenCalledWith({ itemId: "user.item.z" });
     expect(mockedComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show the completed banner if persistence fails; retry succeeds (#610)", async () => {
+    mockedComplete.mockResolvedValueOnce({ status: "error" }).mockResolvedValueOnce({ status: "ok" });
+    render(<LabWorkspace itemId="user.item.e" title="Shell" milestones={[view(0, "Parse", true)]} />);
+    const onResult = lastProps.onResult as (r: { test: unknown }) => void;
+    act(() => onResult({ test: { status: "ok", total: 1, passed: 1, staleDefinition: false } }));
+
+    // First save fails: no completed banner, an actionable retry instead.
+    expect(await screen.findByTestId("lab-complete-error")).toBeInTheDocument();
+    expect(screen.queryByTestId("lab-complete-banner")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /retry completion/i }));
+    expect(await screen.findByTestId("lab-complete-banner")).toBeInTheDocument();
+    expect(mockedComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses open-navigation icons with no lock (#610)", () => {
+    const { container } = render(
+      <LabWorkspace itemId="user.item.n" title="Shell" milestones={[view(0, "Parse", true), view(1, "Run", true)]} />
+    );
+    // Every milestone tab is clickable and none renders a lock affordance.
+    expect(screen.getAllByTestId("lab-milestone-tab").every((t) => !(t as HTMLButtonElement).disabled)).toBe(true);
+    expect(container.querySelector(".lucide-lock")).toBeNull();
   });
 
   it("does not complete on a partial pass", () => {
