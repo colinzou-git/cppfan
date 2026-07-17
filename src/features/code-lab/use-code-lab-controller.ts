@@ -49,11 +49,16 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
   const [source, setSource] = useState(config.starterCode);
   // Autosave/resume: hydrates source from the saved draft on mount and persists
   // edits (cross-device when signed in, localStorage otherwise). #431
-  const { status: draftStatus } = useCodeDraft({
+  const {
+    status: draftStatus,
+    hasPreviousVersionDraft,
+    copyPreviousVersionDraft
+  } = useCodeDraft({
     itemId,
     starterCode: config.starterCode,
     source,
-    setSource
+    setSource,
+    contentVersionId
   });
   const [stdin, setStdin] = useState(config.stdin ?? "");
   const [busy, setBusy] = useState<CodeAction | null>(null);
@@ -241,6 +246,8 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
     source,
     setSource,
     draftStatus,
+    hasPreviousVersionDraft,
+    copyPreviousVersionDraft,
     stdin,
     setStdin,
     busy,

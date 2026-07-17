@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadCodeDraft, saveCodeDraft } from "@/features/code-lab/code-draft-service";
+import { loadCodeDraft, loadPreviousVersionDraft, saveCodeDraft } from "@/features/code-lab/code-draft-service";
 import {
   parseBodyRecord,
   validateDraftItemId,
@@ -13,15 +13,26 @@ function apiError(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status });
 }
 
-// Load the signed-in learner's saved draft for an item. Returns { source: null }
-// when there is no draft, the learner is signed out, or the table is absent —
+/** Bounded content-version id from the request, or null (native/legacy). */
+function contentVersionParam(value: string | null): string | null {
+  return typeof value === "string" && value.length > 0 && value.length <= 100 ? value : null;
+}
+
+// Load the signed-in learner's saved draft for an item + content version (#612).
+// `previous=1` returns the latest draft under a DIFFERENT version instead — the
+// explicit "copy from previous version" source. Returns { source: null } when
+// there is no draft, the learner is signed out, or the table/column is absent —
 // the client then falls back to localStorage, so this never errors on those.
 export async function GET(request: Request) {
-  const itemId = new URL(request.url).searchParams.get("itemId");
-  const parsed = validateDraftItemId(itemId);
+  const url = new URL(request.url);
+  const parsed = validateDraftItemId(url.searchParams.get("itemId"));
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
-  const source = await loadCodeDraft(parsed.itemId).catch(() => null);
+  const contentVersionId = contentVersionParam(url.searchParams.get("contentVersionId"));
+  const source =
+    url.searchParams.get("previous") === "1"
+      ? await loadPreviousVersionDraft(parsed.itemId, contentVersionId).catch(() => null)
+      : await loadCodeDraft(parsed.itemId, contentVersionId).catch(() => null);
   return NextResponse.json({ source }, { headers: { "cache-control": "no-store" } });
 }
 
@@ -35,6 +46,7 @@ export async function PUT(request: Request) {
   const parsed = validateDraftRequest(body);
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
-  const saved = await saveCodeDraft(parsed.itemId, parsed.source).catch(() => false);
+  const contentVersionId = contentVersionParam(typeof body.contentVersionId === "string" ? body.contentVersionId : null);
+  const saved = await saveCodeDraft(parsed.itemId, parsed.source, contentVersionId).catch(() => false);
   return NextResponse.json({ saved }, { headers: { "cache-control": "no-store" } });
 }

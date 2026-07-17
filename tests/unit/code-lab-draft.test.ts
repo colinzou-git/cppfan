@@ -42,4 +42,13 @@ describe("Code Lab draft request validation", () => {
     expect(draftStorageKey(ITEM)).toBe(`cppfan:code-lab:draft:${ITEM}`);
     expect(draftStorageKey("a")).not.toBe(draftStorageKey("b"));
   });
+
+  it("scopes the localStorage key by content version (#612)", () => {
+    // No version keeps the original (native/legacy) key for recoverability.
+    expect(draftStorageKey(ITEM)).toBe(`cppfan:code-lab:draft:${ITEM}`);
+    expect(draftStorageKey(ITEM, "v2")).toBe(`cppfan:code-lab:draft:${ITEM}@v2`);
+    // A new version cannot collide with an old version or the unversioned key.
+    expect(draftStorageKey(ITEM, "v1")).not.toBe(draftStorageKey(ITEM, "v2"));
+    expect(draftStorageKey(ITEM, "v1")).not.toBe(draftStorageKey(ITEM));
+  });
 });
