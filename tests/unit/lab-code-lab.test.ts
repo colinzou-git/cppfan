@@ -87,7 +87,13 @@ describe("labMilestoneViews (#489)", () => {
     expect(views.map((v) => v.label)).toEqual(["Parse", "Stats"]);
     expect(views[0].index).toBe(0);
     expect(views[1].required).toBe(false);
+    // Stable milestone ids from the definition (#610/#612), not array indices.
+    expect(views.map((v) => v.milestoneId)).toEqual(["m1", "m2"]);
     // milestone 0's view must not carry milestone 1's tests
     expect(JSON.stringify(views[0].config)).not.toContain("SECRET");
+  });
+
+  it("uses the stable id 'task' for a single-task lab", () => {
+    expect(labMilestoneViews(lab({ starterCode: "int main(){}" }))[0].milestoneId).toBe("task");
   });
 });
