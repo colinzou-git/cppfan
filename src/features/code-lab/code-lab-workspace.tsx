@@ -16,6 +16,8 @@ import { BoundaryChecklistPanel } from "./boundary-checklist";
 import { PredictionBeforeRun } from "./prediction-before-run";
 import { SelfEvaluationPanel } from "./self-evaluation-panel";
 import { submitSelfEvaluation } from "./self-evaluation-action";
+import { AiEvaluationPanel } from "./ai-evaluation-panel";
+import { submitFormalEvaluation } from "./formal-evaluation-action";
 import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { ResizableColumns } from "./resizable-columns";
@@ -197,6 +199,16 @@ export function CodeLabWorkspace({
         // distinct from the optional AI help/review below.
         <SelfEvaluationPanel
           onSubmit={(rating, reflection) => submitSelfEvaluation({ itemId, contentVersionId, rating, reflection })}
+        />
+      ) : null}
+      {config.evaluationMode === "ai_evaluation" ||
+      config.evaluationMode === "automated_plus_ai" ||
+      config.evaluationMode === "judge_plus_ai" ? (
+        <AiEvaluationPanel
+          mode={config.evaluationMode}
+          onSubmit={() =>
+            submitFormalEvaluation({ itemId, contentVersionId, source: c.source, mode: config.evaluationMode as "ai_evaluation" })
+          }
         />
       ) : null}
       {c.predictionEnabled ? (
