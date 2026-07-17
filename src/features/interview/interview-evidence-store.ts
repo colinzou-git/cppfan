@@ -22,6 +22,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export type EvidenceInput = {
   pattern: string;
   problemId: string;
+  /** Immutable published content version (#612/#613); null for native. */
+  contentVersionId?: string | null;
   unseen: boolean;
   mode: string;
   correct: boolean;
@@ -38,6 +40,7 @@ export type EvidenceInput = {
 export type NormalizedEvidenceRow = {
   pattern: string;
   problem_id: string;
+  content_version_id: string | null;
   unseen: boolean;
   mode: string;
   correct: boolean;
@@ -65,6 +68,7 @@ export function normalizeEvidenceRow(input: EvidenceInput): NormalizedEvidenceRo
   return {
     pattern: input.pattern,
     problem_id: input.problemId,
+    content_version_id: typeof input.contentVersionId === "string" ? input.contentVersionId : null,
     unseen: Boolean(input.unseen),
     mode: MODES.has(input.mode as InterviewEvidence["mode"]) ? input.mode : "practice",
     correct: Boolean(input.correct),
@@ -82,6 +86,7 @@ export function normalizeEvidenceRow(input: EvidenceInput): NormalizedEvidenceRo
 type EvidenceRow = {
   pattern: string;
   problem_id: string;
+  content_version_id?: string | null;
   unseen: boolean;
   mode: string;
   correct: boolean;
@@ -103,6 +108,7 @@ export function rowsToEvidence(rows: EvidenceRow[]): InterviewEvidence[] {
     evidence.push({
       pattern: row.pattern as ProblemGroup,
       problemId: row.problem_id,
+      contentVersionId: typeof row.content_version_id === "string" ? row.content_version_id : null,
       unseen: Boolean(row.unseen),
       mode,
       correct: Boolean(row.correct),
@@ -132,7 +138,7 @@ export async function getRecentInterviewEvidence(
   const since = new Date(now - windowDays * DAY_MS).toISOString();
   const { data, error } = await supabase
     .from("interview_evidence")
-    .select("pattern,problem_id,unseen,mode,correct,hints_used,context,completed_at")
+    .select("pattern,problem_id,content_version_id,unseen,mode,correct,hints_used,context,completed_at")
     .eq("user_id", user.id)
     .gte("completed_at", since)
     .order("completed_at", { ascending: false })

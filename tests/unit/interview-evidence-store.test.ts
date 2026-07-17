@@ -71,6 +71,7 @@ describe("rowsToEvidence (#180)", () => {
       {
         pattern: "arrays_hashing_prefix",
         problemId: "iv.prefix.balance-returns-to-zero",
+        contentVersionId: null,
         unseen: true,
         mode: "interview",
         correct: true,
