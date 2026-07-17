@@ -5,6 +5,7 @@ import { markUserLabComplete } from "@/features/labs/user-lab-progress";
 import type { LabMilestoneView } from "@/features/user-content/lab-code-lab";
 
 vi.mock("@/features/labs/user-lab-progress", () => ({ markUserLabComplete: vi.fn(async () => ({ status: "ok" })) }));
+vi.mock("@/features/labs/user-lab-milestone-progress", () => ({ recordLabMilestonePass: vi.fn(async () => true) }));
 const mockedComplete = vi.mocked(markUserLabComplete);
 
 // Capture the props the wrapper hands to the workspace, and expose onResult so a
@@ -89,6 +90,20 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     fireEvent.click(screen.getByRole("button", { name: /retry completion/i }));
     expect(await screen.findByTestId("lab-complete-banner")).toBeInTheDocument();
     expect(mockedComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it("hydrates durably-passed milestones so progress survives reload (#610)", async () => {
+    // A durable pass for milestone 0 (stable id "m-parse") is provided on open.
+    render(
+      <LabWorkspace
+        itemId="user.item.h"
+        title="Shell"
+        milestones={[view(0, "Parse", true, "m-parse"), view(1, "Run", false, "m-run")]}
+        initialPassedMilestoneIds={["m-parse"]}
+      />
+    );
+    // The only required milestone is already passed → completion flows on open.
+    expect(await screen.findByTestId("lab-complete-banner")).toBeInTheDocument();
   });
 
   it("uses open-navigation icons with no lock (#610)", () => {
