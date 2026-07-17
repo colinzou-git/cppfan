@@ -7,6 +7,7 @@
  */
 
 import type { LearningItemCodeLab } from "@/features/code-lab/code-lab-types";
+import { functionExerciseStarter } from "./function-exercise-harness";
 import type { ExercisePayload } from "./exercise-content-types";
 
 /** Learner-safe Code Lab config for a published exercise (visible tests only). */
@@ -14,18 +15,29 @@ export function exercisePayloadToCodeLabConfig(payload: ExercisePayload): Learni
   const tests = payload.tests ?? [];
   const visible = tests.filter((t) => !t.hidden);
   const hiddenCount = tests.length - visible.length;
+  const isFunction = payload.mode === "function";
+  // Function mode: the harness prints a trailing newline, so grade trimmed; a
+  // learner without a starter begins from a function stub, not a blank program.
+  const matcher = isFunction ? ("trimmed" as const) : ("exact" as const);
+  const starterCode =
+    payload.starterCode && payload.starterCode.trim().length > 0
+      ? payload.starterCode
+      : isFunction && payload.functionSignature
+        ? functionExerciseStarter(payload.functionSignature)
+        : (payload.starterCode ?? "");
 
   return {
     enabled: true,
     language: "cpp",
-    mode: payload.mode === "function" ? "function" : "stdin",
+    mode: isFunction ? "function" : "stdin",
     prompt: payload.prompt || undefined,
-    starterCode: payload.starterCode ?? "",
+    starterCode,
+    ...(isFunction && payload.functionSignature ? { functionSignature: payload.functionSignature } : {}),
     visibleTests: visible.map((test) => ({
       name: test.name,
       stdin: test.input,
       expectedStdout: test.expectedOutput,
-      matcher: "exact" as const
+      matcher
     })),
     ...(hiddenCount > 0 ? { hiddenTestCount: hiddenCount } : {})
   };

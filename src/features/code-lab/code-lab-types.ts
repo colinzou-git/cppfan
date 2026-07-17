@@ -42,6 +42,12 @@ export type LearningItemCodeLab = {
   /** Coding-task prompt, distinct from the item's own teaching prompt. */
   prompt?: string;
   starterCode: string;
+  /**
+   * Declared C++ function signature for `mode: "function"` exercises (#607). The
+   * server wraps the learner's function in a generated harness keyed off this;
+   * it is authoring metadata (not an answer), so it is safe on the client config.
+   */
+  functionSignature?: string;
   stdin?: string;
   visibleTests: CodeTestCase[];
   /** Count only — hidden inputs/expected outputs never reach the client. */

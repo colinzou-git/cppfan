@@ -4,9 +4,11 @@ import type {
   CodeTestCaseResult,
   CodeTestResult
 } from "./code-lab-types";
+import type { LearningItemCodeLab } from "./code-lab-types";
 import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
 import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
+import { buildFunctionExerciseTranslationUnit } from "@/features/user-content/function-exercise-harness";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -117,6 +119,64 @@ function unavailableTestResult(): CodeTestResult {
   };
 }
 
+/**
+ * Prepare the actual source sent to the runner. Function-mode exercises (#607)
+ * are wrapped in the generated single-`main` harness keyed off the authored
+ * signature; every other mode runs the learner source unchanged. A build failure
+ * means the AUTHOR's contract is invalid (should be caught at publish) — distinct
+ * from a learner compile error, which surfaces later as a normal compile_error.
+ */
+function prepareRunnerSource(
+  config: LearningItemCodeLab,
+  learnerSource: string
+): { ok: true; source: string } | { ok: false; note: string } {
+  if (config.mode !== "function") {
+    return { ok: true, source: learnerSource };
+  }
+  const built = buildFunctionExerciseTranslationUnit({
+    learnerSource,
+    functionSignature: config.functionSignature ?? ""
+  });
+  if (!built.ok) {
+    return {
+      ok: false,
+      note: `This function-mode exercise has an invalid author signature: ${built.issues.map((i) => i.message).join("; ")}`
+    };
+  }
+  return { ok: true, source: built.source };
+}
+
+function authorContractRunResult(note: string): CodeRunResult {
+  return {
+    status: "runner_error",
+    compileOutput: "",
+    stdout: "",
+    stderr: "",
+    exitCode: null,
+    timedOut: false,
+    durationMs: null,
+    memoryKb: null,
+    provider: "none",
+    simulated: false,
+    note
+  };
+}
+
+function authorContractTestResult(note: string): CodeTestResult {
+  return {
+    status: "runner_error",
+    passed: 0,
+    total: 0,
+    visible: [],
+    hiddenPassed: 0,
+    hiddenTotal: 0,
+    compileOutput: "",
+    provider: "none",
+    simulated: false,
+    note
+  };
+}
+
 export async function runCode(input: {
   itemId: string;
   source: string;
@@ -142,9 +202,13 @@ export async function runCode(input: {
   }
   const item = resolved.item;
   const config = item.config;
+  const prepared = prepareRunnerSource(config, input.source);
+  if (!prepared.ok) {
+    return authorContractRunResult(prepared.note);
+  }
   const result = await executeRun(
     buildRunnerInput({
-      source: input.source,
+      source: prepared.source,
       stdin: input.stdin ?? "",
       compilerFlags: resolvedFlags(input.compilerFlags ?? config.compilerFlags),
       files: item.files
@@ -185,6 +249,14 @@ export async function runTests(input: {
   }
   const { config, hiddenTests, files } = resolved.item;
 
+  // Function-mode source is wrapped once in the generated harness; each test then
+  // supplies its own stdin, exactly like a stdin-mode exercise (#607).
+  const prepared = prepareRunnerSource(config, input.source);
+  if (!prepared.ok) {
+    return authorContractTestResult(prepared.note);
+  }
+  const runnerSource = prepared.source;
+
   const flags = resolvedFlags(input.compilerFlags ?? config.compilerFlags);
   const visibleCases = config.visibleTests ?? [];
   const hiddenCases = input.includeHidden === false ? [] : hiddenTests;
@@ -196,7 +268,7 @@ export async function runTests(input: {
 
   for (const test of visibleCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags, files })
+      buildRunnerInput({ source: runnerSource, stdin: test.stdin ?? "", compilerFlags: flags, files })
     );
     provider = run.provider;
     simulated = run.simulated;
@@ -228,7 +300,7 @@ export async function runTests(input: {
 
   for (const test of hiddenCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: input.source, stdin: test.stdin ?? "", compilerFlags: flags, files })
+      buildRunnerInput({ source: runnerSource, stdin: test.stdin ?? "", compilerFlags: flags, files })
     );
     provider = run.provider;
     simulated = run.simulated;

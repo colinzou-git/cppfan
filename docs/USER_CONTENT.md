@@ -129,6 +129,32 @@ completion `answer` — live in the authoring payload for the owner/AI side only
 and are never included in a pre-answer learner payload; the projection keeps the
 public path answer-free, as the native learning-item path already does.
 
+## Function-mode exercises (#607)
+
+An exercise with `mode: "function"` declares a C++ `functionSignature`; the
+learner implements only that function (no `main`). One deterministic server-side
+builder, `buildFunctionExerciseTranslationUnit`
+(`function-exercise-harness.ts`), wraps the learner's (or the author's
+starter/reference) source into a complete single-`main` translation unit used by
+**every** function path — starter validation, reference validation, learner Run,
+and visible/hidden Test — so publication validates the same executable shape a
+learner runs. The generated `main` reads the arguments from stdin, calls the
+function, and prints the result, so each test simply supplies different stdin
+(reusing the stdin runner path).
+
+**Supported types** (parameters and return): `int`, `long long`, `double`,
+`bool`, `char`, `std::string`, and `std::vector<>` of int / long long / double /
+string. `void` returns are unsupported. An unsupported/malformed signature is
+rejected at publish (`validateExerciseForPublication`) with an actionable
+message rather than failing later in Code Lab.
+
+**Test serialization** — a test's `input` lists the arguments in signature
+order (a scalar is one token; a `bool` is `1`/`0` or `true`/`false`; a
+`std::string` is one whitespace-delimited token; a `std::vector<T>` is a count
+then its elements). `expectedOutput` is the returned value (scalars verbatim, a
+`bool` as `true`/`false`, a vector space-separated). Function-mode grading is
+trimmed, so a trailing newline never fails a test.
+
 ## Export package (`EXPORT_SCHEMA_VERSION = 1`)
 
 Export produces a portable ZIP (`buildUserContentZip`, using the dependency-free

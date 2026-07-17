@@ -11,8 +11,27 @@ import { compareOutput } from "@/features/code-lab/code-lab-service";
 import { DEFAULT_COMPILER_FLAGS } from "@/features/code-lab/code-lab-defaults";
 import { exerciseHiddenTests } from "@/features/code-lab/user-exercise-code-lab";
 import { exercisePayloadToCodeLabConfig } from "./exercise-code-lab";
+import { buildFunctionExerciseTranslationUnit } from "./function-exercise-harness";
 import type { ExercisePayload } from "./exercise-content-types";
 import type { CodeTestCase } from "@/features/code-lab/code-lab-types";
+
+/**
+ * Wrap author source (starter/reference) exactly as the learner path will (#607):
+ * function mode goes through the generated harness so publication validates the
+ * SAME executable shape learners run; every other mode compiles source directly.
+ * Returns null when the signature is unsupported — the schema-level validation
+ * (validateExerciseForPublication) owns that actionable error.
+ */
+function wrapAuthorSource(payload: ExercisePayload, source: string): string | null {
+  if (payload.mode !== "function") {
+    return source;
+  }
+  const built = buildFunctionExerciseTranslationUnit({
+    learnerSource: source,
+    functionSignature: payload.functionSignature ?? ""
+  });
+  return built.ok ? built.source : null;
+}
 
 export type ExercisePublishValidation =
   | { status: "ok" }
@@ -33,8 +52,13 @@ async function validateStarterContract(payload: ExercisePayload): Promise<Exerci
   if (!starter) {
     return null;
   }
+  const wrapped = wrapAuthorSource(payload, starter);
+  if (wrapped === null) {
+    // Unsupported signature — surfaced by validateExerciseForPublication.
+    return null;
+  }
   const run = await executeRun(
-    buildRunnerInput({ source: starter, stdin: "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
+    buildRunnerInput({ source: wrapped, stdin: "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
   );
   if (run.status === "runner_unconfigured") {
     return null;
@@ -62,6 +86,11 @@ export async function validateExercisePublication(payload: ExercisePayload): Pro
   if (!reference) {
     return { status: "skipped" };
   }
+  const wrappedReference = wrapAuthorSource(payload, reference);
+  if (wrappedReference === null) {
+    // Unsupported signature — surfaced by validateExerciseForPublication.
+    return { status: "skipped" };
+  }
 
   const config = exercisePayloadToCodeLabConfig(payload);
   const cases: CodeTestCase[] = [...config.visibleTests, ...exerciseHiddenTests(payload)];
@@ -71,7 +100,7 @@ export async function validateExercisePublication(payload: ExercisePayload): Pro
   const failures: string[] = [];
   for (const test of runCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: reference, stdin: test.stdin ?? "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
+      buildRunnerInput({ source: wrappedReference, stdin: test.stdin ?? "", compilerFlags: [...DEFAULT_COMPILER_FLAGS] })
     );
     if (run.status === "runner_unconfigured") {
       return { status: "skipped" };

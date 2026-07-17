@@ -16,6 +16,7 @@ import {
   type ExercisePayload,
   type ExerciseTest
 } from "./exercise-content-types";
+import { parseFunctionSignature } from "./function-exercise-harness";
 import type { ParseResult, ValidationIssue } from "./user-content-types";
 
 const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
@@ -219,8 +220,13 @@ export function validateExerciseForPublication(payload: ExercisePayload): Valida
       issues.push({ field: "tests", message: "automated evaluation needs at least one test" });
     }
   }
-  if (payload.mode === "function" && (!payload.functionSignature || payload.functionSignature.trim().length === 0)) {
-    issues.push({ field: "functionSignature", message: "function mode needs a declared signature" });
+  if (payload.mode === "function") {
+    // Reject unsupported/malformed signatures at publish with an actionable
+    // message, rather than failing later inside Code Lab (#607).
+    const parsed = parseFunctionSignature(payload.functionSignature ?? "");
+    if (!parsed.ok) {
+      issues.push(...parsed.issues);
+    }
   }
   return issues;
 }
