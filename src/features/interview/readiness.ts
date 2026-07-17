@@ -11,6 +11,9 @@ export type InterviewContext = "diagnostic" | "guided" | "independent" | "mock";
 export type InterviewEvidence = {
   pattern: ProblemGroup;
   problemId: string;
+  /** Immutable published version this evidence was recorded against (#612/#613);
+   * null for native problems. Prior-exposure is keyed by (problem, version). */
+  contentVersionId?: string | null;
   /** True only for the learner's first exposure to this problem. */
   unseen: boolean;
   mode: "practice" | "interview";

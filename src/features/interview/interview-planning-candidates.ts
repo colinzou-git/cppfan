@@ -69,10 +69,20 @@ export function selectTransferCandidate(
   }
 
   const patternEvidence = evidence.filter((e) => e.pattern === pattern);
-  const attempted = new Set(patternEvidence.map((e) => e.problemId));
+
+  // A candidate counts as SEEN only when there is evidence for it AT its current
+  // version (#613): a native problem matches any attempt; a user problem
+  // republished to a new immutable version is fresh even if an OLD version was
+  // attempted, so a stale-version pass never masks it as already-practiced.
+  const isSeen = (c: InterviewPlanningCandidate): boolean =>
+    patternEvidence.some(
+      (e) =>
+        e.problemId === c.problemId &&
+        (c.source === "native" || (e.contentVersionId ?? null) === (c.contentVersionId ?? null))
+    );
 
   // 1) Prefer a genuinely unseen problem (in candidate order: native then user).
-  const unseen = eligible.find((c) => !attempted.has(c.problemId));
+  const unseen = eligible.find((c) => !isSeen(c));
   if (unseen) {
     return { problemId: unseen.problemId, title: unseen.title, unseen: true };
   }

@@ -41,6 +41,24 @@ describe("interview planning candidates (#613)", () => {
     expect(pick?.unseen).toBe(true);
   });
 
+  it("treats a custom problem republished to a new version as fresh, not seen (#613)", () => {
+    const custom = candidate({ problemId: "user.item.v", group: GROUP, title: "Custom V", contentVersionId: "v2" });
+    // Evidence exists, but for the OLD version v1.
+    const oldVersionEvidence = [
+      { problemId: "user.item.v", pattern: GROUP, completedAtMs: 1000, contentVersionId: "v1" } as InterviewEvidence
+    ];
+    const fresh = selectTransferCandidate(GROUP, oldVersionEvidence, [custom]);
+    expect(fresh?.problemId).toBe("user.item.v");
+    expect(fresh?.unseen).toBe(true);
+
+    // Evidence at the CURRENT version v2 marks it as seen.
+    const currentVersionEvidence = [
+      { problemId: "user.item.v", pattern: GROUP, completedAtMs: 1000, contentVersionId: "v2" } as InterviewEvidence
+    ];
+    const seen = selectTransferCandidate(GROUP, currentVersionEvidence, [custom]);
+    expect(seen?.unseen).toBe(false);
+  });
+
   it("excludes recommendation-disabled custom problems from automatic selection", () => {
     const optedOut = candidate({ problemId: "user.item.optout", group: GROUP, recommendationEnabled: false });
     expect(selectTransferCandidate(GROUP, [], [optedOut])).toBeNull();
