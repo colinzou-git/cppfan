@@ -55,7 +55,9 @@ export async function POST(request: Request) {
       source: parsed.source,
       run: asObject<CodeRunResult>(body.lastRunResult) ?? null,
       test: asObject<CodeTestResult>(body.lastTestResult) ?? null,
-      aiReviewRequested: true
+      aiReviewRequested: true,
+      contentVersionId: parsed.contentVersionId,
+      milestoneIndex: parsed.milestoneIndex
     }).catch(() => false);
 
     return NextResponse.json({ result }, { headers: { "cache-control": "no-store" } });
