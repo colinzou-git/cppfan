@@ -10,6 +10,7 @@ import { getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "@/fea
 import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
 import { labMilestoneViews } from "@/features/user-content/lab-code-lab";
 import { LabWorkspace } from "@/features/user-content/lab-workspace";
+import { getPassedLabMilestones } from "@/features/labs/user-lab-milestone-progress";
 import { interviewPayloadToCodeLabConfig } from "@/features/user-content/interview-code-lab";
 import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
 
@@ -46,6 +47,8 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
     // Published user labs (#489): a milestone navigator over one shared codebase.
     const lab = userContentId ? await getLabForOwner(userContentId) : null;
     if (lab?.publishedPayload) {
+      // Hydrate durable milestone progress for the current version (#610).
+      const initialPassedMilestoneIds = await getPassedLabMilestones(decodedId, lab.publishedVersionId ?? null);
       return (
         <main className="p-3 xl:p-6">
           <LabWorkspace
@@ -53,6 +56,7 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
             title={lab.title}
             milestones={labMilestoneViews(lab.publishedPayload)}
             contentVersionId={lab.publishedVersionId ?? undefined}
+            initialPassedMilestoneIds={initialPassedMilestoneIds}
             backHref="/my-content"
             backLabel="Back to My Content"
           />

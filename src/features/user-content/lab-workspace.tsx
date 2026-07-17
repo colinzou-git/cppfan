@@ -5,6 +5,7 @@ import { CheckCircle2, Circle } from "lucide-react";
 import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import type { CodeTestResult } from "@/features/code-lab/code-lab-types";
 import { markUserLabComplete } from "@/features/labs/user-lab-progress";
+import { recordLabMilestonePass } from "@/features/labs/user-lab-milestone-progress";
 import type { LabMilestoneView } from "./lab-code-lab";
 
 /** Explicit completion-persistence lifecycle so the banner never lies (#610). */
@@ -28,6 +29,7 @@ export function LabWorkspace({
   title,
   milestones,
   contentVersionId,
+  initialPassedMilestoneIds = [],
   backHref,
   backLabel
 }: {
@@ -35,13 +37,18 @@ export function LabWorkspace({
   title: string;
   milestones: LabMilestoneView[];
   contentVersionId?: string;
+  /** Stable milestone ids already durably passed for this version (#610). */
+  initialPassedMilestoneIds?: string[];
   backHref?: string;
   backLabel?: string;
 }) {
   const [active, setActive] = useState(0);
   // Passes are keyed by STABLE milestone id (#610/#612), so reordering or
   // republishing milestones never reinterprets which checkpoint a pass belongs to.
-  const [passed, setPassed] = useState<Record<string, boolean>>({});
+  // Seeded from durable progress so passes survive reload/reopen.
+  const [passed, setPassed] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(initialPassedMilestoneIds.map((id) => [id, true]))
+  );
   const [saveState, setSaveState] = useState<CompletionSaveState>("idle");
   const activeView = milestones[active] ?? milestones[0];
   const isSingleTask = milestones.length === 1 && milestones[0]?.label === "Task";
@@ -84,6 +91,16 @@ export function LabWorkspace({
     if (!test || test.staleDefinition) return;
     // A checkpoint passes when every case (visible + hidden) passes.
     if (test.status === "ok" && test.total > 0 && test.passed === test.total) {
+      // Durably record the pass (best-effort) so it survives reload/reopen (#610),
+      // keyed by stable milestone id + the immutable content version.
+      if (!passed[activeView.milestoneId]) {
+        void recordLabMilestonePass({
+          itemId,
+          contentVersionId: contentVersionId ?? null,
+          milestoneId: activeView.milestoneId,
+          milestoneIndex: activeView.index
+        }).catch(() => false);
+      }
       setPassed((prev) => (prev[activeView.milestoneId] ? prev : { ...prev, [activeView.milestoneId]: true }));
     }
   }
