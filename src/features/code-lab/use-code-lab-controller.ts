@@ -36,7 +36,7 @@ export type CodeLabControllerArgs = {
   contentVersionId?: string;
   /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
   milestoneIndex?: number;
-  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
+  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null; source?: string }) => void;
 };
 
 /**
@@ -198,7 +198,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
           updatePredictionComparisons();
           applyClassifications(result.classifications ?? []);
           updateScaffold(result.classifications ?? [], undefined);
-          onResult?.({ run: result, test: testResultRef.current });
+          onResult?.({ run: result, test: testResultRef.current, source });
         }
       } else if (action === "test") {
         setReview(null);
@@ -214,7 +214,7 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
             result.classifications ?? [],
             result.total > 0 ? result.passed / result.total : undefined
           );
-          onResult?.({ run: runResultRef.current, test: result });
+          onResult?.({ run: runResultRef.current, test: result, source });
         }
       } else {
         const result = await reviewCodeRequest({
