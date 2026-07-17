@@ -26,6 +26,7 @@ describe("interviewPayloadToCodeLabConfig (#490)", () => {
     );
     expect(config.prompt).toBe("Return indices summing to target.");
     expect(config.starterCode).toBe("int main(){}");
+    expect(config.evaluationMode).toBe("judge"); // #609: mode carried into the config
     expect(config.visibleTests).toHaveLength(1);
     expect(config.visibleTests[0].name).toBe("v");
     expect(config.hiddenTestCount).toBe(1);

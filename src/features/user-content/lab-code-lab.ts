@@ -78,6 +78,7 @@ export function labPayloadToCodeLabConfig(payload: LabPayload, milestoneIndex = 
     mode: "stdin",
     prompt: labPrompt(payload, milestoneIndex) || undefined,
     starterCode: payload.starterCode ?? "",
+    evaluationMode: payload.evaluationMode,
     visibleTests: visible.map((test) => ({
       name: test.name,
       stdin: test.input,

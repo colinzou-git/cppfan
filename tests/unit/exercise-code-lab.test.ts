@@ -21,6 +21,8 @@ describe("exercisePayloadToCodeLabConfig (#488)", () => {
     expect(config.mode).toBe("stdin");
     expect(config.prompt).toBe("Reverse a line.");
     expect(config.starterCode).toBe("int main(){}");
+    // #609: the author-selected evaluation mode is carried into the config.
+    expect(config.evaluationMode).toBe("automated_tests");
   });
 
   it("maps function mode", () => {

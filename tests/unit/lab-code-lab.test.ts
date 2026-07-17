@@ -28,6 +28,7 @@ describe("labPayloadToCodeLabConfig (#489)", () => {
       })
     );
     expect(config.starterCode).toBe("int main(){}");
+    expect(config.evaluationMode).toBe("automated_tests"); // #609: mode carried into the config
     expect(config.visibleTests).toHaveLength(1);
     expect(config.visibleTests[0].name).toBe("v");
     expect(config.hiddenTestCount).toBe(1);
