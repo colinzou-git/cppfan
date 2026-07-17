@@ -2,11 +2,16 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LabWorkspace } from "@/features/user-content/lab-workspace";
 import { markUserLabComplete } from "@/features/labs/user-lab-progress";
+import { validateLabCumulative } from "@/features/labs/lab-cumulative-validation";
 import type { LabMilestoneView } from "@/features/user-content/lab-code-lab";
 
 vi.mock("@/features/labs/user-lab-progress", () => ({ markUserLabComplete: vi.fn(async () => ({ status: "ok" })) }));
 vi.mock("@/features/labs/user-lab-milestone-progress", () => ({ recordLabMilestonePass: vi.fn(async () => true) }));
+vi.mock("@/features/labs/lab-cumulative-validation", () => ({
+  validateLabCumulative: vi.fn(async () => ({ status: "ok", regressedMilestoneIds: [] }))
+}));
 const mockedComplete = vi.mocked(markUserLabComplete);
+const mockedCumulative = vi.mocked(validateLabCumulative);
 
 // Capture the props the wrapper hands to the workspace, and expose onResult so a
 // test can simulate a passing Test run.
@@ -104,6 +109,25 @@ describe("LabWorkspace milestone navigator (#489)", () => {
     );
     // The only required milestone is already passed → completion flows on open.
     expect(await screen.findByTestId("lab-complete-banner")).toBeInTheDocument();
+  });
+
+  it("blocks completion when cumulative validation reports a regressed milestone (#610)", async () => {
+    mockedCumulative.mockResolvedValueOnce({ status: "regressed", regressedMilestoneIds: ["m-parse"] });
+    render(
+      <LabWorkspace
+        itemId="user.item.r"
+        title="Shell"
+        milestones={[view(0, "Parse", true, "m-parse")]}
+      />
+    );
+    const onResult = lastProps.onResult as (r: { test: unknown; source?: string }) => void;
+    // Passing the milestone carries the current source; cumulative check then fails.
+    act(() => onResult({ test: { status: "ok", total: 1, passed: 1, staleDefinition: false }, source: "int main(){}" }));
+
+    // No completed banner — the regressed checkpoint is surfaced instead.
+    expect(await screen.findByTestId("lab-regressed")).toBeInTheDocument();
+    expect(screen.queryByTestId("lab-complete-banner")).toBeNull();
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 
   it("uses open-navigation icons with no lock (#610)", () => {

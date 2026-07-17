@@ -6,10 +6,11 @@ import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import type { CodeTestResult } from "@/features/code-lab/code-lab-types";
 import { markUserLabComplete } from "@/features/labs/user-lab-progress";
 import { recordLabMilestonePass } from "@/features/labs/user-lab-milestone-progress";
+import { validateLabCumulative } from "@/features/labs/lab-cumulative-validation";
 import type { LabMilestoneView } from "./lab-code-lab";
 
 /** Explicit completion-persistence lifecycle so the banner never lies (#610). */
-type CompletionSaveState = "idle" | "saving" | "saved" | "error";
+type CompletionSaveState = "idle" | "validating" | "saving" | "saved" | "error";
 
 /**
  * Lab workspace with a milestone navigator (#489). One shared codebase (the
@@ -50,6 +51,10 @@ export function LabWorkspace({
     Object.fromEntries(initialPassedMilestoneIds.map((id) => [id, true]))
   );
   const [saveState, setSaveState] = useState<CompletionSaveState>("idle");
+  const [regressed, setRegressed] = useState<string[]>([]);
+  // Latest shared source seen this session (from a Run/Test), used to re-validate
+  // the cumulative codebase before completion (#610).
+  const latestSourceRef = useRef("");
   const activeView = milestones[active] ?? milestones[0];
   const isSingleTask = milestones.length === 1 && milestones[0]?.label === "Task";
 
@@ -64,8 +69,37 @@ export function LabWorkspace({
   const persistedRef = useRef(false);
   const saveCompletion = useCallback(async () => {
     if (persistedRef.current) return;
-    setSaveState("saving");
     try {
+      // Cumulative final validation (#610): re-run the CURRENT shared code against
+      // every required milestone before completing, so a later edit that broke an
+      // earlier milestone blocks completion and returns the learner to it. Skipped
+      // when no code was run this session (hydrated durable passes stand) or when
+      // no runner is available.
+      if (latestSourceRef.current) {
+        setSaveState("validating");
+        const cumulative = await validateLabCumulative({
+          itemId,
+          contentVersionId: contentVersionId ?? null,
+          source: latestSourceRef.current
+        });
+        if (cumulative.status === "regressed") {
+          setRegressed(cumulative.regressedMilestoneIds);
+          // Return the learner to the regressed checkpoints (clear their pass).
+          setPassed((prev) => {
+            const next = { ...prev };
+            for (const id of cumulative.regressedMilestoneIds) delete next[id];
+            return next;
+          });
+          setSaveState("error");
+          return;
+        }
+        if (cumulative.status === "stale") {
+          setSaveState("error");
+          return;
+        }
+      }
+      setRegressed([]);
+      setSaveState("saving");
       const result = await markUserLabComplete({ itemId });
       if (result.status === "ok") {
         persistedRef.current = true;
@@ -76,7 +110,7 @@ export function LabWorkspace({
     } catch {
       setSaveState("error");
     }
-  }, [itemId]);
+  }, [itemId, contentVersionId]);
 
   // Attempt the save once when the lab first becomes complete. On failure we stop
   // at "error" (no auto-retry loop) and expose an explicit Retry button.
@@ -86,7 +120,8 @@ export function LabWorkspace({
     }
   }, [labComplete, saveState, saveCompletion]);
 
-  function handleResult(result: { test?: CodeTestResult | null }) {
+  function handleResult(result: { test?: CodeTestResult | null; source?: string }) {
+    if (typeof result.source === "string") latestSourceRef.current = result.source;
     const test = result.test;
     if (!test || test.staleDefinition) return;
     // A checkpoint passes when every case (visible + hidden) passes.
@@ -102,6 +137,10 @@ export function LabWorkspace({
         }).catch(() => false);
       }
       setPassed((prev) => (prev[activeView.milestoneId] ? prev : { ...prev, [activeView.milestoneId]: true }));
+      // Re-passing a regressed checkpoint clears it and re-enables the completion
+      // attempt (#610).
+      setRegressed((prev) => prev.filter((id) => id !== activeView.milestoneId));
+      setSaveState((s) => (s === "error" ? "idle" : s));
     }
   }
 
@@ -142,6 +181,20 @@ export function LabWorkspace({
             );
           })}
         </nav>
+      ) : null}
+
+      {regressed.length > 0 ? (
+        <div
+          className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-800"
+          role="alert"
+          data-testid="lab-regressed"
+        >
+          Your latest code no longer passes{" "}
+          {regressed
+            .map((id) => milestones.find((m) => m.milestoneId === id)?.label ?? id)
+            .join(", ")}
+          . Fix it and re-run those checkpoints before completing.
+        </div>
       ) : null}
 
       {labComplete && !isSingleTask ? (

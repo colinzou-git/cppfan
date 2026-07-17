@@ -55,7 +55,7 @@ export function CodeLabWorkspace({
   /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
   milestoneIndex?: number;
   /** Notified after each run/test — a lab wrapper uses this to track milestone completion (#489). */
-  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
+  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null; source?: string }) => void;
   /** Back-link target; defaults to the lesson page. Project labs pass /labs (#439). */
   backHref?: string;
   /** Back-link label; defaults to "Back to lesson". Project labs pass "Back to project labs". */
