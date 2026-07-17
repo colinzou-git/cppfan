@@ -29,9 +29,14 @@ function problem(id: string): InterviewProblem {
 
 const NATIVE = "native-array-problem";
 
+/** A resolved ref: native ids carry a null content version, user ids a versioned one. */
+function ref(id: string) {
+  return { problem: problem(id), contentVersionId: id === NATIVE ? null : `ver-${id}` };
+}
+
 /** Resolver that knows the native problem + a given user problem, else null. */
 function resolverFor(...knownIds: string[]) {
-  return vi.fn(async (id: string) => (knownIds.includes(id) ? problem(id) : null));
+  return vi.fn(async (id: string) => (knownIds.includes(id) ? ref(id) : null));
 }
 
 describe("resolveSessionWithFallback (#608)", () => {
@@ -52,7 +57,7 @@ describe("resolveSessionWithFallback (#608)", () => {
   it("starts a fresh session on a requested problem", async () => {
     const r = await resolveSessionWithFallback({
       saved: createSession({ problemId: NATIVE, mode: "practice", durationMinutes: 45 }),
-      requestedProblem: problem("user.item.req"),
+      requestedProblem: ref("user.item.req"),
       fallbackProblemId: NATIVE,
       durationMinutes: 45,
       resolve: resolverFor("user.item.req", NATIVE)
@@ -84,7 +89,7 @@ describe("resolveSessionWithFallback (#608)", () => {
   it("keeps displayed problem id === session problem id in every branch", async () => {
     for (const scenario of [
       { saved: createSession({ problemId: "user.item.gone", mode: "practice" as const, durationMinutes: 45 }), requested: null, known: [NATIVE] },
-      { saved: null, requested: problem("user.item.req"), known: ["user.item.req", NATIVE] },
+      { saved: null, requested: ref("user.item.req"), known: ["user.item.req", NATIVE] },
       { saved: createSession({ problemId: NATIVE, mode: "practice" as const, durationMinutes: 45 }), requested: null, known: [NATIVE] }
     ]) {
       const r = await resolveSessionWithFallback({
@@ -96,5 +101,26 @@ describe("resolveSessionWithFallback (#608)", () => {
       });
       expect(r.problem?.id).toBe(r.state.problemId);
     }
+  });
+
+  it("binds the session to the resolved immutable content version (#612)", async () => {
+    // A user problem carries its published version; a native problem is null.
+    const userR = await resolveSessionWithFallback({
+      saved: createSession({ problemId: "user.item.abc", mode: "practice", durationMinutes: 45 }),
+      requestedProblem: null,
+      fallbackProblemId: NATIVE,
+      durationMinutes: 45,
+      resolve: resolverFor("user.item.abc", NATIVE)
+    });
+    expect(userR.state.contentVersionId).toBe("ver-user.item.abc");
+
+    const nativeR = await resolveSessionWithFallback({
+      saved: createSession({ problemId: NATIVE, mode: "practice", durationMinutes: 45 }),
+      requestedProblem: null,
+      fallbackProblemId: NATIVE,
+      durationMinutes: 45,
+      resolve: resolverFor(NATIVE)
+    });
+    expect(nativeR.state.contentVersionId).toBeNull();
   });
 });

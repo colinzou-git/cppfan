@@ -42,12 +42,28 @@ function payloadToInterviewProblem(itemId: string, contentId: string, payload: I
  * cannot be resolved by another user).
  */
 export async function resolveInterviewProblem(id: string): Promise<InterviewProblem | null> {
+  return (await resolveInterviewProblemRef(id))?.problem ?? null;
+}
+
+/** A resolved interview problem plus its immutable published content version. */
+export type ResolvedInterviewProblemRef = {
+  problem: InterviewProblem;
+  /** user_content_versions.id for a user problem; null for a native problem. */
+  contentVersionId: string | null;
+};
+
+/**
+ * Resolve a problem id to its problem AND immutable published version (#612).
+ * Native ids have no content version (null); the session binds to this instead
+ * of the schema version, which stays 1 across every publication.
+ */
+export async function resolveInterviewProblemRef(id: string): Promise<ResolvedInterviewProblemRef | null> {
   if (typeof id !== "string" || id.length === 0) {
     return null;
   }
   const native = getInterviewProblem(id);
   if (native) {
-    return native;
+    return { problem: native, contentVersionId: null };
   }
   if (!isUserLearningItemId(id)) {
     return null;
@@ -61,5 +77,5 @@ export async function resolveInterviewProblem(id: string): Promise<InterviewProb
   if (!payload) {
     return null;
   }
-  return payloadToInterviewProblem(id, contentId, payload);
+  return { problem: payloadToInterviewProblem(id, contentId, payload), contentVersionId: detail?.publishedVersionId ?? null };
 }

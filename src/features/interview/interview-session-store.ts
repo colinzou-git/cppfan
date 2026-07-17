@@ -26,6 +26,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 type SessionRow = {
   session_id?: string | null;
   problem_id: string;
+  content_version_id?: string | null;
   mode: string;
   duration_minutes: number;
   phase_index: number;
@@ -117,6 +118,7 @@ export function rowToSessionState(row: SessionRow): SessionState {
   return {
     sessionId: coerceUuid(row.session_id),
     problemId: row.problem_id,
+    contentVersionId: typeof row.content_version_id === "string" ? row.content_version_id : null,
     mode,
     durationMinutes,
     phaseIndex: Math.min(Math.max(0, Math.trunc(row.phase_index)), LAST_PHASE_INDEX),
@@ -138,6 +140,7 @@ export function sessionStateToRow(state: SessionState): SessionRow {
   return {
     session_id: coerceUuid(state.sessionId),
     problem_id: state.problemId,
+    content_version_id: state.contentVersionId ?? null,
     mode: MODES.includes(state.mode) ? state.mode : "practice",
     duration_minutes: SESSION_DURATIONS.includes(state.durationMinutes) ? state.durationMinutes : 45,
     phase_index: Math.min(Math.max(0, Math.trunc(state.phaseIndex)), LAST_PHASE_INDEX),

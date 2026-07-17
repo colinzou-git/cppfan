@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
 import { getInterviewProblems } from "@/features/interview/problem-catalog";
-import { resolveInterviewProblem } from "@/features/interview/interview-problem-resolver";
+import { resolveInterviewProblemRef } from "@/features/interview/interview-problem-resolver";
 import { getCurrentSession, saveCurrentSession } from "@/features/interview/interview-session-store";
 import { getJudgeIoDescription } from "@/features/interview/judge-test-suites";
 import { resolveSessionWithFallback } from "@/features/interview/session-fallback";
@@ -26,7 +26,7 @@ export default async function InterviewSessionPage({
   const requested = await searchParams;
   const requestedId = typeof requested.problem === "string" ? requested.problem : undefined;
   // Resolve native OR the owner's published user problem (#490).
-  const requestedProblem = requestedId ? await resolveInterviewProblem(requestedId) : null;
+  const requestedProblem = requestedId ? await resolveInterviewProblemRef(requestedId) : null;
 
   // Resume the saved session, or start a fresh practice session on the requested
   // (or first) catalog problem. If the chosen problem no longer resolves (a saved
@@ -40,7 +40,7 @@ export default async function InterviewSessionPage({
     requestedProblem,
     fallbackProblemId,
     durationMinutes: 45,
-    resolve: resolveInterviewProblem
+    resolve: resolveInterviewProblemRef
   });
   if (staleReplaced) {
     // Persist the replacement so the stale session does not resurface.
