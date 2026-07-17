@@ -48,6 +48,13 @@ export type LearningItemCodeLab = {
    * it is authoring metadata (not an answer), so it is safe on the client config.
    */
   functionSignature?: string;
+  /**
+   * Author-selected formal evaluation mode for user-created content (#609), e.g.
+   * automated_tests / ai_evaluation / self_evaluation / automated_plus_ai (or the
+   * interview judge modes). Carried so the workspace can render the matching
+   * `Submit evaluation` flow; native items leave it undefined. Not an answer.
+   */
+  evaluationMode?: string;
   stdin?: string;
   visibleTests: CodeTestCase[];
   /** Count only — hidden inputs/expected outputs never reach the client. */

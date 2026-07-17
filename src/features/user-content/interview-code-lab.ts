@@ -22,6 +22,7 @@ export function interviewPayloadToCodeLabConfig(payload: InterviewProblemPayload
     mode: "stdin",
     prompt: payload.statement || undefined,
     starterCode: payload.starterCode ?? "",
+    evaluationMode: payload.evaluationMode,
     visibleTests: visible.map((test) => ({
       name: test.name,
       stdin: test.input,
