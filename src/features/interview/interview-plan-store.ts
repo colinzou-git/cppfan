@@ -6,6 +6,7 @@ import { getReadinessInputs } from "./readiness-store";
 import { GROUP_LABELS } from "./interview-catalog-view";
 import { buildStudyPlan, type PlanHorizonWeeks, type StudyPlan } from "./interview-plan";
 import { routePlanTask, type RouteTarget } from "./interview-routing";
+import { getInterviewPlanningCandidates } from "./interview-planning-candidates";
 import type { ProblemGroup } from "./problem-catalog";
 
 const ALL_PATTERNS = Object.keys(GROUP_LABELS) as ProblemGroup[];
@@ -25,5 +26,8 @@ export async function getStudyPlan(
   const { evidence, mocksCompleted, quality } = await getReadinessInputs(now);
   const report = computeReadiness(evidence, mocksCompleted, quality, { now });
   const plan = buildStudyPlan(report, evidence, ALL_PATTERNS, horizonWeeks, dailyMinutes, now);
-  return { plan, route: routePlanTask(plan.nextTask, evidence) };
+  // Include the owner's eligible published custom problems as plan candidates so
+  // a timed/transfer task can route to one, not only native problems (#613).
+  const candidates = await getInterviewPlanningCandidates();
+  return { plan, route: routePlanTask(plan.nextTask, evidence, candidates) };
 }

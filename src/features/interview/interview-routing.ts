@@ -7,6 +7,11 @@
 import { getInterviewProblem } from "./problem-catalog";
 import { getPracticeMockPacks } from "./mock-packs";
 import { selectTransferProblem } from "./interview-transfer";
+import {
+  selectTransferCandidate,
+  interviewSessionHref,
+  type InterviewPlanningCandidate
+} from "./interview-planning-candidates";
 import type { PlanTask } from "./interview-plan";
 import type { InterviewEvidence } from "./readiness";
 
@@ -35,7 +40,26 @@ export type RouteTarget = {
  * — or, for the C++ implementation pattern, to implementation drills — so the
  * learner always has a specific, non-repeated next action.
  */
-export function routePlanTask(task: PlanTask, evidence: InterviewEvidence[] = []): RouteTarget {
+/**
+ * Pick a transfer problem for a pattern. When planning candidates are supplied
+ * (native + the owner's eligible custom problems, #613) they are used so a custom
+ * problem can be chosen; otherwise this falls back to the native-only selection.
+ */
+function pickTransfer(
+  pattern: Parameters<typeof selectTransferProblem>[0],
+  evidence: InterviewEvidence[],
+  candidates?: InterviewPlanningCandidate[]
+) {
+  return candidates && candidates.length > 0
+    ? selectTransferCandidate(pattern, evidence, candidates)
+    : selectTransferProblem(pattern, evidence);
+}
+
+export function routePlanTask(
+  task: PlanTask,
+  evidence: InterviewEvidence[] = [],
+  candidates?: InterviewPlanningCandidate[]
+): RouteTarget {
   if (task.sessionType === "mock_interview") {
     const pack = getPracticeMockPacks()[0] ?? null;
     return {
@@ -67,7 +91,7 @@ export function routePlanTask(task: PlanTask, evidence: InterviewEvidence[] = []
   }
 
   if (pattern && task.sessionType === "remediation") {
-    const pick = selectTransferProblem(pattern, evidence);
+    const pick = pickTransfer(pattern, evidence, candidates);
     const link = pick ? getInterviewProblem(pick.problemId)?.externalLinks[0] : undefined;
     return {
       kind: "worked_example",
@@ -79,7 +103,7 @@ export function routePlanTask(task: PlanTask, evidence: InterviewEvidence[] = []
   }
 
   if (pattern) {
-    const pick = selectTransferProblem(pattern, evidence);
+    const pick = pickTransfer(pattern, evidence, candidates);
     const transferDetail = pick?.unseen
       ? "An independent, unhinted solve on a fresh problem is the strongest readiness signal."
       : "A different problem in this pattern — not the one you just worked — to prove transfer.";
@@ -87,7 +111,9 @@ export function routePlanTask(task: PlanTask, evidence: InterviewEvidence[] = []
       kind: "timed_problem",
       title: pick ? `Solve under time: ${pick.title}` : "Solve a fresh problem under time",
       detail: task.sessionType === "maintenance" ? "A short, timed rep keeps this strong pattern warm." : transferDetail,
-      href: "/interview/session"
+      // A specific pick gets a problem-specific href — never a generic session URL
+      // while naming a particular problem (#613).
+      href: pick ? interviewSessionHref(pick.problemId) : "/interview/session"
     };
   }
 
