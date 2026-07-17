@@ -14,6 +14,8 @@ import { TraceControls } from "./trace-controls";
 import { AiTracePanel } from "./ai-trace-panel";
 import { BoundaryChecklistPanel } from "./boundary-checklist";
 import { PredictionBeforeRun } from "./prediction-before-run";
+import { SelfEvaluationPanel } from "./self-evaluation-panel";
+import { submitSelfEvaluation } from "./self-evaluation-action";
 import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { ResizableColumns } from "./resizable-columns";
@@ -189,6 +191,13 @@ export function CodeLabWorkspace({
             </span>
           ))}
         </div>
+      ) : null}
+      {config.evaluationMode === "self_evaluation" ? (
+        // The AUTHORITATIVE completion action for a self-evaluated item (#609),
+        // distinct from the optional AI help/review below.
+        <SelfEvaluationPanel
+          onSubmit={(rating, reflection) => submitSelfEvaluation({ itemId, contentVersionId, rating, reflection })}
+        />
       ) : null}
       {c.predictionEnabled ? (
         <PredictionBeforeRun
