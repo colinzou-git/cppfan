@@ -29,10 +29,11 @@ describe("routePlanTask (#180)", () => {
     expect(route.href).toBe("/exercises");
   });
 
-  it("routes a timing/transfer gap to an independent timed problem", () => {
+  it("routes a timing/transfer gap to a specific independent timed problem", () => {
     const route = routePlanTask(task({ sessionType: "independent_timed", pattern: "binary_search" }));
     expect(route.kind).toBe("timed_problem");
-    expect(route.href).toBe("/interview/session");
+    // #613: a selected problem gets a problem-specific href, not a generic URL.
+    expect(route.href).toMatch(/^\/interview\/session\?problem=/);
     expect(route.title).toMatch(/under time/i);
   });
 
