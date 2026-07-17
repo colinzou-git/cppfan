@@ -3,13 +3,10 @@ import { ItemHelpLinks } from "@/components/item-help-links";
 import { createClient } from "@/lib/supabase/server";
 import { getInterviewProblems } from "@/features/interview/problem-catalog";
 import { resolveInterviewProblem } from "@/features/interview/interview-problem-resolver";
-import { getCurrentSession } from "@/features/interview/interview-session-store";
+import { getCurrentSession, saveCurrentSession } from "@/features/interview/interview-session-store";
 import { getJudgeIoDescription } from "@/features/interview/judge-test-suites";
-import {
-  createSession,
-  currentPhase,
-  type SessionState
-} from "@/features/interview/session-machine";
+import { resolveSessionWithFallback } from "@/features/interview/session-fallback";
+import { currentPhase } from "@/features/interview/session-machine";
 import { SessionRunner } from "@/features/interview/session-runner";
 import { FollowUpDrill } from "@/features/interview/follow-up-drill";
 
@@ -32,15 +29,23 @@ export default async function InterviewSessionPage({
   const requestedProblem = requestedId ? await resolveInterviewProblem(requestedId) : null;
 
   // Resume the saved session, or start a fresh practice session on the requested
-  // (or first) catalog problem.
+  // (or first) catalog problem. If the chosen problem no longer resolves (a saved
+  // user problem was archived/deleted/unpublished), start a FRESH session on the
+  // fallback problem so the runner, draft, judge, and follow-up never act on a
+  // stale id behind a different displayed problem (#608 Problem B).
   const problems = getInterviewProblems();
   const fallbackProblemId = problems[0]?.id ?? "";
-  const state: SessionState =
-    requestedProblem && (!saved || saved.problemId !== requestedProblem.id)
-      ? createSession({ problemId: requestedProblem.id, mode: "practice", durationMinutes: 45 })
-      : saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes: 45 });
-
-  const problem = (await resolveInterviewProblem(state.problemId)) ?? problems[0] ?? null;
+  const { state, problem, staleReplaced } = await resolveSessionWithFallback({
+    saved,
+    requestedProblem,
+    fallbackProblemId,
+    durationMinutes: 45,
+    resolve: resolveInterviewProblem
+  });
+  if (staleReplaced) {
+    // Persist the replacement so the stale session does not resurface.
+    await saveCurrentSession(state).catch(() => "error");
+  }
   const judgeIoDescription = problem ? getJudgeIoDescription(problem.id) : null;
 
   let authenticated = false;
@@ -67,6 +72,15 @@ export default async function InterviewSessionPage({
 
       {problem ? (
         <>
+          {staleReplaced ? (
+            <div
+              className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
+              role="status"
+              data-testid="session-stale-replaced"
+            >
+              The previous problem is no longer available; a new session was started.
+            </div>
+          ) : null}
           <ItemHelpLinks
             context={{
               schemaVersion: 1,
