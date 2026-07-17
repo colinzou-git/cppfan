@@ -129,3 +129,58 @@ export function combineEvaluationOutcome(input: CombineEvaluationInput): Combine
     }
   }
 }
+
+/** Extract the objective outcome from a deterministic test result (#609). */
+export function objectiveOutcomeFromTestResult(
+  test: { passed: number; total: number } | null | undefined
+): ObjectiveOutcome | undefined {
+  return test ? { passed: test.passed, total: test.total } : undefined;
+}
+
+/** The learner-facing formal evaluation result the submission API returns (#609). */
+export type UserContentEvaluationResult = {
+  status: EvaluationStatus;
+  mode: ContentEvaluationMode;
+  objective?: ObjectiveOutcome;
+  completionCredited: boolean;
+  objectiveAuthoritative: boolean;
+  reason: string;
+  /** Learner-facing next step derived from the outcome. */
+  nextAction: string;
+};
+
+function nextActionFor(status: EvaluationStatus): string {
+  switch (status) {
+    case "passed":
+      return "Completion recorded — continue to your next review item.";
+    case "partial":
+      return "Address the feedback, then resubmit for evaluation.";
+    case "failed":
+      return "Fix the failing tests/criteria and resubmit.";
+    case "unavailable":
+      return "Evaluation is temporarily unavailable — your work is saved; try again.";
+    case "invalid":
+    default:
+      return "This submission could not be evaluated.";
+  }
+}
+
+/**
+ * Compose the full formal evaluation result from the mode + available evidence,
+ * grounding the pass/fail on combineEvaluationOutcome so a failing objective can
+ * never be flipped to a pass by optimistic AI (#609). The async submission
+ * service (resolve definition, run tests/judge, call the provider, persist)
+ * gathers the inputs and wraps this pure builder.
+ */
+export function buildUserContentEvaluationResult(input: CombineEvaluationInput): UserContentEvaluationResult {
+  const combined = combineEvaluationOutcome(input);
+  return {
+    status: combined.status,
+    mode: input.mode,
+    ...(input.objective ? { objective: input.objective } : {}),
+    completionCredited: combined.completionCredited,
+    objectiveAuthoritative: combined.objectiveAuthoritative,
+    reason: combined.reason,
+    nextAction: nextActionFor(combined.status)
+  };
+}

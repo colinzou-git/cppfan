@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { combineEvaluationOutcome } from "@/features/user-content/user-content-evaluation";
+import {
+  combineEvaluationOutcome,
+  objectiveOutcomeFromTestResult,
+  buildUserContentEvaluationResult
+} from "@/features/user-content/user-content-evaluation";
 
 describe("combineEvaluationOutcome (#609)", () => {
   it("automated/judge: objective determines the outcome", () => {
@@ -59,5 +63,21 @@ describe("combineEvaluationOutcome (#609)", () => {
 
   it("automated with no tests cannot assert a pass on its own", () => {
     expect(combineEvaluationOutcome({ mode: "automated_tests", objective: { passed: 0, total: 0 } }).status).toBe("partial");
+  });
+
+  it("objectiveOutcomeFromTestResult extracts passed/total (or undefined)", () => {
+    expect(objectiveOutcomeFromTestResult({ passed: 3, total: 4 })).toEqual({ passed: 3, total: 4 });
+    expect(objectiveOutcomeFromTestResult(null)).toBeUndefined();
+  });
+
+  it("buildUserContentEvaluationResult composes the result contract with a next action", () => {
+    const passed = buildUserContentEvaluationResult({ mode: "automated_plus_ai", objective: { passed: 2, total: 2 }, ai: { available: true, verdict: "pass" } });
+    expect(passed).toMatchObject({ status: "passed", mode: "automated_plus_ai", completionCredited: true, objective: { passed: 2, total: 2 } });
+    expect(passed.nextAction).toMatch(/completion recorded/i);
+
+    // Objective failure keeps completion uncredited even with optimistic AI.
+    const failed = buildUserContentEvaluationResult({ mode: "automated_plus_ai", objective: { passed: 1, total: 2 }, ai: { available: true, verdict: "pass" } });
+    expect(failed).toMatchObject({ status: "failed", completionCredited: false });
+    expect(failed.nextAction).toMatch(/resubmit|fix/i);
   });
 });
