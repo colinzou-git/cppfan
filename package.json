@@ -20,6 +20,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:db-parity": "vitest run --config vitest.integration.config.ts tests/integration/seed-db-parity.test.ts",
     "verify:interview-catalog": "node scripts/verify-interview-catalog.mjs",
+    "report:exercise-coverage": "node scripts/exercises/report-coverage.mjs",
+    "check:exercise-coverage": "node scripts/exercises/report-coverage.mjs --check",
     "check:links": "node scripts/check-resource-links.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm verify:interview-catalog && pnpm build",
     "verify:e2e": "pnpm exec playwright install --with-deps chromium webkit && pnpm test:e2e",

@@ -44,9 +44,24 @@ static int test_move_transfers_ownership() {
   return 0;
 }
 
+static int test_move_assignment_transfers_ownership() {
+  const int baseline = ScopedArray::live();
+  ScopedArray a(3);
+  a.at(0) = 11;
+  ScopedArray b(1);
+  CHECK(ScopedArray::live() == baseline + 2);
+  b = std::move(a);  // move-assign: b releases its own buffer and takes a's
+  CHECK(ScopedArray::live() == baseline + 1);  // exactly one live owner remains
+  CHECK(b.size() == 3);
+  CHECK(b.at(0) == 11);
+  CHECK(a.size() == 0);  // moved-from is empty
+  return 0;
+}
+
 int main() {
   test_basic_storage();
   test_live_count_returns_to_baseline();
   test_move_transfers_ownership();
+  test_move_assignment_transfers_ownership();
   return REPORT();
 }

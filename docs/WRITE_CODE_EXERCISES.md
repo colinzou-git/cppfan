@@ -257,3 +257,25 @@ scripts/exercises/verify-all.sh        # EX_SANITIZE=0 on MinGW
 
 The CI `C++ exercises` job runs `scripts/exercises/verify-all.sh`, so starter
 and solution builds are validated on every change from a clean Linux checkout.
+
+## Catalog coverage & finite closure (#473)
+
+Catalog breadth has a **defined endpoint**, not endless growth. Required topic
+areas and their floors live in
+`src/features/exercises/exercise-coverage-areas.json` (single-sourced for both
+the TS model in `exercise-coverage.ts` and the report script). Generate the
+report and audit doc with:
+
+```bash
+pnpm report:exercise-coverage   # rewrites docs/EXERCISE_CATALOG_COVERAGE.md
+pnpm check:exercise-coverage    # CI: fail if a required area is below its floor
+                                # or the committed report is stale
+```
+
+`docs/EXERCISE_CATALOG_COVERAGE.md` (generated) shows per-area counts, the
+exercises in each area, and advisory duplicate/shallow-test diagnostics;
+`docs/EXERCISE_CATALOG_REVIEW_RUBRIC.md` records the one-time pedagogy audit.
+`tests/unit/exercise-catalog-coverage.test.ts` fails if any area drops below its
+floor or a hard-quality defect (duplicate title, `< 4` tests, uncovered
+exercise) appears. Once every floor is met, add breadth through **new, focused
+issues** rather than reopening #473.
