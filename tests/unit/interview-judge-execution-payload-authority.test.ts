@@ -21,9 +21,12 @@ describe("interview judge execution payload migration (#608)", () => {
     expect(migration).toMatch(/worker_tests jsonb not null/i);
     expect(migration).toMatch(/fixtures jsonb not null/i);
     expect(migration).toMatch(/alter table public\.interview_judge_execution_payloads enable row level security/i);
-    // Revoked from both roles and NO select/insert/update/delete policy is created.
+    // Revoked from both learner roles and NO select/insert/update/delete policy.
     expect(migration).toMatch(/revoke all on public\.interview_judge_execution_payloads from anon, authenticated/i);
     expect(migration).not.toMatch(/create policy[\s\S]+on public\.interview_judge_execution_payloads/i);
+    // Only the worker's service role may read/manage the raw payload.
+    expect(migration).toMatch(/grant [\w, ]*select[\w, ]* on public\.interview_judge_execution_payloads to service_role/i);
+    expect(migration).not.toMatch(/grant[\w, ]+on public\.interview_judge_execution_payloads to (anon|authenticated)/i);
     // The queue/submissions ALTER must never add source text or fixtures.
     const submissionsAlter = migration.slice(
       migration.indexOf("alter table public.interview_judge_submissions"),

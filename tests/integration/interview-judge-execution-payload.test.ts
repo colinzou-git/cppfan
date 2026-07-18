@@ -84,8 +84,9 @@ suite("interview judge execution payload boundary (#608)", () => {
     expect(error).toBeNull();
     expect(data).toBe("queued");
 
-    // The learner-readable row carries the new version identity + source.
-    const row = await service
+    // The learner reads their own submission row (own-row RLS) with the new
+    // version identity + definition source.
+    const row = await learner
       .from("interview_judge_submissions")
       .select("definition_source,content_version_id,user_id")
       .eq("submission_id", submissionId)

@@ -31,8 +31,13 @@ alter table public.interview_judge_execution_payloads enable row level security;
 
 -- No SELECT/INSERT/UPDATE/DELETE policies are defined for anon/authenticated, so
 -- with RLS enabled they can do nothing. Also revoke table privileges outright so
--- the intent is explicit and defense-in-depth. The service role bypasses RLS.
+-- the intent is explicit and defense-in-depth.
 revoke all on public.interview_judge_execution_payloads from anon, authenticated;
+
+-- Only the isolated worker (service role, which bypasses RLS) may read/manage the
+-- raw payload. The enqueue path writes via the security-definer RPC below; this
+-- grant is what lets the worker read the source + fixtures to compile and run.
+grant select, insert, update, delete on public.interview_judge_execution_payloads to service_role;
 
 -- Replace the enqueue RPC with a version-aware, payload-carrying variant. Both
 -- inserts happen inside this single function invocation, so a submission row and
@@ -87,7 +92,7 @@ begin
     raise exception 'submission limits exceeded' using errcode = '22023';
   end if;
 
-  if (p_submission->>'definition_source') not in ('native', 'user') then
+  if coalesce(p_submission->>'definition_source', 'native') not in ('native', 'user') then
     raise exception 'invalid definition source' using errcode = '22023';
   end if;
 
