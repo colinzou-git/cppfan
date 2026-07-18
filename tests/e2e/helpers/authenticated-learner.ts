@@ -281,6 +281,40 @@ export async function createAuthenticatedLearner(
       const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
       return { contentId: row.content_id };
     },
+    /**
+     * Republish a seeded interview problem to a NEW immutable content version
+     * (#612): save a fresh draft then publish it, so `current_published_version_id`
+     * changes. Returns the new published version number.
+     */
+    async republishInterviewProblem(contentId: string) {
+      const payload = {
+        schemaVersion: 1,
+        title: "PW republished problem",
+        statement: "Republished statement.",
+        evaluationMode: "judge",
+        tests: [{ name: "t", input: "1\n", expectedOutput: "1\n", hidden: false }]
+      };
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: contentId,
+        p_kind: "interview_problem",
+        p_title: payload.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: 1,
+        p_payload: payload,
+        p_expected_revision: null
+      });
+      if (saved.error) {
+        throw saved.error;
+      }
+      const published = await browserLikeClient.rpc("publish_user_content", {
+        p_content_id: contentId,
+        p_expected_revision: null
+      });
+      if (published.error) {
+        throw published.error;
+      }
+    },
     async removeContent(contentId: string) {
       const { error } = await browserLikeClient.rpc("delete_user_content", {
         p_content_id: contentId,
