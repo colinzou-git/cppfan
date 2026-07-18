@@ -171,6 +171,32 @@ function executionToRpcPayload(execution: JudgeSubmissionExecutionPayload) {
   };
 }
 
+/**
+ * Map the client's session identifier to the durable interview_sessions.id that
+ * interview_judge_submissions.interview_session_id references. The client knows
+ * only session_id; there is one session row per user, so the id/session_id of that
+ * row is matched. Returns null (unlinked) when nothing matches — never a value
+ * that would violate the FK.
+ */
+async function resolveInterviewSessionRowId(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  userId: string,
+  clientSessionId: string | null
+): Promise<string | null> {
+  if (!clientSessionId) {
+    return null;
+  }
+  const { data } = await supabase
+    .from("interview_sessions")
+    .select("id,session_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data) {
+    return null;
+  }
+  return data.id === clientSessionId || data.session_id === clientSessionId ? data.id : null;
+}
+
 export async function saveQueuedJudgeSubmission(
   input: JudgeSubmissionDraft,
   execution?: JudgeSubmissionExecutionPayload
@@ -201,11 +227,22 @@ export async function saveQueuedJudgeSubmission(
     return { status: "duplicate", submissionId };
   }
 
+  // The client only knows its own session_id, but interview_session_id is a FK to
+  // interview_sessions.id. Resolve it server-side (there is one session row per
+  // user) so a valid link is stored — and drop the link rather than fail the FK
+  // when no matching row exists yet.
+  const row = judgeSubmissionToRow(input);
+  row.interview_session_id = await resolveInterviewSessionRowId(
+    supabase,
+    user.id,
+    input.context.interviewSessionId ?? null
+  );
+
   // The RPC inserts the learner-readable row AND the private worker execution
   // payload atomically. The raw source/fixtures go only through p_execution into
   // the service-role-only interview_judge_execution_payloads table.
   const { data, error } = await supabase.rpc("enqueue_interview_judge_submission", {
-    p_submission: judgeSubmissionToRow(input),
+    p_submission: row,
     p_execution: execution ? executionToRpcPayload(execution) : null
   });
   if (!error && data === "queued") {

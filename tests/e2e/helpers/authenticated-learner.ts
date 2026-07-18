@@ -207,6 +207,49 @@ export async function createAuthenticatedLearner(
   return {
     email,
     userId,
+    /**
+     * Seed a PUBLISHED judge-backed user interview problem (#608) and return its
+     * projected id (`user.item.<contentId>`). Drives the same save+publish RPCs
+     * the app uses, as the signed-in owner, so the timed session can resolve a
+     * dynamic judge suite end to end.
+     */
+    async seedPublishedInterviewProblem(
+      seed: { title?: string; tests?: Array<{ name: string; input: string; expectedOutput: string; hidden: boolean }> } = {}
+    ) {
+      const payload = {
+        schemaVersion: 1,
+        title: seed.title ?? "Playwright sum problem",
+        statement: "Read two integers a and b from stdin and print a + b.",
+        evaluationMode: "judge",
+        constraints: "0 <= a, b <= 1000",
+        tests: seed.tests ?? [
+          { name: "sample", input: "1 2\n", expectedOutput: "3\n", hidden: false },
+          { name: "edge", input: "10 20\n", expectedOutput: "30\n", hidden: true }
+        ]
+      };
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: null,
+        p_kind: "interview_problem",
+        p_title: payload.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: payload.schemaVersion,
+        p_payload: payload,
+        p_expected_revision: null
+      });
+      if (saved.error) {
+        throw saved.error;
+      }
+      const draftRow = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      const published = await browserLikeClient.rpc("publish_user_content", {
+        p_content_id: draftRow.content_id,
+        p_expected_revision: null
+      });
+      if (published.error) {
+        throw published.error;
+      }
+      return { contentId: draftRow.content_id, problemId: `user.item.${draftRow.content_id}` };
+    },
     async createStudyGoal(input: SeedStudyGoalInput = {}) {
       const timezone = input.timezone ?? "America/Los_Angeles";
       const startLocalDate = input.startLocalDate ?? localDateKey(new Date(), timezone);
