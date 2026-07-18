@@ -255,6 +255,32 @@ export async function createAuthenticatedLearner(
      * its row (service role bypasses RLS). After this, resolvers return null and
      * the Code Lab reports the item as unavailable.
      */
+    /**
+     * Seed a draft user-content item of any kind (#606). Returns its content id.
+     * Uses the owner's save_user_content_draft RPC; the payload is minimal because
+     * the RPC validates only kind + title.
+     */
+    async seedContentDraft(input: {
+      kind: "lesson" | "exercise" | "lab" | "interview_problem";
+      title: string;
+      payload?: Record<string, unknown>;
+    }) {
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: null,
+        p_kind: input.kind,
+        p_title: input.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: 1,
+        p_payload: input.payload ?? { schemaVersion: 1, title: input.title },
+        p_expected_revision: null
+      });
+      if (saved.error) {
+        throw saved.error;
+      }
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      return { contentId: row.content_id };
+    },
     async removeContent(contentId: string) {
       const { error } = await browserLikeClient.rpc("delete_user_content", {
         p_content_id: contentId,
