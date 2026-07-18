@@ -37,9 +37,30 @@ The Playwright web server command builds and starts the production Next.js serve
 
 ## Authenticated Supabase Flow
 
-`tests/e2e/authenticated-learning-loop.spec.ts` is a focused browser test for the
-real signed-in learning loop. It self-skips unless `SUPABASE_URL`,
-`SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` point at a local Supabase
-stack. CI runs it in the `auth-integration` job after `supabase start`, with
-`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` mapped to
-that disposable local stack.
+Backend-dependent browser tests use one canonical command:
+
+```bash
+pnpm test:e2e:authenticated
+```
+
+The command reuses a running local Supabase stack or starts a disposable one,
+exports the generated local URL/anon/service-role values, runs every
+`tests/e2e/authenticated-*.spec.ts` on Chromium, iPhone, and iPad, then stops the
+stack only when it started it. It refuses non-local Supabase URLs and never needs
+production credentials.
+
+Use `pnpm test:e2e` for signed-out/catalog/local-fallback browser coverage. Use
+`pnpm test:e2e:authenticated` for real Auth, persistence, RPC, and owner-scoped
+workflow coverage.
+
+To run a focused authenticated spec or project while retaining automatic backend
+setup, pass Playwright arguments through the script:
+
+```bash
+pnpm test:e2e:authenticated -- \
+  tests/e2e/authenticated-my-content-kinds.spec.ts \
+  --project=chromium
+```
+
+CI calls the same package command in the `Authenticated integration` job. Adding
+a correctly named `authenticated-*.spec.ts` requires no workflow edit.
