@@ -4,10 +4,12 @@ import { createAuthenticatedLearner, hasAuthenticatedE2EEnv } from "./helpers/au
 // #614: Run and Test must agree when an item becomes unavailable and must never
 // execute or report a false zero-test success. The route 404s a never-existing
 // item, so the reachable unavailable state is a mid-session removal: open a
-// published item, delete it, then Run/Test refuse identically in the real UI.
+// published item, delete it, then the action refuses in the real UI and the
+// paired control is refused too.
 //
 // The workspace renders its run controls twice (wide + stacked responsive
-// layouts), so locators are scoped to the currently visible controls.
+// layouts); the wide instance is first in DOM and visible in every project, so
+// locators are scoped to `.first()`.
 //
 // Requires the local Supabase stack; self-skips otherwise.
 
@@ -24,28 +26,31 @@ test.describe("authenticated code lab unavailable item (#614)", () => {
       const page = await context.newPage();
       await page.goto(`/lab/${encodeURIComponent(problemId)}`);
 
-      // The visible run controls resolve and render while the item is available.
-      const controls = page.locator('[data-testid="code-controls"]:visible');
+      const controls = page.locator('[data-testid="code-controls"]').first();
       const runButton = controls.getByRole("button", { name: "Run", exact: true });
+      const runTests = controls.getByRole("button", { name: "Run Tests" });
       await expect(runButton).toBeVisible();
+
       await page.waitForFunction(() => Boolean((window as EditorWindow).__cppfanCodeLabEditor));
       await page.evaluate(() => (window as EditorWindow).__cppfanCodeLabEditor!.setValue("int main(){ return 0; }"));
 
       // Remove the item mid-session (owner-authorized hard delete).
       await learner.removeContent(contentId);
 
-      // Run refuses with the unavailable state — never a normal run result.
-      await runButton.click();
-      const unavailable = page.locator('[data-testid="code-lab-item-unavailable"]:visible');
-      await expect(unavailable).toBeVisible();
-
-      // Test refuses with the SAME signal — never a "tests passed" zero-test success.
-      const runTests = controls.getByRole("button", { name: "Run Tests" });
-      if (await runTests.count()) {
-        await runTests.first().click();
-        await expect(unavailable).toBeVisible();
-        await expect(page.getByTestId("code-test-summary")).toHaveCount(0);
+      // Trigger an action while the control is still enabled. Prefer Test (its
+      // failure mode — a false zero-test "pass" — is what #614 guards against).
+      if ((await runTests.count()) && (await runTests.isEnabled())) {
+        await runTests.click();
+      } else {
+        await runButton.click();
       }
+
+      // The item is reported unavailable — never a normal result or a false pass.
+      await expect(page.getByTestId("code-lab-item-unavailable").first()).toBeVisible();
+      await expect(page.getByTestId("code-test-summary")).toHaveCount(0);
+
+      // The paired control agrees: both Run and Test are now refused (disabled).
+      await expect(runButton).toBeDisabled();
     } finally {
       await learner.cleanup();
     }
