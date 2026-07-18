@@ -16,6 +16,7 @@
 import { resolveCodeLabItem } from "./code-lab-item-resolver";
 import { reviewCode } from "./code-review-service";
 import { runTests } from "./code-lab-service";
+import { aiVerdictFromFeedback } from "./formal-evaluation-verdict";
 import {
   buildUserContentEvaluationResult,
   objectiveOutcomeFromTestResult,
@@ -25,15 +26,6 @@ import {
 } from "@/features/user-content/user-content-evaluation";
 import { recordSkillEvents } from "@/features/events/event-service";
 import { markUserLabComplete } from "@/features/labs/user-lab-progress";
-
-/** Map structured AI review feedback to a formal rubric verdict (pure, #609). */
-export function aiVerdictFromFeedback(feedback: { status: string; errorTags?: unknown } | null): AiOutcome {
-  if (!feedback || feedback.status === "unavailable" || feedback.status === "invalid") {
-    return { available: false, verdict: "unknown" };
-  }
-  const clean = !Array.isArray(feedback.errorTags) || feedback.errorTags.length === 0;
-  return { available: true, verdict: clean ? "pass" : "revise" };
-}
 
 const AI_MODES = new Set<ContentEvaluationMode>(["ai_evaluation", "automated_plus_ai", "judge_plus_ai"]);
 const OBJECTIVE_PLUS_AI = new Set<ContentEvaluationMode>(["automated_plus_ai", "judge_plus_ai"]);
