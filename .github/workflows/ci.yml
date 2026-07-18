@@ -201,19 +201,7 @@ jobs:
           pnpm test:integration
 
       - name: Run authenticated browser E2E tests
-        run: |
-          eval "$(supabase status -o env \
-            --override-name api.url=SUPABASE_URL \
-            --override-name auth.anon_key=SUPABASE_ANON_KEY \
-            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY)"
-          export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
-          export NEXT_PUBLIC_SUPABASE_URL="${SUPABASE_URL}"
-          export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${SUPABASE_ANON_KEY}"
-          export NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
-          pnpm exec playwright test \
-            tests/e2e/authenticated-learning-loop.spec.ts \
-            tests/e2e/authenticated-onboarding.spec.ts \
-            --project=chromium --project=iphone --project=ipad
+        run: pnpm test:e2e:authenticated
 
       - name: Upload Playwright authenticated diagnostics
         if: always()
