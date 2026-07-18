@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { aiVerdictFromFeedback } from "@/features/code-lab/formal-evaluation-action";
+import { aiVerdictFromFeedback } from "@/features/code-lab/formal-evaluation-verdict";
 import { AiEvaluationPanel } from "@/features/code-lab/ai-evaluation-panel";
 import type { UserContentEvaluationResult } from "@/features/user-content/user-content-evaluation";
 
