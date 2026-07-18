@@ -123,4 +123,35 @@ describe("resolveSessionWithFallback (#608)", () => {
     });
     expect(nativeR.state.contentVersionId).toBeNull();
   });
+
+  it("preserves a resumed session's bound version instead of silently rebinding (#608)", async () => {
+    // The saved session is already bound to v1. The author has since republished
+    // (the resolver now returns ver-user.item.abc). The resumed session must keep
+    // v1 — submit-time judge resolution reports staleness instead of silently
+    // judging against a suite the learner never saw.
+    const saved = createSession({ problemId: "user.item.abc", mode: "practice", durationMinutes: 45 });
+    saved.contentVersionId = "v1-original";
+    const r = await resolveSessionWithFallback({
+      saved,
+      requestedProblem: null,
+      fallbackProblemId: NATIVE,
+      durationMinutes: 45,
+      resolve: resolverFor("user.item.abc", NATIVE)
+    });
+    expect(r.state.contentVersionId).toBe("v1-original");
+  });
+
+  it("stamps a fresh requested session with the resolver version, not any saved one", async () => {
+    const saved = createSession({ problemId: "user.item.old", mode: "practice", durationMinutes: 45 });
+    saved.contentVersionId = "should-not-carry";
+    const r = await resolveSessionWithFallback({
+      saved,
+      requestedProblem: ref("user.item.req"),
+      fallbackProblemId: NATIVE,
+      durationMinutes: 45,
+      resolve: resolverFor("user.item.req", NATIVE)
+    });
+    expect(r.state.problemId).toBe("user.item.req");
+    expect(r.state.contentVersionId).toBe("ver-user.item.req");
+  });
 });

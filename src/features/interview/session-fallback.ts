@@ -36,10 +36,14 @@ export async function resolveSessionWithFallback(input: {
   // A `?problem=<id>` entry point starts a fresh session on that problem unless
   // the saved session is already on it; otherwise resume the saved session, or
   // start fresh on the fallback problem.
+  const startedFresh = Boolean(requestedProblem && (!saved || saved.problemId !== requestedProblem.problem.id));
   let state: SessionState =
-    requestedProblem && (!saved || saved.problemId !== requestedProblem.problem.id)
+    startedFresh && requestedProblem
       ? createSession({ problemId: requestedProblem.problem.id, mode: "practice", durationMinutes })
       : (saved ?? createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes }));
+  // We are resuming the learner's saved session only when we did not start fresh
+  // and a saved session actually exists.
+  let resumed = !startedFresh && Boolean(saved);
 
   let ref = await resolve(state.problemId);
   let staleReplaced = false;
@@ -48,12 +52,19 @@ export async function resolveSessionWithFallback(input: {
     // The chosen problem is gone: replace the WHOLE session, not just the display.
     state = createSession({ problemId: fallbackProblemId, mode: "practice", durationMinutes });
     ref = await resolve(state.problemId);
+    resumed = false;
     staleReplaced = true;
   }
 
-  // Bind the session to the immutable published version actually in front of the
-  // learner (#612), so judge submissions / prior-exposure reference it.
-  state = { ...state, contentVersionId: ref?.contentVersionId ?? null };
+  // A resumed session keeps the version it was bound to — never silently rebound
+  // to a newer publication (submit-time resolution reports staleness instead,
+  // #608/#612). A fresh session (or a saved one that predates version binding)
+  // takes the version actually in front of the learner.
+  const keepSavedVersion = resumed && state.contentVersionId != null;
+  state = {
+    ...state,
+    contentVersionId: keepSavedVersion ? state.contentVersionId : (ref?.contentVersionId ?? null)
+  };
 
   return { state, problem: ref?.problem ?? null, staleReplaced };
 }

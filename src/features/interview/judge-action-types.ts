@@ -13,6 +13,8 @@ export type SubmitJudgeAttemptInput = {
   taskKind?: JudgeTaskKind;
   interviewSessionId?: string | null;
   sourceVersion?: number;
+  /** Immutable published version the learner is bound to; null/undefined for native. */
+  contentVersionId?: string | null;
   assistanceUsed?: boolean;
   priorSolutionExposed?: boolean;
 };
@@ -21,6 +23,8 @@ export type SubmitJudgeAttemptResult =
   | { status: "queued"; submissionId: string; visibleTestCount: number; hiddenTestCount: number }
   | { status: "duplicate"; submissionId: string }
   | { status: "unsupported_problem" }
+  | { status: "evaluation_not_judge_backed" }
+  | { status: "stale_definition" }
   | { status: "signed_out" }
   | { status: "invalid"; reason: string }
   | { status: "error"; reason?: string };

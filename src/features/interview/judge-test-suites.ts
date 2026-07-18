@@ -1,7 +1,7 @@
 // Server-held executable interview catalog (#176/#178).
 // Raw stdin/expected output lives in worker-only JSON payloads. Web requests
 // receive hashes and category metadata only.
-import { createHash } from "node:crypto";
+import { fixtureHashFor } from "./judge-fixture";
 import catalog01 from "../../../services/interview-judge/catalog-fixtures-01.json";
 import catalog02 from "../../../services/interview-judge/catalog-fixtures-02.json";
 import catalog03a from "../../../services/interview-judge/catalog-fixtures-03a.json";
@@ -64,17 +64,13 @@ const DEFINITIONS = [
 
 const BY_ID = new Map(DEFINITIONS.map((definition) => [definition.problemId, definition]));
 
-function fixtureHash(test: JudgeProblemTestCase): string {
-  return createHash("sha256").update(`${test.stdin}\0${test.expectedStdout}`).digest("hex");
-}
-
 function toWorkerTest(test: JudgeProblemTestCase): JudgeWorkerTest {
   return {
     id: test.id,
     name: test.name,
     hidden: test.hidden,
     category: test.category,
-    fixtureHash: fixtureHash(test)
+    fixtureHash: fixtureHashFor(test.stdin, test.expectedStdout)
   };
 }
 
