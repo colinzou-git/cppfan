@@ -214,13 +214,17 @@ export async function createAuthenticatedLearner(
      * dynamic judge suite end to end.
      */
     async seedPublishedInterviewProblem(
-      seed: { title?: string; tests?: Array<{ name: string; input: string; expectedOutput: string; hidden: boolean }> } = {}
+      seed: {
+        title?: string;
+        tests?: Array<{ name: string; input: string; expectedOutput: string; hidden: boolean }>;
+        evaluationMode?: "judge" | "judge_plus_ai" | "ai_evaluation" | "self_evaluation";
+      } = {}
     ) {
       const payload = {
         schemaVersion: 1,
         title: seed.title ?? "Playwright sum problem",
         statement: "Read two integers a and b from stdin and print a + b.",
-        evaluationMode: "judge",
+        evaluationMode: seed.evaluationMode ?? "judge",
         constraints: "0 <= a, b <= 1000",
         tests: seed.tests ?? [
           { name: "sample", input: "1 2\n", expectedOutput: "3\n", hidden: false },
