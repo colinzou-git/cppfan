@@ -200,7 +200,7 @@ export async function getCurrentSession(): Promise<SessionState | null> {
   const { data, error } = await supabase
     .from("interview_sessions")
     .select(
-      "session_id,problem_id,mode,duration_minutes,phase_index,elapsed_seconds,phase_elapsed_seconds,notes_by_phase,code_draft,test_notes,assistance_used,abandonment_reason,status,started_at,completed_at"
+      "session_id,problem_id,content_version_id,mode,duration_minutes,phase_index,elapsed_seconds,phase_elapsed_seconds,notes_by_phase,code_draft,test_notes,assistance_used,abandonment_reason,status,started_at,completed_at"
     )
     .eq("user_id", user.id)
     .maybeSingle();

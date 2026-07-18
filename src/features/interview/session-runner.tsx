@@ -149,7 +149,9 @@ export function SessionRunner({
         standard: "c++20",
         taskKind: "compile_and_run",
         interviewSessionId: stableSession.sessionId,
-        sourceVersion: 1,
+        // Bind the run to the immutable published version in front of the learner
+        // (#608/#612) — not a hard-coded source version.
+        contentVersionId: stableSession.contentVersionId ?? null,
         assistanceUsed: stableSession.assistanceUsed,
         priorSolutionExposed: canRevealSolution(stableSession)
       });
@@ -162,6 +164,10 @@ export function SessionRunner({
         setJudgeNotice("Sign in to queue this submission for judge feedback.");
       } else if (result.status === "unsupported_problem") {
         setJudgeNotice("Judge feedback is not available for this problem yet.");
+      } else if (result.status === "stale_definition") {
+        setJudgeNotice("This problem was updated by its author — reopen it to run against the current tests.");
+      } else if (result.status === "evaluation_not_judge_backed") {
+        setJudgeNotice("This problem uses AI or self-evaluation, so automated judge feedback is not available.");
       } else if (result.status === "invalid") {
         setJudgeNotice("Add a non-empty C++ draft before queuing judge feedback.");
       } else {

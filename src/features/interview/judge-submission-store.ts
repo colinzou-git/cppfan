@@ -9,8 +9,10 @@ import {
   type JudgeResult,
   type JudgeSubmission
 } from "./judge-contract";
-import type { JudgeTaskKind } from "../../../services/interview-judge/protocol";
+import type { JudgeTaskKind, JudgeWorkerTest } from "../../../services/interview-judge/protocol";
+import type { JudgeFixture } from "../../../services/interview-judge/worker-runner";
 import type { SessionMode } from "./session-machine";
+import type { JudgeDefinitionSource } from "./interview-judge-definition";
 
 export type JudgeSubmissionStatus = "queued" | "running" | "canceled" | JudgeResult["status"];
 
@@ -20,6 +22,20 @@ export type JudgeSubmissionContext = {
   sourceVersion?: number;
   assistanceUsed?: boolean;
   priorSolutionExposed?: boolean;
+  /** Immutable published version the definition was resolved at; null for native. */
+  contentVersionId?: string | null;
+  definitionSource?: JudgeDefinitionSource;
+};
+
+/**
+ * Worker-only execution payload persisted to the private
+ * interview_judge_execution_payloads table. Raw source + fixtures never appear in
+ * the learner-readable submissions row or in any learner-facing response.
+ */
+export type JudgeSubmissionExecutionPayload = {
+  sourceText: string;
+  workerTests: JudgeWorkerTest[];
+  fixtures: JudgeFixture[];
 };
 
 export type JudgeSubmissionDraft = {
@@ -35,6 +51,8 @@ export type JudgeSubmissionRow = {
   interview_session_id: string | null;
   problem_id: string;
   problem_version: number;
+  content_version_id: string | null;
+  definition_source: JudgeDefinitionSource;
   mode: SessionMode;
   task_kind: JudgeTaskKind;
   compiler: JudgeSubmission["compiler"];
@@ -75,6 +93,10 @@ export type JudgeSubmissionWriteOutcome =
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function coerceUuid(value: unknown): string | null {
+  return typeof value === "string" && UUID_RE.test(value) ? value : null;
+}
+
 function nonNegativeInteger(value: number): number {
   return Math.max(0, Math.trunc(Number.isFinite(value) ? value : 0));
 }
@@ -106,6 +128,8 @@ export function judgeSubmissionToRow(input: JudgeSubmissionDraft): JudgeSubmissi
     interview_session_id: input.context.interviewSessionId ?? null,
     problem_id: input.submission.problemId,
     problem_version: positiveInteger(input.submission.problemVersion, 1),
+    content_version_id: coerceUuid(input.context.contentVersionId),
+    definition_source: input.context.definitionSource === "user" ? "user" : "native",
     mode: input.context.mode,
     task_kind: input.taskKind,
     compiler: input.submission.compiler,
@@ -139,7 +163,18 @@ export function judgeResultToPatch(result: JudgeResult): JudgeResultPatch {
   };
 }
 
-export async function saveQueuedJudgeSubmission(input: JudgeSubmissionDraft): Promise<JudgeSubmissionWriteOutcome> {
+function executionToRpcPayload(execution: JudgeSubmissionExecutionPayload) {
+  return {
+    source_text: execution.sourceText,
+    worker_tests: execution.workerTests,
+    fixtures: execution.fixtures
+  };
+}
+
+export async function saveQueuedJudgeSubmission(
+  input: JudgeSubmissionDraft,
+  execution?: JudgeSubmissionExecutionPayload
+): Promise<JudgeSubmissionWriteOutcome> {
   const validation = validateJudgeSubmissionDraft(input);
   if (!validation.ok) {
     return { status: "invalid", reason: validation.reason };
@@ -166,8 +201,12 @@ export async function saveQueuedJudgeSubmission(input: JudgeSubmissionDraft): Pr
     return { status: "duplicate", submissionId };
   }
 
+  // The RPC inserts the learner-readable row AND the private worker execution
+  // payload atomically. The raw source/fixtures go only through p_execution into
+  // the service-role-only interview_judge_execution_payloads table.
   const { data, error } = await supabase.rpc("enqueue_interview_judge_submission", {
-    p_submission: judgeSubmissionToRow(input)
+    p_submission: judgeSubmissionToRow(input),
+    p_execution: execution ? executionToRpcPayload(execution) : null
   });
   if (!error && data === "queued") {
     return { status: "ok", submissionId };
