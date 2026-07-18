@@ -119,7 +119,7 @@ begin
     v_user, v_submission_id, v_session_id, p_submission->>'problem_id',
     (p_submission->>'problem_version')::integer,
     nullif(p_submission->>'content_version_id', '')::uuid,
-    p_submission->>'definition_source', p_submission->>'mode',
+    coalesce(p_submission->>'definition_source', 'native'), p_submission->>'mode',
     p_submission->>'task_kind', p_submission->>'compiler', p_submission->>'standard',
     p_submission->>'source_hash', (p_submission->>'source_bytes')::integer,
     (p_submission->>'source_version')::integer,
