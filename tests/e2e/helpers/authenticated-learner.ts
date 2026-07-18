@@ -256,7 +256,10 @@ export async function createAuthenticatedLearner(
      * the Code Lab reports the item as unavailable.
      */
     async removeContent(contentId: string) {
-      const { error } = await service.from("user_content_items").delete().eq("id", contentId);
+      const { error } = await browserLikeClient.rpc("delete_user_content", {
+        p_content_id: contentId,
+        p_mode: "delete_all"
+      });
       if (error) {
         throw error;
       }
