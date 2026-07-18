@@ -250,6 +250,17 @@ export async function createAuthenticatedLearner(
       }
       return { contentId: draftRow.content_id, problemId: `user.item.${draftRow.content_id}` };
     },
+    /**
+     * Make a seeded user-content item unavailable mid-session (#614) by deleting
+     * its row (service role bypasses RLS). After this, resolvers return null and
+     * the Code Lab reports the item as unavailable.
+     */
+    async removeContent(contentId: string) {
+      const { error } = await service.from("user_content_items").delete().eq("id", contentId);
+      if (error) {
+        throw error;
+      }
+    },
     async createStudyGoal(input: SeedStudyGoalInput = {}) {
       const timezone = input.timezone ?? "America/Los_Angeles";
       const startLocalDate = input.startLocalDate ?? localDateKey(new Date(), timezone);
