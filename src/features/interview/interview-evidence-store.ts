@@ -19,11 +19,10 @@ const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_LIMIT = 500;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type EvidenceInput = {
-  pattern: string;
+export type EvidenceSelfReportInput = {
   problemId: string;
-  /** Immutable published content version (#612/#613); null for native. */
-  contentVersionId?: string | null;
+  /** Version displayed by the page; concurrency guard only, never persisted directly. */
+  expectedContentVersionId?: string | null;
   unseen: boolean;
   mode: string;
   correct: boolean;
@@ -33,7 +32,14 @@ export type EvidenceInput = {
   timeToApproachSeconds?: number | null;
   timeToImplementationSeconds?: number | null;
   followUpResult?: string;
-  problemVersion?: number;
+};
+
+export type EvidenceInput = Omit<EvidenceSelfReportInput, "expectedContentVersionId"> & {
+  pattern: string;
+  /** Server-resolved immutable user_content_versions.id; null for native. */
+  contentVersionId: string | null;
+  /** Server-resolved native/schema problem version retained for compatibility. */
+  problemVersion: number;
 };
 
 /** The trusted, normalized column values for an evidence row (no user_id/timestamp). */

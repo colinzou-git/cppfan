@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NotebookPen } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getInterviewProblems } from "@/features/interview/problem-catalog";
+import { getInterviewPlanningCandidates } from "@/features/interview/interview-planning-candidates";
 import { EvidenceLog, type EvidenceProblemOption } from "@/features/interview/evidence-log";
 
 export const metadata = {
@@ -9,11 +9,13 @@ export const metadata = {
 };
 
 export default async function InterviewLogPage() {
-  const problems: EvidenceProblemOption[] = getInterviewProblems().map((problem) => ({
-    id: problem.id,
-    title: problem.title,
-    group: problem.group,
-    version: problem.version
+  const candidates = await getInterviewPlanningCandidates();
+  const problems: EvidenceProblemOption[] = candidates.map((candidate) => ({
+    id: candidate.problemId,
+    title: candidate.title,
+    group: candidate.group,
+    source: candidate.source,
+    contentVersionId: candidate.contentVersionId ?? null
   }));
 
   let authenticated = false;
