@@ -1,5 +1,8 @@
 # Playwright E2E Notes
 
+See [`TEST_ENVIRONMENTS.md`](TEST_ENVIRONMENTS.md) before choosing between the
+public and authenticated browser suites.
+
 The E2E suite is a small smoke suite that verifies cppFan works on:
 
 - desktop Chromium

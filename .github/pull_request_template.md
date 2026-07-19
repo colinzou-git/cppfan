@@ -38,6 +38,7 @@ Remaining work (for partial PRs):
 
 - [ ] Read `CLAUDE.md`
 - [ ] Read relevant spec under `specs/`
+- [ ] Read `docs/TEST_ENVIRONMENTS.md` when the change has UI, persistence, Auth, RPC, DB, or CI behavior
 - [ ] Updated docs if behavior or architecture changed
 
 ## Scope control
@@ -50,6 +51,15 @@ Remaining work (for partial PRs):
 
 ## Tests
 
+### Test environment selection
+
+- [ ] Unit/component tests were required and run, or not applicable
+- [ ] Public browser E2E was required and run, or not applicable
+- [ ] Authenticated browser E2E with disposable local Supabase was required and run, or not applicable
+- [ ] DB migration/integration validation was required and run, or not applicable
+- [ ] Production operator verification was required, documented, and remains explicitly manual, or not applicable
+- [ ] Existing CI/test environments were inspected before declaring anything blocked
+
 Commands run:
 
 ```bash
@@ -61,7 +71,15 @@ Results:
 - [ ] Lint passed or not applicable
 - [ ] Typecheck passed or not applicable
 - [ ] Unit tests passed or not applicable
-- [ ] E2E tests passed or not applicable
+- [ ] Public E2E passed or not applicable
+- [ ] Authenticated E2E passed or not applicable
+- [ ] DB/integration checks passed or not applicable
+
+Backend-dependent tests added or changed:
+
+- Test file(s):
+- Environment/classification:
+- CI job/command:
 
 ## UI evidence
 
@@ -70,6 +88,9 @@ For UI changes, add screenshots or Playwright traces.
 ## Known limitations
 
 List any remaining limitations or follow-up issues.
+
+When deferring a test or acceptance criterion because of environment limits,
+include the full `## Environment limitation analysis` required by `CLAUDE.md`.
 
 ## Rollback plan
 
