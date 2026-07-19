@@ -1421,3 +1421,27 @@ begin
   delete from auth.users where id = v_uid;
   raise notice 'user content interview publish smoke OK';
 end $$;
+
+-- #661: terminal interview history must carry the immutable content version.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'interview_session_attempts'
+      and column_name = 'content_version_id'
+  ) then
+    raise exception '#661: interview_session_attempts.content_version_id column is missing';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'interview_session_code_revisions'
+      and column_name = 'content_version_id'
+  ) then
+    raise exception '#661: interview_session_code_revisions.content_version_id column is missing';
+  end if;
+
+  raise notice 'interview history content_version_id smoke OK';
+end $$;

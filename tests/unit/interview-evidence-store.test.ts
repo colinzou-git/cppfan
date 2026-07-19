@@ -9,6 +9,8 @@ function input(overrides: Partial<EvidenceInput> = {}): EvidenceInput {
   return {
     pattern: "binary_search",
     problemId: "iv.bs.x",
+    contentVersionId: null,
+    problemVersion: 1,
     unseen: true,
     mode: "interview",
     correct: true,
@@ -50,6 +52,11 @@ describe("normalizeEvidenceRow detail fields (#180)", () => {
   it("still normalizes the core fields (mode/context/hints) defensively", () => {
     const row = normalizeEvidenceRow(input({ mode: "bogus", context: "bogus", hintsUsed: -2 }));
     expect(row).toMatchObject({ mode: "practice", context: "independent", hints_used: 0 });
+  });
+
+  it("preserves a resolved immutable content version", () => {
+    const id = "22222222-2222-4222-8222-222222222222";
+    expect(normalizeEvidenceRow(input({ contentVersionId: id })).content_version_id).toBe(id);
   });
 });
 

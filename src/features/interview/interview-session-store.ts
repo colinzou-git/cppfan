@@ -45,6 +45,7 @@ type SessionRow = {
 export type SessionAttemptRow = {
   session_id: string;
   problem_id: string;
+  content_version_id: string | null;
   mode: SessionMode;
   duration_minutes: SessionDuration;
   status: "completed" | "abandoned";
@@ -61,6 +62,7 @@ export type SessionAttemptRow = {
 
 export type SessionCodeRevisionRow = {
   session_id: string;
+  content_version_id: string | null;
   source_hash: string;
   source_bytes: number;
   source_text: string;
@@ -163,6 +165,7 @@ export function sessionStateToAttemptRow(state: SessionState): SessionAttemptRow
   return {
     session_id: sessionId,
     problem_id: state.problemId,
+    content_version_id: coerceUuid(state.contentVersionId),
     mode: MODES.includes(state.mode) ? state.mode : "practice",
     duration_minutes: SESSION_DURATIONS.includes(state.durationMinutes) ? state.durationMinutes : 45,
     status: state.status,
@@ -185,6 +188,7 @@ export function sessionStateToCodeRevisionRow(state: SessionState): SessionCodeR
   const sourceText = state.codeDraft.slice(0, 12000);
   return {
     session_id: sessionId,
+    content_version_id: coerceUuid(state.contentVersionId),
     source_hash: sourceHash(sourceText),
     source_bytes: new TextEncoder().encode(sourceText).length,
     source_text: sourceText

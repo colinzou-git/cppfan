@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { logInterviewEvidence } from "./interview-evidence-actions";
 import type { InterviewContext } from "./readiness";
 
-export type EvidenceProblemOption = { id: string; title: string; group: string; version: number };
+export type EvidenceProblemOption = {
+  id: string;
+  title: string;
+  group: string;
+  source: "native" | "user";
+  contentVersionId: string | null;
+};
 
 const CONTEXTS: { value: InterviewContext; label: string }[] = [
   { value: "independent", label: "Independent" },
@@ -65,20 +71,23 @@ export function EvidenceLog({
     }
     startTransition(async () => {
       const result = await logInterviewEvidence({
-        pattern: selected.group,
         problemId: selected.id,
+        expectedContentVersionId: selected.contentVersionId,
         unseen,
         mode,
         correct,
         hintsUsed,
         context,
         followUpResult,
-        problemVersion: selected.version,
         timeToApproachSeconds: minutesToSeconds(approachMinutes),
         timeToImplementationSeconds: minutesToSeconds(implementationMinutes)
       });
       if (result.status === "signed_out") {
         setNotice("Sign in to save this outcome to your readiness evidence.");
+      } else if (result.status === "stale") {
+        setNotice("This problem was republished. Reload and log the outcome against the version now shown.");
+      } else if (result.status === "unavailable") {
+        setNotice("This problem is no longer available. Reload and choose another problem.");
       } else if (result.status === "error") {
         setNotice("Could not log this outcome just now.");
       } else {
@@ -99,7 +108,7 @@ export function EvidenceLog({
         >
           {problems.map((problem) => (
             <option key={problem.id} value={problem.id}>
-              {problem.title}
+              {problem.source === "user" ? `My content — ${problem.title}` : problem.title}
             </option>
           ))}
         </select>

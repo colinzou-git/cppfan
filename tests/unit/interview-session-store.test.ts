@@ -11,6 +11,7 @@ import { createSession, SESSION_PHASES } from "@/features/interview/session-mach
 // round-trip a valid session and defend against out-of-range stored values.
 
 const SESSION_ID = "11111111-1111-4111-8111-111111111111";
+const CONTENT_VERSION_ID = "22222222-2222-4222-8222-222222222222";
 const STARTED_AT = "2026-06-20T20:00:00.000Z";
 const COMPLETED_AT = "2026-06-20T20:45:00.000Z";
 
@@ -115,7 +116,13 @@ describe("interview session row mappers (#177)", () => {
   });
 
   it("creates append-only attempt evidence only for finished sessions", () => {
-    const inProgress = createSession({ problemId: "iv.x", mode: "interview", durationMinutes: 45, sessionId: SESSION_ID });
+    const inProgress = createSession({
+      problemId: "user.item.abc",
+      contentVersionId: CONTENT_VERSION_ID,
+      mode: "interview",
+      durationMinutes: 45,
+      sessionId: SESSION_ID
+    });
     expect(sessionStateToAttemptRow(inProgress)).toBeNull();
 
     const completed = {
@@ -127,7 +134,8 @@ describe("interview session row mappers (#177)", () => {
     };
     expect(sessionStateToAttemptRow(completed)).toMatchObject({
       session_id: SESSION_ID,
-      problem_id: "iv.x",
+      problem_id: "user.item.abc",
+      content_version_id: CONTENT_VERSION_ID,
       status: "completed",
       elapsed_seconds: 2700,
       test_notes: "covered empty, duplicates, and overflow",
@@ -137,12 +145,39 @@ describe("interview session row mappers (#177)", () => {
 
   it("deduplicates meaningful code revisions by source hash", () => {
     const state = {
-      ...createSession({ problemId: "iv.x", mode: "practice", durationMinutes: 45, sessionId: SESSION_ID }),
+      ...createSession({
+        problemId: "user.item.abc",
+        contentVersionId: CONTENT_VERSION_ID,
+        mode: "practice",
+        durationMinutes: 45,
+        sessionId: SESSION_ID
+      }),
       codeDraft: "int main(){return 0;}\n"
     };
     const revision = sessionStateToCodeRevisionRow(state);
-    expect(revision).toMatchObject({ session_id: SESSION_ID, source_bytes: 22, source_text: state.codeDraft });
+    expect(revision).toMatchObject({
+      session_id: SESSION_ID,
+      content_version_id: CONTENT_VERSION_ID,
+      source_bytes: 22,
+      source_text: state.codeDraft
+    });
     expect(revision?.source_hash).toHaveLength(64);
     expect(sessionStateToCodeRevisionRow({ ...state, codeDraft: "   " })).toBeNull();
+  });
+
+  it("stores null content version for native terminal history", () => {
+    const native = {
+      ...createSession({
+        problemId: "iv.x",
+        mode: "practice",
+        durationMinutes: 45,
+        sessionId: SESSION_ID
+      }),
+      status: "completed" as const,
+      completedAt: COMPLETED_AT,
+      codeDraft: "int main(){}"
+    };
+    expect(sessionStateToAttemptRow(native)?.content_version_id).toBeNull();
+    expect(sessionStateToCodeRevisionRow(native)?.content_version_id).toBeNull();
   });
 });

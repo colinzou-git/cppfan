@@ -252,7 +252,33 @@ export async function createAuthenticatedLearner(
       if (published.error) {
         throw published.error;
       }
-      return { contentId: draftRow.content_id, problemId: `user.item.${draftRow.content_id}` };
+      const item = await browserLikeClient
+        .from("user_content_items")
+        .select("current_published_version_id")
+        .eq("id", draftRow.content_id)
+        .single();
+      if (item.error || !item.data?.current_published_version_id) {
+        throw item.error ?? new Error("Published version id missing.");
+      }
+      return {
+        contentId: draftRow.content_id,
+        problemId: `user.item.${draftRow.content_id}`,
+        publishedVersionId: item.data.current_published_version_id as string
+      };
+    },
+    /** The learner's most recent interview evidence row for a problem (#661). */
+    async latestInterviewEvidence(problemId: string) {
+      const result = await browserLikeClient
+        .from("interview_evidence")
+        .select("problem_id,content_version_id,pattern")
+        .eq("problem_id", problemId)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (result.error) {
+        throw result.error;
+      }
+      return result.data;
     },
     /**
      * Make a seeded user-content item unavailable mid-session (#614) by deleting
