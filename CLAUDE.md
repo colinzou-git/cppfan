@@ -60,6 +60,7 @@ After implementation:
 - Summarize changed files and why each was changed.
 - Run the relevant validation commands.
 - Report exact command results.
+- State which test-environment classes were required and which were run.
 - Explain known limitations or follow-up work.
 
 Run these unless the task explains why not:
@@ -75,6 +76,68 @@ For UI or workflow changes, also run:
 ```bash
 pnpm test:e2e
 ```
+
+## Test environment discovery
+
+Before claiming that a test or acceptance criterion is blocked by missing
+credentials, backend services, Docker, Supabase, authentication, CI
+configuration, or production access, inspect the repository's existing test
+environments first.
+
+At minimum, inspect:
+
+- `package.json` test scripts;
+- `.github/workflows/*.yml`;
+- `docs/TEST_ENVIRONMENTS.md`;
+- `docs/PLAYWRIGHT_E2E.md`;
+- `tests/e2e/helpers/`;
+- `tests/e2e/authenticated-*.spec.ts`;
+- `supabase/config.toml`.
+
+Classify the required validation as one or more of:
+
+1. unit/component;
+2. public browser without a backend;
+3. authenticated browser with disposable local Supabase;
+4. database migration/integration smoke;
+5. production-only operator verification.
+
+Important cppFan rules:
+
+- `pnpm test:e2e` is the public/signed-out/local-fallback browser suite. It is
+  not the only browser environment.
+- `pnpm test:e2e:authenticated` is the canonical real Auth/persistence/RPC
+  browser suite. It starts or reuses disposable local Supabase and never needs
+  production credentials.
+- Do not conclude that a backend-dependent test is unavailable merely because
+  the default `pnpm test:e2e` run has no Supabase configuration.
+- Use the existing disposable local Supabase environment whenever it can satisfy
+  the acceptance criterion. Do not invent a second backend harness or use
+  production data.
+- A correctly named `tests/e2e/authenticated-*.spec.ts` is automatically included
+  in authenticated CI; do not defer it for lack of manual workflow registration.
+
+Before deferring any criterion, include this exact section in the PR description
+or issue comment:
+
+```text
+## Environment limitation analysis
+
+Required capability:
+Existing environments inspected:
+- Unit/component:
+- Public browser:
+- Authenticated local Supabase:
+- DB migration/integration:
+- Production operator:
+
+Why the existing disposable environment is insufficient:
+Exact missing capability:
+Smallest change that would enable the test:
+```
+
+“The default E2E environment has no backend” is not a sufficient limitation
+analysis when an authenticated local Supabase job exists.
 
 ## Guardrails
 
