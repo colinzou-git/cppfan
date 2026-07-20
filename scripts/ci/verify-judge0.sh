@@ -57,8 +57,8 @@ if ! jq -e \
   exit 1
 fi
 
-source_b64="$(printf '%s' '#include <iostream>\nint main() { int a = 20; int b = 22; std::cout << (a + b) << "\\n"; }\n' | base64 | tr -d '\n')"
-stdin_b64="$(printf '' | base64 | tr -d '\n')"
+source_b64="$(printf '%b' '#include <iostream>\nint main() { int a = 20; int b = 22; std::cout << (a + b) << "\\n"; }\n' | base64 | tr -d '\n')"
+stdin_b64=""
 request_json="$(jq -n \
   --argjson language_id "${CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID}" \
   --arg source_code "${source_b64}" \
