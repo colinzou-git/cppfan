@@ -1,0 +1,76 @@
+name: Judge0 real-runner E2E
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-runner:
+    name: Real C++ runner
+    if: >-
+      ${{
+        vars.CODE_RUNNER_REAL_E2E_ENABLED == 'true' &&
+        (github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository)
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      CODE_RUNNER_PROVIDER: judge0
+      CODE_RUNNER_BASE_URL: ${{ vars.CODE_RUNNER_BASE_URL }}
+      CODE_RUNNER_API_KEY: ${{ secrets.CODE_RUNNER_API_KEY }}
+      CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID: ${{ vars.CODE_RUNNER_JUDGE0_CPP_LANGUAGE_ID }}
+      CODE_RUNNER_JUDGE0_ENABLE_COMPILER_OPTIONS: ${{ vars.CODE_RUNNER_JUDGE0_ENABLE_COMPILER_OPTIONS }}
+      CPPFAN_REQUIRE_REAL_CODE_RUNNER: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable pnpm through Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Judge0 real compile/run
+        run: bash scripts/ci/verify-judge0.sh
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run authenticated browser E2E with Judge0
+        run: pnpm test:e2e:authenticated --project=chromium
+
+      - name: Upload real-runner Playwright diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-judge0-real-runner
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
