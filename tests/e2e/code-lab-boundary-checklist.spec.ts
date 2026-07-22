@@ -23,8 +23,9 @@ test("a Code Lab task shows a boundary-case checklist the learner can use", asyn
   await items.first().check();
   await expect(items.first()).toBeChecked();
 
-  // "Use as stdin" drops the sample into the stdin field and Run still works.
+  // "Use as stdin" drops the sample into the Input Args field and Run (which now
+  // starts the interactive Terminal, #664) still works.
   await page.getByTestId("boundary-checklist-use-input").first().click();
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toBeVisible();
+  await expect(page.getByTestId("code-terminal")).toBeVisible();
 });

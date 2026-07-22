@@ -30,9 +30,9 @@ test("a failing boundary test surfaces a dismissible remediation recommendation"
   await expect(remediation).toContainText(/Recommended next/i);
   await expect(remediation).toContainText(/Reason:/i);
 
-  // No hard lock: it is dismissible and Run still works afterwards.
+  // No hard lock: it is dismissible and Run (interactive Terminal, #664) still works.
   await page.getByTestId("code-remediation-dismiss").click();
   await expect(remediation).toHaveCount(0);
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toBeVisible();
+  await expect(page.getByTestId("code-terminal")).toBeVisible();
 });

@@ -76,6 +76,89 @@ export function validateStartPayload(payload: {
   return { ok: true, source, stdin, breakpointLines, watches };
 }
 
+/**
+ * Interactive Terminal limits (#664). A terminal session keeps a real child
+ * process alive with writable stdin, so it needs its own caps for initial and
+ * live input in addition to the shared compile/output/session bounds. Idle here
+ * means "the browser stopped polling" — a program quietly waiting on stdin is
+ * never killed for being quiet, only for exceeding a hard wall/idle/resource cap.
+ */
+export const TERMINAL_LIMITS = {
+  compileTimeoutMs: 10_000,
+  sessionWallMs: 10 * 60_000,
+  idleTimeoutMs: 3 * 60_000,
+  /** How long a finished session's bounded transcript stays pollable. */
+  retainAfterExitMs: 60_000,
+  memoryBytes: 256 * 1024 * 1024,
+  maxProcesses: 64,
+  maxOutputBytes: 128 * 1024,
+  maxEvents: 5_000,
+  maxSourceChars: 20_000,
+  maxInitialStdinChars: 10_000,
+  maxInputPayloadChars: 4_000,
+  maxCumulativeInputChars: 64 * 1024
+} as const;
+
+// Allow tab (\t), newline (\n), carriage return (\r); reject other C0/DEL controls.
+const DISALLOWED_CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+
+export function hasDisallowedControl(text: string): boolean {
+  return DISALLOWED_CONTROL.test(text);
+}
+
+export type TerminalStartValidation =
+  | { ok: true; source: string; stdin: string }
+  | { ok: false; code: string; message: string };
+
+/** Validate a terminal start payload against the sandbox limits before compiling. */
+export function validateTerminalStart(payload: { source?: unknown; stdin?: unknown }): TerminalStartValidation {
+  const source = typeof payload.source === "string" ? payload.source : "";
+  if (!source.trim()) {
+    return { ok: false, code: "empty_source", message: "Source is required." };
+  }
+  if (source.length > TERMINAL_LIMITS.maxSourceChars) {
+    return { ok: false, code: "source_too_large", message: "Source exceeds the size limit." };
+  }
+  const stdin = typeof payload.stdin === "string" ? payload.stdin : "";
+  if (stdin.length > TERMINAL_LIMITS.maxInitialStdinChars) {
+    return { ok: false, code: "stdin_too_large", message: "Input Args exceeds the size limit." };
+  }
+  if (hasDisallowedControl(stdin)) {
+    return { ok: false, code: "invalid_stdin", message: "Input Args contains disallowed control characters." };
+  }
+  return { ok: true, source, stdin };
+}
+
+export type TerminalInputValidation =
+  | { ok: true; data: string; eof: boolean }
+  | { ok: false; code: string; message: string };
+
+/**
+ * Validate a live-input write. `eof` alone (with empty data) is allowed; an empty
+ * data line is allowed (required for getline); the per-write cap and the
+ * cumulative cap protect the child process.
+ */
+export function validateTerminalInput(
+  payload: { data?: unknown; eof?: unknown },
+  cumulativeSoFar: number
+): TerminalInputValidation {
+  const eof = payload.eof === true;
+  const data = typeof payload.data === "string" ? payload.data : "";
+  if (!eof && typeof payload.data !== "string") {
+    return { ok: false, code: "invalid_input", message: "Input data must be a string." };
+  }
+  if (data.length > TERMINAL_LIMITS.maxInputPayloadChars) {
+    return { ok: false, code: "input_too_large", message: "Input line exceeds the size limit." };
+  }
+  if (hasDisallowedControl(data)) {
+    return { ok: false, code: "invalid_input", message: "Input contains disallowed control characters." };
+  }
+  if (cumulativeSoFar + data.length > TERMINAL_LIMITS.maxCumulativeInputChars) {
+    return { ok: false, code: "input_limit_reached", message: "Cumulative input exceeds the session limit." };
+  }
+  return { ok: true, data, eof };
+}
+
 /** Reject a watch expression that could call functions / cause side effects. */
 export function isSafeWatchExpression(expression: string): boolean {
   // No call syntax, assignment, statement separators, or preprocessor — watches

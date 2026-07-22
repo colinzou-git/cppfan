@@ -53,19 +53,20 @@ test.describe("Code Lab browser QA", () => {
     expect(edited.trim()).not.toMatch(/\/\*MID\*\/$/);
 
     await setMonacoValue(page, INVALID_CPP);
-    await page.getByRole("button", { name: /^Run$/ }).click();
+    // Run now drives the interactive Terminal (#664); the one-shot Judge0 compile/
+    // run pipeline this QA guards is exercised through Run Tests, whose results
+    // panel surfaces a compile error just as usefully.
+    await page.getByRole("button", { name: /Run Tests/i }).click();
 
-    const output = page.getByTestId("code-output");
+    const output = page.getByTestId("code-test-results");
     await expect(output).toBeVisible({ timeout: 25_000 });
-    await expect(output).toContainText(/Compile error|error:|expected|before|return/i, { timeout: 25_000 });
+    await expect(output).toContainText(/Compile error|did not compile|error:|expected|before|return/i, {
+      timeout: 25_000
+    });
     const invalidText = (await output.textContent()) ?? "";
     expect(invalidText).not.toMatch(/status unknown|unknown: unknown|cannot be converted to UTF-8|HTTP 400/i);
 
     await setMonacoValue(page, VALID_CPP);
-    await page.getByRole("button", { name: /^Run$/ }).click();
-    await expect(output).toContainText(/Ran successfully/i, { timeout: 25_000 });
-    await expect(output).toContainText("Hello, cppFan!", { timeout: 25_000 });
-
     await page.getByRole("button", { name: /Run Tests/i }).click();
     const tests = page.getByTestId("code-test-results");
     await expect(tests).toBeVisible({ timeout: 35_000 });

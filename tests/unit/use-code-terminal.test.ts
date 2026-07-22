@@ -1,0 +1,181 @@
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useCodeTerminal } from "@/features/code-lab/use-code-terminal";
+import type { CodeTerminalSnapshot } from "@/features/code-lab/code-terminal-types";
+
+vi.mock("@/features/code-lab/code-terminal-client", () => ({
+  startTerminalRequest: vi.fn(),
+  pollTerminalRequest: vi.fn(),
+  sendTerminalInput: vi.fn(),
+  stopTerminalRequest: vi.fn(),
+  recordTerminalAttemptRequest: vi.fn()
+}));
+
+import {
+  pollTerminalRequest,
+  recordTerminalAttemptRequest,
+  sendTerminalInput,
+  startTerminalRequest,
+  stopTerminalRequest
+} from "@/features/code-lab/code-terminal-client";
+
+const startMock = vi.mocked(startTerminalRequest);
+const pollMock = vi.mocked(pollTerminalRequest);
+const inputMock = vi.mocked(sendTerminalInput);
+const stopMock = vi.mocked(stopTerminalRequest);
+const attemptMock = vi.mocked(recordTerminalAttemptRequest);
+
+function snap(overrides: Partial<CodeTerminalSnapshot>): CodeTerminalSnapshot {
+  return {
+    sessionId: "s1",
+    sessionToken: "tok-1",
+    status: "running",
+    events: [],
+    nextSequence: 0,
+    ...overrides
+  };
+}
+
+const baseArgs = { itemId: "item-a", source: "int main(){}", stdin: "" };
+
+beforeEach(() => {
+  startMock.mockReset();
+  pollMock.mockReset();
+  inputMock.mockReset();
+  stopMock.mockReset();
+  attemptMock.mockReset();
+  // Keep the poll loop quiet unless a test drives it.
+  pollMock.mockResolvedValue(snap({ status: "running", events: [], nextSequence: 0 }));
+  inputMock.mockResolvedValue({ ok: true });
+  stopMock.mockResolvedValue({ ok: true });
+  attemptMock.mockResolvedValue({ recorded: true });
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
+describe("useCodeTerminal (#664)", () => {
+  it("sends Input Args once at start and stores the running transcript", async () => {
+    startMock.mockResolvedValue(
+      snap({
+        status: "running",
+        events: [
+          { sequence: 1, kind: "stdin", text: "5\n", createdAt: "t" },
+          { sequence: 2, kind: "stdout", text: "n=", createdAt: "t" }
+        ],
+        nextSequence: 2
+      })
+    );
+    const { result, unmount } = renderHook(() => useCodeTerminal({ ...baseArgs, stdin: "5\n" }));
+
+    await act(async () => {
+      await result.current.start();
+    });
+
+    expect(startMock).toHaveBeenCalledTimes(1);
+    expect(startMock).toHaveBeenCalledWith(expect.objectContaining({ itemId: "item-a", stdin: "5\n" }));
+    expect(result.current.status).toBe("running");
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.events).toHaveLength(2);
+    unmount();
+  });
+
+  it("sendInput posts the exact data and returns true on success", async () => {
+    startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+    await act(async () => {
+      await result.current.start();
+    });
+
+    let ok = false;
+    await act(async () => {
+      ok = await result.current.sendInput("hi there\n");
+    });
+
+    expect(ok).toBe(true);
+    expect(inputMock).toHaveBeenCalledWith({ sessionId: "s1", sessionToken: "tok-1", data: "hi there\n" });
+    unmount();
+  });
+
+  it("allows an empty line to be sent", async () => {
+    startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+    await act(async () => {
+      await result.current.start();
+    });
+    await act(async () => {
+      await result.current.sendInput("\n");
+    });
+    expect(inputMock).toHaveBeenCalledWith({ sessionId: "s1", sessionToken: "tok-1", data: "\n" });
+    unmount();
+  });
+
+  it("surfaces a retryable input error and returns false when delivery fails", async () => {
+    startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
+    inputMock.mockRejectedValue(new Error("network down"));
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+    await act(async () => {
+      await result.current.start();
+    });
+
+    let ok = true;
+    await act(async () => {
+      ok = await result.current.sendInput("x\n");
+    });
+
+    expect(ok).toBe(false);
+    expect(result.current.inputError).toBe("network down");
+    unmount();
+  });
+
+  it("sendEof closes stdin without data", async () => {
+    startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+    await act(async () => {
+      await result.current.start();
+    });
+    await act(async () => {
+      await result.current.sendEof();
+    });
+    expect(inputMock).toHaveBeenCalledWith({ sessionId: "s1", sessionToken: "tok-1", eof: true });
+    unmount();
+  });
+
+  it("marks the session stale when source changes during a run", async () => {
+    startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
+    const { result, rerender, unmount } = renderHook((props) => useCodeTerminal(props), {
+      initialProps: baseArgs
+    });
+    await act(async () => {
+      await result.current.start();
+    });
+    expect(result.current.isStale).toBe(false);
+
+    rerender({ ...baseArgs, source: "int main(){return 1;}" });
+    expect(result.current.isStale).toBe(true);
+    unmount();
+  });
+
+  it("records exactly one attempt on an immediate compile error", async () => {
+    startMock.mockResolvedValue(
+      snap({
+        sessionId: "s2",
+        status: "compile_error",
+        events: [{ sequence: 1, kind: "compiler", text: "error: expected ';'", createdAt: "t" }],
+        nextSequence: 1
+      })
+    );
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+    await act(async () => {
+      await result.current.start();
+    });
+
+    expect(result.current.status).toBe("compile_error");
+    expect(attemptMock).toHaveBeenCalledTimes(1);
+    expect(attemptMock).toHaveBeenCalledWith(
+      expect.objectContaining({ itemId: "item-a", status: "compile_error", compileOutput: "error: expected ';'" })
+    );
+    unmount();
+  });
+});
