@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedContent } from "@/features/learning-items/formatted-content";
 import type { CodeRunResult, CodeTestResult, LearningItemCodeLab } from "./code-lab-types";
 import { CodeEditor } from "./code-editor";
-import { CodeRunControls } from "./code-run-controls";
-import { CodeOutputPanel } from "./code-output-panel";
+import { CodeRunControls, type CodeAction } from "./code-run-controls";
+import { CodeTerminalPanel } from "./code-terminal-panel";
 import { TestResultsPanel } from "./test-results-panel";
 import { AiCodeReviewPanel } from "./ai-code-review-panel";
 import { TraceControls } from "./trace-controls";
@@ -17,6 +17,7 @@ import { PredictionBeforeRun } from "./prediction-before-run";
 import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { useCodeLabController } from "./use-code-lab-controller";
+import { useCodeTerminal } from "./use-code-terminal";
 
 /**
  * Embedded Code Lab client component (#407). Composes the editor, run/test
@@ -36,6 +37,17 @@ export function CodeLab({
   onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
 }) {
   const c = useCodeLabController({ itemId, config, onResult });
+  // Run drives the same interactive Terminal session as the full-page workspace
+  // (#664); Run Tests stays one-shot on the controller.
+  const terminal = useCodeTerminal({ itemId, source: c.source, stdin: c.stdin });
+
+  function onAction(action: CodeAction) {
+    if (action === "run") {
+      void terminal.start();
+      return;
+    }
+    c.handleAction(action);
+  }
 
   return (
     <Card id="code-lab" className="scroll-mt-24 border-slate-200 bg-white shadow-sm" data-testid="code-lab">
@@ -69,8 +81,11 @@ export function CodeLab({
 
         {config.mode === "stdin" ? (
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-600">
-              Standard input (stdin)
+            <span className="text-xs font-bold uppercase tracking-wide text-slate-600">Input Args</span>
+            <span className="text-xs text-slate-500">
+              Written to standard input when the program starts. This is not{" "}
+              <code className="font-mono">main(argc, argv)</code> command-line input. Standard input
+              stays open, so you can answer later reads in the Terminal.
             </span>
             <textarea
               value={c.stdin}
@@ -78,7 +93,7 @@ export function CodeLab({
               rows={2}
               className="rounded-lg border border-slate-200 p-2 font-mono text-xs"
               data-testid="code-stdin"
-              placeholder="Input passed to the program"
+              placeholder="Input written to the program when it starts"
             />
           </label>
         ) : null}
@@ -96,10 +111,24 @@ export function CodeLab({
 
         <CodeRunControls
           busy={c.busy}
-          onAction={c.handleAction}
+          onAction={onAction}
           hasError={c.hasRunError}
           runDisabled={c.missingRequired}
+          terminalActive={terminal.isActive}
+          terminalStarting={terminal.starting}
+          onStop={terminal.stop}
         />
+
+        {terminal.isStale ? (
+          <div
+            className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800"
+            role="alert"
+            data-testid="code-terminal-stale"
+          >
+            The running program uses an older version of your code. Stop it before running the
+            changed code.
+          </div>
+        ) : null}
 
         {c.error ? (
           <p className="text-xs font-bold text-amber-700" role="alert">
@@ -128,7 +157,24 @@ export function CodeLab({
         </section>
 
         <aside className="grid min-w-0 gap-3 xl:max-h-[calc(100vh-12rem)] xl:overflow-auto xl:pr-1">
-          <CodeOutputPanel result={c.runResult} />
+          <div className="rounded-xl border border-slate-200 bg-white p-3" data-testid="code-lab-terminal-column">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Terminal</p>
+            <CodeTerminalPanel
+              status={terminal.status}
+              events={terminal.events}
+              exitCode={terminal.exitCode}
+              durationMs={terminal.durationMs}
+              outputTruncated={terminal.outputTruncated}
+              message={terminal.message}
+              isActive={terminal.isActive}
+              isFinished={terminal.isFinished}
+              sending={terminal.sending}
+              inputError={terminal.inputError}
+              onSend={terminal.sendInput}
+              onEof={terminal.sendEof}
+              onClearError={terminal.clearInputError}
+            />
+          </div>
           <TestResultsPanel result={c.testResult} />
           <ErrorRemediationPanel recommendation={c.remediation} onAction={c.handleRemediationAction} />
           {/* Avoid competing cards: show the scaffold suggestion only when there is

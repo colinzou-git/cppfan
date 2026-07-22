@@ -20,7 +20,7 @@ test("Trace with AI shows a panel and does not block Run/Test", async ({ page })
   await expect(tracePanel).toBeVisible();
   await expect(tracePanel).toContainText(/not available|trace/i);
 
-  // Phase 1 Run still works after a trace request.
+  // Run (interactive Terminal, #664) still works after a trace request.
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toContainText("Hello, cppFan!");
+  await expect(page.getByTestId("code-terminal-transcript")).toContainText("Program started");
 });

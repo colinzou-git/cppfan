@@ -55,3 +55,47 @@ export type ActionBody = {
 };
 
 export type StopBody = { sessionId?: string };
+
+/**
+ * Interactive Terminal wire types (#664). A terminal session compiles the
+ * learner source, spawns the binary with piped stdin/stdout/stderr, and streams
+ * an ordered transcript the browser retrieves by cursor. Distinct from the
+ * one-shot Judge0 runner and from the GDB debug session above.
+ */
+import type { TerminalEvent } from "./terminal-event-buffer.js";
+
+export type TerminalStatus =
+  | "idle"
+  | "compiling"
+  | "running"
+  | "exited"
+  | "stopped"
+  | "compile_error"
+  | "runtime_error"
+  | "timeout"
+  | "error";
+
+export type TerminalSnapshot = {
+  sessionId: string | null;
+  /** Unguessable per-session capability required for poll/input/stop (#664). */
+  sessionToken?: string;
+  status: TerminalStatus;
+  events: TerminalEvent[];
+  /** Cursor the client sends on its next poll (highest sequence emitted). */
+  nextSequence: number;
+  exitCode?: number | null;
+  durationMs?: number | null;
+  outputTruncated?: boolean;
+  message?: string;
+};
+
+export type TerminalStartBody = { itemId?: string; source?: string; stdin?: string };
+export type TerminalPollBody = { sessionId?: string; sessionToken?: string; after?: number };
+export type TerminalInputBody = {
+  sessionId?: string;
+  sessionToken?: string;
+  data?: string;
+  /** Close stdin without killing the process, so read-until-EOF loops can finish. */
+  eof?: boolean;
+};
+export type TerminalStopBody = { sessionId?: string; sessionToken?: string };

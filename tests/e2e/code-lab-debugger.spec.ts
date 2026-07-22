@@ -41,6 +41,6 @@ test("the Debug tab persists breakpoints and degrades gracefully when unconfigur
   await expect(page.getByTestId("code-debug-info-popup")).toContainText(/not configured|unconfigured/i);
 
   // The other dock tabs still work.
-  await page.getByTestId("code-lab-tab-output").click();
+  await page.getByTestId("code-lab-tab-terminal").click();
   await expect(page.getByText(/Run your program to see/i)).toBeVisible();
 });

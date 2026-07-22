@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-// #407: the in-app C++ Code Lab on a real learning-item page. Runs signed-out
-// with the default deterministic mock runner (CODE_RUNNER_PROVIDER unset) and no
-// AI provider, so Run/Test produce simulated output and AI Review shows its
-// graceful unavailable state.
+// #407/#664: the in-app C++ Code Lab on a real learning-item page. Runs signed-out
+// with the default deterministic mock runner and mock interactive terminal
+// (providers unset) and no AI provider, so Run drives the mock Terminal, Run
+// Tests produces simulated results, and AI Review shows its graceful unavailable
+// state.
 
 const CODE_ITEM = "/learn/cpp.program_basics.structure.lesson";
 const PLAIN_ITEM = "/learn/cpp.program_basics.structure.mc_entry";
@@ -20,11 +21,15 @@ test("a code-capable item runs, tests, and reviews in-page", async ({ page }) =>
   // The starter program is shown in the editor.
   await expect(lab).toContainText("Hello, cppFan!");
 
-  // Run: simulated stdout appears.
+  // Run: the interactive Terminal starts (mock provider) and its transcript shows
+  // the program came up ready for input.
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  const output = page.getByTestId("code-output");
-  await expect(output).toBeVisible();
-  await expect(output).toContainText("Hello, cppFan!");
+  const terminal = page.getByTestId("code-terminal");
+  await expect(terminal).toBeVisible();
+  await expect(page.getByTestId("code-terminal-transcript")).toContainText("Program started");
+  // Run becomes Stop while the session is active.
+  await expect(page.getByTestId("code-stop")).toBeVisible();
+  await page.getByTestId("code-stop").click();
 
   // Run Tests: every test passes for the correct starter solution.
   await page.getByRole("button", { name: "Run Tests" }).click();
@@ -39,7 +44,7 @@ test("a code-capable item runs, tests, and reviews in-page", async ({ page }) =>
   await expect(page.getByTestId("code-ai-review")).toContainText(/not available|review/i);
 });
 
-test("editing the code changes the run output", async ({ page }) => {
+test("editing the code changes the executed output (via Run Tests)", async ({ page }) => {
   await page.goto(CODE_ITEM);
   await expect(page.getByTestId("code-editor")).toBeVisible();
 
@@ -53,8 +58,10 @@ test("editing the code changes the run output", async ({ page }) => {
     );
   }, '#include <iostream>\nint main() { std::cout << "Edited output" << "\\n"; }');
 
-  await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toContainText("Edited output");
+  // Run Tests stays one-shot and deterministic; the mock runner reflects the
+  // edited source, so the failing case shows the new actual output.
+  await page.getByRole("button", { name: "Run Tests" }).click();
+  await expect(page.getByTestId("code-test-results")).toContainText("Edited output");
 });
 
 test("a non-code item does not show the Code Lab", async ({ page }) => {

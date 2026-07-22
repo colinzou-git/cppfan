@@ -22,7 +22,7 @@ test("passing a Code Lab task surfaces a non-locking scaffold recommendation", a
   await page.getByTestId("scaffold-recommendation-link").click();
   await expect(page).toHaveURL(/#code-lab$/);
 
-  // It does not block anything: Run still works.
+  // It does not block anything: Run (interactive Terminal, #664) still works.
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toBeVisible();
+  await expect(page.getByTestId("code-terminal")).toBeVisible();
 });

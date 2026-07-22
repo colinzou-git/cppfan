@@ -7,7 +7,7 @@ import { FormattedContent } from "@/features/learning-items/formatted-content";
 import type { CodeRunResult, CodeTestResult, LearningItemCodeLab } from "./code-lab-types";
 import { CodeEditor } from "./code-editor";
 import { CodeRunControls, type CodeAction } from "./code-run-controls";
-import { CodeOutputPanel } from "./code-output-panel";
+import { CodeTerminalPanel } from "./code-terminal-panel";
 import { TestResultsPanel } from "./test-results-panel";
 import { AiCodeReviewPanel } from "./ai-code-review-panel";
 import { TraceControls } from "./trace-controls";
@@ -26,8 +26,9 @@ import { DebugTabPanel } from "./debug-tab-panel";
 import { useCodeBreakpoints } from "./use-code-breakpoints";
 import { useCodeDebugger } from "./use-code-debugger";
 import { useCodeLabController } from "./use-code-lab-controller";
+import { useCodeTerminal } from "./use-code-terminal";
 
-type DockTab = "output" | "tests" | "stdin" | "debug" | "ai";
+type DockTab = "terminal" | "tests" | "stdin" | "debug" | "ai";
 
 /**
  * Full-page Code Lab workspace (#431). Option 1 layout: a problem panel on the
@@ -73,7 +74,15 @@ export function CodeLabWorkspace({
     contentVersionId,
     milestoneIndex
   });
-  const [tab, setTab] = useState<DockTab>("output");
+  // Interactive Terminal session (#664): Run drives this, not the one-shot runner.
+  const terminal = useCodeTerminal({
+    itemId,
+    source: c.source,
+    stdin: c.stdin,
+    contentVersionId,
+    milestoneIndex
+  });
+  const [tab, setTab] = useState<DockTab>("terminal");
   const [aiFullscreen, setAiFullscreen] = useState(false);
   const isWide = useIsWide();
 
@@ -90,8 +99,13 @@ export function CodeLabWorkspace({
   const resolvedBackLabel = backLabel ?? "Back to lesson";
 
   function onAction(action: CodeAction) {
-    if (action === "run") setTab("output");
-    else if (action === "test") setTab("tests");
+    // Run drives the interactive Terminal session; Tests/AI stay one-shot (#664).
+    if (action === "run") {
+      setTab("terminal");
+      void terminal.start();
+      return;
+    }
+    if (action === "test") setTab("tests");
     else setTab("ai");
     c.handleAction(action);
   }
@@ -105,7 +119,22 @@ export function CodeLabWorkspace({
         onAction={onAction}
         hasError={c.hasRunError}
         runDisabled={c.missingRequired || c.itemUnavailable}
+        terminalActive={terminal.isActive}
+        terminalStarting={terminal.starting}
+        onStop={terminal.stop}
       />
+      {terminal.isStale ? (
+        <div
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800"
+          role="alert"
+          data-testid="code-terminal-stale"
+        >
+          <span>
+            The running program uses an older version of your code. Stop it before running the
+            changed code.
+          </span>
+        </div>
+      ) : null}
       {c.hasPreviousVersionDraft ? (
         <div
           className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
@@ -234,8 +263,11 @@ export function CodeLabWorkspace({
   const stdinField =
     config.mode === "stdin" ? (
       <label className="flex flex-col gap-1">
-        <span className="text-xs font-bold uppercase tracking-wide text-slate-600">
-          Standard input (stdin)
+        <span className="text-xs font-bold uppercase tracking-wide text-slate-600">Input Args</span>
+        <span className="text-xs text-slate-500">
+          Written to standard input when the program starts. This is not{" "}
+          <code className="font-mono">main(argc, argv)</code> command-line input. Standard input
+          stays open, so you can answer later reads in the Terminal.
         </span>
         <textarea
           value={c.stdin}
@@ -243,7 +275,7 @@ export function CodeLabWorkspace({
           rows={4}
           className="rounded-lg border border-slate-200 p-2 font-mono text-xs"
           data-testid="code-stdin"
-          placeholder="Input passed to the program"
+          placeholder="Input written to the program when it starts"
         />
       </label>
     ) : (
@@ -280,10 +312,10 @@ export function CodeLabWorkspace({
     </div>
   );
 
-  const tabs: { id: DockTab; label: string }[] = [
-    { id: "output", label: "Output" },
+  const tabs: { id: DockTab; label: string; active?: boolean }[] = [
+    { id: "terminal", label: "Terminal", active: terminal.isActive },
     { id: "tests", label: "Tests" },
-    ...(config.mode === "stdin" ? [{ id: "stdin" as const, label: "Input" }] : []),
+    ...(config.mode === "stdin" ? [{ id: "stdin" as const, label: "Input Args" }] : []),
     { id: "debug", label: "Debug" },
     { id: "ai", label: "AI" }
   ];
@@ -312,17 +344,36 @@ export function CodeLabWorkspace({
             }`}
             data-testid={`code-lab-tab-${t.id}`}
           >
-            {t.label}
+            <span className="inline-flex items-center gap-1.5">
+              {t.label}
+              {t.active ? (
+                <span
+                  className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"
+                  aria-label="running"
+                  data-testid="code-terminal-running-indicator"
+                />
+              ) : null}
+            </span>
           </button>
         ))}
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-3" role="tabpanel">
-        {tab === "output" ? (
-          c.runResult ? (
-            <CodeOutputPanel result={c.runResult} />
-          ) : (
-            <p className="text-sm text-slate-500">Run your program to see compiler and program output here.</p>
-          )
+        {tab === "terminal" ? (
+          <CodeTerminalPanel
+            status={terminal.status}
+            events={terminal.events}
+            exitCode={terminal.exitCode}
+            durationMs={terminal.durationMs}
+            outputTruncated={terminal.outputTruncated}
+            message={terminal.message}
+            isActive={terminal.isActive}
+            isFinished={terminal.isFinished}
+            sending={terminal.sending}
+            inputError={terminal.inputError}
+            onSend={terminal.sendInput}
+            onEof={terminal.sendEof}
+            onClearError={terminal.clearInputError}
+          />
         ) : null}
         {tab === "tests" ? (
           c.testResult ? (

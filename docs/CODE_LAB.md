@@ -223,6 +223,97 @@ still renders; Start Debugging returns a friendly "Real debugger service is not
 configured." state and no external service is needed. Deploy the service with
 `services/gdb-debugger` (Docker) on the same OVH environment family as Judge0.
 
+## Interactive Terminal (live cin/getline, #664)
+
+**Run** starts an interactive **Terminal** session instead of a one-shot execution.
+The program compiles on the execution service, spawns with piped stdin/stdout/stderr,
+and stays alive so the learner can answer later `std::cin` / `std::getline` reads
+without restarting. Both the full-page workspace and the embedded lab share one
+controller (`useCodeTerminal`) and one panel (`CodeTerminalPanel`).
+
+- **Terminal vs Input Args.** The full-page right dock renames **Output → Terminal**
+  and **Input → Input Args**. Input Args is the *initial stdin* written once at
+  launch (not `main(argc, argv)` command-line input); standard input stays open
+  afterward so live input in the Terminal answers later reads. Its contents are
+  sent exactly as authored — no newline is added or removed.
+- **Combined transcript.** Compiler diagnostics, stdout, stderr, learner input, and
+  system notices appear in one chronological, escaped (never HTML), whitespace-
+  preserving log. It auto-follows only while you are near the bottom and offers a
+  "Jump to latest" control otherwise.
+- **Run/Stop.** While compiling/running, Run becomes **Stop**, and **Run Tests** is
+  disabled so the two execution paths never compete. Editing the source during a
+  session marks it as running an older version; Stop before running the change.
+- **Send / Send EOF.** Enter sends the composer text plus `\n` (empty lines are
+  allowed, for getline); **Send EOF** closes stdin without killing the process, so
+  `while (getline(...))` loops can finish intentionally.
+- **Session ending.** A session ends only through an explicit/real event: Stop, EOF
+  then natural exit, natural exit, compile/runtime failure, or a hard server safety
+  limit. A quiet program waiting on input is **never** killed by a client heuristic —
+  only the hard wall/idle/retain/resource caps end it, and they surface a visible
+  system message.
+- **Learning rules.** A Terminal Run records exactly one attempt when the session
+  reaches a final state (polling never duplicates it) and may emit `code_attempted`,
+  but **never** `code_passed`/mastery — only the one-shot **Run Tests** path produces
+  pass evidence. Run Tests stays one-shot, deterministic, and never leaks hidden tests.
+
+### Terminal security model
+
+Untrusted C++ **never** runs inside Next.js/Vercel and the browser never receives
+`CODE_TERMINAL_API_KEY` or the service URL. The browser calls Next API routes
+(`app/api/code/terminal/{start,poll,input,stop,attempt,health}`), which proxy to the
+execution service's `/terminal/{start,poll,input,stop}` (same OVH deployable as the
+GDB debugger). Sessions use cryptographically random ids **and** an unguessable
+per-session capability token required on every poll/input/stop; a browser-supplied
+id alone can never reach a foreign session. The service bounds source, initial and
+per-write and cumulative live input, output bytes, event count, processes, memory,
+compile time, wall time, and retained-session time, kills the whole process group on
+Stop/reap, and deletes the temp workspace on every terminal state
+(`services/gdb-debugger/src/{terminal-session,terminal-event-buffer,security}.ts`).
+
+### Terminal configuration (server-only)
+
+```bash
+CODE_TERMINAL_PROVIDER=execution-service
+CODE_TERMINAL_BASE_URL=http://<ovh-host>:3008
+CODE_TERMINAL_API_KEY=<server-side-token>
+CODE_TERMINAL_TIMEOUT_MS=30000
+CODE_TERMINAL_POLL_MS=250
+```
+
+Provider selection (`code-terminal-service.ts`): `execution-service` + a base URL →
+the real OVH adapter; `mock` → the deterministic in-memory mock; **unset/misconfigured**
+→ the mock in non-production (local dev, CI, Playwright work offline) but an explicit
+"Interactive terminal service is not configured" state in production, so a real
+deployment never pretends live input works. Health: `GET /api/code/terminal/health`.
+
+### Terminal service smoke test
+
+With the service running (`cd services/gdb-debugger && npm run build && npm start`)
+and `DEBUGGER_API_KEY` set, drive a full session over curl:
+
+```bash
+BASE=http://localhost:3008; KEY=<server-side-token>
+SRC='#include <iostream>\nint main(){int x; std::cin>>x; std::cout<<"got "<<x<<"\\n";}'
+# start
+RESP=$(curl -s -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
+  -d "{\"source\":\"$SRC\"}" "$BASE/terminal/start")
+SID=$(echo "$RESP" | jq -r .sessionId); TOK=$(echo "$RESP" | jq -r .sessionToken)
+# input
+curl -s -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
+  -d "{\"sessionId\":\"$SID\",\"sessionToken\":\"$TOK\",\"data\":\"7\\n\"}" "$BASE/terminal/input"
+# poll for output
+curl -s -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
+  -d "{\"sessionId\":\"$SID\",\"sessionToken\":\"$TOK\",\"after\":0}" "$BASE/terminal/poll"
+# stop
+curl -s -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
+  -d "{\"sessionId\":\"$SID\",\"sessionToken\":\"$TOK\"}" "$BASE/terminal/stop"
+```
+
+The `services/gdb-debugger` real-child-process integration tests
+(`terminal-session.integration.test.ts`) exercise the same behaviors and require a
+`g++` toolchain; they are skipped automatically where one is unavailable, so ordinary
+`pnpm verify` never needs production credentials.
+
 ## Troubleshooting
 
 ### `/languages` works but submissions fail

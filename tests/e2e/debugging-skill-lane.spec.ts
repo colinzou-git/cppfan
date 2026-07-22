@@ -16,9 +16,9 @@ test("a code-capable debugging item shows the Code Lab and feedback area", async
   await expect(lab).toBeVisible();
   await expect(page.getByTestId("code-editor")).toBeVisible();
 
-  // Running shows the output/feedback area, and AI Review is available.
+  // Running starts the interactive Terminal (#664), and AI Review is available.
   await page.getByRole("button", { name: "Run", exact: true }).click();
-  await expect(page.getByTestId("code-output")).toBeVisible();
+  await expect(page.getByTestId("code-terminal")).toBeVisible();
   await expect(page.getByRole("button", { name: "AI Review Code" })).toBeVisible();
 });
 
