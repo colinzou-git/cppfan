@@ -21,8 +21,11 @@ test("full-page: Terminal + Input Args tabs, live input, empty line, and Stop", 
   await page.getByTestId("code-lab-tab-stdin").click();
   await page.getByTestId("code-stdin").fill("first line\nsecond line");
 
+  // The narrow (stacked) layout renders the controls twice; scope to the first.
+  const controls = page.locator('[data-testid="code-controls"]').first();
+
   // Run selects the Terminal tab and the session starts.
-  await page.getByRole("button", { name: "Run", exact: true }).click();
+  await controls.getByRole("button", { name: "Run", exact: true }).click();
   await expect(page.getByTestId("code-lab-tab-terminal")).toHaveAttribute("aria-selected", "true");
   const transcript = page.getByTestId("code-terminal-transcript");
   await expect(transcript).toBeVisible();
@@ -40,9 +43,9 @@ test("full-page: Terminal + Input Args tabs, live input, empty line, and Stop", 
   await expect(transcript).toContainText("You entered an empty line.");
 
   // Stop the session; Run returns.
-  await page.getByTestId("code-stop").click();
+  await controls.getByTestId("code-stop").click();
   await expect(transcript).toContainText("stopped by you");
-  await expect(page.getByRole("button", { name: "Run", exact: true })).toBeVisible();
+  await expect(controls.getByRole("button", { name: "Run", exact: true })).toBeVisible();
 });
 
 test("embedded: Run starts the same Terminal session in the right column", async ({ page }) => {
