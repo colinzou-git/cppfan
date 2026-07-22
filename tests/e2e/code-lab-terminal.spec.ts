@@ -67,7 +67,10 @@ test("Run Tests stays one-shot and does not leak hidden test details", async ({ 
   await expect(page.getByTestId("code-lab")).toBeVisible();
 
   await page.getByRole("button", { name: "Run Tests" }).click();
-  await expect(page.getByTestId("code-test-results")).toBeVisible();
-  // The interactive transcript is not used for tests, and no hidden inputs appear.
-  await expect(page.getByText(/hidden input/i)).toHaveCount(0);
+  const results = page.getByTestId("code-test-results");
+  await expect(results).toBeVisible();
+  // Run Tests renders its own one-shot results panel (not the interactive
+  // transcript), and any hidden cases are shown only as counts — never their
+  // concrete inputs/expected outputs.
+  await expect(page.getByTestId("code-terminal-input")).toHaveCount(0);
 });

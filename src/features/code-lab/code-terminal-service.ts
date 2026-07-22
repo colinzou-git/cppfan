@@ -8,12 +8,14 @@ import { GdbServiceTerminalAdapter } from "./gdb-service-terminal-adapter";
  *
  * - `execution-service` with a base URL → the real OVH terminal adapter.
  * - `mock` → the deterministic in-memory mock.
- * - unset/misconfigured → the mock in non-production (so local dev, CI, and
- *   Playwright work offline), but an explicit "unconfigured" state in production
- *   so a real deployment never pretends live input works.
+ * - unset/misconfigured → the mock everywhere EXCEPT a real production deployment
+ *   (`VERCEL_ENV === "production"`), which shows an explicit "unconfigured" state so
+ *   it never pretends live input works. CI/local/preview run a production Next build
+ *   too (`next start`), so the gate is the hosting env, not NODE_ENV — otherwise the
+ *   offline mock the Playwright suite relies on would never be selected.
  *
- * The mock is a shared singleton so its sessions survive across the stateless
- * start/poll/input/stop route handlers.
+ * The mock's sessions live on globalThis so they survive across the separately
+ * bundled start/poll/input/stop route handlers within one server process.
  */
 export type TerminalSelection =
   | { kind: "ready"; adapter: CodeTerminalAdapter }
@@ -42,10 +44,11 @@ export function selectTerminalProvider(): TerminalSelection {
     return { kind: "ready", adapter: sharedMockTerminalAdapter };
   }
 
-  if (process.env.NODE_ENV === "production") {
+  // Only a real production deployment refuses to fall back to the mock.
+  if (process.env.VERCEL_ENV === "production") {
     return { kind: "unconfigured", note: "Real terminal service is not configured." };
   }
 
-  // Local dev / CI / Playwright default: deterministic offline mock.
+  // Local dev / CI / Playwright / preview default: deterministic offline mock.
   return { kind: "ready", adapter: sharedMockTerminalAdapter };
 }

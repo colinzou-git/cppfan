@@ -56,6 +56,20 @@ type MockSession = {
   startedAt: number;
 };
 
+type MockStore = { sessions: Map<string, MockSession>; counter: number };
+
+// Next.js bundles each route handler separately in a production build, so a
+// plain module-level Map would not be shared between the start/poll/input/stop
+// routes. Anchoring the store on globalThis keeps one shared instance per server
+// process (which is all the offline mock needs for local dev, CI, and Playwright).
+const globalForMock = globalThis as unknown as { __cppfanMockTerminal?: MockStore };
+function mockStore(): MockStore {
+  if (!globalForMock.__cppfanMockTerminal) {
+    globalForMock.__cppfanMockTerminal = { sessions: new Map(), counter: 0 };
+  }
+  return globalForMock.__cppfanMockTerminal;
+}
+
 /**
  * Deterministic, network-free terminal used by local dev, CI, and Playwright.
  * It does not compile or run C++ — it simulates a stable transcript so the whole
@@ -65,12 +79,14 @@ type MockSession = {
  */
 export class MockTerminalAdapter implements CodeTerminalAdapter {
   readonly name = "mock";
-  private readonly sessions = new Map<string, MockSession>();
-  private counter = 0;
+  // Sessions live on globalThis (see mockStore) so they survive across the
+  // separately bundled route handlers; the instance itself is stateless.
+  private readonly sessions = mockStore().sessions;
 
   async start(input: CodeTerminalStartRequest): Promise<CodeTerminalSnapshot> {
-    this.counter += 1;
-    const sessionId = `mock-term-${this.counter}-${randomSuffix()}`;
+    const store = mockStore();
+    store.counter += 1;
+    const sessionId = `mock-term-${store.counter}-${randomSuffix()}`;
     const token = `mock-token-${randomSuffix()}${randomSuffix()}`;
     const session: MockSession = {
       token,
