@@ -1,14 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CodeTerminalPanel } from "@/features/code-lab/code-terminal-panel";
-import type { CodeTerminalEvent, CodeTerminalStatus } from "@/features/code-lab/code-terminal-types";
+import type {
+  CodeTerminalEvent,
+  CodeTerminalStatus
+} from "@/features/code-lab/code-terminal-types";
 
-function renderPanel(
-  overrides: Partial<React.ComponentProps<typeof CodeTerminalPanel>> = {}
-) {
+function renderPanel(overrides: Partial<React.ComponentProps<typeof CodeTerminalPanel>> = {}) {
   const onSend = overrides.onSend ?? vi.fn().mockResolvedValue(true);
   const onEof = overrides.onEof ?? vi.fn().mockResolvedValue(true);
   const onClearError = overrides.onClearError ?? vi.fn();
+  const onRetryAttemptSave = overrides.onRetryAttemptSave ?? vi.fn().mockResolvedValue(undefined);
   const status: CodeTerminalStatus = overrides.status ?? "running";
   const props: React.ComponentProps<typeof CodeTerminalPanel> = {
     status,
@@ -21,9 +23,12 @@ function renderPanel(
     isFinished: overrides.isFinished ?? false,
     sending: overrides.sending ?? false,
     inputError: overrides.inputError ?? null,
+    attemptSaveStatus: overrides.attemptSaveStatus ?? "idle",
+    attemptSaveError: overrides.attemptSaveError ?? null,
     onSend,
     onEof,
-    onClearError
+    onClearError,
+    onRetryAttemptSave
   };
   return { ...render(<CodeTerminalPanel {...props} />), onSend, onEof, onClearError };
 }
@@ -46,9 +51,12 @@ describe("CodeTerminalPanel (#664)", () => {
         isFinished
         sending={false}
         inputError={null}
+        attemptSaveStatus="saved"
+        attemptSaveError={null}
         onSend={vi.fn()}
         onEof={vi.fn()}
         onClearError={vi.fn()}
+        onRetryAttemptSave={vi.fn()}
       />
     );
     expect(screen.queryByTestId("code-terminal-input")).not.toBeInTheDocument();
@@ -97,7 +105,76 @@ describe("CodeTerminalPanel (#664)", () => {
   });
 
   it("renders an explicit unconfigured state", () => {
-    renderPanel({ status: "unconfigured", message: "Interactive terminal service is not configured." });
+    renderPanel({
+      status: "unconfigured",
+      message: "Interactive terminal service is not configured."
+    });
     expect(screen.getByTestId("code-terminal-unconfigured")).toHaveTextContent("not configured");
+  });
+
+  it("renders saving/retrying state without hiding the transcript", () => {
+    const { rerender } = renderPanel({
+      status: "exited",
+      isFinished: true,
+      attemptSaveStatus: "saving",
+      events: [{ sequence: 1, kind: "stdout", text: "done", createdAt: "t" }]
+    });
+    expect(screen.getByTestId("code-terminal-attempt-saving")).toBeInTheDocument();
+    expect(screen.getByTestId("code-terminal-transcript")).toHaveTextContent("done");
+    rerender(
+      <CodeTerminalPanel
+        status="exited"
+        events={[]}
+        exitCode={0}
+        durationMs={1}
+        outputTruncated={false}
+        message={null}
+        isActive={false}
+        isFinished
+        sending={false}
+        inputError={null}
+        attemptSaveStatus="retrying"
+        attemptSaveError={null}
+        onSend={vi.fn()}
+        onEof={vi.fn()}
+        onClearError={vi.fn()}
+        onRetryAttemptSave={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId("code-terminal-attempt-saving")).toBeInTheDocument();
+  });
+
+  it("shows a manual history retry after an error and stays quiet when saved", () => {
+    const onRetryAttemptSave = vi.fn().mockResolvedValue(undefined);
+    const { rerender } = renderPanel({
+      status: "exited",
+      isFinished: true,
+      attemptSaveStatus: "error",
+      attemptSaveError: "History save failed.",
+      onRetryAttemptSave
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Retry saving run" }));
+    expect(onRetryAttemptSave).toHaveBeenCalledTimes(1);
+    rerender(
+      <CodeTerminalPanel
+        status="exited"
+        events={[]}
+        exitCode={0}
+        durationMs={1}
+        outputTruncated={false}
+        message={null}
+        isActive={false}
+        isFinished
+        sending={false}
+        inputError={null}
+        attemptSaveStatus="saved"
+        attemptSaveError={null}
+        onSend={vi.fn()}
+        onEof={vi.fn()}
+        onClearError={vi.fn()}
+        onRetryAttemptSave={vi.fn()}
+      />
+    );
+    expect(screen.queryByTestId("code-terminal-attempt-error")).not.toBeInTheDocument();
   });
 });

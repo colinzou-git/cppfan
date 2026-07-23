@@ -29,6 +29,7 @@ function snap(overrides: Partial<CodeTerminalSnapshot>): CodeTerminalSnapshot {
   return {
     sessionId: "s1",
     sessionToken: "tok-1",
+    terminalAttemptId: "10000000-0000-4000-8000-000000000001",
     status: "running",
     events: [],
     nextSequence: 0,
@@ -48,7 +49,10 @@ beforeEach(() => {
   pollMock.mockResolvedValue(snap({ status: "running", events: [], nextSequence: 0 }));
   inputMock.mockResolvedValue({ ok: true });
   stopMock.mockResolvedValue({ ok: true });
-  attemptMock.mockResolvedValue({ recorded: true });
+  attemptMock.mockResolvedValue({
+    status: "recorded",
+    attemptId: "20000000-0000-4000-8000-000000000001"
+  });
 });
 
 afterEach(() => {
@@ -74,7 +78,9 @@ describe("useCodeTerminal (#664)", () => {
     });
 
     expect(startMock).toHaveBeenCalledTimes(1);
-    expect(startMock).toHaveBeenCalledWith(expect.objectContaining({ itemId: "item-a", stdin: "5\n" }));
+    expect(startMock).toHaveBeenCalledWith(
+      expect.objectContaining({ itemId: "item-a", stdin: "5\n" })
+    );
     expect(result.current.status).toBe("running");
     expect(result.current.isActive).toBe(true);
     expect(result.current.events).toHaveLength(2);
@@ -94,7 +100,11 @@ describe("useCodeTerminal (#664)", () => {
     });
 
     expect(ok).toBe(true);
-    expect(inputMock).toHaveBeenCalledWith({ sessionId: "s1", sessionToken: "tok-1", data: "hi there\n" });
+    expect(inputMock).toHaveBeenCalledWith({
+      sessionId: "s1",
+      sessionToken: "tok-1",
+      data: "hi there\n"
+    });
     unmount();
   });
 
@@ -161,6 +171,7 @@ describe("useCodeTerminal (#664)", () => {
     startMock.mockResolvedValue(
       snap({
         sessionId: "s2",
+        terminalAttemptId: "10000000-0000-4000-8000-000000000002",
         status: "compile_error",
         events: [{ sequence: 1, kind: "compiler", text: "error: expected ';'", createdAt: "t" }],
         nextSequence: 1
@@ -174,8 +185,128 @@ describe("useCodeTerminal (#664)", () => {
     expect(result.current.status).toBe("compile_error");
     expect(attemptMock).toHaveBeenCalledTimes(1);
     expect(attemptMock).toHaveBeenCalledWith(
-      expect.objectContaining({ itemId: "item-a", status: "compile_error", compileOutput: "error: expected ';'" })
+      expect.objectContaining({
+        itemId: "item-a",
+        terminalAttemptId: "10000000-0000-4000-8000-000000000002",
+        sessionId: "s2",
+        sessionToken: "tok-1",
+        source: "int main(){}"
+      })
     );
+    expect(result.current.attemptSaveStatus).toBe("saved");
     unmount();
+  });
+
+  it("keeps the save unsaved through a transport failure, then retries after 500 ms", async () => {
+    vi.useFakeTimers();
+    try {
+      startMock.mockResolvedValue(
+        snap({
+          sessionId: "s-retry",
+          terminalAttemptId: "10000000-0000-4000-8000-000000000003",
+          status: "compile_error"
+        })
+      );
+      attemptMock.mockRejectedValueOnce(new Error("temporary")).mockResolvedValueOnce({
+        status: "recorded",
+        attemptId: "20000000-0000-4000-8000-000000000003"
+      });
+      const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+      await act(async () => {
+        await result.current.start();
+        await Promise.resolve();
+      });
+      expect(attemptMock).toHaveBeenCalledTimes(1);
+      expect(result.current.attemptSaveStatus).toBe("retrying");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(499);
+      });
+      expect(attemptMock).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1);
+      });
+      expect(attemptMock).toHaveBeenCalledTimes(2);
+      expect(result.current.attemptSaveStatus).toBe("saved");
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("exposes manual retry after bounded failures and reuses the exact attempt id", async () => {
+    vi.useFakeTimers();
+    try {
+      const terminalAttemptId = "10000000-0000-4000-8000-000000000004";
+      startMock.mockResolvedValue(
+        snap({
+          sessionId: "s-manual",
+          terminalAttemptId,
+          status: "compile_error"
+        })
+      );
+      attemptMock.mockResolvedValue({
+        status: "retryable_error",
+        message: "try later"
+      });
+      const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+      await act(async () => {
+        await result.current.start();
+        await Promise.resolve();
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500 + 1500 + 4000);
+      });
+      expect(attemptMock).toHaveBeenCalledTimes(4);
+      expect(result.current.attemptSaveStatus).toBe("error");
+
+      attemptMock.mockResolvedValueOnce({
+        status: "already_recorded",
+        attemptId: "row"
+      });
+      await act(async () => {
+        await result.current.retryAttemptSave();
+      });
+      expect(attemptMock).toHaveBeenLastCalledWith(expect.objectContaining({ terminalAttemptId }));
+      expect(result.current.attemptSaveStatus).toBe("saved");
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("saves the source captured at start even if the editor changes", async () => {
+    vi.useFakeTimers();
+    try {
+      startMock.mockResolvedValue(
+        snap({
+          sessionId: "s-source",
+          terminalAttemptId: "10000000-0000-4000-8000-000000000005",
+          status: "running"
+        })
+      );
+      pollMock.mockResolvedValueOnce(
+        snap({
+          sessionId: "s-source",
+          terminalAttemptId: undefined,
+          status: "exited",
+          exitCode: 0
+        })
+      );
+      const { result, rerender, unmount } = renderHook((props) => useCodeTerminal(props), {
+        initialProps: baseArgs
+      });
+      await act(async () => {
+        await result.current.start();
+      });
+      rerender({ ...baseArgs, source: "int main(){return 99;}" });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(250);
+      });
+      expect(attemptMock).toHaveBeenCalledWith(expect.objectContaining({ source: "int main(){}" }));
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

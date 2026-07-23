@@ -4,11 +4,9 @@ import type {
   CodeTestCaseResult,
   CodeTestResult
 } from "./code-lab-types";
-import type { LearningItemCodeLab } from "./code-lab-types";
-import { DEFAULT_COMPILER_FLAGS } from "./code-lab-defaults";
 import { getCodeLabConfigForItem } from "./code-lab-catalog";
-import { resolveCodeLabItem, CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
-import { buildFunctionExerciseTranslationUnit } from "@/features/user-content/function-exercise-harness";
+import { CODE_LAB_STALE_NOTE } from "./code-lab-item-resolver";
+import { resolveCodeExecutionPlan } from "./code-execution-plan";
 import { buildRunnerInput, executeRun } from "./code-runner";
 import { classifyCodeAttempt } from "./code-error-classifier";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
@@ -33,10 +31,6 @@ export function compareOutput(
     default:
       return actual === expected;
   }
-}
-
-function resolvedFlags(itemFlags?: string[]): string[] {
-  return itemFlags && itemFlags.length > 0 ? itemFlags : [...DEFAULT_COMPILER_FLAGS];
 }
 
 /**
@@ -77,7 +71,7 @@ function staleTestResult(): CodeTestResult {
   };
 }
 
-const ITEM_UNAVAILABLE_NOTE =
+export const ITEM_UNAVAILABLE_NOTE =
   "This exercise is no longer available. Return to the catalog or reload if it was recently republished.";
 
 /**
@@ -117,33 +111,6 @@ function unavailableTestResult(): CodeTestResult {
     note: ITEM_UNAVAILABLE_NOTE,
     itemUnavailable: true
   };
-}
-
-/**
- * Prepare the actual source sent to the runner. Function-mode exercises (#607)
- * are wrapped in the generated single-`main` harness keyed off the authored
- * signature; every other mode runs the learner source unchanged. A build failure
- * means the AUTHOR's contract is invalid (should be caught at publish) — distinct
- * from a learner compile error, which surfaces later as a normal compile_error.
- */
-function prepareRunnerSource(
-  config: LearningItemCodeLab,
-  learnerSource: string
-): { ok: true; source: string } | { ok: false; note: string } {
-  if (config.mode !== "function") {
-    return { ok: true, source: learnerSource };
-  }
-  const built = buildFunctionExerciseTranslationUnit({
-    learnerSource,
-    functionSignature: config.functionSignature ?? ""
-  });
-  if (!built.ok) {
-    return {
-      ok: false,
-      note: `This function-mode exercise has an invalid author signature: ${built.issues.map((i) => i.message).join("; ")}`
-    };
-  }
-  return { ok: true, source: built.source };
 }
 
 function authorContractRunResult(note: string): CodeRunResult {
@@ -187,36 +154,36 @@ export async function runCode(input: {
   /** Active milestone for a user lab (#489). */
   milestoneIndex?: number;
 }): Promise<CodeRunResult> {
-  const resolved = await resolveCodeLabItem({
+  const planned = await resolveCodeExecutionPlan({
     itemId: input.itemId,
     expectedContentVersionId: input.expectedVersionId,
-    milestoneIndex: input.milestoneIndex
+    milestoneIndex: input.milestoneIndex,
+    learnerSource: input.source,
+    compilerFlags: input.compilerFlags
   });
-  if (resolved.status === "stale_definition") {
+  if (planned.status === "stale_definition") {
     return staleRunResult();
   }
   // An unknown/unpublished item is refused BEFORE the runner, identically to
   // Test, so Run can never compile arbitrary source without a task context (#614).
-  if (resolved.status === "not_found") {
+  if (planned.status === "item_unavailable") {
     return unavailableRunResult();
   }
-  const item = resolved.item;
-  const config = item.config;
-  const prepared = prepareRunnerSource(config, input.source);
-  if (!prepared.ok) {
-    return authorContractRunResult(prepared.note);
+  if (planned.status === "invalid_contract") {
+    return authorContractRunResult(planned.message);
   }
+  const { plan } = planned;
   const result = await executeRun(
     buildRunnerInput({
-      source: prepared.source,
+      source: plan.preparedSource,
       stdin: input.stdin ?? "",
-      compilerFlags: resolvedFlags(input.compilerFlags ?? config.compilerFlags),
-      files: item.files
+      compilerFlags: plan.compilerFlags,
+      files: plan.files
     })
   );
   const { classifications } = classifyCodeAttempt({
     runResult: result,
-    skillTags: config.skillTags ?? []
+    skillTags: plan.config.skillTags ?? []
   });
   return classifications.length > 0 ? { ...result, classifications } : result;
 }
@@ -236,30 +203,25 @@ export async function runTests(input: {
   /** Active milestone for a user lab (#489). */
   milestoneIndex?: number;
 }): Promise<CodeTestResult> {
-  const resolved = await resolveCodeLabItem({
+  const planned = await resolveCodeExecutionPlan({
     itemId: input.itemId,
     expectedContentVersionId: input.expectedVersionId,
-    milestoneIndex: input.milestoneIndex
+    milestoneIndex: input.milestoneIndex,
+    learnerSource: input.source,
+    compilerFlags: input.compilerFlags
   });
-  if (resolved.status === "stale_definition") {
+  if (planned.status === "stale_definition") {
     return staleTestResult();
   }
-  if (resolved.status === "not_found") {
+  if (planned.status === "item_unavailable") {
     return unavailableTestResult();
   }
-  const { config, hiddenTests, files } = resolved.item;
-
-  // Function-mode source is wrapped once in the generated harness; each test then
-  // supplies its own stdin, exactly like a stdin-mode exercise (#607).
-  const prepared = prepareRunnerSource(config, input.source);
-  if (!prepared.ok) {
-    return authorContractTestResult(prepared.note);
+  if (planned.status === "invalid_contract") {
+    return authorContractTestResult(planned.message);
   }
-  const runnerSource = prepared.source;
-
-  const flags = resolvedFlags(input.compilerFlags ?? config.compilerFlags);
-  const visibleCases = config.visibleTests ?? [];
-  const hiddenCases = input.includeHidden === false ? [] : hiddenTests;
+  const { plan } = planned;
+  const visibleCases = plan.visibleTests;
+  const hiddenCases = input.includeHidden === false ? [] : plan.hiddenTests;
 
   const visible: CodeTestCaseResult[] = [];
   let hiddenPassed = 0;
@@ -268,7 +230,12 @@ export async function runTests(input: {
 
   for (const test of visibleCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: runnerSource, stdin: test.stdin ?? "", compilerFlags: flags, files })
+      buildRunnerInput({
+        source: plan.preparedSource,
+        stdin: test.stdin ?? "",
+        compilerFlags: plan.compilerFlags,
+        files: plan.files
+      })
     );
     provider = run.provider;
     simulated = run.simulated;
@@ -285,9 +252,11 @@ export async function runTests(input: {
         simulated: run.simulated,
         note: "Tests did not run because the code did not compile."
       };
-      return withClassifications(compileResult, config.skillTags ?? [], input.itemId);
+      return withClassifications(compileResult, plan.config.skillTags ?? [], input.itemId);
     }
-    const passed = run.status === "success" && compareOutput(run.stdout, test.expectedStdout ?? "", test.matcher);
+    const passed =
+      run.status === "success" &&
+      compareOutput(run.stdout, test.expectedStdout ?? "", test.matcher);
     visible.push({
       name: test.name,
       passed,
@@ -300,11 +269,19 @@ export async function runTests(input: {
 
   for (const test of hiddenCases) {
     const run = await executeRun(
-      buildRunnerInput({ source: runnerSource, stdin: test.stdin ?? "", compilerFlags: flags, files })
+      buildRunnerInput({
+        source: plan.preparedSource,
+        stdin: test.stdin ?? "",
+        compilerFlags: plan.compilerFlags,
+        files: plan.files
+      })
     );
     provider = run.provider;
     simulated = run.simulated;
-    if (run.status === "success" && compareOutput(run.stdout, test.expectedStdout ?? "", test.matcher)) {
+    if (
+      run.status === "success" &&
+      compareOutput(run.stdout, test.expectedStdout ?? "", test.matcher)
+    ) {
       hiddenPassed += 1;
     }
   }
@@ -321,7 +298,7 @@ export async function runTests(input: {
     provider,
     simulated
   };
-  return withClassifications(result, config.skillTags ?? [], input.itemId);
+  return withClassifications(result, plan.config.skillTags ?? [], input.itemId);
 }
 
 function withClassifications(

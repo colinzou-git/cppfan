@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import type { CodeTerminalEvent, CodeTerminalStatus } from "./code-terminal-types";
+import type {
+  CodeTerminalEvent,
+  CodeTerminalStatus,
+  TerminalAttemptSaveStatus
+} from "./code-terminal-types";
 
 /**
  * Combined interactive Terminal transcript + input composer (#664). Renders
@@ -22,6 +26,9 @@ const STATUS_LABELS: Record<CodeTerminalStatus, string> = {
   compile_error: "Compile error",
   runtime_error: "Runtime error",
   timeout: "Timed out",
+  stale_definition: "Reload required",
+  item_unavailable: "Unavailable",
+  invalid_contract: "Invalid exercise",
   unconfigured: "Not configured",
   error: "Error"
 };
@@ -47,9 +54,12 @@ export function CodeTerminalPanel({
   isFinished,
   sending,
   inputError,
+  attemptSaveStatus,
+  attemptSaveError,
   onSend,
   onEof,
-  onClearError
+  onClearError,
+  onRetryAttemptSave
 }: {
   status: CodeTerminalStatus;
   events: CodeTerminalEvent[];
@@ -61,9 +71,12 @@ export function CodeTerminalPanel({
   isFinished: boolean;
   sending: boolean;
   inputError: string | null;
+  attemptSaveStatus: TerminalAttemptSaveStatus;
+  attemptSaveError: string | null;
   onSend: (data: string) => Promise<boolean>;
   onEof: () => Promise<boolean>;
   onClearError: () => void;
+  onRetryAttemptSave: () => Promise<void>;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -124,6 +137,30 @@ export function CodeTerminalPanel({
     );
   }
 
+  if (
+    status === "stale_definition" ||
+    status === "item_unavailable" ||
+    status === "invalid_contract"
+  ) {
+    const guidance =
+      status === "stale_definition"
+        ? "Reload to use the current published definition."
+        : status === "item_unavailable"
+          ? "Return to the catalog or My Content, or reload if it was recently republished."
+          : "The author must correct and republish this exercise before it can run.";
+    return (
+      <div
+        className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+        data-testid={`code-terminal-${status.replace("_", "-")}`}
+        role="alert"
+      >
+        <p className="font-bold">{STATUS_LABELS[status]}</p>
+        <p className="mt-1">{message ?? guidance}</p>
+        <p className="mt-1 text-amber-800">{guidance}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2" data-testid="code-terminal">
       <div className="flex flex-wrap items-center gap-2">
@@ -143,6 +180,31 @@ export function CodeTerminalPanel({
           <span className="text-xs font-bold text-amber-700">output truncated</span>
         ) : null}
       </div>
+
+      {attemptSaveStatus === "saving" || attemptSaveStatus === "retrying" ? (
+        <p
+          className="text-xs font-semibold text-slate-600"
+          data-testid="code-terminal-attempt-saving"
+        >
+          Saving run history…
+        </p>
+      ) : null}
+      {attemptSaveStatus === "error" ? (
+        <div
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+          role="alert"
+          data-testid="code-terminal-attempt-error"
+        >
+          <span>{attemptSaveError ?? "This run finished, but its history was not saved."}</span>
+          <button
+            type="button"
+            onClick={() => void onRetryAttemptSave()}
+            className="rounded-md border border-amber-500 px-2 py-1 font-bold hover:bg-amber-100"
+          >
+            Retry saving run
+          </button>
+        </div>
+      ) : null}
 
       <div className="relative min-h-0 flex-1">
         <div

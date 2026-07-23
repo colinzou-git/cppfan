@@ -314,6 +314,12 @@ The `services/gdb-debugger` real-child-process integration tests
 `g++` toolchain; they are skipped automatically where one is unavailable, so ordinary
 `pnpm verify` never needs production credentials.
 
+The optional real-provider GitHub workflow is documented in
+[Interactive Terminal real-service CI](./TERMINAL_REAL_SERVICE_CI.md). It
+forwards both this service and Judge0 through strict SSH, runs a sanitized direct
+preflight, and executes the focused authenticated parity suite without changing
+ordinary mock-based CI.
+
 ## Troubleshooting
 
 ### `/languages` works but submissions fail

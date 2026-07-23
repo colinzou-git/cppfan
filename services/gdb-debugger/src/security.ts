@@ -51,7 +51,11 @@ export function validateStartPayload(payload: {
   for (const bp of breakpoints) {
     const line = Number((bp as { line?: unknown })?.line);
     if (!Number.isInteger(line) || line <= 0) {
-      return { ok: false, code: "invalid_breakpoint", message: "Breakpoint lines must be positive integers." };
+      return {
+        ok: false,
+        code: "invalid_breakpoint",
+        message: "Breakpoint lines must be positive integers."
+      };
     }
     breakpointLines.push(line);
   }
@@ -88,12 +92,15 @@ export const TERMINAL_LIMITS = {
   sessionWallMs: 10 * 60_000,
   idleTimeoutMs: 3 * 60_000,
   /** How long a finished session's bounded transcript stays pollable. */
-  retainAfterExitMs: 60_000,
+  retainAfterExitMs: 5 * 60_000,
   memoryBytes: 256 * 1024 * 1024,
   maxProcesses: 64,
   maxOutputBytes: 128 * 1024,
   maxEvents: 5_000,
   maxSourceChars: 20_000,
+  maxFiles: 16,
+  maxFileChars: 20_000,
+  maxTotalFileChars: 64 * 1024,
   maxInitialStdinChars: 10_000,
   maxInputPayloadChars: 4_000,
   maxCumulativeInputChars: 64 * 1024
@@ -107,11 +114,41 @@ export function hasDisallowedControl(text: string): boolean {
 }
 
 export type TerminalStartValidation =
-  | { ok: true; source: string; stdin: string }
+  | {
+      ok: true;
+      source: string;
+      stdin: string;
+      files: Array<{ name: string; content: string }>;
+      compilerFlags: string[];
+    }
   | { ok: false; code: string; message: string };
 
+const ALLOWED_COMPILER_FLAGS = new Set([
+  "-std=c++17",
+  "-std=c++20",
+  "-Wall",
+  "-Wextra",
+  "-Wpedantic",
+  "-pedantic",
+  "-O0",
+  "-O1",
+  "-O2",
+  "-O3",
+  "-Os",
+  "-g",
+  "-g0",
+  "-g1",
+  "-g2",
+  "-g3"
+]);
+
 /** Validate a terminal start payload against the sandbox limits before compiling. */
-export function validateTerminalStart(payload: { source?: unknown; stdin?: unknown }): TerminalStartValidation {
+export function validateTerminalStart(payload: {
+  source?: unknown;
+  stdin?: unknown;
+  files?: unknown;
+  compilerFlags?: unknown;
+}): TerminalStartValidation {
   const source = typeof payload.source === "string" ? payload.source : "";
   if (!source.trim()) {
     return { ok: false, code: "empty_source", message: "Source is required." };
@@ -124,9 +161,92 @@ export function validateTerminalStart(payload: { source?: unknown; stdin?: unkno
     return { ok: false, code: "stdin_too_large", message: "Input Args exceeds the size limit." };
   }
   if (hasDisallowedControl(stdin)) {
-    return { ok: false, code: "invalid_stdin", message: "Input Args contains disallowed control characters." };
+    return {
+      ok: false,
+      code: "invalid_stdin",
+      message: "Input Args contains disallowed control characters."
+    };
   }
-  return { ok: true, source, stdin };
+
+  if (!Array.isArray(payload.files)) {
+    return { ok: false, code: "invalid_file", message: "Fixture files must be an array." };
+  }
+  if (payload.files.length > TERMINAL_LIMITS.maxFiles) {
+    return { ok: false, code: "invalid_file", message: "Too many fixture files." };
+  }
+  const files: Array<{ name: string; content: string }> = [];
+  const names = new Set<string>();
+  let totalFileChars = 0;
+  for (const raw of payload.files) {
+    const file = raw as { name?: unknown; content?: unknown };
+    if (typeof file?.name !== "string" || typeof file.content !== "string") {
+      return {
+        ok: false,
+        code: "invalid_file",
+        message: "Each fixture needs a filename and string content."
+      };
+    }
+    const name = file.name;
+    const segments = name.split("/");
+    if (
+      !name ||
+      name.startsWith("/") ||
+      name.includes("\\") ||
+      /^[A-Za-z]:/.test(name) ||
+      segments.some((segment) => !segment || segment === "." || segment === "..")
+    ) {
+      return {
+        ok: false,
+        code: "invalid_file",
+        message: `Fixture filename "${name}" must be a safe relative path.`
+      };
+    }
+    if (names.has(name)) {
+      return { ok: false, code: "invalid_file", message: `Duplicate fixture filename "${name}".` };
+    }
+    if (file.content.length > TERMINAL_LIMITS.maxFileChars) {
+      return {
+        ok: false,
+        code: "invalid_file",
+        message: `Fixture "${name}" exceeds the per-file size limit.`
+      };
+    }
+    totalFileChars += file.content.length;
+    if (totalFileChars > TERMINAL_LIMITS.maxTotalFileChars) {
+      return {
+        ok: false,
+        code: "invalid_file",
+        message: "Fixture files exceed the total size limit."
+      };
+    }
+    names.add(name);
+    files.push({ name, content: file.content });
+  }
+
+  if (!Array.isArray(payload.compilerFlags) || payload.compilerFlags.length === 0) {
+    return { ok: false, code: "invalid_compiler_flag", message: "Compiler flags are required." };
+  }
+  const compilerFlags: string[] = [];
+  let standardCount = 0;
+  for (const flag of payload.compilerFlags) {
+    if (typeof flag !== "string" || !ALLOWED_COMPILER_FLAGS.has(flag)) {
+      return {
+        ok: false,
+        code: "invalid_compiler_flag",
+        message: `Compiler flag "${typeof flag === "string" ? flag : ""}" is not allowed.`
+      };
+    }
+    if (flag.startsWith("-std=")) standardCount += 1;
+    compilerFlags.push(flag);
+  }
+  if (standardCount > 1) {
+    return {
+      ok: false,
+      code: "invalid_compiler_flag",
+      message: "Only one C++ standard flag is allowed."
+    };
+  }
+  return { ok: true, source, stdin, files, compilerFlags };
 }
 
 export type TerminalInputValidation =
@@ -151,10 +271,18 @@ export function validateTerminalInput(
     return { ok: false, code: "input_too_large", message: "Input line exceeds the size limit." };
   }
   if (hasDisallowedControl(data)) {
-    return { ok: false, code: "invalid_input", message: "Input contains disallowed control characters." };
+    return {
+      ok: false,
+      code: "invalid_input",
+      message: "Input contains disallowed control characters."
+    };
   }
   if (cumulativeSoFar + data.length > TERMINAL_LIMITS.maxCumulativeInputChars) {
-    return { ok: false, code: "input_limit_reached", message: "Cumulative input exceeds the session limit." };
+    return {
+      ok: false,
+      code: "input_limit_reached",
+      message: "Cumulative input exceeds the session limit."
+    };
   }
   return { ok: true, data, eof };
 }

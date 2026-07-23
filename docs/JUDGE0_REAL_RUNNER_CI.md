@@ -95,3 +95,7 @@ assert that their execution result reports `provider=judge0` and
 GitHub Actions variables configure CI only. The deployed Next.js application
 must separately receive the same `CODE_RUNNER_*` values in Vercel or its actual
 server environment. Never prefix the API token with `NEXT_PUBLIC_`.
+
+For the complementary interactive execution-service tunnel, deployment
+prerequisites, and focused Terminal browser proof, see
+[Interactive Terminal real-service CI](./TERMINAL_REAL_SERVICE_CI.md).

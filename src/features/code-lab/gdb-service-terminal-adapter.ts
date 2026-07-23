@@ -1,9 +1,9 @@
 import type {
   CodeTerminalHealth,
+  CodeTerminalBackendStartRequest,
   CodeTerminalInputRequest,
   CodeTerminalPollRequest,
   CodeTerminalSnapshot,
-  CodeTerminalStartRequest,
   CodeTerminalStopRequest
 } from "./code-terminal-types";
 import type { CodeTerminalAdapter } from "./code-terminal-adapter";
@@ -35,12 +35,12 @@ export class GdbServiceTerminalAdapter implements CodeTerminalAdapter {
     this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
-  start(input: CodeTerminalStartRequest): Promise<CodeTerminalSnapshot> {
-    // Only source + Input Args cross to the service; item metadata stays app-side.
+  start(input: CodeTerminalBackendStartRequest): Promise<CodeTerminalSnapshot> {
     return this.post<CodeTerminalSnapshot>("/terminal/start", {
-      itemId: input.itemId,
       source: input.source,
-      stdin: input.stdin ?? ""
+      stdin: input.stdin,
+      files: input.files,
+      compilerFlags: input.compilerFlags
     });
   }
 

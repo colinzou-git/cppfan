@@ -77,7 +77,9 @@ async function readJson(req: IncomingMessage): Promise<Record<string, unknown> |
   }
   try {
     const parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
@@ -88,11 +90,14 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   if (req.method === "GET" && url === "/health") {
     return send(res, 200, { status: "ok", sessions: sessions.size, terminals: terminals.size });
   }
-  if (req.method !== "POST") return send(res, 404, { error: { code: "not_found", message: "Not found." } });
-  if (!authorized(req)) return send(res, 401, { error: { code: "unauthorized", message: "Unauthorized." } });
+  if (req.method !== "POST")
+    return send(res, 404, { error: { code: "not_found", message: "Not found." } });
+  if (!authorized(req))
+    return send(res, 401, { error: { code: "unauthorized", message: "Unauthorized." } });
 
   const body = await readJson(req);
-  if (!body) return send(res, 400, { error: { code: "invalid_request", message: "Invalid JSON." } });
+  if (!body)
+    return send(res, 400, { error: { code: "invalid_request", message: "Invalid JSON." } });
 
   if (url === "/debug/start") {
     const start = body as StartBody;
@@ -106,7 +111,10 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     } catch (error) {
       await session.dispose();
       return send(res, 500, {
-        error: { code: "start_failed", message: error instanceof Error ? error.message : "Start failed." }
+        error: {
+          code: "start_failed",
+          message: error instanceof Error ? error.message : "Start failed."
+        }
       });
     }
   }
@@ -118,7 +126,9 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
       return send(res, 404, { error: { code: "no_session", message: "Unknown session." } });
     }
     if (action.action === "restart") {
-      return send(res, 409, { error: { code: "restart_unsupported", message: "Restart by starting a new session." } });
+      return send(res, 409, {
+        error: { code: "restart_unsupported", message: "Restart by starting a new session." }
+      });
     }
     sessions.touch(action.sessionId, Date.now());
     const snapshot = await session.action(action.action ?? "continue", action.watches ?? []);
@@ -137,7 +147,15 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     const valid = validateTerminalStart(start);
     if (!valid.ok) return send(res, 400, { error: { code: valid.code, message: valid.message } });
     const token = randomBytes(24).toString("base64url");
-    const session = new TerminalSession(valid.source, valid.stdin, token);
+    const session = new TerminalSession(
+      {
+        source: valid.source,
+        initialStdin: valid.stdin,
+        files: valid.files,
+        compilerFlags: valid.compilerFlags
+      },
+      token
+    );
     try {
       await session.start();
       const managed = terminals.create(session, Date.now());
@@ -145,7 +163,10 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     } catch (error) {
       await session.dispose();
       return send(res, 500, {
-        error: { code: "start_failed", message: error instanceof Error ? error.message : "Start failed." }
+        error: {
+          code: "start_failed",
+          message: error instanceof Error ? error.message : "Start failed."
+        }
       });
     }
   }
@@ -171,7 +192,8 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     if (!valid.ok) return send(res, 400, { error: { code: valid.code, message: valid.message } });
     terminals.touch(input.sessionId!, Date.now());
     const result = session.writeInput(valid.data, valid.eof);
-    if (!result.ok) return send(res, 409, { error: { code: result.code, message: result.message } });
+    if (!result.ok)
+      return send(res, 409, { error: { code: result.code, message: result.message } });
     return send(res, 200, { ok: true });
   }
 
@@ -190,7 +212,9 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 
 export function createDebuggerServer() {
   return createServer((req, res) => {
-    handle(req, res).catch(() => send(res, 500, { error: { code: "internal", message: "Internal error." } }));
+    handle(req, res).catch(() =>
+      send(res, 500, { error: { code: "internal", message: "Internal error." } })
+    );
   });
 }
 
@@ -220,14 +244,20 @@ function reapTerminals(now: number): void {
   for (const id of terminals.ids()) {
     const session = terminals.get(id);
     const finishedAt = session?.finishedAtMs;
-    if (session && finishedAt !== null && finishedAt !== undefined && now - finishedAt >= TERMINAL_LIMITS.retainAfterExitMs) {
+    if (
+      session &&
+      finishedAt !== null &&
+      finishedAt !== undefined &&
+      now - finishedAt >= TERMINAL_LIMITS.retainAfterExitMs
+    ) {
       terminals.remove(id);
       void session.dispose();
     }
   }
 }
 
-const isMain = typeof process.argv[1] === "string" && import.meta.url === `file://${process.argv[1]}`;
+const isMain =
+  typeof process.argv[1] === "string" && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const reaper = startSessionReaper();
   const server = createDebuggerServer();
