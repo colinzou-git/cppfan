@@ -8,6 +8,7 @@ const ready = Boolean(url && anonKey && serviceKey);
 const suite = ready ? describe : describe.skip;
 const password = "Test-Password-123!";
 const nativeItem = "cpp.program_basics.structure.lesson";
+const knownSkillId = "cpp.program_basics.structure";
 
 function anonymousClient(): SupabaseClient {
   return createClient(url!, anonKey!, {
@@ -21,7 +22,6 @@ suite("Terminal attempt atomic idempotency (#668)", () => {
   let other: SupabaseClient;
   let learnerId = "";
   let otherId = "";
-  let knownSkillId = "";
 
   async function createUser(label: string) {
     const email = `terminal-668-${label}-${Date.now()}-${crypto.randomUUID()}@example.test`;
@@ -60,14 +60,6 @@ suite("Terminal attempt atomic idempotency (#668)", () => {
     service = createClient(url!, serviceKey!, {
       auth: { autoRefreshToken: false, persistSession: false }
     });
-    const skill = await service
-      .from("learning_item_skills")
-      .select("skill_id")
-      .eq("learning_item_id", nativeItem)
-      .limit(1)
-      .single();
-    if (skill.error || !skill.data?.skill_id) throw skill.error ?? new Error("seed skill missing");
-    knownSkillId = skill.data.skill_id;
     const a = await createUser("a");
     const b = await createUser("b");
     learner = a.client;

@@ -8,6 +8,7 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ready = Boolean(url && anonKey && serviceKey);
 const suite = ready ? describe : describe.skip;
 const password = "Test-Password-123!";
+const knownSkillId = "cpp.program_basics.structure";
 
 function anonymousClient(): SupabaseClient {
   return createClient(url!, anonKey!, {
@@ -19,7 +20,6 @@ suite("authoritative user-lab persistence (#669)", () => {
   let service: SupabaseClient;
   let learner: SupabaseClient;
   let learnerId = "";
-  let knownSkillId = "";
   const itemId = `user.item.${crypto.randomUUID()}`;
   const versionOne = crypto.randomUUID();
   const versionTwo = crypto.randomUUID();
@@ -28,9 +28,6 @@ suite("authoritative user-lab persistence (#669)", () => {
     service = createClient(url!, serviceKey!, {
       auth: { autoRefreshToken: false, persistSession: false }
     });
-    const skill = await service.from("skills").select("id").limit(1).single();
-    if (skill.error || !skill.data?.id) throw skill.error ?? new Error("seed skill missing");
-    knownSkillId = skill.data.id;
     const email = `lab-669-${Date.now()}@example.test`;
     const created = await service.auth.admin.createUser({
       email,
