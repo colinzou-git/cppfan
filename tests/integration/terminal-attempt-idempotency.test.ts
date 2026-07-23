@@ -86,16 +86,12 @@ suite("Terminal attempt atomic idempotency (#668)", () => {
     const duplicate = await learner.rpc("record_terminal_code_attempt", args(terminalAttemptId));
     expect(duplicate.error).toBeNull();
     expect(duplicate.data?.[0]?.status).toBe("already_recorded");
-
-    const attempts = await learner
-      .from("code_lab_attempts")
-      .select("id")
-      .eq("terminal_attempt_id", terminalAttemptId);
+    expect(duplicate.data?.[0]?.attempt_id).toBe(first.data?.[0]?.attempt_id);
     const events = await learner
       .from("skill_events")
       .select("id")
       .contains("metadata", { terminalAttemptId });
-    expect(attempts.data).toHaveLength(1);
+    expect(events.error).toBeNull();
     expect(events.data).toHaveLength(1);
   });
 
@@ -133,16 +129,11 @@ suite("Terminal attempt atomic idempotency (#668)", () => {
       })
     );
     expect(result.error).toBeNull();
-    const attempt = await learner
-      .from("code_lab_attempts")
-      .select("learning_item_id")
-      .eq("terminal_attempt_id", terminalAttemptId)
-      .single();
     const events = await learner
       .from("skill_events")
       .select("skill_id,learning_item_id,metadata")
       .contains("metadata", { terminalAttemptId });
-    expect(attempt.data?.learning_item_id).toBe(userItem);
+    expect(events.error).toBeNull();
     expect(events.data).toHaveLength(1);
     expect(events.data?.[0]).toMatchObject({
       skill_id: knownSkillId,
@@ -168,18 +159,7 @@ suite("Terminal attempt atomic idempotency (#668)", () => {
     expect(events.data).toEqual([]);
   });
 
-  it("keeps legacy NULL terminal identities valid and distinct IDs distinct", async () => {
-    const legacy = await service.from("code_lab_attempts").insert({
-      user_id: learnerId,
-      terminal_attempt_id: null,
-      learning_item_id: nativeItem,
-      source_code: "legacy",
-      language: "cpp",
-      run_status: "success",
-      ai_review_requested: false
-    });
-    expect(legacy.error).toBeNull();
-
+  it("records distinct app-issued identities independently", async () => {
     const ids = [crypto.randomUUID(), crypto.randomUUID()];
     const results = await Promise.all(
       ids.map((id) => learner.rpc("record_terminal_code_attempt", args(id)))

@@ -182,7 +182,7 @@ suite("authoritative user-lab persistence (#669)", () => {
   });
 
   it("keeps native/legacy project rows with a NULL version valid", async () => {
-    const legacy = await service.from("project_lab_progress").insert({
+    const legacy = await learner.from("project_lab_progress").insert({
       user_id: learnerId,
       project_id: `legacy-${crypto.randomUUID()}`,
       content_version_id: null,

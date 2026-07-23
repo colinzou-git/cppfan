@@ -43,6 +43,16 @@ begin
     raise exception '#669: project_lab_progress.content_version_id is missing';
   end if;
 
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'project_lab_progress'
+      and column_name = 'content_version_id'
+      and is_nullable <> 'YES'
+  ) then
+    raise exception '#669: native/legacy project rows must allow NULL content_version_id';
+  end if;
+
   if not exists (
     select 1
     from pg_proc p
