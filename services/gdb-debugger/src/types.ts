@@ -89,7 +89,13 @@ export type TerminalSnapshot = {
   message?: string;
 };
 
-export type TerminalStartBody = { itemId?: string; source?: string; stdin?: string };
+export type TerminalFile = { name?: string; content?: string };
+export type TerminalStartBody = {
+  source?: string;
+  stdin?: string;
+  files?: TerminalFile[];
+  compilerFlags?: string[];
+};
 export type TerminalPollBody = { sessionId?: string; sessionToken?: string; after?: number };
 export type TerminalInputBody = {
   sessionId?: string;

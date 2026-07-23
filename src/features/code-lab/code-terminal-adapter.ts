@@ -2,10 +2,10 @@ import type {
   CodeTerminalEvent,
   CodeTerminalEventKind,
   CodeTerminalHealth,
+  CodeTerminalBackendStartRequest,
   CodeTerminalInputRequest,
   CodeTerminalPollRequest,
   CodeTerminalSnapshot,
-  CodeTerminalStartRequest,
   CodeTerminalStatus,
   CodeTerminalStopRequest
 } from "./code-terminal-types";
@@ -20,15 +20,14 @@ import { isTerminalFinished } from "./code-terminal-types";
  */
 export interface CodeTerminalAdapter {
   readonly name: string;
-  start(input: CodeTerminalStartRequest): Promise<CodeTerminalSnapshot>;
+  start(input: CodeTerminalBackendStartRequest): Promise<CodeTerminalSnapshot>;
   poll(input: CodeTerminalPollRequest): Promise<CodeTerminalSnapshot>;
   input(input: CodeTerminalInputRequest): Promise<{ ok: boolean }>;
   stop(input: CodeTerminalStopRequest): Promise<{ ok: boolean }>;
   health(): Promise<CodeTerminalHealth>;
 }
 
-export const TERMINAL_UNCONFIGURED_MESSAGE =
-  "Interactive terminal service is not configured.";
+export const TERMINAL_UNCONFIGURED_MESSAGE = "Interactive terminal service is not configured.";
 
 /**
  * A successful, non-crashing snapshot for when no terminal provider is available
@@ -41,6 +40,19 @@ export function unconfiguredTerminalSnapshot(
   return {
     sessionId: null,
     status: "unconfigured",
+    events: [],
+    nextSequence: 0,
+    message
+  };
+}
+
+export function refusedTerminalSnapshot(
+  status: "stale_definition" | "item_unavailable" | "invalid_contract",
+  message: string
+): CodeTerminalSnapshot {
+  return {
+    sessionId: null,
+    status,
     events: [],
     nextSequence: 0,
     message
@@ -83,7 +95,7 @@ export class MockTerminalAdapter implements CodeTerminalAdapter {
   // separately bundled route handlers; the instance itself is stateless.
   private readonly sessions = mockStore().sessions;
 
-  async start(input: CodeTerminalStartRequest): Promise<CodeTerminalSnapshot> {
+  async start(input: CodeTerminalBackendStartRequest): Promise<CodeTerminalSnapshot> {
     const store = mockStore();
     store.counter += 1;
     const sessionId = `mock-term-${store.counter}-${randomSuffix()}`;
@@ -165,6 +177,7 @@ export class MockTerminalAdapter implements CodeTerminalAdapter {
     return {
       sessionId,
       sessionToken: session.token,
+      provider: this.name,
       status: session.status,
       events: session.events.filter((event) => event.sequence > after),
       nextSequence: session.seq,

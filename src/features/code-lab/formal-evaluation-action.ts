@@ -27,7 +27,11 @@ import {
 import { recordSkillEvents } from "@/features/events/event-service";
 import { markUserLabComplete } from "@/features/labs/user-lab-progress";
 
-const AI_MODES = new Set<ContentEvaluationMode>(["ai_evaluation", "automated_plus_ai", "judge_plus_ai"]);
+const AI_MODES = new Set<ContentEvaluationMode>([
+  "ai_evaluation",
+  "automated_plus_ai",
+  "judge_plus_ai"
+]);
 const OBJECTIVE_PLUS_AI = new Set<ContentEvaluationMode>(["automated_plus_ai", "judge_plus_ai"]);
 
 export async function submitFormalEvaluation(input: {
@@ -46,14 +50,20 @@ export async function submitFormalEvaluation(input: {
       source: input.source,
       expectedVersionId: input.contentVersionId ?? undefined
     }).catch(() => null);
-    objective = test ? objectiveOutcomeFromTestResult({ passed: test.passed, total: test.total }) : { passed: 0, total: 1 };
+    objective = test
+      ? objectiveOutcomeFromTestResult({ passed: test.passed, total: test.total })
+      : { passed: 0, total: 1 };
   }
 
   let ai: AiOutcome | undefined;
   if (AI_MODES.has(mode)) {
     const controller = new AbortController();
     const feedback = await reviewCode(
-      { itemId: input.itemId, source: input.source, contentVersionId: input.contentVersionId ?? undefined },
+      {
+        itemId: input.itemId,
+        source: input.source,
+        contentVersionId: input.contentVersionId ?? undefined
+      },
       controller.signal
     ).catch(() => null);
     ai = aiVerdictFromFeedback(feedback);
@@ -65,7 +75,11 @@ export async function submitFormalEvaluation(input: {
     const resolved = await resolveCodeLabItem({ itemId: input.itemId });
     if (resolved.status === "ok") {
       if (resolved.item.source === "user_lab") {
-        await markUserLabComplete({ itemId: input.itemId }).catch(() => ({ status: "error" }));
+        await markUserLabComplete({
+          itemId: input.itemId,
+          contentVersionId: input.contentVersionId,
+          evaluationMode: mode
+        }).catch(() => ({ status: "error" }));
       } else if (resolved.item.skillTags.length > 0) {
         const metadata = { evaluationMode: mode, contentVersionId: input.contentVersionId ?? null };
         await recordSkillEvents(

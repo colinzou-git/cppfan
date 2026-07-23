@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { TerminalEventBuffer } from "./terminal-event-buffer.js";
 import { TERMINAL_LIMITS } from "./security.js";
 import type { TerminalSnapshot, TerminalStatus } from "./types.js";
@@ -21,8 +21,6 @@ import type { TerminalSnapshot, TerminalStatus } from "./types.js";
 
 type PublicSnapshot = Omit<TerminalSnapshot, "sessionId" | "sessionToken">;
 
-const COMPILE_FLAGS = ["-std=c++20", "-Wall", "-Wextra", "-O0", "-o"];
-
 export class TerminalSession {
   private workspace = "";
   private child: ChildProcess | null = null;
@@ -41,8 +39,12 @@ export class TerminalSession {
   private workspaceCleared = false;
 
   constructor(
-    private readonly source: string,
-    private readonly initialStdin: string,
+    private readonly input: {
+      source: string;
+      initialStdin: string;
+      files: Array<{ name: string; content: string }>;
+      compilerFlags: string[];
+    },
     /** Unguessable per-session capability the server checks on every follow-up. */
     readonly token: string
   ) {}
@@ -54,7 +56,12 @@ export class TerminalSession {
     this.workspace = await mkdtemp(join(tmpdir(), "cppfan-term-"));
     const sourcePath = join(this.workspace, "main.cpp");
     const binPath = join(this.workspace, "main");
-    await writeFile(sourcePath, this.source, "utf8");
+    await writeFile(sourcePath, this.input.source, "utf8");
+    for (const file of this.input.files) {
+      const target = join(this.workspace, file.name);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, file.content, "utf8");
+    }
 
     const compile = await this.compile(sourcePath, binPath);
     if (compile.output.trim()) this.buffer.append("compiler", compile.output);
@@ -87,10 +94,10 @@ export class TerminalSession {
     this.wireChild();
 
     // Send Input Args exactly once, then keep stdin open for live input.
-    if (this.initialStdin) {
-      this.child.stdin?.write(this.initialStdin);
-      this.buffer.append("stdin", this.initialStdin);
-      this.cumulativeInput += this.initialStdin.length;
+    if (this.input.initialStdin) {
+      this.child.stdin?.write(this.input.initialStdin);
+      this.buffer.append("stdin", this.input.initialStdin);
+      this.cumulativeInput += this.input.initialStdin.length;
     }
 
     this.wallTimer = setTimeout(() => {
@@ -100,7 +107,10 @@ export class TerminalSession {
   }
 
   /** Write one live-input payload, or close stdin on EOF. */
-  writeInput(data: string, eof: boolean): { ok: true } | { ok: false; code: string; message: string } {
+  writeInput(
+    data: string,
+    eof: boolean
+  ): { ok: true } | { ok: false; code: string; message: string } {
     if (this.status !== "running" || !this.child) {
       return { ok: false, code: "not_running", message: "The session is not running." };
     }
@@ -171,8 +181,12 @@ export class TerminalSession {
   private wireChild(): void {
     const child = this.child;
     if (!child) return;
-    child.stdout?.on("data", (chunk: Buffer) => this.buffer.append("stdout", chunk.toString("utf8")));
-    child.stderr?.on("data", (chunk: Buffer) => this.buffer.append("stderr", chunk.toString("utf8")));
+    child.stdout?.on("data", (chunk: Buffer) =>
+      this.buffer.append("stdout", chunk.toString("utf8"))
+    );
+    child.stderr?.on("data", (chunk: Buffer) =>
+      this.buffer.append("stderr", chunk.toString("utf8"))
+    );
     child.stdin?.on("error", () => undefined); // ignore EPIPE if the child exits mid-write
     child.on("error", (error) => {
       if (this.endedAtMs !== null) return;
@@ -237,7 +251,9 @@ export class TerminalSession {
 
   private compile(sourcePath: string, binPath: string): Promise<{ ok: boolean; output: string }> {
     return new Promise((resolve) => {
-      const cc = spawn("g++", [sourcePath, ...COMPILE_FLAGS, binPath], { cwd: this.workspace });
+      const cc = spawn("g++", [sourcePath, ...this.input.compilerFlags, "-o", binPath], {
+        cwd: this.workspace
+      });
       let output = "";
       cc.stdout.on("data", (d) => (output += d.toString()));
       cc.stderr.on("data", (d) => (output += d.toString()));

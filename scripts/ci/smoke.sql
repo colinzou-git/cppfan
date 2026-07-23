@@ -22,6 +22,40 @@ begin
   raise notice 'grade RPC smoke OK (correct choice graded true)';
 end $$;
 
+-- #669: authoritative user-lab hashes and atomic versioned completion.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'user_lab_milestone_progress_hash_format'
+      and conrelid = 'public.user_lab_milestone_progress'::regclass
+  ) then
+    raise exception '#669: milestone hash-format constraint is missing';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'project_lab_progress'
+      and column_name = 'content_version_id'
+  ) then
+    raise exception '#669: project_lab_progress.content_version_id is missing';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname = 'complete_user_lab_version'
+  ) then
+    raise exception '#669: complete_user_lab_version RPC is missing';
+  end if;
+
+  raise notice 'authoritative user-lab completion smoke OK';
+end $$;
+
 -- 2) A wrong choice grades false (not just "always true").
 do $$
 declare
@@ -1444,4 +1478,47 @@ begin
   end if;
 
   raise notice 'interview history content_version_id smoke OK';
+end $$;
+
+-- #668: Terminal attempts use one app-issued id and one atomic persistence RPC.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'code_lab_attempts'
+      and column_name = 'terminal_attempt_id'
+  ) then
+    raise exception '#668: code_lab_attempts.terminal_attempt_id is missing';
+  end if;
+
+  if not exists (
+    select 1 from pg_indexes
+    where schemaname = 'public'
+      and indexname = 'code_lab_attempts_user_terminal_attempt_uidx'
+  ) then
+    raise exception '#668: Terminal attempt idempotency index is missing';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname = 'record_terminal_code_attempt'
+  ) then
+    raise exception '#668: record_terminal_code_attempt RPC is missing';
+  end if;
+
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'code_lab_attempts'
+      and column_name = 'terminal_attempt_id'
+      and is_nullable <> 'YES'
+  ) then
+    raise exception '#668: legacy non-Terminal attempts must allow NULL terminal_attempt_id';
+  end if;
+
+  raise notice 'Terminal attempt idempotency smoke OK';
 end $$;
