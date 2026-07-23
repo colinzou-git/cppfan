@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 60
 
     env:
+      VPS_SSH_HOST: ${{ vars.VPS_SSH_HOST }}
+      VPS_SSH_USER: ${{ vars.VPS_SSH_USER }}
+      VPS_JUDGE0_PORT: ${{ vars.VPS_JUDGE0_PORT }}
       CODE_RUNNER_PROVIDER: judge0
       CODE_RUNNER_BASE_URL: ${{ vars.CODE_RUNNER_BASE_URL }}
       CODE_RUNNER_API_KEY: ${{ secrets.CODE_RUNNER_API_KEY }}
@@ -50,6 +53,95 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install dedicated SSH credentials
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          : "${VPS_SSH_HOST:?VPS_SSH_HOST is required}"
+          : "${VPS_SSH_USER:?VPS_SSH_USER is required}"
+          : "${VPS_JUDGE0_PORT:?VPS_JUDGE0_PORT is required}"
+          : "${VPS_SSH_PRIVATE_KEY:?VPS_SSH_PRIVATE_KEY is required}"
+          : "${VPS_SSH_KNOWN_HOSTS:?VPS_SSH_KNOWN_HOSTS is required}"
+          : "${CODE_RUNNER_API_KEY:?CODE_RUNNER_API_KEY is required}"
+
+          if [[ "${CODE_RUNNER_BASE_URL}" != "http://127.0.0.1:23580" ]]; then
+            echo "CODE_RUNNER_BASE_URL must be http://127.0.0.1:23580 for the SSH tunnel." >&2
+            exit 1
+          fi
+          if ! [[ "${VPS_JUDGE0_PORT}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "VPS_JUDGE0_PORT must be a positive integer." >&2
+            exit 1
+          fi
+
+          ssh_dir="${RUNNER_TEMP}/cppfan-judge0-ssh"
+          key_path="${ssh_dir}/cppfan_judge0_ci"
+          known_hosts_path="${ssh_dir}/known_hosts"
+          install -d -m 700 "${ssh_dir}"
+          install -m 600 /dev/null "${key_path}"
+          install -m 600 /dev/null "${known_hosts_path}"
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' >"${key_path}"
+          printf '%s\n' "${VPS_SSH_KNOWN_HOSTS}" | tr -d '\r' >"${known_hosts_path}"
+          chmod 600 "${key_path}" "${known_hosts_path}"
+
+          ssh-keygen -y -f "${key_path}" >/dev/null
+          if ! ssh-keygen -F "${VPS_SSH_HOST}" -f "${known_hosts_path}" >/dev/null; then
+            echo "VPS_SSH_KNOWN_HOSTS does not contain the configured VPS host." >&2
+            exit 1
+          fi
+
+          echo "CPPFAN_JUDGE0_SSH_KEY=${key_path}" >>"${GITHUB_ENV}"
+          echo "CPPFAN_JUDGE0_KNOWN_HOSTS=${known_hosts_path}" >>"${GITHUB_ENV}"
+
+      - name: Start SSH tunnel and wait for Judge0
+        run: |
+          set -euo pipefail
+          tunnel_log="${RUNNER_TEMP}/judge0-ssh-tunnel.log"
+          ssh -N \
+            -i "${CPPFAN_JUDGE0_SSH_KEY}" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o ExitOnForwardFailure=yes \
+            -o PasswordAuthentication=no \
+            -o KbdInteractiveAuthentication=no \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="${CPPFAN_JUDGE0_KNOWN_HOSTS}" \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -L "127.0.0.1:23580:127.0.0.1:${VPS_JUDGE0_PORT}" \
+            "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            >"${tunnel_log}" 2>&1 &
+          tunnel_pid=$!
+          echo "CPPFAN_JUDGE0_SSH_TUNNEL_PID=${tunnel_pid}" >>"${GITHUB_ENV}"
+
+          tunnel_ready=false
+          for _ in $(seq 1 30); do
+            if ! kill -0 "${tunnel_pid}" 2>/dev/null; then
+              echo "The Judge0 SSH tunnel exited before becoming ready." >&2
+              tail -n 50 "${tunnel_log}" >&2 || true
+              wait "${tunnel_pid}" || true
+              exit 1
+            fi
+            if curl --fail --silent --show-error \
+              --connect-timeout 2 \
+              --max-time 5 \
+              --header "Accept: application/json" \
+              --header "X-Auth-Token: ${CODE_RUNNER_API_KEY}" \
+              "${CODE_RUNNER_BASE_URL%/}/languages" \
+              >/dev/null; then
+              tunnel_ready=true
+              break
+            fi
+            sleep 1
+          done
+
+          if [[ "${tunnel_ready}" != "true" ]]; then
+            echo "Judge0 did not become reachable through the SSH tunnel." >&2
+            exit 1
+          fi
+          echo "Judge0 SSH tunnel is reachable."
+
       - name: Verify Judge0 real compile/run
         run: bash scripts/ci/verify-judge0.sh
 
@@ -62,15 +154,25 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run authenticated browser E2E with Judge0
-        run: pnpm test:e2e:authenticated --project=chromium
+        run: pnpm test:e2e:authenticated tests/e2e/authenticated-*.spec.ts --project=chromium
 
       - name: Upload real-runner Playwright diagnostics
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-judge0-real-runner
           path: |
+            ${{ runner.temp }}/judge0-ssh-tunnel.log
             playwright-report/
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Stop SSH tunnel
+        if: always()
+        run: |
+          if [[ -n "${CPPFAN_JUDGE0_SSH_TUNNEL_PID:-}" ]] &&
+             kill -0 "${CPPFAN_JUDGE0_SSH_TUNNEL_PID}" 2>/dev/null; then
+            kill "${CPPFAN_JUDGE0_SSH_TUNNEL_PID}"
+            wait "${CPPFAN_JUDGE0_SSH_TUNNEL_PID}" || true
+          fi
