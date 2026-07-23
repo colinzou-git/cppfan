@@ -10,6 +10,10 @@ const preflight = readFileSync(
   resolve("scripts/ci/verify-code-terminal.sh"),
   "utf8"
 );
+const focusedSpec = readFileSync(
+  resolve("tests/e2e/authenticated-terminal-real.spec.ts"),
+  "utf8"
+);
 
 describe("real interactive Terminal CI contract (#667)", () => {
   it("pins real providers and loopback endpoints", () => {
@@ -51,6 +55,9 @@ describe("real interactive Terminal CI contract (#667)", () => {
   it("runs only the focused browser spec and covers the full service protocol", () => {
     expect(workflow).toContain("tests/e2e/authenticated-terminal-real.spec.ts");
     expect(workflow).not.toContain("tests/e2e/authenticated-*.spec.ts");
+    expect(focusedSpec).toContain(
+      'process.env.CPPFAN_REQUIRE_REAL_CODE_TERMINAL !== "true"'
+    );
     for (const marker of [
       "/health",
       "/terminal/start",

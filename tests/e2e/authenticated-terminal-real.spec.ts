@@ -32,6 +32,11 @@ function controls(page: Page) {
 }
 
 test.describe("real interactive Terminal and Judge0 contract (#667)", () => {
+  test.skip(
+    process.env.CPPFAN_REQUIRE_REAL_CODE_TERMINAL !== "true",
+    "Requires the dedicated real Terminal workflow."
+  );
+
   test.skip(!hasAuthenticatedE2EEnv(), "requires disposable local Supabase");
 
   test("streams multiple inputs, an empty line, EOF, and saves one final attempt", async ({
