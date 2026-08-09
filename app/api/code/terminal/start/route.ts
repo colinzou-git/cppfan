@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { parseBodyRecord } from "@/features/code-lab/code-lab-request";
 import { validateTerminalStartRequest } from "@/features/code-lab/code-terminal-request";
 import { selectTerminalProvider } from "@/features/code-lab/code-terminal-service";
-import { unconfiguredTerminalSnapshot } from "@/features/code-lab/code-terminal-adapter";
+import {
+  refusedTerminalSnapshot,
+  unconfiguredTerminalSnapshot
+} from "@/features/code-lab/code-terminal-adapter";
+import { resolveCodeExecutionPlan } from "@/features/code-lab/code-execution-plan";
+import { CODE_LAB_STALE_NOTE } from "@/features/code-lab/code-lab-item-resolver";
+import { ITEM_UNAVAILABLE_NOTE } from "@/features/code-lab/code-lab-service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +26,31 @@ export async function POST(request: Request) {
   const parsed = validateTerminalStartRequest(body);
   if (!parsed.ok) return apiError(parsed.code, parsed.message, 400);
 
+  const planned = await resolveCodeExecutionPlan({
+    itemId: parsed.itemId,
+    expectedContentVersionId: parsed.contentVersionId,
+    milestoneIndex: parsed.milestoneIndex,
+    learnerSource: parsed.source
+  });
+  if (planned.status === "stale_definition") {
+    return NextResponse.json(
+      { result: refusedTerminalSnapshot("stale_definition", CODE_LAB_STALE_NOTE) },
+      { headers: NO_STORE }
+    );
+  }
+  if (planned.status === "item_unavailable") {
+    return NextResponse.json(
+      { result: refusedTerminalSnapshot("item_unavailable", ITEM_UNAVAILABLE_NOTE) },
+      { headers: NO_STORE }
+    );
+  }
+  if (planned.status === "invalid_contract") {
+    return NextResponse.json(
+      { result: refusedTerminalSnapshot("invalid_contract", planned.message) },
+      { headers: NO_STORE }
+    );
+  }
+
   const selection = selectTerminalProvider();
   if (selection.kind === "unconfigured") {
     return NextResponse.json(
@@ -30,13 +61,22 @@ export async function POST(request: Request) {
 
   try {
     const result = await selection.adapter.start({
-      itemId: parsed.itemId,
-      source: parsed.source,
+      source: planned.plan.preparedSource,
       stdin: parsed.stdin,
-      contentVersionId: parsed.contentVersionId,
-      milestoneIndex: parsed.milestoneIndex
+      files: planned.plan.files,
+      compilerFlags: planned.plan.compilerFlags
     });
-    return NextResponse.json({ result }, { headers: NO_STORE });
+    const terminalAttemptId = result.sessionId ? crypto.randomUUID() : undefined;
+    return NextResponse.json(
+      {
+        result: {
+          ...result,
+          terminalAttemptId,
+          provider: selection.adapter.name
+        }
+      },
+      { headers: NO_STORE }
+    );
   } catch {
     return apiError("terminal_error", "The terminal service failed to start a session.", 502);
   }

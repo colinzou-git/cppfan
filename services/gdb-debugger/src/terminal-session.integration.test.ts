@@ -40,8 +40,16 @@ function text(session: TerminalSession, kind?: string): string {
     .join("");
 }
 
-async function newSession(source: string, stdin = ""): Promise<TerminalSession> {
-  const session = new TerminalSession(source, stdin, "test-token");
+async function newSession(
+  source: string,
+  stdin = "",
+  files: Array<{ name: string; content: string }> = [],
+  compilerFlags = ["-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-O0"]
+): Promise<TerminalSession> {
+  const session = new TerminalSession(
+    { source, initialStdin: stdin, files, compilerFlags },
+    "test-token"
+  );
   await session.start();
   return session;
 }
@@ -137,6 +145,49 @@ int main(){std::string s; int n=0; while(std::getline(std::cin,s)) n++; std::cou
     expect(snap.events.some((e) => e.kind === "compiler")).toBe(true);
     // Writing input to a non-running session is refused.
     expect(session.writeInput("x\n", false)).toMatchObject({ ok: false });
+    await session.dispose();
+  });
+
+  it("runs function-only source after the app harness prepares it", async () => {
+    const session = await newSession(
+      `#include <iostream>
+int add(int a, int b){ return a + b; }
+int main(){ int a,b; std::cin >> a >> b; std::cout << add(a,b) << "\\n"; }`,
+      "2 3\n"
+    );
+    await waitUntil(() => session.isFinished);
+    expect(text(session, "stdout")).toContain("5");
+    await session.dispose();
+  });
+
+  it("materializes nested and multiple fixtures in the working directory", async () => {
+    const session = await newSession(
+      `#include <fstream>
+#include <iostream>
+#include <string>
+int main(){std::string a,b;std::ifstream("fixtures/a.txt")>>a;std::ifstream("b.txt")>>b;std::cout<<a<<" "<<b;}`,
+      "",
+      [
+        { name: "fixtures/a.txt", content: "nested" },
+        { name: "b.txt", content: "second" }
+      ]
+    );
+    await waitUntil(() => session.isFinished);
+    expect(text(session, "stdout")).toContain("nested second");
+    await session.dispose();
+  });
+
+  it("applies supplied flags once and compiles C++20 syntax", async () => {
+    const session = await newSession(
+      `#include <iostream>
+int main(){ auto square=[](int x){return x*x;}; std::cout<<square(4); }`,
+      "",
+      [],
+      ["-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-O0"]
+    );
+    await waitUntil(() => session.isFinished);
+    expect(session.snapshot(0).status).toBe("exited");
+    expect(text(session, "stdout")).toContain("16");
     await session.dispose();
   });
 

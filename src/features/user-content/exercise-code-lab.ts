@@ -33,13 +33,16 @@ export function exercisePayloadToCodeLabConfig(payload: ExercisePayload): Learni
     prompt: payload.prompt || undefined,
     starterCode,
     evaluationMode: payload.evaluationMode,
-    ...(isFunction && payload.functionSignature ? { functionSignature: payload.functionSignature } : {}),
+    ...(isFunction && payload.functionSignature
+      ? { functionSignature: payload.functionSignature }
+      : {}),
     visibleTests: visible.map((test) => ({
       name: test.name,
       stdin: test.input,
       expectedStdout: test.expectedOutput,
       matcher
     })),
+    ...(isFunction && visible[0]?.input !== undefined ? { stdin: visible[0].input } : {}),
     ...(hiddenCount > 0 ? { hiddenTestCount: hiddenCount } : {})
   };
 }

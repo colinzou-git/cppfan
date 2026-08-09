@@ -1,69 +1,137 @@
 "use server";
 
-/*
- * Durable per-milestone progress for user-created labs (#610). Best-effort and
- * RLS-owned like the other lab progress stores: every path returns quietly (null
- * / false / []) when Supabase is unconfigured, the learner is signed out, or the
- * table is not migrated yet, so the lab still works in-session-only. user_id is
- * stamped from the session; the client never supplies it. Progress is keyed by
- * the stable milestone id + immutable content version, so an old-version pass is
- * never reinterpreted as current.
- */
-
+import { createHash } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
-import { isUserLearningItemId } from "@/features/user-content/user-content-id";
+import { getLabForOwner } from "@/features/user-content/user-content-queries";
+import { labMilestoneViews } from "@/features/user-content/lab-code-lab";
+import {
+  contentIdFromUserItemId,
+  isUserLearningItemId
+} from "@/features/user-content/user-content-id";
+import { CODE_LAB_STALE_NOTE } from "@/features/code-lab/code-lab-item-resolver";
 
-export type LabMilestonePassInput = {
-  itemId: string;
-  contentVersionId?: string | null;
+export type UserLabMilestoneProgress = {
   milestoneId: string;
-  milestoneIndex?: number | null;
-  evaluationMethod?: string;
-  codeSnapshotHash?: string | null;
+  milestoneIndex: number | null;
+  codeSnapshotHash: string;
+  passedAt: string;
 };
 
-/** Record a durable milestone pass. Returns false (never throws) on any failure. */
-export async function recordLabMilestonePass(input: LabMilestonePassInput): Promise<boolean> {
-  if (!input?.itemId || !isUserLearningItemId(input.itemId) || !input.milestoneId) {
-    return false;
+export type RecordLabMilestonePassResult =
+  | { status: "saved"; progress: UserLabMilestoneProgress }
+  | { status: "stale_definition"; message: string }
+  | { status: "invalid_milestone"; message: string }
+  | { status: "signed_out"; message: string }
+  | { status: "unavailable"; message: string }
+  | { status: "error"; message: string };
+
+export async function recordLabMilestonePass(input: {
+  itemId: string;
+  expectedContentVersionId: string;
+  milestoneId: string;
+  milestoneIndex: number;
+  source: string;
+}): Promise<RecordLabMilestonePassResult> {
+  if (
+    !input?.itemId ||
+    !isUserLearningItemId(input.itemId) ||
+    !input.expectedContentVersionId ||
+    !input.milestoneId ||
+    !Number.isInteger(input.milestoneIndex) ||
+    input.milestoneIndex < 0 ||
+    typeof input.source !== "string" ||
+    !input.source.trim()
+  ) {
+    return {
+      status: "invalid_milestone",
+      message: "A valid milestone, published version, and passing source are required."
+    };
   }
+  const contentId = contentIdFromUserItemId(input.itemId);
+  if (!contentId) {
+    return {
+      status: "invalid_milestone",
+      message: "The milestone definition is invalid."
+    };
+  }
+
   const supabase = await createClient();
-  if (!supabase) return false;
+  if (!supabase) {
+    return { status: "signed_out", message: "Sign in to save milestone progress." };
+  }
   const {
     data: { user }
   } = await supabase.auth.getUser();
-  if (!user) return false;
+  if (!user) {
+    return { status: "signed_out", message: "Sign in to save milestone progress." };
+  }
 
-  const { error } = await supabase.from("user_lab_milestone_progress").upsert(
-    {
-      user_id: user.id,
-      learning_item_id: input.itemId,
-      content_version_id: input.contentVersionId ?? null,
-      milestone_id: input.milestoneId,
-      milestone_index: input.milestoneIndex ?? null,
-      status: "passed",
-      evaluation_method: input.evaluationMethod ?? "automated_tests",
-      code_snapshot_hash: input.codeSnapshotHash ?? null,
-      passed_at: new Date().toISOString()
-    },
-    { onConflict: "user_id,learning_item_id,content_version_id,milestone_id" }
-  );
-  if (error) {
-    if (!isMissingObjectError(error)) {
+  const detail = await getLabForOwner(contentId);
+  if (!detail?.publishedPayload || !detail.publishedVersionId) {
+    return { status: "unavailable", message: "This lab is no longer available." };
+  }
+  if (detail.publishedVersionId !== input.expectedContentVersionId) {
+    return { status: "stale_definition", message: CODE_LAB_STALE_NOTE };
+  }
+
+  const milestones = labMilestoneViews(detail.publishedPayload);
+  const expected = milestones[input.milestoneIndex];
+  if (!expected || expected.milestoneId !== input.milestoneId) {
+    return {
+      status: "invalid_milestone",
+      message: "The milestone definition changed. Reload the lab."
+    };
+  }
+
+  const codeSnapshotHash = createHash("sha256").update(input.source, "utf8").digest("hex");
+  const passedAt = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("user_lab_milestone_progress")
+    .upsert(
+      {
+        user_id: user.id,
+        learning_item_id: input.itemId,
+        content_version_id: detail.publishedVersionId,
+        milestone_id: expected.milestoneId,
+        milestone_index: expected.index,
+        status: "passed",
+        evaluation_method: "automated_tests",
+        code_snapshot_hash: codeSnapshotHash,
+        passed_at: passedAt
+      },
+      {
+        onConflict: "user_id,learning_item_id,content_version_id,milestone_id"
+      }
+    )
+    .select("milestone_id,milestone_index,code_snapshot_hash,passed_at")
+    .single();
+
+  if (error || !data) {
+    if (error && !isMissingObjectError(error)) {
       console.error(`[user-lab] milestone progress write failed (code=${error.code ?? "none"})`);
     }
-    return false;
+    return {
+      status: isMissingObjectError(error) ? "unavailable" : "error",
+      message: "Milestone progress could not be saved. Retry this passing result."
+    };
   }
-  return true;
+
+  return {
+    status: "saved",
+    progress: {
+      milestoneId: data.milestone_id,
+      milestoneIndex: data.milestone_index,
+      codeSnapshotHash: data.code_snapshot_hash,
+      passedAt: data.passed_at
+    }
+  };
 }
 
-/**
- * Stable milestone ids the learner has durably passed for THIS content version
- * (#610/#612). Returns [] signed-out / unconfigured / pre-migration, so hydration
- * simply falls back to in-session progress.
- */
-export async function getPassedLabMilestones(itemId: string, contentVersionId?: string | null): Promise<string[]> {
+export async function getPassedLabMilestones(
+  itemId: string,
+  contentVersionId?: string | null
+): Promise<UserLabMilestoneProgress[]> {
   if (!itemId || !isUserLearningItemId(itemId)) return [];
   const supabase = await createClient();
   if (!supabase) return [];
@@ -74,11 +142,14 @@ export async function getPassedLabMilestones(itemId: string, contentVersionId?: 
 
   let query = supabase
     .from("user_lab_milestone_progress")
-    .select("milestone_id")
+    .select("milestone_id,milestone_index,code_snapshot_hash,passed_at")
     .eq("user_id", user.id)
     .eq("learning_item_id", itemId)
-    .eq("status", "passed");
-  query = contentVersionId ? query.eq("content_version_id", contentVersionId) : query.is("content_version_id", null);
+    .eq("status", "passed")
+    .not("code_snapshot_hash", "is", null);
+  query = contentVersionId
+    ? query.eq("content_version_id", contentVersionId)
+    : query.is("content_version_id", null);
 
   const { data, error } = await query;
   if (error || !data) {
@@ -87,5 +158,28 @@ export async function getPassedLabMilestones(itemId: string, contentVersionId?: 
     }
     return [];
   }
-  return [...new Set((data as Array<{ milestone_id: string }>).map((r) => r.milestone_id))];
+  return (
+    data as Array<{
+      milestone_id: string;
+      milestone_index: number | null;
+      code_snapshot_hash: string | null;
+      passed_at: string;
+    }>
+  )
+    .filter(
+      (
+        row
+      ): row is {
+        milestone_id: string;
+        milestone_index: number | null;
+        code_snapshot_hash: string;
+        passed_at: string;
+      } => /^[0-9a-f]{64}$/.test(row.code_snapshot_hash ?? "")
+    )
+    .map((row) => ({
+      milestoneId: row.milestone_id,
+      milestoneIndex: row.milestone_index,
+      codeSnapshotHash: row.code_snapshot_hash,
+      passedAt: row.passed_at
+    }));
 }

@@ -115,6 +115,11 @@ jobs:
             psql -v ON_ERROR_STOP=1 -f "$f"
           done
 
+      - name: Verify authoritative lab migration is replay-safe
+        run: >-
+          psql -v ON_ERROR_STOP=1
+          -f supabase/migrations/20260723100000_lab_progress_authoritative_completion.sql
+
       - name: Smoke-test migrated schema
         run: psql -v ON_ERROR_STOP=1 -f scripts/ci/smoke.sql
 

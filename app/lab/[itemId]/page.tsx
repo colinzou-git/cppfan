@@ -6,13 +6,20 @@ import { CodeLabWorkspace } from "@/features/code-lab/code-lab-workspace";
 import { getProjectLabById } from "@/features/labs/project-labs";
 import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { getInterviewProblem } from "@/features/interview/problem-catalog";
-import { getExerciseForOwner, getLabForOwner, getInterviewForOwner } from "@/features/user-content/user-content-queries";
+import {
+  getExerciseForOwner,
+  getLabForOwner,
+  getInterviewForOwner
+} from "@/features/user-content/user-content-queries";
 import { exercisePayloadToCodeLabConfig } from "@/features/user-content/exercise-code-lab";
 import { labMilestoneViews } from "@/features/user-content/lab-code-lab";
 import { LabWorkspace } from "@/features/user-content/lab-workspace";
 import { getPassedLabMilestones } from "@/features/labs/user-lab-milestone-progress";
 import { interviewPayloadToCodeLabConfig } from "@/features/user-content/interview-code-lab";
-import { contentIdFromUserItemId, isUserLearningItemId } from "@/features/user-content/user-content-id";
+import {
+  contentIdFromUserItemId,
+  isUserLearningItemId
+} from "@/features/user-content/user-content-id";
 
 /**
  * Dedicated full-page Code Lab (#431, #439, #440). Resolves lesson Code Labs,
@@ -48,7 +55,10 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
     const lab = userContentId ? await getLabForOwner(userContentId) : null;
     if (lab?.publishedPayload) {
       // Hydrate durable milestone progress for the current version (#610).
-      const initialPassedMilestoneIds = await getPassedLabMilestones(decodedId, lab.publishedVersionId ?? null);
+      const initialMilestoneProgress = await getPassedLabMilestones(
+        decodedId,
+        lab.publishedVersionId ?? null
+      );
       return (
         <main className="p-3 xl:p-6">
           <LabWorkspace
@@ -56,7 +66,7 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
             title={lab.title}
             milestones={labMilestoneViews(lab.publishedPayload)}
             contentVersionId={lab.publishedVersionId ?? undefined}
-            initialPassedMilestoneIds={initialPassedMilestoneIds}
+            initialMilestoneProgress={initialMilestoneProgress}
             backHref="/my-content"
             backLabel="Back to My Content"
           />
@@ -148,7 +158,10 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
   if (result.status === "error") {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <Link href={`/learn/${encodeURIComponent(decodedId)}`} className="text-sm font-bold text-blue-700">
+        <Link
+          href={`/learn/${encodeURIComponent(decodedId)}`}
+          className="text-sm font-bold text-blue-700"
+        >
           ← Back to lesson
         </Link>
         <div
@@ -156,14 +169,16 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
           className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
         >
           <p className="font-bold">This Code Lab is temporarily unavailable.</p>
-          <p className="mt-1">We couldn’t load it from the database just now. Please refresh or try again shortly.</p>
+          <p className="mt-1">
+            We couldn’t load it from the database just now. Please refresh or try again shortly.
+          </p>
         </div>
       </main>
     );
   }
 
   const title = result.status === "ok" ? result.data.item.title : "Code Lab";
-  const sourceVersion = result.status === "ok" ? result.data.item.updated_at ?? "1" : "1";
+  const sourceVersion = result.status === "ok" ? (result.data.item.updated_at ?? "1") : "1";
 
   return (
     <main className="p-3 xl:p-6">

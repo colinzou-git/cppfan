@@ -7,7 +7,7 @@ import { getExerciseById } from "@/features/exercises/exercise-catalog";
 import { setExerciseProgress } from "@/features/exercises/exercise-progress";
 import { resolveCodeLabItem } from "./code-lab-item-resolver";
 import type { CodeAttemptSummary, CodeRunResult, CodeTestResult } from "./code-lab-types";
-import type { CodeTerminalStatus } from "./code-terminal-types";
+import type { CodeTerminalStatus, RecordTerminalAttemptResult } from "./code-terminal-types";
 
 /**
  * Best-effort persistence of a code-lab attempt for the signed-in learner
@@ -87,90 +87,103 @@ export async function recordCodeAttempt(input: {
  * `code_attempted` (real-run evidence) but NEVER `code_passed`/mastery — only the
  * one-shot Run Tests path produces pass evidence. Best-effort like recordCodeAttempt.
  */
-export async function recordTerminalAttempt(input: {
+export async function recordTerminalAttemptAuthoritative(input: {
+  terminalAttemptId: string;
   itemId: string;
   source: string;
   status: CodeTerminalStatus;
-  exitCode?: number | null;
-  compileOutput?: string | null;
-  stdout?: string | null;
-  stderr?: string | null;
+  exitCode: number | null;
+  compileOutput: string;
+  stdout: string;
+  stderr: string;
   provider: string;
   simulated: boolean;
-  contentVersionId?: string | null;
-  milestoneIndex?: number | null;
-}): Promise<boolean> {
+  contentVersionId: string | null;
+  milestoneIndex: number | null;
+}): Promise<RecordTerminalAttemptResult> {
   const supabase = await createClient();
-  if (!supabase) return false;
+  if (!supabase) {
+    return {
+      status: "permanent_error",
+      message: "Run history is unavailable because persistence is not configured."
+    };
+  }
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
-  if (!user) return false;
+  if (!user) {
+    return { status: "signed_out", message: "Sign in to save Terminal run history." };
+  }
 
-  const { error } = await supabase.from("code_lab_attempts").insert({
-    user_id: user.id,
-    learning_item_id: input.itemId,
-    content_version_id: input.contentVersionId ?? null,
-    milestone_index: input.milestoneIndex ?? null,
-    source_code: input.source,
-    language: "cpp",
-    // A distinct, non-success run status — never mapped to a false pass. "stopped"
-    // and the other terminal endings stay legible in history.
-    run_status: `terminal_${input.status}`,
-    compile_output: input.compileOutput ?? null,
-    stdout: input.stdout ?? null,
-    stderr: input.stderr ?? null,
-    tests_passed: null,
-    tests_total: null,
-    ai_review_requested: false
-  });
-
-  let attemptRecorded = true;
-  if (error) {
-    attemptRecorded = false;
-    if (!isMissingObjectError(error)) {
-      console.error(`[code-lab] terminal attempt insert failed (code=${error.code ?? "none"})`);
+  let skillIds: string[] = [];
+  if (!input.simulated) {
+    const resolved = await resolveCodeLabItem({
+      itemId: input.itemId,
+      expectedContentVersionId: input.contentVersionId ?? undefined,
+      milestoneIndex: input.milestoneIndex ?? undefined
+    });
+    if (resolved.status === "ok") {
+      skillIds = resolved.item.skillTags;
     }
   }
 
-  const evidenceRecorded = await recordTerminalSkillEvents(input).catch(() => false);
-  return attemptRecorded || evidenceRecorded;
-}
-
-async function recordTerminalSkillEvents(input: {
-  itemId: string;
-  status: CodeTerminalStatus;
-  provider: string;
-  simulated: boolean;
-  contentVersionId?: string | null;
-  milestoneIndex?: number | null;
-}): Promise<boolean> {
-  // Simulated (mock) runs never produce real learning evidence.
-  if (input.simulated) return false;
-  const resolved = await resolveCodeLabItem({ itemId: input.itemId });
-  const skillTags = resolved.status === "ok" ? resolved.item.skillTags : [];
-  if (skillTags.length === 0) return false;
-
   const metadata: Record<string, unknown> = {
     itemId: input.itemId,
-    contentVersionId: input.contentVersionId ?? null,
-    milestoneIndex: input.milestoneIndex ?? null,
+    contentVersionId: input.contentVersionId,
+    milestoneIndex: input.milestoneIndex,
     provider: input.provider,
-    simulated: false,
+    simulated: input.simulated,
     runStatus: `terminal_${input.status}`,
+    exitCode: input.exitCode,
     source: "terminal"
   };
 
-  // code_attempted only — a Terminal Run is never pass/mastery evidence (#664).
-  return recordSkillEvents(
-    skillTags.map((skillId) => ({
-      eventType: "code_attempted" as const,
-      skillId,
-      learningItemId: input.itemId,
-      metadata
-    }))
-  );
+  const { data, error } = await supabase.rpc("record_terminal_code_attempt", {
+    p_terminal_attempt_id: input.terminalAttemptId,
+    p_learning_item_id: input.itemId,
+    p_content_version_id: input.contentVersionId,
+    p_milestone_index: input.milestoneIndex,
+    p_source_code: input.source,
+    p_run_status: `terminal_${input.status}`,
+    p_compile_output: input.compileOutput,
+    p_stdout: input.stdout,
+    p_stderr: input.stderr,
+    p_skill_ids: skillIds,
+    p_event_metadata: metadata
+  });
+
+  if (error) {
+    const code = error.code ?? "";
+    if (isMissingObjectError(error)) {
+      return {
+        status: "permanent_error",
+        message: "Run history needs the latest database migration before it can be saved."
+      };
+    }
+    if (code === "22023" || code === "42501") {
+      return {
+        status: "permanent_error",
+        message: "This Terminal run could not be accepted for history."
+      };
+    }
+    console.error(`[code-lab] terminal attempt RPC failed (code=${code || "none"})`);
+    return {
+      status: "retryable_error",
+      message: "Run history could not be saved yet. Retry saving this run."
+    };
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  const status = (row as { status?: unknown } | null)?.status;
+  const attemptId = (row as { attempt_id?: unknown } | null)?.attempt_id;
+  if ((status === "recorded" || status === "already_recorded") && typeof attemptId === "string") {
+    return { status, attemptId };
+  }
+  return {
+    status: "retryable_error",
+    message: "Run history returned an incomplete response. Retry saving this run."
+  };
 }
 
 async function recordCodeAttemptSkillEvents(input: {
@@ -214,7 +227,9 @@ async function recordCodeAttemptSkillEvents(input: {
 }
 
 function isPassingRealTestAttempt(test: CodeTestResult | null | undefined): boolean {
-  return Boolean(test && !test.simulated && test.status === "ok" && test.total > 0 && test.passed === test.total);
+  return Boolean(
+    test && !test.simulated && test.status === "ok" && test.total > 0 && test.passed === test.total
+  );
 }
 
 export function codeAttemptMetadata(input: {

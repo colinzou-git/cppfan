@@ -58,7 +58,11 @@ export function CodeLabWorkspace({
   /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
   milestoneIndex?: number;
   /** Notified after each run/test — a lab wrapper uses this to track milestone completion (#489). */
-  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null; source?: string }) => void;
+  onResult?: (result: {
+    run?: CodeRunResult | null;
+    test?: CodeTestResult | null;
+    source?: string;
+  }) => void;
   /** Back-link target; defaults to the lesson page. Project labs pass /labs (#439). */
   backHref?: string;
   /** Back-link label; defaults to "Back to lesson". Project labs pass "Back to project labs". */
@@ -85,6 +89,8 @@ export function CodeLabWorkspace({
   const [tab, setTab] = useState<DockTab>("terminal");
   const [aiFullscreen, setAiFullscreen] = useState(false);
   const isWide = useIsWide();
+  const hasExecutionInput = config.mode === "stdin" || config.mode === "function";
+  const inputLabel = config.mode === "function" ? "Arguments" : "Input Args";
 
   // Close the fullscreen AI reading mode with Escape (#466).
   useEffect(() => {
@@ -110,7 +116,12 @@ export function CodeLabWorkspace({
     c.handleAction(action);
   }
 
-  const staleDefinition = Boolean(c.runResult?.staleDefinition || c.testResult?.staleDefinition);
+  const staleDefinition = Boolean(
+    c.runResult?.staleDefinition ||
+    c.testResult?.staleDefinition ||
+    terminal.status === "stale_definition"
+  );
+  const terminalItemUnavailable = terminal.status === "item_unavailable";
 
   const controls = (
     <div className="flex flex-col gap-2">
@@ -118,7 +129,9 @@ export function CodeLabWorkspace({
         busy={c.busy}
         onAction={onAction}
         hasError={c.hasRunError}
-        runDisabled={c.missingRequired || c.itemUnavailable}
+        runDisabled={
+          c.missingRequired || c.itemUnavailable || terminalItemUnavailable || staleDefinition
+        }
         terminalActive={terminal.isActive}
         terminalStarting={terminal.starting}
         onStop={terminal.stop}
@@ -156,8 +169,14 @@ export function CodeLabWorkspace({
           role="alert"
           data-testid="code-lab-item-unavailable"
         >
-          <span>This exercise is no longer available. Return to the catalog or reload if it was recently republished.</span>
-          <Link href={resolvedBackHref} className="rounded-md bg-rose-600 px-2 py-1 text-white hover:bg-rose-700">
+          <span>
+            This exercise is no longer available. Return to the catalog or reload if it was recently
+            republished.
+          </span>
+          <Link
+            href={resolvedBackHref}
+            className="rounded-md bg-rose-600 px-2 py-1 text-white hover:bg-rose-700"
+          >
             {resolvedBackLabel}
           </Link>
           <button
@@ -227,7 +246,9 @@ export function CodeLabWorkspace({
         // The AUTHORITATIVE completion action for a self-evaluated item (#609),
         // distinct from the optional AI help/review below.
         <SelfEvaluationPanel
-          onSubmit={(rating, reflection) => submitSelfEvaluation({ itemId, contentVersionId, rating, reflection })}
+          onSubmit={(rating, reflection) =>
+            submitSelfEvaluation({ itemId, contentVersionId, rating, reflection })
+          }
         />
       ) : null}
       {config.evaluationMode === "ai_evaluation" ||
@@ -236,7 +257,12 @@ export function CodeLabWorkspace({
         <AiEvaluationPanel
           mode={config.evaluationMode}
           onSubmit={() =>
-            submitFormalEvaluation({ itemId, contentVersionId, source: c.source, mode: config.evaluationMode as "ai_evaluation" })
+            submitFormalEvaluation({
+              itemId,
+              contentVersionId,
+              source: c.source,
+              mode: config.evaluationMode as "ai_evaluation"
+            })
           }
         />
       ) : null}
@@ -260,27 +286,33 @@ export function CodeLabWorkspace({
     </div>
   );
 
-  const stdinField =
-    config.mode === "stdin" ? (
-      <label className="flex flex-col gap-1">
-        <span className="text-xs font-bold uppercase tracking-wide text-slate-600">Input Args</span>
+  const stdinField = hasExecutionInput ? (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-bold uppercase tracking-wide text-slate-600">{inputLabel}</span>
+      {config.mode === "function" ? (
+        <span className="text-xs text-slate-500">
+          Enter arguments using this exercise&apos;s serialized function-test format for{" "}
+          <code>{config.functionSignature}</code>. Vectors use a count followed by their elements.
+        </span>
+      ) : (
         <span className="text-xs text-slate-500">
           Written to standard input when the program starts. This is not{" "}
           <code className="font-mono">main(argc, argv)</code> command-line input. Standard input
           stays open, so you can answer later reads in the Terminal.
         </span>
-        <textarea
-          value={c.stdin}
-          onChange={(event) => c.setStdin(event.target.value)}
-          rows={4}
-          className="rounded-lg border border-slate-200 p-2 font-mono text-xs"
-          data-testid="code-stdin"
-          placeholder="Input written to the program when it starts"
-        />
-      </label>
-    ) : (
-      <p className="text-sm text-slate-500">This exercise does not read standard input.</p>
-    );
+      )}
+      <textarea
+        value={c.stdin}
+        onChange={(event) => c.setStdin(event.target.value)}
+        rows={4}
+        className="rounded-lg border border-slate-200 p-2 font-mono text-xs"
+        data-testid="code-stdin"
+        placeholder="Input written to the program when it starts"
+      />
+    </label>
+  ) : (
+    <p className="text-sm text-slate-500">This exercise does not read standard input.</p>
+  );
 
   const aiPanel = (
     <div className="flex flex-col gap-3">
@@ -288,7 +320,9 @@ export function CodeLabWorkspace({
         itemId={itemId}
         title={title}
         prompt={config.prompt ?? title}
-        topic={config.skillTags && config.skillTags.length > 0 ? config.skillTags.join(", ") : undefined}
+        topic={
+          config.skillTags && config.skillTags.length > 0 ? config.skillTags.join(", ") : undefined
+        }
         sourceVersion={sourceVersion}
         source={c.source}
         fullscreen={aiFullscreen}
@@ -315,7 +349,7 @@ export function CodeLabWorkspace({
   const tabs: { id: DockTab; label: string; active?: boolean }[] = [
     { id: "terminal", label: "Terminal", active: terminal.isActive },
     { id: "tests", label: "Tests" },
-    ...(config.mode === "stdin" ? [{ id: "stdin" as const, label: "Input Args" }] : []),
+    ...(hasExecutionInput ? [{ id: "stdin" as const, label: inputLabel }] : []),
     { id: "debug", label: "Debug" },
     { id: "ai", label: "AI" }
   ];
@@ -325,11 +359,17 @@ export function CodeLabWorkspace({
       <div className="flex flex-col gap-2 border-b border-slate-200 p-3">
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm font-bold text-slate-800">main.cpp</span>
-          <span className="text-xs text-slate-400">C++20 · Judge0</span>
+          <span className="text-xs text-slate-400">
+            Run: Interactive Terminal · Tests: configured runner
+          </span>
         </div>
         {controls}
       </div>
-      <div className="flex gap-1 border-b border-slate-200 px-2 pt-2" role="tablist" aria-label="Code Lab output">
+      <div
+        className="flex gap-1 border-b border-slate-200 px-2 pt-2"
+        role="tablist"
+        aria-label="Code Lab output"
+      >
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -370,9 +410,12 @@ export function CodeLabWorkspace({
             isFinished={terminal.isFinished}
             sending={terminal.sending}
             inputError={terminal.inputError}
+            attemptSaveStatus={terminal.attemptSaveStatus}
+            attemptSaveError={terminal.attemptSaveError}
             onSend={terminal.sendInput}
             onEof={terminal.sendEof}
             onClearError={terminal.clearInputError}
+            onRetryAttemptSave={terminal.retryAttemptSave}
           />
         ) : null}
         {tab === "tests" ? (
@@ -421,7 +464,11 @@ export function CodeLabWorkspace({
                 </button>
               )}
             </div>
-            <div className={aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"}>
+            <div
+              className={
+                aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"
+              }
+            >
               <div
                 className={
                   aiFullscreen
@@ -490,9 +537,14 @@ export function CodeLabWorkspace({
 }
 
 function DraftStatusLine({ status }: { status: "idle" | "saving" | "saved" }) {
-  const label = status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Autosaves as you type";
+  const label =
+    status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Autosaves as you type";
   return (
-    <p className="text-right text-[11px] text-slate-500" data-testid="code-lab-draft-status" aria-live="polite">
+    <p
+      className="text-right text-[11px] text-slate-500"
+      data-testid="code-lab-draft-status"
+      aria-live="polite"
+    >
       {label}
     </p>
   );

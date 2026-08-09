@@ -16,6 +16,9 @@ export type CodeTerminalStatus =
   | "compile_error"
   | "runtime_error"
   | "timeout"
+  | "stale_definition"
+  | "item_unavailable"
+  | "invalid_contract"
   | "unconfigured"
   | "error";
 
@@ -33,6 +36,10 @@ export type CodeTerminalSnapshot = {
   sessionId: string | null;
   /** Unguessable per-session capability required for poll/input/stop (#664). */
   sessionToken?: string;
+  /** Stable app-issued idempotency identity for one executed Terminal run. */
+  terminalAttemptId?: string;
+  /** Server-derived adapter name; never contains service URLs or credentials. */
+  provider?: string;
   status: CodeTerminalStatus;
   events: CodeTerminalEvent[];
   /** Cursor to send on the next poll (highest sequence emitted so far). */
@@ -50,6 +57,14 @@ export type CodeTerminalStartRequest = {
   stdin?: string;
   contentVersionId?: string;
   milestoneIndex?: number;
+};
+
+/** Trusted server-to-provider contract produced by the execution-plan resolver. */
+export type CodeTerminalBackendStartRequest = {
+  source: string;
+  stdin: string;
+  files: Array<{ name: string; content: string }>;
+  compilerFlags: string[];
 };
 
 export type CodeTerminalPollRequest = {
@@ -71,6 +86,27 @@ export type CodeTerminalStopRequest = {
   sessionId: string;
   sessionToken: string;
 };
+
+export type TerminalAttemptSaveStatus = "idle" | "saving" | "retrying" | "saved" | "error";
+
+export type CodeTerminalAttemptRequest = {
+  terminalAttemptId: string;
+  sessionId: string;
+  sessionToken: string;
+  itemId: string;
+  source: string;
+  contentVersionId?: string;
+  milestoneIndex?: number;
+};
+
+export type RecordTerminalAttemptResult =
+  | { status: "recorded"; attemptId: string }
+  | { status: "already_recorded"; attemptId: string }
+  | { status: "not_final"; message: string }
+  | { status: "signed_out"; message: string }
+  | { status: "session_unavailable"; message: string }
+  | { status: "retryable_error"; message: string }
+  | { status: "permanent_error"; message: string };
 
 export type CodeTerminalHealth = {
   status: "ok" | "unconfigured" | "error";
@@ -102,6 +138,9 @@ export function isTerminalFinished(status: CodeTerminalStatus | null | undefined
     status === "compile_error" ||
     status === "runtime_error" ||
     status === "timeout" ||
+    status === "stale_definition" ||
+    status === "item_unavailable" ||
+    status === "invalid_contract" ||
     status === "error"
   );
 }

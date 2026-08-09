@@ -244,7 +244,9 @@ export async function createAuthenticatedLearner(
       if (saved.error) {
         throw saved.error;
       }
-      const draftRow = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      const draftRow = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
       const published = await browserLikeClient.rpc("publish_user_content", {
         p_content_id: draftRow.content_id,
         p_expected_revision: null
@@ -265,6 +267,148 @@ export async function createAuthenticatedLearner(
         problemId: `user.item.${draftRow.content_id}`,
         publishedVersionId: item.data.current_published_version_id as string
       };
+    },
+    async seedPublishedExercise(input: {
+      title: string;
+      mode: "stdin_program" | "function";
+      functionSignature?: string;
+      starterCode?: string;
+      tests: Array<{
+        name: string;
+        input: string;
+        expectedOutput: string;
+        hidden: boolean;
+      }>;
+    }) {
+      const payload = {
+        schemaVersion: 1,
+        title: input.title,
+        prompt: "Implement the requested C++ behavior.",
+        mode: input.mode,
+        evaluationMode: "automated_tests",
+        functionSignature: input.functionSignature,
+        starterCode: input.starterCode,
+        tests: input.tests
+      };
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: null,
+        p_kind: "exercise",
+        p_title: payload.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: 1,
+        p_payload: payload,
+        p_expected_revision: null
+      });
+      if (saved.error) throw saved.error;
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
+      const published = await browserLikeClient.rpc("publish_user_content", {
+        p_content_id: row.content_id,
+        p_expected_revision: null
+      });
+      if (published.error) throw published.error;
+      return {
+        contentId: row.content_id,
+        itemId: `user.item.${row.content_id}`
+      };
+    },
+    async seedPublishedLab(input: {
+      title: string;
+      starterCode?: string;
+      fixtures?: Array<{ filename: string; content: string }>;
+      tests?: Array<{
+        name: string;
+        input: string;
+        expectedOutput: string;
+        hidden: boolean;
+      }>;
+      milestones?: Array<{
+        id: string;
+        title: string;
+        instructions: string;
+        required: boolean;
+        tests: Array<{
+          name: string;
+          input: string;
+          expectedOutput: string;
+          hidden: boolean;
+        }>;
+      }>;
+    }) {
+      const payload = {
+        schemaVersion: 1,
+        title: input.title,
+        summary: "Playwright fixture lab",
+        taskDescription: "Read the configured fixture and print it.",
+        mode: input.milestones ? "milestones" : "single_task",
+        evaluationMode: "automated_tests",
+        starterCode: input.starterCode ?? "",
+        fixtures: input.fixtures ?? [],
+        ...(input.milestones
+          ? { milestones: input.milestones }
+          : { completion: { tests: input.tests ?? [] } })
+      };
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: null,
+        p_kind: "lab",
+        p_title: payload.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: 1,
+        p_payload: payload,
+        p_expected_revision: null
+      });
+      if (saved.error) throw saved.error;
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
+      const published = await browserLikeClient.rpc("publish_user_content", {
+        p_content_id: row.content_id,
+        p_expected_revision: null
+      });
+      if (published.error) throw published.error;
+      const item = await browserLikeClient
+        .from("user_content_items")
+        .select("current_published_version_id")
+        .eq("id", row.content_id)
+        .single();
+      if (item.error || !item.data?.current_published_version_id) {
+        throw item.error ?? new Error("Published lab version id missing.");
+      }
+      return {
+        contentId: row.content_id,
+        itemId: `user.item.${row.content_id}`,
+        publishedVersionId: item.data.current_published_version_id as string
+      };
+    },
+    async labMilestoneProgress(itemId: string) {
+      const result = await browserLikeClient
+        .from("user_lab_milestone_progress")
+        .select("milestone_id,content_version_id,code_snapshot_hash,status")
+        .eq("learning_item_id", itemId)
+        .order("milestone_index", { ascending: true });
+      if (result.error) throw result.error;
+      return result.data;
+    },
+    async labCompletion(itemId: string) {
+      const result = await browserLikeClient
+        .from("project_lab_progress")
+        .select("project_id,content_version_id,status")
+        .eq("project_id", itemId)
+        .maybeSingle();
+      if (result.error) throw result.error;
+      return result.data;
+    },
+    async terminalAttempts(itemId: string) {
+      const result = await browserLikeClient
+        .from("code_lab_attempts")
+        .select("terminal_attempt_id,run_status,tests_passed,tests_total")
+        .eq("learning_item_id", itemId)
+        .not("terminal_attempt_id", "is", null);
+      if (result.error) throw result.error;
+      return result.data;
     },
     /** The learner's most recent interview evidence row for a problem (#661). */
     async latestInterviewEvidence(problemId: string) {
@@ -308,7 +452,9 @@ export async function createAuthenticatedLearner(
       if (saved.error) {
         throw saved.error;
       }
-      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
       return { contentId: row.content_id };
     },
     /**
@@ -367,15 +513,17 @@ export async function createAuthenticatedLearner(
         p_recommendation_source: "manual",
         p_start_local_date: startLocalDate,
         p_submission_id: crypto.randomUUID(),
-        p_targets: [{
-          acquisitionContractId: "skill-initial-learning",
-          acquisitionContractVersion: 1,
-          orderIndex: 0,
-          referenceId: skillId,
-          source: "manual",
-          targetKind: "acquire_skill",
-          titleSnapshot: input.skillTitle ?? "A minimal C++ program"
-        }],
+        p_targets: [
+          {
+            acquisitionContractId: "skill-initial-learning",
+            acquisitionContractVersion: 1,
+            orderIndex: 0,
+            referenceId: skillId,
+            source: "manual",
+            targetKind: "acquire_skill",
+            titleSnapshot: input.skillTitle ?? "A minimal C++ program"
+          }
+        ],
         p_timezone: timezone,
         p_title: input.title ?? "Playwright goal"
       });

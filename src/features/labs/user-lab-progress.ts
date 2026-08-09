@@ -1,70 +1,104 @@
 "use server";
 
-/*
- * Persist completion of a user-created project lab (#489). When a learner passes
- * every required milestone, the lab is marked complete in the shared
- * project_lab_progress table (keyed by the user.item learning-item id) and a
- * completion_submitted skill event is recorded against the lab's owner skill, so
- * the lab participates in the mastery/FSRS learning loop like native work.
- * Owner-scoped RLS on project_lab_progress keeps the row private.
- */
-
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError } from "@/lib/supabase/errors";
-import { recordSkillEvents, type RecordSkillEventInput } from "@/features/events/event-service";
-import { contentIdFromUserItemId, isUserLearningItemId, userSkillId } from "@/features/user-content/user-content-id";
+import { getLabForOwner } from "@/features/user-content/user-content-queries";
+import {
+  contentIdFromUserItemId,
+  isUserLearningItemId,
+  userSkillId
+} from "@/features/user-content/user-content-id";
 import type { ProjectActionResult } from "./project-action-types";
 
-export async function markUserLabComplete(input: { itemId: string }): Promise<ProjectActionResult> {
-  const itemId = typeof input?.itemId === "string" ? input.itemId : "";
-  if (!itemId || !isUserLearningItemId(itemId)) {
-    return { status: "invalid_project" };
-  }
-  const contentId = contentIdFromUserItemId(itemId);
-  if (!contentId) {
-    return { status: "invalid_project" };
-  }
+export type PersistUserLabCompletionResult =
+  | { status: "completed" }
+  | { status: "already_completed" }
+  | { status: "signed_out"; message: string }
+  | { status: "save_error"; message: string };
 
+/**
+ * Lower-level completion persistence for already-authoritative evaluation
+ * paths. Automated milestone labs call completeUserLab instead.
+ */
+export async function persistUserLabVersionCompletion(input: {
+  itemId: string;
+  contentVersionId: string;
+  skillId: string;
+  metadata?: Record<string, unknown>;
+}): Promise<PersistUserLabCompletionResult> {
   const supabase = await createClient();
   if (!supabase) {
-    return { status: "signed_out" };
+    return { status: "signed_out", message: "Sign in to save lab completion." };
   }
   const {
     data: { user }
   } = await supabase.auth.getUser();
   if (!user) {
-    return { status: "signed_out" };
+    return { status: "signed_out", message: "Sign in to save lab completion." };
   }
 
-  const now = new Date().toISOString();
-  const { error } = await supabase.from("project_lab_progress").upsert(
-    {
-      user_id: user.id,
-      project_id: itemId,
-      status: "completed",
-      completed_at: now,
-      updated_at: now
-    },
-    { onConflict: "user_id,project_id" }
-  );
+  const { data, error } = await supabase.rpc("complete_user_lab_version", {
+    p_project_id: input.itemId,
+    p_content_version_id: input.contentVersionId,
+    p_skill_id: input.skillId,
+    p_metadata: input.metadata ?? {}
+  });
   if (error) {
-    if (isMissingObjectError(error)) {
-      return { status: "unavailable" };
+    if (!isMissingObjectError(error)) {
+      console.error(`[user-lab-progress] completion RPC failed (code=${error.code ?? "none"})`);
     }
-    console.error(`[user-lab-progress] write failed (code=${error.code ?? "none"})`);
-    return { status: "error" };
+    return {
+      status: "save_error",
+      message: isMissingObjectError(error)
+        ? "Lab completion needs the latest database migration."
+        : "Lab completion could not be saved. Retry completion."
+    };
+  }
+  if (data === "completed" || data === "already_completed") {
+    revalidatePath("/labs");
+    return { status: data };
+  }
+  return {
+    status: "save_error",
+    message: "Lab completion returned an unexpected result."
+  };
+}
+
+/**
+ * Completion path for formal self/AI evaluation modes. These modes intentionally
+ * use their own authoritative evaluator and must not be forced through automated
+ * milestone cumulative tests.
+ */
+export async function markUserLabComplete(input: {
+  itemId: string;
+  contentVersionId?: string | null;
+  evaluationMode?: string;
+}): Promise<ProjectActionResult> {
+  const itemId = typeof input?.itemId === "string" ? input.itemId : "";
+  if (!itemId || !isUserLearningItemId(itemId)) {
+    return { status: "invalid_project" };
+  }
+  const contentId = contentIdFromUserItemId(itemId);
+  if (!contentId) return { status: "invalid_project" };
+  const detail = await getLabForOwner(contentId);
+  const currentVersion = detail?.publishedVersionId;
+  if (!detail?.publishedPayload || !currentVersion) {
+    return { status: "unavailable" };
+  }
+  if (input.contentVersionId && input.contentVersionId !== currentVersion) {
+    return { status: "unavailable" };
   }
 
-  const events: RecordSkillEventInput[] = [
-    {
-      eventType: "completion_submitted",
-      skillId: userSkillId(contentId),
-      metadata: { project_id: itemId, source: "user_lab", scope: "project" }
-    }
-  ];
-  await recordSkillEvents(events);
-
-  revalidatePath("/labs");
-  return { status: "ok" };
+  const result = await persistUserLabVersionCompletion({
+    itemId,
+    contentVersionId: currentVersion,
+    skillId: userSkillId(contentId),
+    metadata: { evaluationMode: input.evaluationMode ?? null }
+  });
+  if (result.status === "completed" || result.status === "already_completed") {
+    return { status: "ok" };
+  }
+  if (result.status === "signed_out") return { status: "signed_out" };
+  return { status: "error" };
 }

@@ -24,7 +24,10 @@ export async function submitSelfEvaluation(input: {
   rating: "not_yet" | "partial" | "complete";
   reflection?: string;
 }): Promise<UserContentEvaluationResult> {
-  const result = buildUserContentEvaluationResult({ mode: "self_evaluation", self: { rating: input.rating } });
+  const result = buildUserContentEvaluationResult({
+    mode: "self_evaluation",
+    self: { rating: input.rating }
+  });
 
   // partial / not_yet: an honest non-completion — record nothing, prompt more work.
   if (!result.completionCredited) {
@@ -41,7 +44,11 @@ export async function submitSelfEvaluation(input: {
 
   if (resolved.item.source === "user_lab") {
     // Labs credit whole-lab completion (writes progress + its own completion event).
-    await markUserLabComplete({ itemId: input.itemId }).catch(() => ({ status: "error" }));
+    await markUserLabComplete({
+      itemId: input.itemId,
+      contentVersionId: input.contentVersionId,
+      evaluationMode: "self_evaluation"
+    }).catch(() => ({ status: "error" }));
     return result;
   }
 

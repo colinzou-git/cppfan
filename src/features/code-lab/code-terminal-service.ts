@@ -23,18 +23,34 @@ export type TerminalSelection =
 
 export function selectTerminalProvider(): TerminalSelection {
   const provider = process.env.CODE_TERMINAL_PROVIDER?.trim().toLowerCase();
+  const requireReal =
+    process.env.CPPFAN_REQUIRE_REAL_CODE_TERMINAL === "true";
+
+  if (requireReal && provider !== "execution-service") {
+    return {
+      kind: "unconfigured",
+      note: "A real interactive Terminal provider is required for this run."
+    };
+  }
 
   if (provider === "execution-service") {
     const baseUrl = process.env.CODE_TERMINAL_BASE_URL?.trim();
     if (!baseUrl) {
       return { kind: "unconfigured", note: "CODE_TERMINAL_BASE_URL is not set." };
     }
+    const apiKey = process.env.CODE_TERMINAL_API_KEY?.trim();
+    if (requireReal && !apiKey) {
+      return {
+        kind: "unconfigured",
+        note: "CODE_TERMINAL_API_KEY is not set for the required real provider."
+      };
+    }
     const timeoutMs = Number.parseInt(process.env.CODE_TERMINAL_TIMEOUT_MS ?? "", 10);
     return {
       kind: "ready",
       adapter: new GdbServiceTerminalAdapter({
         baseUrl,
-        apiKey: process.env.CODE_TERMINAL_API_KEY?.trim(),
+        apiKey,
         timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : undefined
       })
     };

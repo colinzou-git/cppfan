@@ -1,10 +1,12 @@
 import type {
   CodeTerminalHealth,
+  CodeTerminalAttemptRequest,
   CodeTerminalInputRequest,
   CodeTerminalPollRequest,
   CodeTerminalSnapshot,
   CodeTerminalStartRequest,
-  CodeTerminalStopRequest
+  CodeTerminalStopRequest,
+  RecordTerminalAttemptResult
 } from "./code-terminal-types";
 
 /**
@@ -67,22 +69,10 @@ export function terminalHealthRequest(signal?: AbortSignal): Promise<CodeTermina
   return requestJson<CodeTerminalHealth>("/api/code/terminal/health", { method: "GET" }, signal);
 }
 
-export type TerminalAttemptRequest = {
-  itemId: string;
-  source: string;
-  status: string;
-  exitCode?: number | null;
-  compileOutput?: string;
-  stdout?: string;
-  stderr?: string;
-  contentVersionId?: string;
-  milestoneIndex?: number;
-};
-
-/** Record the single final-state attempt for a Terminal Run (best-effort). */
+/** Persist a final Terminal run through the server-authoritative snapshot. */
 export function recordTerminalAttemptRequest(
-  input: TerminalAttemptRequest,
+  input: CodeTerminalAttemptRequest,
   signal?: AbortSignal
-): Promise<{ recorded: boolean }> {
-  return postJson<{ recorded: boolean }>("/api/code/terminal/attempt", input, signal);
+): Promise<RecordTerminalAttemptResult> {
+  return postJson<RecordTerminalAttemptResult>("/api/code/terminal/attempt", input, signal);
 }
