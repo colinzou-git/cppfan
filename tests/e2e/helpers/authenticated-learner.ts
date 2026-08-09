@@ -244,7 +244,9 @@ export async function createAuthenticatedLearner(
       if (saved.error) {
         throw saved.error;
       }
-      const draftRow = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      const draftRow = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
       const published = await browserLikeClient.rpc("publish_user_content", {
         p_content_id: draftRow.content_id,
         p_expected_revision: null
@@ -316,11 +318,23 @@ export async function createAuthenticatedLearner(
       title: string;
       starterCode?: string;
       fixtures?: Array<{ filename: string; content: string }>;
-      tests: Array<{
+      tests?: Array<{
         name: string;
         input: string;
         expectedOutput: string;
         hidden: boolean;
+      }>;
+      milestones?: Array<{
+        id: string;
+        title: string;
+        instructions: string;
+        required: boolean;
+        tests: Array<{
+          name: string;
+          input: string;
+          expectedOutput: string;
+          hidden: boolean;
+        }>;
       }>;
     }) {
       const payload = {
@@ -328,11 +342,13 @@ export async function createAuthenticatedLearner(
         title: input.title,
         summary: "Playwright fixture lab",
         taskDescription: "Read the configured fixture and print it.",
-        mode: "single_task",
+        mode: input.milestones ? "milestones" : "single_task",
         evaluationMode: "automated_tests",
         starterCode: input.starterCode ?? "",
         fixtures: input.fixtures ?? [],
-        completion: { tests: input.tests }
+        ...(input.milestones
+          ? { milestones: input.milestones }
+          : { completion: { tests: input.tests ?? [] } })
       };
       const saved = await browserLikeClient.rpc("save_user_content_draft", {
         p_content_id: null,
@@ -353,10 +369,37 @@ export async function createAuthenticatedLearner(
         p_expected_revision: null
       });
       if (published.error) throw published.error;
+      const item = await browserLikeClient
+        .from("user_content_items")
+        .select("current_published_version_id")
+        .eq("id", row.content_id)
+        .single();
+      if (item.error || !item.data?.current_published_version_id) {
+        throw item.error ?? new Error("Published lab version id missing.");
+      }
       return {
         contentId: row.content_id,
-        itemId: `user.item.${row.content_id}`
+        itemId: `user.item.${row.content_id}`,
+        publishedVersionId: item.data.current_published_version_id as string
       };
+    },
+    async labMilestoneProgress(itemId: string) {
+      const result = await browserLikeClient
+        .from("user_lab_milestone_progress")
+        .select("milestone_id,content_version_id,code_snapshot_hash,status")
+        .eq("learning_item_id", itemId)
+        .order("milestone_index", { ascending: true });
+      if (result.error) throw result.error;
+      return result.data;
+    },
+    async labCompletion(itemId: string) {
+      const result = await browserLikeClient
+        .from("project_lab_progress")
+        .select("project_id,content_version_id,status")
+        .eq("project_id", itemId)
+        .maybeSingle();
+      if (result.error) throw result.error;
+      return result.data;
     },
     async terminalAttempts(itemId: string) {
       const result = await browserLikeClient
@@ -409,7 +452,9 @@ export async function createAuthenticatedLearner(
       if (saved.error) {
         throw saved.error;
       }
-      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as { content_id: string };
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
       return { contentId: row.content_id };
     },
     /**
@@ -468,15 +513,17 @@ export async function createAuthenticatedLearner(
         p_recommendation_source: "manual",
         p_start_local_date: startLocalDate,
         p_submission_id: crypto.randomUUID(),
-        p_targets: [{
-          acquisitionContractId: "skill-initial-learning",
-          acquisitionContractVersion: 1,
-          orderIndex: 0,
-          referenceId: skillId,
-          source: "manual",
-          targetKind: "acquire_skill",
-          titleSnapshot: input.skillTitle ?? "A minimal C++ program"
-        }],
+        p_targets: [
+          {
+            acquisitionContractId: "skill-initial-learning",
+            acquisitionContractVersion: 1,
+            orderIndex: 0,
+            referenceId: skillId,
+            source: "manual",
+            targetKind: "acquire_skill",
+            titleSnapshot: input.skillTitle ?? "A minimal C++ program"
+          }
+        ],
         p_timezone: timezone,
         p_title: input.title ?? "Playwright goal"
       });

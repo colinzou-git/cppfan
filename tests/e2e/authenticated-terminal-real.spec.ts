@@ -18,9 +18,7 @@ async function assertRealHealth(page: Page) {
 }
 
 async function setEditor(page: Page, source: string) {
-  await page.waitForFunction(
-    () => Boolean((window as EditorWindow).__cppfanCodeLabEditor)
-  );
+  await page.waitForFunction(() => Boolean((window as EditorWindow).__cppfanCodeLabEditor));
   await page.evaluate(
     (value) => (window as EditorWindow).__cppfanCodeLabEditor!.setValue(value),
     source
@@ -80,9 +78,7 @@ int main() {
       await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited");
       await expect(transcript).toContainText("eof");
 
-      await expect
-        .poll(async () => (await learner.terminalAttempts(itemId)).length)
-        .toBe(1);
+      await expect.poll(async () => (await learner.terminalAttempts(itemId)).length).toBe(1);
       expect((await learner.terminalAttempts(itemId))[0]).toMatchObject({
         run_status: "terminal_exited",
         tests_passed: null,
@@ -93,10 +89,7 @@ int main() {
     }
   });
 
-  test("stops a real process and retains the transcript", async ({
-    context,
-    baseURL
-  }) => {
+  test("stops a real process and retains the transcript", async ({ context, baseURL }) => {
     const learner = await createAuthenticatedLearner(context, baseURL!);
     try {
       const page = await context.newPage();
@@ -110,17 +103,11 @@ int main() {
 int main(){ std::cout << "waiting" << std::flush; for(;;) std::this_thread::sleep_for(std::chrono::milliseconds(100)); }`
       );
       await controls(page).getByRole("button", { name: "Run", exact: true }).click();
-      await expect(page.getByTestId("code-terminal-transcript")).toContainText(
-        "waiting"
-      );
+      await expect(page.getByTestId("code-terminal-transcript")).toContainText("waiting");
       await controls(page).getByRole("button", { name: "Stop" }).click();
       await expect(page.getByTestId("code-terminal-status")).toHaveText("Stopped");
-      await expect(page.getByTestId("code-terminal-transcript")).toContainText(
-        "stopped by you"
-      );
-      await expect(
-        controls(page).getByRole("button", { name: "Run", exact: true })
-      ).toBeEnabled();
+      await expect(page.getByTestId("code-terminal-transcript")).toContainText("stopped by you");
+      await expect(controls(page).getByRole("button", { name: "Run", exact: true })).toBeEnabled();
     } finally {
       await learner.cleanup();
     }
@@ -163,9 +150,7 @@ int main(){ std::cout << "waiting" << std::flush; for(;;) std::this_thread::slee
 
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
       await expect(page.getByTestId("code-test-summary")).toHaveText("2/2 tests passed");
-      await expect(page.getByTestId("code-test-results")).toContainText(
-        "Judge0 real compile/run"
-      );
+      await expect(page.getByTestId("code-test-results")).toContainText("Judge0 real compile/run");
     } finally {
       await learner.cleanup();
     }
@@ -201,15 +186,127 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
 
       await controls(page).getByRole("button", { name: "Run", exact: true }).click();
       await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited");
-      await expect(page.getByTestId("code-terminal-transcript")).toContainText(
-        "fixture-ok"
-      );
+      await expect(page.getByTestId("code-terminal-transcript")).toContainText("fixture-ok");
 
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
       await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
-      await expect(page.getByTestId("code-test-results")).toContainText(
-        "Judge0 real compile/run"
+      await expect(page.getByTestId("code-test-results")).toContainText("Judge0 real compile/run");
+    } finally {
+      await learner.cleanup();
+    }
+  });
+
+  test("persists milestone evidence, reports regression, and completes the current lab version", async ({
+    context,
+    baseURL
+  }) => {
+    const learner = await createAuthenticatedLearner(context, baseURL!);
+    try {
+      const seeded = await learner.seedPublishedLab({
+        title: "PW authoritative cumulative lab",
+        starterCode: "",
+        milestones: [
+          {
+            id: "first-value",
+            title: "First value",
+            instructions: "Print one for input 1.",
+            required: true,
+            tests: [
+              {
+                name: "prints one",
+                input: "1\n",
+                expectedOutput: "one\n",
+                hidden: false
+              }
+            ]
+          },
+          {
+            id: "second-value",
+            title: "Second value",
+            instructions: "Print two for input 2.",
+            required: true,
+            tests: [
+              {
+                name: "prints two",
+                input: "2\n",
+                expectedOutput: "two\n",
+                hidden: false
+              }
+            ]
+          }
+        ]
+      });
+      const page = await context.newPage();
+      await assertRealHealth(page);
+      await page.goto(`/lab/${encodeURIComponent(seeded.itemId)}`);
+      const milestoneTabs = page.getByTestId("lab-milestone-tab");
+      await expect(milestoneTabs).toHaveCount(2);
+
+      await setEditor(
+        page,
+        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 1 ? "one\\n" : "wrong\\n"); }'
       );
+      await controls(page).getByRole("button", { name: "Run Tests" }).click();
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(milestoneTabs.nth(0).getByLabel("Milestone progress saved")).toBeVisible();
+      await expect
+        .poll(async () => (await learner.labMilestoneProgress(seeded.itemId)).length)
+        .toBe(1);
+      expect((await learner.labMilestoneProgress(seeded.itemId))[0]).toMatchObject({
+        milestone_id: "first-value",
+        content_version_id: seeded.publishedVersionId,
+        status: "passed"
+      });
+      expect((await learner.labMilestoneProgress(seeded.itemId))[0]?.code_snapshot_hash).toMatch(
+        /^[0-9a-f]{64}$/
+      );
+
+      await page.reload();
+      await expect(
+        page.getByTestId("lab-milestone-tab").nth(0).getByLabel("Milestone progress saved")
+      ).toBeVisible();
+      await page.getByTestId("lab-milestone-tab").nth(1).click();
+      await setEditor(
+        page,
+        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 2 ? "two\\n" : "wrong\\n"); }'
+      );
+      await controls(page).getByRole("button", { name: "Run Tests" }).click();
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(
+        page.getByTestId("lab-milestone-tab").nth(1).getByLabel("Milestone progress saved")
+      ).toBeVisible();
+      await expect
+        .poll(async () => (await learner.labMilestoneProgress(seeded.itemId)).length)
+        .toBe(2);
+
+      await page
+        .getByTestId("lab-completion-controls")
+        .getByRole("button", { name: "Validate & complete" })
+        .click();
+      await expect(page.getByTestId("lab-regressed")).toContainText("First value", {
+        timeout: 30_000
+      });
+      expect(await learner.labCompletion(seeded.itemId)).toBeNull();
+
+      await setEditor(
+        page,
+        '#include <iostream>\nint main(){ int x; std::cin >> x; if (x == 1) std::cout << "one\\n"; else if (x == 2) std::cout << "two\\n"; }'
+      );
+      await controls(page).getByRole("button", { name: "Run Tests" }).click();
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await page
+        .getByTestId("lab-completion-controls")
+        .getByRole("button", { name: "Validate & complete" })
+        .click();
+      await expect(page.getByTestId("lab-complete-banner")).toBeVisible({ timeout: 30_000 });
+      await expect
+        .poll(async () => (await learner.labCompletion(seeded.itemId))?.status)
+        .toBe("completed");
+      expect(await learner.labCompletion(seeded.itemId)).toMatchObject({
+        project_id: seeded.itemId,
+        content_version_id: seeded.publishedVersionId,
+        status: "completed"
+      });
     } finally {
       await learner.cleanup();
     }
