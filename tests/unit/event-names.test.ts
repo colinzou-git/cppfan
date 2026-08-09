@@ -30,8 +30,12 @@ function singleQuotedIdents(sql: string): string[] {
 // The DB constraint and the #441 preflight/smoke guards hardcode the allowlist in
 // SQL (SQL cannot import the TS list). These tests fail if either drifts from
 // SKILL_EVENT_NAMES so the contract stays in lockstep.
-const FINAL_CONSTRAINT_MIGRATION =
-  "supabase/migrations/20260618170000_add_placement_event_names.sql";
+const CONSTRAINT_REWRITE_MIGRATIONS = [
+  "supabase/migrations/20260614540000_error_pattern_events.sql",
+  "supabase/migrations/20260618150000_add_adaptive_practice_event_names.sql",
+  "supabase/migrations/20260618160000_add_capstone_event_names.sql",
+  "supabase/migrations/20260618170000_add_placement_event_names.sql",
+] as const;
 const PREFLIGHT_MIGRATION =
   "supabase/migrations/20260625120000_preflight_skill_event_type_integrity.sql";
 
@@ -49,9 +53,11 @@ describe("stable skill event names", () => {
     expect(isSkillEventName("not_an_event")).toBe(false);
   });
 
-  it("final DB constraint allowlist matches SKILL_EVENT_NAMES exactly (#441)", () => {
-    const sqlNames = singleQuotedIdents(readRepoFile(FINAL_CONSTRAINT_MIGRATION));
-    expect([...new Set(sqlNames)].sort()).toEqual([...SKILL_EVENT_NAMES].sort());
+  it("every DB constraint rewrite accepts the final stable allowlist (#441)", () => {
+    for (const migration of CONSTRAINT_REWRITE_MIGRATIONS) {
+      const sqlNames = singleQuotedIdents(readRepoFile(migration));
+      expect([...new Set(sqlNames)].sort(), migration).toEqual([...SKILL_EVENT_NAMES].sort());
+    }
   });
 
   it("preflight integrity migration covers every stable name (#441)", () => {
