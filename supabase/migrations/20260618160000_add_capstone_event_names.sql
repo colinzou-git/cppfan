@@ -1,5 +1,7 @@
 -- Roadmap #82 / #130: add stable capstone milestone event names. These events
--- live in the skill-event ledger and remain separate from FSRS scheduling.
+-- live in the skill-event ledger and remain separate from FSRS scheduling. The
+-- complete stable allowlist keeps this historical constraint rewrite safe to
+-- replay after placement events have been recorded.
 
 alter table public.skill_events drop constraint if exists skill_events_event_type_check;
 alter table public.skill_events add constraint skill_events_event_type_check
@@ -24,5 +26,8 @@ alter table public.skill_events add constraint skill_events_event_type_check
     'parsons_checked',
     'capstone_milestone_started',
     'capstone_milestone_completed',
-    'capstone_reflection_submitted'
+    'capstone_reflection_submitted',
+    'placement_started',
+    'placement_completed',
+    'placement_reset'
   ));
