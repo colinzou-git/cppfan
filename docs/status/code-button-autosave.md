@@ -37,8 +37,8 @@ slice, then update this doc.
   then cross-device Supabase; debounced save; flush on unmount) wired into
   `useCodeLabController` and exposed as `draftStatus`. Save indicator
   (`code-lab-draft-status`) in the workspace. Applies to embedded + full-page
-  labs. Migration deploys via the db CI job / supabase-production-migrations —
-  not runnable on this host; verify in CI.
+  labs. Migration deploys via the DB CI job / **Deploy database migrations**
+  workflow; verify there when it is not runnable on the development host.
 - [ ] **Slice 3 — Exercises 'Code' button.** BLOCKED on a product decision.
   Findings: exercises (`exercise-catalog.ts`, e.g. `dsa-two-sum-sorted`) are
   **repo-based, multi-file `.hpp`** exercises run via `scripts/exercises/*.sh` /
@@ -98,7 +98,7 @@ loop was already stopped after the core slices.
 ## Constraints / parity notes
 
 - Dev host can't run Supabase/Docker (see memory) — migrations apply via CI
-  integration job + `supabase-production-migrations` workflow; verify there, not
+  integration job + **Deploy database migrations** workflow; verify there, not
   locally. Code self-skips DB when unconfigured/signed-out.
 - Migrations are high-risk: follow the `code_lab_attempts` migration as the
   pattern; RLS must restrict drafts to the owning user.
