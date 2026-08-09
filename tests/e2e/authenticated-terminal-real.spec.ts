@@ -30,6 +30,8 @@ function controls(page: Page) {
 }
 
 test.describe("real interactive Terminal and Judge0 contract (#667)", () => {
+  test.describe.configure({ timeout: 180_000 });
+
   test.skip(
     process.env.CPPFAN_REQUIRE_REAL_CODE_TERMINAL !== "true",
     "Requires the dedicated real Terminal workflow."
@@ -62,9 +64,11 @@ int main() {
   std::cout << "eof\\n";
 }`
       );
+      await page.getByTestId("code-lab-tab-stdin").click();
+      await page.getByTestId("code-stdin").fill("");
       await controls(page).getByRole("button", { name: "Run", exact: true }).click();
       const transcript = page.getByTestId("code-terminal-transcript");
-      await expect(transcript).toContainText("first>");
+      await expect(transcript).toContainText("first>", { timeout: 30_000 });
 
       const input = page.getByTestId("code-terminal-input");
       await input.fill("hello with spaces");
@@ -75,7 +79,9 @@ int main() {
       await page.getByTestId("code-terminal-send").click();
       await expect(transcript).toContainText("two:");
       await page.getByTestId("code-terminal-eof").click();
-      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited");
+      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited", {
+        timeout: 30_000
+      });
       await expect(transcript).toContainText("eof");
 
       await expect.poll(async () => (await learner.terminalAttempts(itemId)).length).toBe(1);
@@ -142,14 +148,20 @@ int main(){ std::cout << "waiting" << std::flush; for(;;) std::this_thread::slee
       await assertRealHealth(page);
       await page.goto(`/lab/${encodeURIComponent(seeded.itemId)}`);
       await expect(page.getByRole("tab", { name: "Arguments" })).toBeVisible();
+      await page.getByRole("tab", { name: "Arguments" }).click();
+      await page.getByTestId("code-stdin").fill("2 3\n");
       await setEditor(page, "int add(int a, int b){ return a + b; }");
 
       await controls(page).getByRole("button", { name: "Run", exact: true }).click();
-      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited");
+      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited", {
+        timeout: 30_000
+      });
       await expect(page.getByTestId("code-terminal-transcript")).toContainText("5");
 
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
-      await expect(page.getByTestId("code-test-summary")).toHaveText("2/2 tests passed");
+      await expect(page.getByTestId("code-test-summary")).toHaveText("2/2 tests passed", {
+        timeout: 30_000
+      });
       await expect(page.getByTestId("code-test-results")).toContainText("Judge0 real compile/run");
     } finally {
       await learner.cleanup();
@@ -185,11 +197,15 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
       await setEditor(page, source);
 
       await controls(page).getByRole("button", { name: "Run", exact: true }).click();
-      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited");
+      await expect(page.getByTestId("code-terminal-status")).toHaveText("Exited", {
+        timeout: 30_000
+      });
       await expect(page.getByTestId("code-terminal-transcript")).toContainText("fixture-ok");
 
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
-      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
+        timeout: 30_000
+      });
       await expect(page.getByTestId("code-test-results")).toContainText("Judge0 real compile/run");
     } finally {
       await learner.cleanup();
@@ -247,7 +263,9 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
         '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 1 ? "one\\n" : "wrong\\n"); }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
-      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
+        timeout: 30_000
+      });
       await expect(milestoneTabs.nth(0).getByLabel("Milestone progress saved")).toBeVisible();
       await expect
         .poll(async () => (await learner.labMilestoneProgress(seeded.itemId)).length)
@@ -271,7 +289,9 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
         '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 2 ? "two\\n" : "wrong\\n"); }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
-      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
+        timeout: 30_000
+      });
       await expect(
         page.getByTestId("lab-milestone-tab").nth(1).getByLabel("Milestone progress saved")
       ).toBeVisible();
@@ -293,7 +313,9 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
         '#include <iostream>\nint main(){ int x; std::cin >> x; if (x == 1) std::cout << "one\\n"; else if (x == 2) std::cout << "two\\n"; }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
-      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed");
+      await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
+        timeout: 30_000
+      });
       await page
         .getByTestId("lab-completion-controls")
         .getByRole("button", { name: "Validate & complete" })
