@@ -1532,3 +1532,26 @@ begin
 
   raise notice 'Terminal attempt idempotency smoke OK';
 end $$;
+
+-- #667: owner-scoped RLS policies are reachable through the intended table
+-- privileges. Attempts remain append-only; drafts retain their documented CRUD
+-- lifecycle; neither table is exposed to anonymous clients.
+do $$
+begin
+  if not (
+    has_table_privilege('authenticated', 'public.code_lab_attempts', 'select')
+    and has_table_privilege('authenticated', 'public.code_lab_attempts', 'insert')
+    and not has_table_privilege('authenticated', 'public.code_lab_attempts', 'update')
+    and not has_table_privilege('authenticated', 'public.code_lab_attempts', 'delete')
+    and has_table_privilege('authenticated', 'public.code_lab_drafts', 'select')
+    and has_table_privilege('authenticated', 'public.code_lab_drafts', 'insert')
+    and has_table_privilege('authenticated', 'public.code_lab_drafts', 'update')
+    and has_table_privilege('authenticated', 'public.code_lab_drafts', 'delete')
+    and not has_table_privilege('anon', 'public.code_lab_attempts', 'select')
+    and not has_table_privilege('anon', 'public.code_lab_drafts', 'select')
+  ) then
+    raise exception '#667: Code Lab table privileges do not match the RLS contract';
+  end if;
+
+  raise notice 'Code Lab table privileges smoke OK';
+end $$;

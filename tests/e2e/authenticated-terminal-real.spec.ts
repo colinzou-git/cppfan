@@ -177,11 +177,11 @@ int main(){ std::cout << "waiting" << std::flush; for(;;) std::this_thread::slee
       const source = `#include <fstream>
 #include <iostream>
 #include <string>
-int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline(f,s); std::cout << s; }`;
+int main(){ std::ifstream f("message.txt"); std::string s; std::getline(f,s); std::cout << s; }`;
       const seeded = await learner.seedPublishedLab({
         title: "PW real fixture parity",
         starterCode: source,
-        fixtures: [{ filename: "fixtures/message.txt", content: "fixture-ok" }],
+        fixtures: [{ filename: "message.txt", content: "fixture-ok" }],
         tests: [
           {
             name: "fixture",
@@ -231,7 +231,7 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
               {
                 name: "prints one",
                 input: "1\n",
-                expectedOutput: "one\n",
+                expectedOutput: "one",
                 hidden: false
               }
             ]
@@ -245,7 +245,7 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
               {
                 name: "prints two",
                 input: "2\n",
-                expectedOutput: "two\n",
+                expectedOutput: "two",
                 hidden: false
               }
             ]
@@ -260,7 +260,7 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
 
       await setEditor(
         page,
-        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 1 ? "one\\n" : "wrong\\n"); }'
+        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 1 ? "one" : "wrong"); }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
       await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
@@ -286,7 +286,7 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
       await page.getByTestId("lab-milestone-tab").nth(1).click();
       await setEditor(
         page,
-        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 2 ? "two\\n" : "wrong\\n"); }'
+        '#include <iostream>\nint main(){ int x; std::cin >> x; std::cout << (x == 2 ? "two" : "wrong"); }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
       await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
@@ -310,7 +310,7 @@ int main(){ std::ifstream f("fixtures/message.txt"); std::string s; std::getline
 
       await setEditor(
         page,
-        '#include <iostream>\nint main(){ int x; std::cin >> x; if (x == 1) std::cout << "one\\n"; else if (x == 2) std::cout << "two\\n"; }'
+        '#include <iostream>\nint main(){ int x; std::cin >> x; if (x == 1) std::cout << "one"; else if (x == 2) std::cout << "two"; }'
       );
       await controls(page).getByRole("button", { name: "Run Tests" }).click();
       await expect(page.getByTestId("code-test-summary")).toHaveText("1/1 tests passed", {
