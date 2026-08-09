@@ -9,6 +9,7 @@ import {
   PistonRunner,
   simulateStdout
 } from "@/features/code-lab/code-runner-adapter";
+import { createStoreZip } from "@/features/user-content/zip";
 
 describe("Code Lab mock runner", () => {
   it("prints string literals from a cout chain", () => {
@@ -181,7 +182,8 @@ describe("Judge0Runner", () => {
       stdin,
       compilerFlags: ["-std=c++20"],
       timeoutMs: 5000,
-      memoryMb: 128
+      memoryMb: 128,
+      files: [{ name: "message.txt", content: "fixture-ok" }]
     });
 
     expect(result.status).toBe("success");
@@ -192,7 +194,9 @@ describe("Judge0Runner", () => {
 
     const firstCall = fetchMock.mock.calls[0];
     if (!firstCall) throw new Error("Expected Judge0Runner to call fetch.");
-    expect(String(firstCall[0])).toBe("http://judge0.example/submissions?base64_encoded=true&wait=true");
+    expect(String(firstCall[0])).toBe(
+      "http://judge0.example/submissions?base64_encoded=true&wait=true"
+    );
     const init = firstCall[1];
     if (!init) throw new Error("Expected Judge0Runner to pass fetch options.");
     expect((init.headers as Record<string, string>)["X-Auth-Token"]).toBe("secret");
@@ -201,6 +205,11 @@ describe("Judge0Runner", () => {
     expect(body.source_code).toBe(Buffer.from(source, "utf8").toString("base64"));
     expect(body.stdin).toBe(Buffer.from(stdin, "utf8").toString("base64"));
     expect(body.memory_limit).toBe(128 * 1024);
+    expect(body.additional_files).toBe(
+      Buffer.from(
+        createStoreZip([{ name: "message.txt", data: new TextEncoder().encode("fixture-ok") }])
+      ).toString("base64")
+    );
     expect(body).not.toHaveProperty("compiler_options");
   });
 });
@@ -217,7 +226,11 @@ describe("Judge0 line-wrapped base64 decoding", () => {
       "main.cpp: In function 'int main()':\n" +
       "main.cpp:7:1: error: 'adfad' does not name a type\n" +
       "    7 | adfad\n      | ^~~~~\n";
-    const wrappedBase64 = `${(Buffer.from(compileError, "utf8").toString("base64").match(/.{1,60}/g) ?? []).join("\n")}\n`;
+    const wrappedBase64 = `${(
+      Buffer.from(compileError, "utf8")
+        .toString("base64")
+        .match(/.{1,60}/g) ?? []
+    ).join("\n")}\n`;
     expect(wrappedBase64).toContain("\n");
 
     const fetchMock = vi.fn(
@@ -234,13 +247,15 @@ describe("Judge0 line-wrapped base64 decoding", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await new Judge0Runner({ baseUrl: "http://judge0.example", languageId: 54 }).run({
-      source: `int main(){ return 0; }\nadfad`,
-      stdin: "",
-      compilerFlags: [],
-      timeoutMs: 5000,
-      memoryMb: 128
-    });
+    const result = await new Judge0Runner({ baseUrl: "http://judge0.example", languageId: 54 }).run(
+      {
+        source: `int main(){ return 0; }\nadfad`,
+        stdin: "",
+        compilerFlags: [],
+        timeoutMs: 5000,
+        memoryMb: 128
+      }
+    );
 
     expect(result.status).toBe("compile_error");
     expect(result.compileOutput).toBe(compileError);
@@ -287,13 +302,21 @@ describe("Piston response interpretation", () => {
   });
 
   it("maps SIGKILL to a timeout", () => {
-    const result = interpretPistonResponse({ run: { code: null, signal: "SIGKILL", stdout: "" } }, "piston", 9);
+    const result = interpretPistonResponse(
+      { run: { code: null, signal: "SIGKILL", stdout: "" } },
+      "piston",
+      9
+    );
     expect(result.status).toBe("timeout");
     expect(result.timedOut).toBe(true);
   });
 
   it("reports success with stdout for a clean run", () => {
-    const result = interpretPistonResponse({ compile: { code: 0 }, run: { code: 0, stdout: "ok\n" } }, "piston", 7);
+    const result = interpretPistonResponse(
+      { compile: { code: 0 }, run: { code: 0, stdout: "ok\n" } },
+      "piston",
+      7
+    );
     expect(result.status).toBe("success");
     expect(result.stdout).toBe("ok\n");
     expect(result.simulated).toBe(false);
@@ -315,7 +338,10 @@ describe("Judge0 response interpretation", () => {
 
   it("maps Compilation Error to compile_error", () => {
     const result = interpretJudge0Response(
-      { compile_output: "main.cpp:1: error: expected ';'", status: { id: 6, description: "Compilation Error" } },
+      {
+        compile_output: "main.cpp:1: error: expected ';'",
+        status: { id: 6, description: "Compilation Error" }
+      },
       "judge0",
       50
     );
@@ -324,7 +350,11 @@ describe("Judge0 response interpretation", () => {
   });
 
   it("maps Time Limit Exceeded to timeout", () => {
-    const result = interpretJudge0Response({ status: { id: 5, description: "Time Limit Exceeded" } }, "judge0", 50);
+    const result = interpretJudge0Response(
+      { status: { id: 5, description: "Time Limit Exceeded" } },
+      "judge0",
+      50
+    );
     expect(result.status).toBe("timeout");
     expect(result.timedOut).toBe(true);
   });
@@ -341,7 +371,10 @@ describe("Judge0 response interpretation", () => {
 
   it("maps Internal Error to runner_error", () => {
     const result = interpretJudge0Response(
-      { message: "Judge0 worker internal error", status: { id: 13, description: "Internal Error" } },
+      {
+        message: "Judge0 worker internal error",
+        status: { id: 13, description: "Internal Error" }
+      },
       "judge0",
       50
     );

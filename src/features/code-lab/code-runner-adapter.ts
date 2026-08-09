@@ -1,4 +1,5 @@
 import type { CodeRunResult } from "./code-lab-types";
+import { createStoreZip } from "../user-content/zip";
 
 /**
  * Runner adapter boundary (#407). The Code Lab never executes untrusted C++ in
@@ -61,9 +62,7 @@ export class MockRunner implements CodeRunnerAdapter {
  * result.
  */
 export function simulateStdout(source: string, stdin: string): string {
-  const withoutComments = source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\/\/[^\n]*/g, "");
+  const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
   const literals: string[] = [];
   let printsVariable = false;
@@ -182,7 +181,9 @@ export class PistonRunner implements CodeRunnerAdapter {
 
     if (!response.ok) {
       const detail = await readShortResponseBody(response);
-      const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
+      const statusDetail = detail
+        ? `HTTP ${response.status}: ${detail}`
+        : `HTTP ${response.status}`;
       return runnerError(
         this.name,
         response.status === 429
@@ -251,6 +252,14 @@ export class Judge0Runner implements CodeRunnerAdapter {
       memory_limit: input.memoryMb * 1024
     };
 
+    if (input.files && input.files.length > 0) {
+      const encoder = new TextEncoder();
+      const archive = createStoreZip(
+        input.files.map((file) => ({ name: file.name, data: encoder.encode(file.content) }))
+      );
+      body.additional_files = Buffer.from(archive).toString("base64");
+    }
+
     if (this.options.compilerOptionsEnabled && input.compilerFlags.length > 0) {
       body.compiler_options = encodeBase64Text(input.compilerFlags.join(" "));
     }
@@ -273,8 +282,14 @@ export class Judge0Runner implements CodeRunnerAdapter {
 
     if (!response.ok) {
       const detail = await readShortResponseBody(response);
-      const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
-      return runnerError(this.name, `The Judge0 runner rejected this submission (${statusDetail}).`, start);
+      const statusDetail = detail
+        ? `HTTP ${response.status}: ${detail}`
+        : `HTTP ${response.status}`;
+      return runnerError(
+        this.name,
+        `The Judge0 runner rejected this submission (${statusDetail}).`,
+        start
+      );
     }
 
     let payload: Judge0Response;
@@ -313,26 +328,43 @@ export class Judge0Runner implements CodeRunnerAdapter {
 
       let response: Response;
       try {
-        response = await fetch(`${baseUrl}/submissions/${encodeURIComponent(token)}?base64_encoded=true`, {
-          method: "GET",
-          headers,
-          cache: "no-store",
-          signal: AbortSignal.timeout(Math.max(1000, deadline - Date.now()))
-        });
+        response = await fetch(
+          `${baseUrl}/submissions/${encodeURIComponent(token)}?base64_encoded=true`,
+          {
+            method: "GET",
+            headers,
+            cache: "no-store",
+            signal: AbortSignal.timeout(Math.max(1000, deadline - Date.now()))
+          }
+        );
       } catch {
-        return runnerError(this.name, "The Judge0 runner did not respond while polling the result.", start);
+        return runnerError(
+          this.name,
+          "The Judge0 runner did not respond while polling the result.",
+          start
+        );
       }
 
       if (!response.ok) {
         const detail = await readShortResponseBody(response);
-        const statusDetail = detail ? `HTTP ${response.status}: ${detail}` : `HTTP ${response.status}`;
-        return runnerError(this.name, `The Judge0 runner rejected result polling (${statusDetail}).`, start);
+        const statusDetail = detail
+          ? `HTTP ${response.status}: ${detail}`
+          : `HTTP ${response.status}`;
+        return runnerError(
+          this.name,
+          `The Judge0 runner rejected result polling (${statusDetail}).`,
+          start
+        );
       }
 
       try {
         lastPayload = decodeJudge0TextFields((await response.json()) as Judge0Response);
       } catch {
-        return runnerError(this.name, "The Judge0 runner returned an unreadable polling response.", start);
+        return runnerError(
+          this.name,
+          "The Judge0 runner returned an unreadable polling response.",
+          start
+        );
       }
 
       if (!isJudge0Pending(lastPayload)) {
@@ -498,7 +530,10 @@ export function interpretJudge0Response(
     memoryKb,
     provider,
     simulated: false,
-    note: firstNonEmptyText(message, `Judge0 returned status ${statusId ?? "unknown"}: ${statusDescription}`)
+    note: firstNonEmptyText(
+      message,
+      `Judge0 returned status ${statusId ?? "unknown"}: ${statusDescription}`
+    )
   };
 }
 
@@ -562,7 +597,11 @@ function runnerError(provider: string, note: string, start: number): CodeRunResu
   return runnerErrorFromDuration(provider, note, Date.now() - start);
 }
 
-function runnerErrorFromDuration(provider: string, note: string, durationMs: number): CodeRunResult {
+function runnerErrorFromDuration(
+  provider: string,
+  note: string,
+  durationMs: number
+): CodeRunResult {
   return {
     status: "runner_error",
     compileOutput: "",
