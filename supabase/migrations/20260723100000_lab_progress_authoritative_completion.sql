@@ -1,11 +1,21 @@
 -- #669 Authoritative user-lab milestone evidence and versioned completion.
 
-alter table public.user_lab_milestone_progress
-  add constraint user_lab_milestone_progress_hash_format
-  check (
-    code_snapshot_hash is null
-    or code_snapshot_hash ~ '^[0-9a-f]{64}$'
-  ) not valid;
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.user_lab_milestone_progress'::regclass
+      and conname = 'user_lab_milestone_progress_hash_format'
+  ) then
+    alter table public.user_lab_milestone_progress
+      add constraint user_lab_milestone_progress_hash_format
+      check (
+        code_snapshot_hash is null
+        or code_snapshot_hash ~ '^[0-9a-f]{64}$'
+      ) not valid;
+  end if;
+end $$;
 
 alter table public.user_lab_milestone_progress
   validate constraint user_lab_milestone_progress_hash_format;
