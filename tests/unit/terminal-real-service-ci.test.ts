@@ -52,6 +52,13 @@ describe("real interactive Terminal CI contract (#667)", () => {
     );
   });
 
+  it("serializes real-service runs around the singleton VPS Terminal", () => {
+    expect(workflow).toContain(
+      "group: interactive-terminal-real-service-${{ github.repository }}"
+    );
+    expect(workflow).toContain("cancel-in-progress: false");
+  });
+
   it("runs only the focused browser spec and covers the full service protocol", () => {
     expect(workflow).toContain("tests/e2e/authenticated-terminal-real.spec.ts");
     expect(workflow).not.toContain("tests/e2e/authenticated-*.spec.ts");

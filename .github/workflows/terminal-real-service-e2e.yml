@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+# The VPS service deliberately has one global Terminal slot. Queue workflow
+# runs instead of allowing pushes/reruns to compete for that same canary.
+concurrency:
+  group: interactive-terminal-real-service-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   real-terminal:
     name: Real interactive Terminal

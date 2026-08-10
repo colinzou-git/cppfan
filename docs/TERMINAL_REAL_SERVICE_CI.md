@@ -16,6 +16,10 @@ GitHub-hosted runner
 The same execution-service deployable hosts the interactive Terminal and GDB
 routes. Do not create a second Terminal daemon.
 
+Workflow runs are serialized because the VPS service intentionally exposes one
+global interactive Terminal slot. A newer push waits for the current real-service
+run to finish; it does not cancel that run or compete with it.
+
 ## Repository settings
 
 Actions secrets:
