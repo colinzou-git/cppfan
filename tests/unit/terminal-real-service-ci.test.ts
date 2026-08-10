@@ -66,7 +66,10 @@ describe("real interactive Terminal CI contract (#667)", () => {
       "/terminal/stop",
       "eof:true",
       "fixture-ok",
-      "stopped by you"
+      "stopped by you",
+      "terminal_busy",
+      "singleton_busy=ok",
+      "singleton_release=ok"
     ]) {
       expect(preflight).toContain(marker);
     }

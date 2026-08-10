@@ -145,6 +145,34 @@ send_eof() {
   api_post /terminal/input "${body}" >/dev/null
 }
 
+expect_busy_start() {
+  local source="$1"
+  local start_body
+  local response_file
+  local status
+  start_body="$(jq -n \
+    --arg source "${source}" \
+    '{
+      source: $source,
+      stdin: "",
+      files: [],
+      compilerFlags: ["-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-O0"]
+    }')"
+  response_file="$(mktemp "${RUNNER_TEMP:-/tmp}/terminal-busy-response.XXXXXX")"
+  status="$(curl --silent --show-error \
+    --connect-timeout 3 --max-time 15 \
+    -o "${response_file}" -w '%{http_code}' \
+    -H "Authorization: Bearer ${CODE_TERMINAL_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "${start_body}" \
+    "${CODE_TERMINAL_BASE_URL%/}/terminal/start")"
+  [[ "${status}" == "409" ]]
+  jq -e '.error.code == "terminal_busy"' "${response_file}" >/dev/null
+  jq -e '.error.message == "The Terminal is busy. Stop or wait for the current run to finish."' \
+    "${response_file}" >/dev/null
+  rm -f "${response_file}"
+}
+
 health="$(api_get /health)"
 jq -e '.status == "ok"' <<<"${health}" >/dev/null
 
@@ -166,6 +194,7 @@ CPP
 
 start_session "${multi_source}"
 wait_for_text "first>"
+expect_busy_start "${multi_source}"
 send_input $'hello with spaces\n'
 wait_for_text "one:hello with spaces"
 wait_for_text "second>"
@@ -215,7 +244,14 @@ wait_for_status "stopped"
 session_id=""
 session_token=""
 
-summary=$'health=ok\nmulti_input=ok\nempty_line=ok\neof=ok\nfixture=ok\nstop=ok\n'
+# A stopped session retains its transcript but must release the singleton slot.
+start_session 'int main(){return 0;}'
+wait_for_status "exited"
+[[ "${terminal_exit_code}" == "0" ]]
+session_id=""
+session_token=""
+
+summary=$'health=ok\nmulti_input=ok\nempty_line=ok\neof=ok\nfixture=ok\nstop=ok\nsingleton_busy=ok\nsingleton_release=ok\n'
 if [[ -n "${RUNNER_TEMP:-}" ]]; then
   printf '%s' "${summary}" >"${RUNNER_TEMP}/terminal-preflight-summary.txt"
 fi
