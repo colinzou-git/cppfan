@@ -16,6 +16,10 @@ GitHub-hosted runner
 The same execution-service deployable hosts the interactive Terminal and GDB
 routes. Do not create a second Terminal daemon.
 
+Workflow runs are serialized because the VPS service intentionally exposes one
+global interactive Terminal slot. A newer push waits for the current real-service
+run to finish; it does not cancel that run or compete with it.
+
 ## Repository settings
 
 Actions secrets:
@@ -94,7 +98,9 @@ fall back to `mock`.
 - an empty `getline` line;
 - EOF and natural exit;
 - nested fixture materialization;
-- manual Stop and its transcript event.
+- manual Stop and its transcript event;
+- deterministic `409 terminal_busy` rejection while a session is active;
+- singleton-capacity release after Stop while the old transcript is retained.
 
 The artifact summary contains only:
 
@@ -105,6 +111,8 @@ empty_line=ok
 eof=ok
 fixture=ok
 stop=ok
+singleton_busy=ok
+singleton_release=ok
 ```
 
 ## Rotating the Terminal API key

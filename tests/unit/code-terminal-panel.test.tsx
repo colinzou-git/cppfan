@@ -112,6 +112,16 @@ describe("CodeTerminalPanel (#664)", () => {
     expect(screen.getByTestId("code-terminal-unconfigured")).toHaveTextContent("not configured");
   });
 
+  it("renders an actionable start error", () => {
+    renderPanel({
+      status: "error",
+      message: "The Terminal is busy. Stop or wait for the current run to finish."
+    });
+    expect(screen.getByTestId("code-terminal-error")).toHaveTextContent(
+      "Stop or wait for the current run"
+    );
+  });
+
   it("renders saving/retrying state without hiding the transcript", () => {
     const { rerender } = renderPanel({
       status: "exited",

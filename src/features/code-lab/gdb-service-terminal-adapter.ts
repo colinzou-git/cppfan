@@ -23,6 +23,22 @@ export type TerminalServiceAdapterConfig = {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
+type TerminalServiceErrorBody = {
+  error?: { code?: unknown; message?: unknown };
+};
+
+/** A safe, structured failure returned by the private execution service. */
+export class TerminalServiceError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+    message: string
+  ) {
+    super(message);
+    this.name = "TerminalServiceError";
+  }
+}
+
 export class GdbServiceTerminalAdapter implements CodeTerminalAdapter {
   readonly name = "execution-service";
   private readonly baseUrl: string;
@@ -91,7 +107,13 @@ export class GdbServiceTerminalAdapter implements CodeTerminalAdapter {
       body: JSON.stringify(body)
     });
     if (!res.ok) {
-      throw new Error(`Terminal service responded ${res.status}.`);
+      const body = (await res.json().catch(() => ({}))) as TerminalServiceErrorBody;
+      const code = typeof body.error?.code === "string" ? body.error.code : "terminal_error";
+      const message =
+        typeof body.error?.message === "string"
+          ? body.error.message
+          : `Terminal service responded ${res.status}.`;
+      throw new TerminalServiceError(res.status, code, message);
     }
     return (await res.json()) as T;
   }

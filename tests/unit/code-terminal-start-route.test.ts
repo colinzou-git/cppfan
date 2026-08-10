@@ -26,6 +26,7 @@ vi.mock("@/features/code-lab/code-terminal-service", () => ({
 }));
 
 import { POST } from "@/app/api/code/terminal/start/route";
+import { TerminalServiceError } from "@/features/code-lab/gdb-service-terminal-adapter";
 
 function request(): Request {
   return new Request("http://localhost/api/code/terminal/start", {
@@ -103,5 +104,32 @@ describe("Terminal start route execution contract (#666)", () => {
       error: { code: "terminal_error" }
     });
     expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves the singleton busy response as a safe 409", async () => {
+    resolvePlan.mockResolvedValue({
+      status: "ok",
+      plan: {
+        preparedSource: "prepared source",
+        files: [],
+        compilerFlags: ["-std=c++20"]
+      }
+    });
+    start.mockRejectedValueOnce(
+      new TerminalServiceError(
+        409,
+        "terminal_busy",
+        "The Terminal is busy. Stop or wait for the current run to finish."
+      )
+    );
+
+    const response = await POST(request());
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "terminal_busy",
+        message: "The Terminal is busy. Stop or wait for the current run to finish."
+      }
+    });
   });
 });

@@ -232,7 +232,7 @@ without restarting. Both the full-page workspace and the embedded lab share one
 controller (`useCodeTerminal`) and one panel (`CodeTerminalPanel`).
 
 - **Terminal vs Input Args.** The full-page right dock renames **Output → Terminal**
-  and **Input → Input Args**. Input Args is the *initial stdin* written once at
+  and **Input → Input Args**. Input Args is the _initial stdin_ written once at
   launch (not `main(argc, argv)` command-line input); standard input stays open
   afterward so live input in the Terminal answers later reads. Its contents are
   sent exactly as authored — no newline is added or removed.
@@ -243,13 +243,18 @@ controller (`useCodeTerminal`) and one panel (`CodeTerminalPanel`).
 - **Run/Stop.** While compiling/running, Run becomes **Stop**, and **Run Tests** is
   disabled so the two execution paths never compete. Editing the source during a
   session marks it as running an older version; Stop before running the change.
+- **Single-user capacity.** The execution service permits exactly one active
+  interactive Terminal process across the app. A second start while the first is
+  compiling, running, or still stopping receives a stable `409 terminal_busy`
+  response and the panel asks you to stop or wait for the current run. Completed
+  transcripts remain readable without occupying the slot.
 - **Send / Send EOF.** Enter sends the composer text plus `\n` (empty lines are
   allowed, for getline); **Send EOF** closes stdin without killing the process, so
   `while (getline(...))` loops can finish intentionally.
 - **Session ending.** A session ends only through an explicit/real event: Stop, EOF
   then natural exit, natural exit, compile/runtime failure, or a hard server safety
   limit. A quiet program waiting on input is **never** killed by a client heuristic —
-  only the hard wall/idle/retain/resource caps end it, and they surface a visible
+  only the hard wall/idle/retain caps end it, and they surface a visible
   system message.
 - **Learning rules.** A Terminal Run records exactly one attempt when the session
   reaches a final state (polling never duplicates it) and may emit `code_attempted`,
@@ -264,11 +269,14 @@ Untrusted C++ **never** runs inside Next.js/Vercel and the browser never receive
 execution service's `/terminal/{start,poll,input,stop}` (same OVH deployable as the
 GDB debugger). Sessions use cryptographically random ids **and** an unguessable
 per-session capability token required on every poll/input/stop; a browser-supplied
-id alone can never reach a foreign session. The service bounds source, initial and
-per-write and cumulative live input, output bytes, event count, processes, memory,
-compile time, wall time, and retained-session time, kills the whole process group on
-Stop/reap, and deletes the temp workspace on every terminal state
-(`services/gdb-debugger/src/{terminal-session,terminal-event-buffer,security}.ts`).
+id alone cannot control a session. This personal deployment intentionally uses one
+process-wide active Terminal slot instead of per-session OS isolation or rate
+limiting. It still bounds source, fixture, initial/live input, output bytes, event
+count, compile time, wall time, idle time, and transcript retention; kills the
+program process group on Stop/reap; and deletes the temp workspace on every final
+state (`services/gdb-debugger/src/{terminal-session,terminal-event-buffer,security}.ts`).
+The service is therefore intended for this trusted single-user app, not as a
+general multi-tenant code-execution platform.
 
 ### Terminal configuration (server-only)
 

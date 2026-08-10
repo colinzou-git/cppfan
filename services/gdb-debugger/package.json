@@ -2,7 +2,7 @@
   "name": "cppfan-gdb-debugger",
   "version": "0.1.0",
   "private": true,
-  "description": "OVH-hosted GDB/MI debugger service for the cppFan Code Lab (#442). Compiles and debugs untrusted C++ in an isolated sandbox; the Next.js app proxies to it.",
+  "description": "OVH-hosted GDB/MI and interactive Terminal service for cppFan's trusted single-user Code Lab deployment.",
   "type": "module",
   "engines": {
     "node": ">=22"

@@ -119,6 +119,45 @@ int main(){ std::cout << "waiting" << std::flush; for(;;) std::this_thread::slee
     }
   });
 
+  test("allows one global Terminal and explains the busy state in a second tab", async ({
+    context,
+    baseURL
+  }) => {
+    const learner = await createAuthenticatedLearner(context, baseURL!);
+    try {
+      const firstPage = await context.newPage();
+      await assertRealHealth(firstPage);
+      await firstPage.goto("/lab/cpp.program_basics.io.lesson");
+      await setEditor(
+        firstPage,
+        `#include <chrono>
+#include <iostream>
+#include <thread>
+int main(){ std::cout << "slot-owned" << std::flush; for(;;) std::this_thread::sleep_for(std::chrono::milliseconds(100)); }`
+      );
+      await controls(firstPage).getByRole("button", { name: "Run", exact: true }).click();
+      await expect(firstPage.getByTestId("code-terminal-transcript")).toContainText("slot-owned");
+
+      const secondPage = await context.newPage();
+      await secondPage.goto("/lab/cpp.program_basics.io.lesson");
+      await setEditor(secondPage, "int main(){return 0;}");
+      await controls(secondPage).getByRole("button", { name: "Run", exact: true }).click();
+      await expect(secondPage.getByTestId("code-terminal-status")).toHaveText("Error");
+      await expect(secondPage.getByTestId("code-terminal-error")).toHaveText(
+        "The Terminal is busy. Stop or wait for the current run to finish."
+      );
+
+      await controls(firstPage).getByRole("button", { name: "Stop" }).click();
+      await expect(firstPage.getByTestId("code-terminal-status")).toHaveText("Stopped");
+      await controls(secondPage).getByRole("button", { name: "Run", exact: true }).click();
+      await expect(secondPage.getByTestId("code-terminal-status")).toHaveText("Exited", {
+        timeout: 30_000
+      });
+    } finally {
+      await learner.cleanup();
+    }
+  });
+
   test("runs function-only source in Terminal and through real Judge0 tests", async ({
     context,
     baseURL

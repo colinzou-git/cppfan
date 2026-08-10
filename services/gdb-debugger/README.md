@@ -1,7 +1,7 @@
 # cppFan execution service — GDB debugger (#442) + interactive Terminal (#664)
 
-A small, OVH-hosted HTTP service that compiles and runs untrusted C++ in an
-isolated, network-less sandbox. It hosts two independent features:
+A small, OVH-hosted HTTP service that compiles and runs C++ for cppFan's trusted
+single-user deployment. It hosts two independent features:
 
 - **GDB debugger** (#442): `g++ -g -O0` + `gdb --interpreter=mi2` stepping.
 - **Interactive Terminal** (#664): compile, spawn the binary directly with piped
@@ -16,35 +16,42 @@ invokes debug actions or vice versa.
 
 ## Endpoints
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET  | `/health`          | liveness (`sessions`, `terminals` counts) |
-| POST | `/debug/start`     | compile + launch under gdb, return first stopped snapshot |
-| POST | `/debug/action`    | continue / pause / step over/into/out / restart |
-| POST | `/debug/stop`      | kill the inferior + gdb, delete the workspace |
-| POST | `/terminal/start`  | compile + spawn the binary, write Input Args once, keep stdin open |
-| POST | `/terminal/poll`   | events after a cursor + current status (retained after exit) |
-| POST | `/terminal/input`  | write one live-input payload, or close stdin on `{ "eof": true }` |
-| POST | `/terminal/stop`   | kill the process group (idempotent) |
+| Method | Path              | Purpose                                                            |
+| ------ | ----------------- | ------------------------------------------------------------------ |
+| GET    | `/health`         | liveness (`sessions`, `terminals` counts)                          |
+| POST   | `/debug/start`    | compile + launch under gdb, return first stopped snapshot          |
+| POST   | `/debug/action`   | continue / pause / step over/into/out / restart                    |
+| POST   | `/debug/stop`     | kill the inferior + gdb, delete the workspace                      |
+| POST   | `/terminal/start` | compile + spawn the binary, write Input Args once, keep stdin open |
+| POST   | `/terminal/poll`  | events after a cursor + current status (retained after exit)       |
+| POST   | `/terminal/input` | write one live-input payload, or close stdin on `{ "eof": true }`  |
+| POST   | `/terminal/stop`  | kill the process group (idempotent)                                |
 
 All POST requests authenticate with a bearer token equal to the app's
 `CODE_DEBUGGER_API_KEY`. Terminal sessions additionally require an unguessable
 per-session `sessionToken` (returned by `/terminal/start`) on every poll/input/stop;
 a browser-supplied `sessionId` alone can never reach a foreign session.
 
-## Sandbox limits
+## Runtime limits and Terminal capacity
 
 See `src/security.ts`:
 
 - `DEBUG_LIMITS`: 10s compile, 5min wall, 2min idle, 256MB memory, 64 processes,
   64KB output, 20 breakpoints, 20 watches, 500 steps.
-- `TERMINAL_LIMITS`: 10s compile, 10min wall, 3min idle (no polling), 60s
-  retain-after-exit, 256MB memory, 64 processes, 128KB output, 5000 events, 10KB
-  initial stdin, 4KB per live-input write, 64KB cumulative live input.
+- `TERMINAL_LIMITS`: 10s compile, 10min wall, 3min idle (no polling), 5min
+  retain-after-exit, 128KB output, 5000 events, 10KB initial stdin, 4KB per
+  live-input write, and 64KB cumulative live input.
 
-The program gets no network and a temp-only workspace deleted on every terminal
-state. A quiet program waiting on stdin is never killed for being quiet — only the
-hard wall/idle/retain/resource caps end it, with a visible system message.
+The service allows exactly one active interactive Terminal across the process.
+Concurrent starts receive `409 terminal_busy`; a completed transcript stays
+pollable without consuming the slot. The program uses a temp workspace deleted on
+every final state, and a quiet program waiting on stdin is never killed merely for
+being quiet. The hard wall/idle/retain caps still apply.
+
+This deliberately simple model does not provide per-session CPU/memory/process
+enforcement, network isolation, or request rate limits. Container-wide limits may
+be applied by the deployment, but the service is intended for cppFan's one-user
+installation rather than multi-tenant execution.
 
 ## App configuration
 
