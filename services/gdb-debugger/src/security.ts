@@ -85,7 +85,7 @@ export function validateStartPayload(payload: {
  * process alive with writable stdin, so it needs its own caps for initial and
  * live input in addition to the shared compile/output/session bounds. Idle here
  * means "the browser stopped polling" — a program quietly waiting on stdin is
- * never killed for being quiet, only for exceeding a hard wall/idle/resource cap.
+ * never killed for being quiet, only for exceeding a hard wall/idle cap.
  */
 export const TERMINAL_LIMITS = {
   compileTimeoutMs: 10_000,
@@ -93,8 +93,6 @@ export const TERMINAL_LIMITS = {
   idleTimeoutMs: 3 * 60_000,
   /** How long a finished session's bounded transcript stays pollable. */
   retainAfterExitMs: 5 * 60_000,
-  memoryBytes: 256 * 1024 * 1024,
-  maxProcesses: 64,
   maxOutputBytes: 128 * 1024,
   maxEvents: 5_000,
   maxSourceChars: 20_000,

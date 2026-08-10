@@ -87,6 +87,23 @@ describe("useCodeTerminal (#664)", () => {
     unmount();
   });
 
+  it("shows the actionable singleton-busy message when another run owns the Terminal", async () => {
+    startMock.mockRejectedValue(
+      new Error("The Terminal is busy. Stop or wait for the current run to finish.")
+    );
+    const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));
+
+    await act(async () => {
+      await result.current.start();
+    });
+
+    expect(result.current.status).toBe("error");
+    expect(result.current.message).toBe(
+      "The Terminal is busy. Stop or wait for the current run to finish."
+    );
+    unmount();
+  });
+
   it("sendInput posts the exact data and returns true on success", async () => {
     startMock.mockResolvedValue(snap({ status: "running", nextSequence: 0 }));
     const { result, unmount } = renderHook(() => useCodeTerminal(baseArgs));

@@ -47,6 +47,17 @@ const terminals = new SessionManager<TerminalSession>(
   cryptoId
 );
 
+// This is a personal, single-user service. Reserve capacity synchronously before
+// awaiting compilation so two overlapping start requests cannot both launch a
+// program. Finished sessions stay in `terminals` briefly for transcript/attempt
+// reads, but do not consume the one active Terminal slot.
+let terminalStartReserved = false;
+
+function hasActiveTerminal(): boolean {
+  if (terminalStartReserved) return true;
+  return terminals.ids().some((id) => terminals.get(id)?.isFinished === false);
+}
+
 function ownsTerminal(session: TerminalSession, token: unknown): boolean {
   const a = Buffer.from(session.token);
   const b = Buffer.from(typeof token === "string" ? token : "");
@@ -146,6 +157,15 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     const start = body as TerminalStartBody;
     const valid = validateTerminalStart(start);
     if (!valid.ok) return send(res, 400, { error: { code: valid.code, message: valid.message } });
+    if (hasActiveTerminal()) {
+      return send(res, 409, {
+        error: {
+          code: "terminal_busy",
+          message: "The Terminal is busy. Stop or wait for the current run to finish."
+        }
+      });
+    }
+    terminalStartReserved = true;
     const token = randomBytes(24).toString("base64url");
     const session = new TerminalSession(
       {
@@ -168,6 +188,8 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
           message: error instanceof Error ? error.message : "Start failed."
         }
       });
+    } finally {
+      terminalStartReserved = false;
     }
   }
 

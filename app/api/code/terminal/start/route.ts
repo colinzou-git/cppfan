@@ -9,6 +9,7 @@ import {
 import { resolveCodeExecutionPlan } from "@/features/code-lab/code-execution-plan";
 import { CODE_LAB_STALE_NOTE } from "@/features/code-lab/code-lab-item-resolver";
 import { ITEM_UNAVAILABLE_NOTE } from "@/features/code-lab/code-lab-service";
+import { TerminalServiceError } from "@/features/code-lab/gdb-service-terminal-adapter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,7 +78,14 @@ export async function POST(request: Request) {
       },
       { headers: NO_STORE }
     );
-  } catch {
+  } catch (error) {
+    if (
+      error instanceof TerminalServiceError &&
+      error.status === 409 &&
+      error.code === "terminal_busy"
+    ) {
+      return apiError("terminal_busy", error.message, 409);
+    }
     return apiError("terminal_error", "The terminal service failed to start a session.", 502);
   }
 }
