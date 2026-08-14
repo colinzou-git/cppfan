@@ -356,9 +356,26 @@ export function TutorConversation({
   }, [context, requestedConversation, fresh]);
 
   useEffect(() => {
-    const messageList = messageListRef.current;
-    if (!messageList || !autoFollowRef.current) return;
-    messageList.scrollTo({ top: messageList.scrollHeight });
+    if (!autoFollowRef.current) return;
+
+    // WebKit (especially iPhone-sized viewports) can report the previous
+    // scrollHeight during the commit that adds a long streamed Markdown block.
+    // Waiting through two animation frames lets layout settle before measuring
+    // the real bottom. Rapid stream updates cancel stale frames so only the
+    // newest content controls the scroll position.
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        const messageList = messageListRef.current;
+        if (!messageList || !autoFollowRef.current) return;
+        messageList.scrollTo({ top: messageList.scrollHeight });
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+    };
   }, [messages]);
 
   function handleMessageListScroll() {

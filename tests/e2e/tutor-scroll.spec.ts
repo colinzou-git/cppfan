@@ -69,15 +69,16 @@ test("multi-turn Tutor keeps the newest answer visible and the composer on scree
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("TURN_2_FINAL_LINE")).toBeVisible();
 
-  const scrollState = await list.evaluate((element) => ({
-    scrollTop: element.scrollTop,
-    scrollHeight: element.scrollHeight,
-    clientHeight: element.clientHeight,
-    distanceFromBottom: element.scrollHeight - element.scrollTop - element.clientHeight
-  }));
-
-  expect(scrollState.scrollHeight).toBeGreaterThan(scrollState.clientHeight);
-  expect(scrollState.distanceFromBottom).toBeLessThanOrEqual(2);
+  expect(
+    await list.evaluate((element) => element.scrollHeight > element.clientHeight)
+  ).toBe(true);
+  await expect
+    .poll(() =>
+      list.evaluate(
+        (element) => element.scrollHeight - element.scrollTop - element.clientHeight
+      )
+    )
+    .toBeLessThanOrEqual(2);
 
   const composerBox = await composer.boundingBox();
   const viewport = page.viewportSize();
