@@ -18,6 +18,8 @@ type TutorMessageBlock =
   | { type: "rule" }
   | { type: "table"; header: string[]; rows: string[][] };
 
+const AUTO_FOLLOW_THRESHOLD_PX = 96;
+
 function localEntry(role: "user" | "assistant", requestId: string, content: string): AiChatMessageView {
   return {
     id: `${role}-${requestId}`,
@@ -30,6 +32,10 @@ function localEntry(role: "user" | "assistant", requestId: string, content: stri
     model: null,
     createdAt: new Date().toISOString()
   };
+}
+
+function isNearMessageListBottom(element: HTMLDivElement) {
+  return element.scrollHeight - element.scrollTop - element.clientHeight <= AUTO_FOLLOW_THRESHOLD_PX;
 }
 
 function splitTableCells(line: string) {
@@ -318,6 +324,8 @@ export function TutorConversation({
   const [retry, setRetry] = useState<{ text: string; id: string } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const autoFollowRef = useRef(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -329,6 +337,7 @@ export function TutorConversation({
           ? threads.find((entry) => entry.id === requestedConversation)
           : threads.find((entry) => entry.sourceVersion === context.sourceVersion);
         if (selected) {
+          autoFollowRef.current = true;
           setConversationId(selected.id);
           setMessages(selected.messages);
           setDraft("");
@@ -346,6 +355,18 @@ export function TutorConversation({
     };
   }, [context, requestedConversation, fresh]);
 
+  useEffect(() => {
+    const messageList = messageListRef.current;
+    if (!messageList || !autoFollowRef.current) return;
+    messageList.scrollTo({ top: messageList.scrollHeight });
+  }, [messages]);
+
+  function handleMessageListScroll() {
+    const messageList = messageListRef.current;
+    if (!messageList) return;
+    autoFollowRef.current = isNearMessageListBottom(messageList);
+  }
+
   function patchAssistant(requestId: string, patch: Partial<AiChatMessageView>) {
     setMessages((current) => {
       const index = current.findIndex((entry) => entry.role === "assistant" && entry.requestId === requestId);
@@ -356,6 +377,7 @@ export function TutorConversation({
 
   async function send(text: string, requestId: string, appendUser: boolean) {
     if (!text.trim() || busy) return;
+    autoFollowRef.current = true;
     setBusy(true);
     setNotice(null);
     setRetry(null);
@@ -418,8 +440,8 @@ export function TutorConversation({
   const oldVersion = Boolean(notice?.includes("older item version"));
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-3 py-4 sm:px-6 sm:py-8">
-      <header className="rounded-t-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <main className="mx-auto flex h-dvh min-h-0 w-full max-w-4xl flex-col overflow-hidden px-3 py-4 sm:px-6 sm:py-8">
+      <header className="shrink-0 rounded-t-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <p className="text-xs font-black uppercase tracking-wide text-blue-700">AI Chat</p>
         <h1 className="text-2xl font-black text-slate-950">{context.title}</h1>
         <p className="mt-1 text-sm text-slate-600">Messages are saved to your account for this item. cppFan grading remains authoritative.</p>
@@ -428,9 +450,15 @@ export function TutorConversation({
           <Link href={tutorUrl(context, { fresh: true })} className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white">New chat</Link>
         </nav>
       </header>
-      {notice ? <p role="status" className="border-x border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{notice}</p> : null}
-      <section className="flex min-h-[65vh] flex-1 flex-col rounded-b-2xl border border-t-0 border-slate-200 bg-white shadow-sm">
-        <div className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6" aria-live="polite">
+      {notice ? <p role="status" className="shrink-0 border-x border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">{notice}</p> : null}
+      <section className="flex min-h-0 flex-1 flex-col rounded-b-2xl border border-t-0 border-slate-200 bg-white shadow-sm">
+        <div
+          ref={messageListRef}
+          onScroll={handleMessageListScroll}
+          className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-6"
+          aria-live="polite"
+          data-testid="tutor-message-list"
+        >
           {!messages.length ? <p className="rounded-xl bg-blue-50 p-4 text-sm text-blue-950">The relevant item context is already in the editable prompt below. Review it before sending.</p> : null}
           {messages.map((entry) => (
             <article key={`${entry.role}-${entry.requestId}`} className={`max-w-[94%] rounded-xl p-4 text-sm ${entry.role === "user" ? "ml-auto bg-blue-700 text-white" : "bg-slate-100 text-slate-900"}`}>
@@ -440,7 +468,11 @@ export function TutorConversation({
             </article>
           ))}
         </div>
-        <form onSubmit={submit} className="border-t border-slate-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <form
+          onSubmit={submit}
+          className="shrink-0 border-t border-slate-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+          data-testid="tutor-composer"
+        >
           <label htmlFor="tutor-prompt" className="sr-only">AI Chat prompt</label>
           <textarea ref={textareaRef} id="tutor-prompt" value={draft} onChange={(event) => setDraft(event.target.value)} rows={7} disabled={oldVersion} className="w-full resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100" />
           <div className="mt-3 flex flex-wrap items-start justify-between gap-2">
