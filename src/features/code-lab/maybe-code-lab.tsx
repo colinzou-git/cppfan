@@ -7,8 +7,15 @@ import { CodeLab } from "./code-lab";
  * renders the shared CodeLab only when the item opts in, so no page duplicates
  * runner/editor logic.
  */
-export function MaybeCodeLab({ itemId }: { itemId: string }) {
+export function MaybeCodeLab({
+  itemId,
+  practiceEnabled = false
+}: {
+  itemId: string;
+  /** #674 v1: explicit saved practices are exposed only by lesson callers. */
+  practiceEnabled?: boolean;
+}) {
   const config = getCodeLabConfigForItem(itemId);
   if (!config) return null;
-  return <CodeLab itemId={itemId} config={config} />;
+  return <CodeLab itemId={itemId} config={config} practiceEnabled={practiceEnabled} />;
 }

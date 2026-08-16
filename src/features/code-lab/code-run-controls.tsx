@@ -10,6 +10,7 @@ export function CodeRunControls({
   onAction,
   hasError,
   runDisabled = false,
+  actionsDisabled = false,
   terminalActive = false,
   terminalStarting = false,
   onStop
@@ -19,6 +20,8 @@ export function CodeRunControls({
   hasError: boolean;
   /** Phase 3.4 (#413): gate Run/Run Tests until required predictions are filled. */
   runDisabled?: boolean;
+  /** Disable every source-dependent action, e.g. while viewing read-only reference code (#674). */
+  actionsDisabled?: boolean;
   /** True while an interactive Run session is compiling/running (#664). */
   terminalActive?: boolean;
   /** True while the start request is in flight (#664). */
@@ -26,7 +29,7 @@ export function CodeRunControls({
   /** Stop the active interactive Run session (#664). */
   onStop?: () => void;
 }) {
-  const disabled = busy !== null;
+  const disabled = busy !== null || actionsDisabled;
   return (
     <div className="flex flex-wrap gap-2" data-testid="code-controls">
       {terminalActive ? (
@@ -78,7 +81,7 @@ export function CodeRunControls({
         variant="ghost"
         onClick={() => onAction("explain")}
         disabled={disabled || !hasError}
-        title={hasError ? undefined : "Run the code first to explain an error"}
+        title={hasError && !actionsDisabled ? undefined : actionsDisabled ? "Switch back to your code to use this action" : "Run the code first to explain an error"}
       >
         <Bug className="mr-1.5 h-4 w-4" aria-hidden="true" />
         {busy === "explain" ? "Explaining…" : "Explain Error"}

@@ -18,6 +18,8 @@ import { ErrorRemediationPanel } from "./error-remediation-panel";
 import { ScaffoldRecommendationCard } from "@/features/recommendations/scaffold-recommendation-card";
 import { useCodeLabController } from "./use-code-lab-controller";
 import { useCodeTerminal } from "./use-code-terminal";
+import { useCodePractices } from "./use-code-practices";
+import { CodePracticeManager } from "./code-practice-manager";
 
 /**
  * Embedded Code Lab client component (#407). Composes the editor, run/test
@@ -29,10 +31,13 @@ import { useCodeTerminal } from "./use-code-terminal";
 export function CodeLab({
   itemId,
   config,
+  practiceEnabled = false,
   onResult
 }: {
   itemId: string;
   config: LearningItemCodeLab;
+  /** #674: expose explicit named practices only when the lesson caller opts in. */
+  practiceEnabled?: boolean;
   /** Phase 3.9 (#418): notify a host (e.g. a capstone milestone) of run/test results. */
   onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null }) => void;
 }) {
@@ -40,12 +45,24 @@ export function CodeLab({
   // Run drives the same interactive Terminal session as the full-page workspace
   // (#664); Run Tests stays one-shot on the controller.
   const terminal = useCodeTerminal({ itemId, source: c.source, stdin: c.stdin });
+  const practices = useCodePractices({
+    enabled: practiceEnabled,
+    itemId,
+    currentStandardSource: config.starterCode,
+    source: c.source,
+    setSource: c.setSource
+  });
   const hasExecutionInput = config.mode === "stdin" || config.mode === "function";
   const inputLabel = config.mode === "function" ? "Arguments" : "Input Args";
   const terminalRefused =
     terminal.status === "stale_definition" || terminal.status === "item_unavailable";
+  const referenceLocked = terminal.isActive || terminal.starting;
+  const fullScreenHref = practices.activePracticeId
+    ? `/lab/${encodeURIComponent(itemId)}?practice=${encodeURIComponent(practices.activePracticeId)}`
+    : `/lab/${encodeURIComponent(itemId)}`;
 
   function onAction(action: CodeAction) {
+    if (practices.readOnlyReference) return;
     if (action === "run") {
       void terminal.start();
       return;
@@ -65,7 +82,7 @@ export function CodeLab({
             Code Lab
           </span>
           <Link
-            href={`/lab/${encodeURIComponent(itemId)}`}
+            href={fullScreenHref}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-50"
             data-testid="code-lab-open-full"
           >
@@ -85,7 +102,13 @@ export function CodeLab({
           long output from overflowing the card. */}
       <CardContent className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)] xl:items-start">
         <section className="grid min-w-0 gap-3">
-          <CodeEditor value={c.source} onChange={c.setSource} label="C++ source code" />
+          <CodePracticeManager controller={practices} referenceLocked={referenceLocked} />
+          <CodeEditor
+            value={practices.displaySource}
+            onChange={c.setSource}
+            label="C++ source code"
+            readOnly={practices.readOnlyReference}
+          />
 
           {hasExecutionInput ? (
             <label className="flex flex-col gap-1">
@@ -132,6 +155,7 @@ export function CodeLab({
             onAction={onAction}
             hasError={c.hasRunError}
             runDisabled={c.missingRequired || terminalRefused}
+            actionsDisabled={practices.readOnlyReference}
             terminalActive={terminal.isActive}
             terminalStarting={terminal.starting}
             onStop={terminal.stop}
@@ -161,7 +185,7 @@ export function CodeLab({
               onSelect={c.setTraceSource}
               onTrace={c.handleTrace}
               busy={c.tracePending}
-              disabled={c.busy !== null || c.source.trim().length === 0}
+              disabled={c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference}
             />
           ) : null}
 
