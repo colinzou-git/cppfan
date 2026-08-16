@@ -102,9 +102,11 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const result = await updateCodePractice({ practiceId, name, source: source ?? undefined }).catch(() => ({
-    status: "unavailable" as const
-  }));
+  const result = await updateCodePractice({
+    practiceId,
+    name: name ?? undefined,
+    source: source ?? undefined
+  }).catch(() => ({ status: "unavailable" as const }));
   if (result.status !== "ok") return statusResponse(result.status);
   return NextResponse.json({ practice: result.data });
 }
