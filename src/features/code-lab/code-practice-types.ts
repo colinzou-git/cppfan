@@ -17,6 +17,7 @@ export type CodePractice = {
 export type CodePracticeServiceStatus =
   | "ok"
   | "signed_out"
+  | "unconfigured"
   | "not_found"
   | "not_eligible"
   | "unavailable";
