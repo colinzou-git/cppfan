@@ -52,6 +52,7 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   // Code Lab items use a side-by-side desktop layout: lesson/prompt on the left,
   // the Code Lab on the right (#431). Other items stay a single reading column.
   const hasCodeLab = isCodeLabItem(item.id);
+  const practiceEnabled = item.type === "lesson";
 
   return (
     <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
@@ -145,10 +146,10 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
             the lesson; on mobile it stacks below. Non-code items render nothing. */}
         {hasCodeLab ? (
           <aside className="min-w-0 xl:sticky xl:top-6" data-testid="learning-item-code-lab-pane">
-            <MaybeCodeLab itemId={item.id} />
+            <MaybeCodeLab itemId={item.id} practiceEnabled={practiceEnabled} />
           </aside>
         ) : (
-          <MaybeCodeLab itemId={item.id} />
+          <MaybeCodeLab itemId={item.id} practiceEnabled={practiceEnabled} />
         )}
       </CardContent>
     </Card>
