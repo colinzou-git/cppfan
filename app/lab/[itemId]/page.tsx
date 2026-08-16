@@ -27,8 +27,19 @@ import {
  * route can't be used as a generic shell. The workspace owns the wide, resizable
  * layout, so this page renders nearly full-bleed.
  */
-export default async function CodeLabPage({ params }: { params: Promise<{ itemId: string }> }) {
+export default async function CodeLabPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ itemId: string }>;
+  searchParams: Promise<{ practice?: string | string[] }>;
+}) {
   const { itemId } = await params;
+  const query = await searchParams;
+  const requestedPracticeId =
+    typeof query.practice === "string" && query.practice.length > 0 && query.practice.length <= 100
+      ? query.practice
+      : undefined;
   const decodedId = decodeURIComponent(itemId);
 
   // Published user-created exercises (#488) carry no static config; resolve the
@@ -179,6 +190,7 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
 
   const title = result.status === "ok" ? result.data.item.title : "Code Lab";
   const sourceVersion = result.status === "ok" ? (result.data.item.updated_at ?? "1") : "1";
+  const practiceEnabled = result.status === "ok" && result.data.item.type === "lesson";
 
   return (
     <main className="p-3 xl:p-6">
@@ -187,6 +199,8 @@ export default async function CodeLabPage({ params }: { params: Promise<{ itemId
         title={title}
         config={config}
         sourceVersion={sourceVersion}
+        practiceEnabled={practiceEnabled}
+        initialPracticeId={practiceEnabled ? requestedPracticeId : undefined}
       />
     </main>
   );
