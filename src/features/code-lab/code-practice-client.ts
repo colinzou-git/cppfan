@@ -26,9 +26,11 @@ export async function loadPracticesRequest(
   const response = await fetch(`/api/code/practices?itemId=${encodeURIComponent(itemId)}`, {
     cache: "no-store"
   });
+  // Keep compatibility with any older server that still returns 401 for reads.
   if (response.status === 401) return { status: "signed_out" };
   if (!response.ok) return parseError(response);
-  const body = (await response.json()) as { practices?: CodePractice[] };
+  const body = (await response.json()) as { practices?: CodePractice[]; signedIn?: boolean };
+  if (body.signedIn === false) return { status: "signed_out" };
   return { status: "ok", practices: Array.isArray(body.practices) ? body.practices : [] };
 }
 
