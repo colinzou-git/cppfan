@@ -18,6 +18,9 @@ function apiError(code: string, message: string, status: number) {
 
 function statusResponse(status: Exclude<CodePracticeServiceStatus, "ok">) {
   if (status === "signed_out") return apiError("signed_out", "Sign in to save code practices.", 401);
+  if (status === "unconfigured") {
+    return apiError("unconfigured", "Saved practices require configured account storage.", 503);
+  }
   if (status === "not_found") return apiError("not_found", "The code practice was not found.", 404);
   if (status === "not_eligible") {
     return apiError("not_eligible", "Saved practices are available only for lesson Code Labs.", 400);
@@ -50,8 +53,20 @@ export async function GET(request: Request) {
   if (!itemId) return apiError("invalid_item", "A valid item id is required.", 400);
 
   const result = await listCodePractices(itemId).catch(() => ({ status: "unavailable" as const }));
+  // Listing is also used on signed-out lesson pages. Absence of an authenticated
+  // storage session is a normal UI state, not an HTTP failure; writes remain
+  // strict 401/503 below.
+  if (result.status === "signed_out" || result.status === "unconfigured") {
+    return NextResponse.json(
+      { practices: [], signedIn: false },
+      { headers: { "cache-control": "no-store" } }
+    );
+  }
   if (result.status !== "ok") return statusResponse(result.status);
-  return NextResponse.json({ practices: result.data }, { headers: { "cache-control": "no-store" } });
+  return NextResponse.json(
+    { practices: result.data, signedIn: true },
+    { headers: { "cache-control": "no-store" } }
+  );
 }
 
 export async function POST(request: Request) {
