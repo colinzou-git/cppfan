@@ -84,7 +84,10 @@ export async function resolveLessonPracticeContext(
 
 async function auth() {
   const supabase = await createClient();
-  if (!supabase) return { status: "unavailable" as const };
+  // Page QA and other signed-out/offline-capable surfaces intentionally run with
+  // Supabase unconfigured. Distinguish that from a real query failure so the
+  // read/list API can render a clean sign-in affordance without emitting a 503.
+  if (!supabase) return { status: "unconfigured" as const };
   const {
     data: { user }
   } = await supabase.auth.getUser();
