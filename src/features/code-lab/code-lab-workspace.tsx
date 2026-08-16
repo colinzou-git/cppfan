@@ -27,6 +27,8 @@ import { useCodeBreakpoints } from "./use-code-breakpoints";
 import { useCodeDebugger } from "./use-code-debugger";
 import { useCodeLabController } from "./use-code-lab-controller";
 import { useCodeTerminal } from "./use-code-terminal";
+import { useCodePractices } from "./use-code-practices";
+import { CodePracticeManager } from "./code-practice-manager";
 
 type DockTab = "terminal" | "tests" | "stdin" | "debug" | "ai";
 
@@ -44,6 +46,8 @@ export function CodeLabWorkspace({
   sourceVersion = "1",
   contentVersionId,
   milestoneIndex,
+  practiceEnabled = false,
+  initialPracticeId,
   onResult,
   backHref,
   backLabel
@@ -57,6 +61,10 @@ export function CodeLabWorkspace({
   contentVersionId?: string;
   /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
   milestoneIndex?: number;
+  /** #674 v1: named saved practices are enabled only for native/generated lessons. */
+  practiceEnabled?: boolean;
+  /** Practice selected by the embedded Code Lab's ?practice= full-screen link. */
+  initialPracticeId?: string;
   /** Notified after each run/test — a lab wrapper uses this to track milestone completion (#489). */
   onResult?: (result: {
     run?: CodeRunResult | null;
@@ -86,11 +94,21 @@ export function CodeLabWorkspace({
     contentVersionId,
     milestoneIndex
   });
+  const practices = useCodePractices({
+    enabled: practiceEnabled,
+    itemId,
+    currentStandardSource: config.starterCode,
+    source: c.source,
+    setSource: c.setSource,
+    initialPracticeId
+  });
   const [tab, setTab] = useState<DockTab>("terminal");
   const [aiFullscreen, setAiFullscreen] = useState(false);
   const isWide = useIsWide();
   const hasExecutionInput = config.mode === "stdin" || config.mode === "function";
   const inputLabel = config.mode === "function" ? "Arguments" : "Input Args";
+  const referenceLocked =
+    terminal.isActive || terminal.starting || Boolean(debug.snapshot?.sessionId);
 
   // Close the fullscreen AI reading mode with Escape (#466).
   useEffect(() => {
@@ -105,6 +123,7 @@ export function CodeLabWorkspace({
   const resolvedBackLabel = backLabel ?? "Back to lesson";
 
   function onAction(action: CodeAction) {
+    if (practices.readOnlyReference) return;
     // Run drives the interactive Terminal session; Tests/AI stay one-shot (#664).
     if (action === "run") {
       setTab("terminal");
@@ -132,6 +151,7 @@ export function CodeLabWorkspace({
         runDisabled={
           c.missingRequired || c.itemUnavailable || terminalItemUnavailable || staleDefinition
         }
+        actionsDisabled={practices.readOnlyReference}
         terminalActive={terminal.isActive}
         terminalStarting={terminal.starting}
         onStop={terminal.stop}
@@ -243,8 +263,6 @@ export function CodeLabWorkspace({
         </div>
       ) : null}
       {config.evaluationMode === "self_evaluation" ? (
-        // The AUTHORITATIVE completion action for a self-evaluated item (#609),
-        // distinct from the optional AI help/review below.
         <SelfEvaluationPanel
           onSubmit={(rating, reflection) =>
             submitSelfEvaluation({ itemId, contentVersionId, rating, reflection })
@@ -338,7 +356,7 @@ export function CodeLabWorkspace({
             onSelect={c.setTraceSource}
             onTrace={c.handleTrace}
             busy={c.tracePending}
-            disabled={c.busy !== null || c.source.trim().length === 0}
+            disabled={c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference}
           />
           <AiTracePanel trace={c.trace} pending={c.tracePending} />
         </>
@@ -353,6 +371,12 @@ export function CodeLabWorkspace({
     { id: "debug", label: "Debug" },
     { id: "ai", label: "AI" }
   ];
+
+  const referencePanel = (
+    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
+      Reference code is read-only. Switch back to your code before debugging or using AI code actions.
+    </p>
+  );
 
   const rightDock = (
     <div className="flex h-full flex-col">
@@ -426,63 +450,70 @@ export function CodeLabWorkspace({
           )
         ) : null}
         {tab === "stdin" ? stdinField : null}
-        {tab === "debug" ? <DebugTabPanel breakpoints={breakpointState} debug={debug} /> : null}
+        {tab === "debug" ? (
+          practices.readOnlyReference ? referencePanel : <DebugTabPanel breakpoints={breakpointState} debug={debug} />
+        ) : null}
         {tab === "ai" ? (
-          // One mounted AI panel (and one CodeLabChat): the wrapper toggles to a
-          // fixed fullscreen reading mode in place, so chat draft/messages survive
-          // open/close (#466).
-          <div
-            className={
-              aiFullscreen
-                ? "fixed inset-0 z-50 flex flex-col bg-white"
-                : "flex min-h-0 flex-1 flex-col"
-            }
-            role={aiFullscreen ? "dialog" : undefined}
-            aria-modal={aiFullscreen ? true : undefined}
-            aria-label={aiFullscreen ? "Fullscreen AI tab" : undefined}
-            data-testid={aiFullscreen ? "code-lab-ai-fullscreen" : "code-lab-ai-panel"}
-          >
-            <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
-              <span className="text-sm font-bold text-slate-800">AI tutor</span>
-              {aiFullscreen ? (
-                <button
-                  type="button"
-                  onClick={() => setAiFullscreen(false)}
-                  className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                  data-testid="code-lab-ai-fullscreen-close"
-                >
-                  Exit full screen
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAiFullscreen(true)}
-                  className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                  data-testid="code-lab-ai-fullscreen-toggle"
-                >
-                  Full screen
-                </button>
-              )}
-            </div>
+          practices.readOnlyReference ? (
+            referencePanel
+          ) : (
             <div
               className={
-                aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"
+                aiFullscreen
+                  ? "fixed inset-0 z-50 flex flex-col bg-white"
+                  : "flex min-h-0 flex-1 flex-col"
               }
+              role={aiFullscreen ? "dialog" : undefined}
+              aria-modal={aiFullscreen ? true : undefined}
+              aria-label={aiFullscreen ? "Fullscreen AI tab" : undefined}
+              data-testid={aiFullscreen ? "code-lab-ai-fullscreen" : "code-lab-ai-panel"}
             >
+              <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
+                <span className="text-sm font-bold text-slate-800">AI tutor</span>
+                {aiFullscreen ? (
+                  <button
+                    type="button"
+                    onClick={() => setAiFullscreen(false)}
+                    className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                    data-testid="code-lab-ai-fullscreen-close"
+                  >
+                    Exit full screen
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAiFullscreen(true)}
+                    className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                    data-testid="code-lab-ai-fullscreen-toggle"
+                  >
+                    Full screen
+                  </button>
+                )}
+              </div>
               <div
                 className={
-                  aiFullscreen
-                    ? "mx-auto flex min-h-full w-full max-w-5xl flex-col gap-3"
-                    : "flex min-h-0 flex-col gap-3"
+                  aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"
                 }
               >
-                {aiPanel}
+                <div
+                  className={
+                    aiFullscreen
+                      ? "mx-auto flex min-h-full w-full max-w-5xl flex-col gap-3"
+                      : "flex min-h-0 flex-col gap-3"
+                  }
+                >
+                  {aiPanel}
+                </div>
               </div>
             </div>
-          </div>
+          )
         ) : null}
       </div>
     </div>
+  );
+
+  const practiceManager = (
+    <CodePracticeManager controller={practices} referenceLocked={referenceLocked} />
   );
 
   if (!isWide) {
@@ -491,14 +522,16 @@ export function CodeLabWorkspace({
     return (
       <div className="flex flex-col gap-4" data-testid="code-lab-workspace">
         {problemPanel}
-        <div className="flex flex-col gap-1 px-4">
+        <div className="flex flex-col gap-2 px-4">
+          {practiceManager}
           <CodeEditor
-            value={c.source}
+            value={practices.displaySource}
             onChange={c.setSource}
             label="C++ source code"
-            breakpoints={breakpointState.breakpoints}
-            debugLine={debug.snapshot?.line ?? null}
-            onToggleBreakpoint={breakpointState.toggleBreakpoint}
+            readOnly={practices.readOnlyReference}
+            breakpoints={practices.readOnlyReference ? [] : breakpointState.breakpoints}
+            debugLine={practices.readOnlyReference ? null : (debug.snapshot?.line ?? null)}
+            onToggleBreakpoint={practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint}
           />
           <DraftStatusLine status={c.draftStatus} />
         </div>
@@ -517,15 +550,17 @@ export function CodeLabWorkspace({
         storageKey="cppfan:code-lab:columns"
         left={<div className="h-full border-r border-slate-200 bg-slate-50/60">{problemPanel}</div>}
         center={
-          <div className="flex h-full flex-col gap-1 bg-slate-100 p-3">
+          <div className="flex h-full flex-col gap-2 bg-slate-100 p-3">
+            {practiceManager}
             <CodeEditor
-              value={c.source}
+              value={practices.displaySource}
               onChange={c.setSource}
               label="C++ source code"
+              readOnly={practices.readOnlyReference}
               fill
-              breakpoints={breakpointState.breakpoints}
-              debugLine={debug.snapshot?.line ?? null}
-              onToggleBreakpoint={breakpointState.toggleBreakpoint}
+              breakpoints={practices.readOnlyReference ? [] : breakpointState.breakpoints}
+              debugLine={practices.readOnlyReference ? null : (debug.snapshot?.line ?? null)}
+              onToggleBreakpoint={practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint}
             />
             <DraftStatusLine status={c.draftStatus} />
           </div>
