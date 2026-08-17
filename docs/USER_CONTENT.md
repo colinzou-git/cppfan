@@ -93,6 +93,15 @@ or **reset review cards** (`reset_review_cards_for_content` resets only the
 owner's FSRS cards for this lesson to a fresh `new` state — FSRS scheduling and
 skill mastery stay separate).
 
+All four editors share one serialized draft-persistence controller. Debounced
+autosave, manual Save, AI preflight, and publish preflight join the same
+in-flight save; an edit made during that request produces one follow-up save
+with the newest snapshot. Publish stops when its prerequisite flush fails and
+uses the content ID and revision returned by the successful flush directly.
+Generic lesson save/publish failures log the operation, content identity,
+expected revision, duration, and bounded Supabase diagnostics server-side;
+lesson payload content is never logged.
+
 ## Attachments and Storage
 
 External references (`url`/`github_url`/`lesson_ref`) are recorded by
@@ -121,6 +130,12 @@ operation union (`ai-authoring-proposal.ts`) includes `replace_field`,
 `add_parsons_block`, `add_completion_blank`; the editor lists them for per-item
 accept/reject (`ai-proposal-panel.tsx`). No `AI-generated` marker is stored — the
 visible source stays `User-Created`.
+
+Before a lesson AI request, the editor flushes the latest dirty draft so the
+provider never reads an older database snapshot. The lesson editor's internal
+model round-trips every `LessonPayload` field, including objectives, structured
+sections, tags, source notes, and examples, even when a field has no dedicated
+manual control yet.
 
 ## Answer-key separation
 

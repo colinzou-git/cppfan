@@ -4,7 +4,8 @@ import { expect, test } from "@playwright/test";
  * My Content authoring smoke (#487). Runs in the default e2e environment where
  * Supabase is not configured, so requireOwnerSession renders the pages in
  * local-only mode instead of redirecting to login. Exercises the entry point,
- * the editor's local autosave fallback, and the AI panel's save-first guard.
+ * the editor's local autosave fallback, and the AI panel's latest-draft
+ * preflight when cloud persistence is unavailable.
  */
 test.describe("My Content authoring (#487)", () => {
   test("lists an empty library and links to the lesson editor", async ({ page }) => {
@@ -19,7 +20,7 @@ test.describe("My Content authoring (#487)", () => {
   });
 
   test("saves a draft locally when no backend is configured", async ({ page }) => {
-    await page.goto("/my-content/lessons/new");
+    await page.goto("/my-content/lessons/new", { waitUntil: "networkidle" });
 
     await page.getByPlaceholder("Lesson title").fill("Pointers vs references");
     await page.getByPlaceholder("Teach the concept…").fill("A reference is an alias.");
@@ -29,15 +30,19 @@ test.describe("My Content authoring (#487)", () => {
     await expect(page.getByText(/saved locally only/i)).toBeVisible();
   });
 
-  test("the AI assistant asks for a saved draft before proposing changes", async ({ page }) => {
-    await page.goto("/my-content/lessons/new");
+  test("the AI assistant tries to flush the latest draft before proposing changes", async ({ page }) => {
+    await page.goto("/my-content/lessons/new", { waitUntil: "networkidle" });
 
     await expect(page.getByText("AI authoring assistant")).toBeVisible();
+    await page.getByPlaceholder("Lesson title").fill("Pointers vs references");
+    await page.getByPlaceholder("Teach the concept…").fill("A reference is an alias.");
+    await page.getByPlaceholder(/Why it matters/i).fill("References cannot be null or rebound.");
     await page
       .getByPlaceholder(/Add a common-mistakes section/i)
       .fill("Add two learning objectives");
     await page.getByRole("button", { name: /ask ai/i }).click();
 
-    await expect(page.getByText(/save a draft first/i)).toBeVisible();
+    await expect(page.getByText(/could not save the latest draft for the assistant/i)).toBeVisible();
+    await expect(page.getByText(/saved locally only/i)).toBeVisible();
   });
 });

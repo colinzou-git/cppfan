@@ -37,6 +37,26 @@ export type SaveDraftResult =
   | { status: "unconfigured" }
   | { status: "error" };
 
+type SupabaseMutationError = { code?: string; message?: string; details?: string; hint?: string };
+
+function logUserContentMutationError(input: {
+  operation: "save_user_content_draft" | "publish_user_content";
+  kind: UserContentKind;
+  contentId: string | null;
+  expectedRevision: number | null;
+  startedAt: number;
+  error: SupabaseMutationError;
+}) {
+  console.error("User content mutation failed", {
+    operation: input.operation,
+    kind: input.kind,
+    contentId: input.contentId,
+    expectedRevision: input.expectedRevision,
+    durationMs: Date.now() - input.startedAt,
+    error: { code: input.error.code, message: input.error.message, details: input.error.details, hint: input.error.hint }
+  });
+}
+
 /**
  * Restore a prior version's content as the current draft (#487). Reads the
  * chosen version's payload (owner-scoped RLS) and re-saves it as a new draft via
@@ -120,6 +140,7 @@ export async function saveLessonDraft(input: SaveDraftInput): Promise<SaveDraftR
   if (!supabase) {
     return { status: "unconfigured" };
   }
+  const startedAt = Date.now();
   const { data, error } = await supabase.rpc("save_user_content_draft", {
     p_content_id: input?.contentId ?? null,
     p_kind: input?.kind ?? "lesson",
@@ -131,6 +152,9 @@ export async function saveLessonDraft(input: SaveDraftInput): Promise<SaveDraftR
     p_expected_revision: input?.expectedRevision ?? null
   });
   if (error) {
+    if (error.code !== "40001") {
+      logUserContentMutationError({ operation: "save_user_content_draft", kind: input?.kind ?? "lesson", contentId: input?.contentId ?? null, expectedRevision: input?.expectedRevision ?? null, startedAt, error });
+    }
     return error.code === "40001" ? { status: "conflict" } : { status: "error" };
   }
   const row = (Array.isArray(data) ? data[0] : data) as
@@ -497,11 +521,15 @@ export async function publishContent(input: { contentId: string; expectedRevisio
   if (!supabase) {
     return { status: "unconfigured" };
   }
+  const startedAt = Date.now();
   const { data, error } = await supabase.rpc("publish_user_content", {
     p_content_id: contentId,
     p_expected_revision: input?.expectedRevision ?? null
   });
   if (error) {
+    if (error.code !== "40001") {
+      logUserContentMutationError({ operation: "publish_user_content", kind: "lesson", contentId, expectedRevision: input?.expectedRevision ?? null, startedAt, error });
+    }
     return error.code === "40001" ? { status: "conflict" } : { status: "error" };
   }
   const row = (Array.isArray(data) ? data[0] : data) as

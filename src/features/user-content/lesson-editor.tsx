@@ -13,10 +13,11 @@ import { ParsonsEditor } from "./parsons-editor";
 import { CompletionEditor } from "./completion-editor";
 import { CodeFieldsEditor, type CodeFields } from "./code-fields-editor";
 import { ReviewCardsEditor } from "./review-cards-editor";
+import { useSerializedDraftPersistence, type DraftFlushResult } from "./use-serialized-draft-persistence";
 import type { ContentVersionSummary, UserContentAttachment } from "./user-content-queries";
 import { applyAcceptedOperations, type AuthoringOperation } from "./ai-authoring-proposal";
 import type { LearningItemType } from "@/features/learning-items/learning-item-types";
-import type { LessonChoice, LessonCompletionBlank, LessonParsonsBlock, LessonPayload, LessonReviewCard } from "./user-content-types";
+import type { LessonChoice, LessonCompletionBlank, LessonExample, LessonParsonsBlock, LessonPayload, LessonReviewCard, LessonSections } from "./user-content-types";
 
 const ITEM_TYPES: LearningItemType[] = [
   "lesson",
@@ -42,6 +43,11 @@ type EditorFields = {
   completionBlanks: LessonCompletionBlank[];
   code: CodeFields;
   reviewCards: LessonReviewCard[];
+  tags: string[];
+  learningObjectives: string[];
+  sourceNotes: string;
+  sections: LessonSections;
+  examples: LessonExample[];
 };
 
 const CHOICE_TYPES = new Set<LearningItemType>(["multiple_choice", "concept_check"]);
@@ -49,7 +55,7 @@ const CODE_TYPES = new Set<LearningItemType>(["code_reading", "bug_spotting", "w
 
 type SaveState = "idle" | "saving" | "saved" | "local_only" | "conflict" | "invalid" | "error";
 
-function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
+export function fieldsFromLessonPayload(payload: LessonPayload | null): EditorFields {
   return {
     title: payload?.title ?? "",
     itemType: payload?.itemType ?? "lesson",
@@ -67,11 +73,16 @@ function fieldsFromPayload(payload: LessonPayload | null): EditorFields {
       expectedOutput: payload?.expectedOutput ?? "",
       solutionExplanation: payload?.solutionExplanation ?? ""
     },
-    reviewCards: payload?.reviewCards ?? []
+    reviewCards: payload?.reviewCards?.map((card) => ({ ...card, choices: card.choices.map((choice) => ({ ...choice })) })) ?? [],
+    tags: payload?.tags ? [...payload.tags] : [],
+    learningObjectives: payload?.learningObjectives ? [...payload.learningObjectives] : [],
+    sourceNotes: payload?.sourceNotes ?? "",
+    sections: payload?.sections ? { ...payload.sections } : {},
+    examples: payload?.examples?.map((example) => ({ ...example })) ?? []
   };
 }
 
-function buildPayload(fields: EditorFields): Record<string, unknown> {
+export function buildLessonPayload(fields: EditorFields): Record<string, unknown> {
   const minutes = Number(fields.estimatedMinutes);
   return {
     itemType: fields.itemType,
@@ -88,7 +99,12 @@ function buildPayload(fields: EditorFields): Record<string, unknown> {
     ...(fields.code.referenceSolution ? { referenceSolution: fields.code.referenceSolution } : {}),
     ...(fields.code.expectedOutput ? { expectedOutput: fields.code.expectedOutput } : {}),
     ...(fields.code.solutionExplanation ? { solutionExplanation: fields.code.solutionExplanation } : {}),
-    ...(fields.reviewCards.length > 0 ? { reviewCards: fields.reviewCards } : {})
+    ...(fields.reviewCards.length > 0 ? { reviewCards: fields.reviewCards } : {}),
+    ...(fields.tags.length > 0 ? { tags: fields.tags } : {}),
+    ...(fields.learningObjectives.length > 0 ? { learningObjectives: fields.learningObjectives } : {}),
+    ...(fields.sourceNotes ? { sourceNotes: fields.sourceNotes } : {}),
+    ...(Object.keys(fields.sections).length > 0 ? { sections: fields.sections } : {}),
+    ...(fields.examples.length > 0 ? { examples: fields.examples } : {})
   };
 }
 
@@ -108,74 +124,22 @@ export function LessonEditor({
   initialVersions?: ContentVersionSummary[];
 }) {
   const storageKey = `cppfan:user-content:lesson:${initialContentId ?? "new"}:v1`;
-  const [fields, setFields] = useState<EditorFields>(() => fieldsFromPayload(initialPayload ?? null));
+  const [fields, setFields] = useState<EditorFields>(() => fieldsFromLessonPayload(initialPayload ?? null));
   const [contentId, setContentId] = useState<string | undefined>(initialContentId);
   const revisionRef = useRef<number | null>(initialRevision ?? null);
   const [state, setState] = useState<SaveState>("idle");
   const [message, setMessage] = useState<string>("");
   const [lifecycle, setLifecycle] = useState<string>(initialLifecycle ?? "draft");
   const [publishOpen, setPublishOpen] = useState(false);
-  const dirtyRef = useRef(false);
+  const publishingRef = useRef(false);
 
-  // Recover any local copy left from a crash/close before the last cloud save.
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<EditorFields>;
-        if (parsed && typeof parsed.title === "string") {
-          setFields((prev) => ({ ...prev, ...parsed }));
-          setState("local_only");
-          setMessage("Recovered unsaved local changes.");
-        }
-      }
-    } catch {
-      // ignore malformed local recovery data
-    }
-  }, [storageKey]);
-
-  const update = useCallback(
-    (patch: Partial<EditorFields>) => {
-      setFields((prev) => {
-        const next = { ...prev, ...patch };
-        dirtyRef.current = true;
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(next));
-        } catch {
-          // ignore quota/availability errors
-        }
-        return next;
-      });
-    },
-    [storageKey]
-  );
-
-  const save = useCallback(async () => {
-    if (fields.title.trim().length === 0) {
-      setState("invalid");
-      setMessage("A title is required.");
-      return;
-    }
-    setState("saving");
-    setMessage("");
-    const result = await saveLessonDraft({
-      contentId: contentId ?? null,
-      kind: "lesson",
-      title: fields.title,
-      expectedRevision: revisionRef.current,
-      payload: buildPayload(fields)
-    });
+  const applySaveResult = useCallback((result: DraftFlushResult) => {
     if (result.status === "ok") {
       setContentId(result.contentId);
       revisionRef.current = result.revision;
-      dirtyRef.current = false;
       setState("saved");
       setMessage("Saved.");
-      try {
-        window.localStorage.removeItem(storageKey);
-      } catch {
-        // ignore
-      }
+      try { window.localStorage.removeItem(storageKey); } catch { /* ignore */ }
     } else if (result.status === "conflict") {
       setState("conflict");
       setMessage("This lesson changed on another device. Reload to get the latest version.");
@@ -189,18 +153,67 @@ export function LessonEditor({
       setState("error");
       setMessage("Could not save. Try again.");
     }
-  }, [contentId, fields, storageKey]);
+  }, [storageKey]);
 
-  // Debounced autosave after edits settle.
-  useEffect(() => {
-    if (!dirtyRef.current || fields.title.trim().length === 0) {
-      return;
+  const { flushDraft, markDirty } = useSerializedDraftPersistence({
+    initialSnapshot: fields,
+    initialContentId,
+    initialRevision,
+    saveDraft: (snapshot, identity) => snapshot.title.trim().length === 0
+      ? Promise.resolve({ status: "invalid" as const, issues: [{ field: "title", message: "a title is required" }] })
+      : saveLessonDraft({ contentId: identity.contentId, kind: "lesson", title: snapshot.title, expectedRevision: identity.revision, payload: buildLessonPayload(snapshot) }),
+    onAutosaveStart: () => {
+      if (!publishingRef.current) { setState("saving"); setMessage(""); }
+    },
+    onAutosaveResult: (result) => {
+      if (!publishingRef.current) applySaveResult(result);
     }
-    const handle = window.setTimeout(() => {
-      void save();
-    }, 1500);
-    return () => window.clearTimeout(handle);
-  }, [fields, save]);
+  });
+
+  // Recover any local copy left from a crash/close before the last cloud save.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<EditorFields>;
+        if (parsed && typeof parsed.title === "string") {
+          setFields((prev) => {
+            const next = { ...prev, ...parsed };
+            markDirty(next);
+            return next;
+          });
+          setState("local_only");
+          setMessage("Recovered unsaved local changes.");
+        }
+      }
+    } catch {
+      // ignore malformed local recovery data
+    }
+  }, [markDirty, storageKey]);
+
+  const update = useCallback(
+    (patch: Partial<EditorFields>) => {
+      setFields((prev) => {
+        const next = { ...prev, ...patch };
+        markDirty(next);
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(next));
+        } catch {
+          // ignore quota/availability errors
+        }
+        return next;
+      });
+    },
+    [markDirty, storageKey]
+  );
+
+  const save = useCallback(async () => {
+    setState("saving");
+    setMessage("");
+    const result = await flushDraft();
+    if (!publishingRef.current) applySaveResult(result);
+    return result;
+  }, [applySaveResult, flushDraft]);
 
   // Apply accepted AI proposal operations onto the current payload (covering
   // replace_field, sections, objectives/tags, choices, parsons/completion, and
@@ -210,28 +223,33 @@ export function LessonEditor({
       if (ops.length === 0) {
         return;
       }
-      const current = buildPayload(fields) as unknown as LessonPayload;
+      const current = buildLessonPayload(fields) as unknown as LessonPayload;
       const applied = applyAcceptedOperations(current, ops);
-      update(fieldsFromPayload(applied));
+      update(fieldsFromLessonPayload(applied));
     },
     [fields, update]
   );
 
   const runPublish = useCallback(async (mode: PublishMode) => {
-    if (dirtyRef.current || !contentId) {
-      await save();
-    }
-    if (!contentId) {
+    if (publishingRef.current) return;
+    publishingRef.current = true;
+    setState("saving");
+    setMessage("Saving latest draft…");
+    const saved = await flushDraft();
+    if (saved.status !== "ok") {
+      publishingRef.current = false;
+      applySaveResult(saved);
       return;
     }
-    setState("saving");
+    setContentId(saved.contentId);
+    revisionRef.current = saved.revision;
     setMessage("Publishing…");
-    const result = await publishContent({ contentId, expectedRevision: revisionRef.current });
+    const result = await publishContent({ contentId: saved.contentId, expectedRevision: saved.revision });
     if (result.status === "ok") {
       setLifecycle("published");
       setState("saved");
       if (mode === "reset") {
-        const reset = await resetReviewForContent(contentId);
+        const reset = await resetReviewForContent(saved.contentId);
         setMessage(reset.status === "ok" ? "Published. Review cards reset." : "Published. Could not reset review cards.");
       } else {
         setMessage("Published.");
@@ -249,7 +267,13 @@ export function LessonEditor({
       setState("error");
       setMessage("Could not publish.");
     }
-  }, [contentId, save]);
+    publishingRef.current = false;
+  }, [applySaveResult, flushDraft]);
+
+  const ensureSavedForAi = useCallback(async () => {
+    const result = await save();
+    return result.status === "ok" ? { status: "ok" as const, contentId: result.contentId } : { status: result.status };
+  }, [save]);
 
   const onPublishClick = useCallback(() => {
     if (lifecycle === "published") {
@@ -397,7 +421,7 @@ export function LessonEditor({
 
       <AttachmentManager contentId={contentId} initialAttachments={initialAttachments} />
 
-      <AiProposalPanel contentId={contentId} onApply={applyAiOperations} />
+      <AiProposalPanel contentId={contentId} ensureSaved={ensureSavedForAi} onApply={applyAiOperations} />
     </div>
   );
 }

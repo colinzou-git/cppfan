@@ -29,6 +29,9 @@ export function describeOperation(op: AuthoringOperation): string {
 }
 
 type PanelStatus = "idle" | "loading" | "ready" | "error";
+type EnsureSavedResult =
+  | { status: "ok"; contentId: string }
+  | { status: "conflict" | "invalid" | "unconfigured" | "error" | "not_found" };
 
 /**
  * AI authoring assistant panel (#487). Asks /api/ai/author for a structured
@@ -37,9 +40,11 @@ type PanelStatus = "idle" | "loading" | "ready" | "error";
  */
 export function AiProposalPanel({
   contentId,
+  ensureSaved,
   onApply
 }: {
   contentId?: string;
+  ensureSaved?: () => Promise<EnsureSavedResult>;
   onApply: (operations: AuthoringOperation[]) => void;
 }) {
   const [instruction, setInstruction] = useState("");
@@ -49,7 +54,7 @@ export function AiProposalPanel({
   const [message, setMessage] = useState("");
 
   async function ask() {
-    if (!contentId) {
+    if (!contentId && !ensureSaved) {
       setStatus("error");
       setMessage("Save a draft first so the assistant can read it.");
       return;
@@ -61,10 +66,27 @@ export function AiProposalPanel({
     setMessage("");
     setProposal(null);
     try {
+      let savedContentId = contentId;
+      if (ensureSaved) {
+        setMessage("Saving the latest draft…");
+        const saved = await ensureSaved();
+        if (saved.status !== "ok") {
+          setStatus("error");
+          setMessage("Could not save the latest draft for the assistant.");
+          return;
+        }
+        savedContentId = saved.contentId;
+        setMessage("");
+      }
+      if (!savedContentId) {
+        setStatus("error");
+        setMessage("Save a draft first so the assistant can read it.");
+        return;
+      }
       const res = await fetch("/api/ai/author", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ contentId, instruction })
+        body: JSON.stringify({ contentId: savedContentId, instruction })
       });
       if (!res.ok) {
         setStatus("error");
