@@ -7,6 +7,7 @@ import { publishInterview, saveInterviewDraft } from "./user-content-actions";
 import { VersionHistory } from "./version-history";
 import { ExerciseTestsEditor } from "./exercise-tests-editor";
 import { InterviewAiProposalPanel } from "./interview-ai-proposal-panel";
+import { useSerializedDraftPersistence, type DraftFlushResult } from "./use-serialized-draft-persistence";
 import { applyAcceptedInterviewOperations, type InterviewAuthoringOperation } from "./interview-ai-authoring";
 import type { ContentVersionSummary } from "./user-content-queries";
 import {
@@ -137,66 +138,15 @@ export function InterviewEditor({
   const [state, setState] = useState<SaveState>("idle");
   const [message, setMessage] = useState<string>("");
   const [lifecycle, setLifecycle] = useState<string>(initialLifecycle ?? "draft");
-  const dirtyRef = useRef(false);
+  const publishingRef = useRef(false);
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<InterviewFields>;
-        if (parsed && typeof parsed.title === "string") {
-          setFields((prev) => ({ ...prev, ...parsed }));
-          setState("local_only");
-          setMessage("Recovered unsaved local changes.");
-        }
-      }
-    } catch {
-      // ignore malformed local recovery data
-    }
-  }, [storageKey]);
-
-  const update = useCallback(
-    (patch: Partial<InterviewFields>) => {
-      setFields((prev) => {
-        const next = { ...prev, ...patch };
-        dirtyRef.current = true;
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(next));
-        } catch {
-          // ignore quota/availability errors
-        }
-        return next;
-      });
-    },
-    [storageKey]
-  );
-
-  const save = useCallback(async () => {
-    if (fields.title.trim().length === 0) {
-      setState("invalid");
-      setMessage("A title is required.");
-      return;
-    }
-    setState("saving");
-    setMessage("");
-    const result = await saveInterviewDraft({
-      contentId: contentId ?? null,
-      kind: "interview_problem",
-      title: fields.title,
-      expectedRevision: revisionRef.current,
-      payload: buildInterviewPayload(fields)
-    });
+  const applySaveResult = useCallback((result: DraftFlushResult) => {
     if (result.status === "ok") {
       setContentId(result.contentId);
       revisionRef.current = result.revision;
-      dirtyRef.current = false;
       setState("saved");
       setMessage("Saved.");
-      try {
-        window.localStorage.removeItem(storageKey);
-      } catch {
-        // ignore
-      }
+      try { window.localStorage.removeItem(storageKey); } catch { /* ignore */ }
     } else if (result.status === "conflict") {
       setState("conflict");
       setMessage("This problem changed on another device. Reload to get the latest version.");
@@ -210,28 +160,82 @@ export function InterviewEditor({
       setState("error");
       setMessage("Could not save. Try again.");
     }
-  }, [contentId, fields, storageKey]);
+  }, [storageKey]);
+
+  const { flushDraft, markDirty } = useSerializedDraftPersistence({
+    initialSnapshot: fields,
+    initialContentId,
+    initialRevision,
+    saveDraft: (snapshot, identity) => snapshot.title.trim().length === 0
+      ? Promise.resolve({ status: "invalid" as const, issues: [{ field: "title", message: "a title is required" }] })
+      : saveInterviewDraft({ contentId: identity.contentId, kind: "interview_problem", title: snapshot.title, expectedRevision: identity.revision, payload: buildInterviewPayload(snapshot) }),
+    onAutosaveStart: () => {
+      if (!publishingRef.current) { setState("saving"); setMessage(""); }
+    },
+    onAutosaveResult: (result) => {
+      if (!publishingRef.current) applySaveResult(result);
+    }
+  });
 
   useEffect(() => {
-    if (!dirtyRef.current || fields.title.trim().length === 0) {
-      return;
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<InterviewFields>;
+        if (parsed && typeof parsed.title === "string") {
+          setFields((prev) => {
+            const next = { ...prev, ...parsed };
+            markDirty(next);
+            return next;
+          });
+          setState("local_only");
+          setMessage("Recovered unsaved local changes.");
+        }
+      }
+    } catch {
+      // ignore malformed local recovery data
     }
-    const handle = window.setTimeout(() => {
-      void save();
-    }, 1500);
-    return () => window.clearTimeout(handle);
-  }, [fields, save]);
+  }, [markDirty, storageKey]);
+
+  const update = useCallback(
+    (patch: Partial<InterviewFields>) => {
+      setFields((prev) => {
+        const next = { ...prev, ...patch };
+        markDirty(next);
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(next));
+        } catch {
+          // ignore quota/availability errors
+        }
+        return next;
+      });
+    },
+    [markDirty, storageKey]
+  );
+
+  const save = useCallback(async () => {
+    setState("saving");
+    setMessage("");
+    const result = await flushDraft();
+    if (!publishingRef.current) applySaveResult(result);
+    return result;
+  }, [applySaveResult, flushDraft]);
 
   const publish = useCallback(async () => {
-    if (dirtyRef.current || !contentId) {
-      await save();
-    }
-    if (!contentId) {
+    if (publishingRef.current) return;
+    publishingRef.current = true;
+    setState("saving");
+    setMessage("Saving latest draft…");
+    const saved = await flushDraft();
+    if (saved.status !== "ok") {
+      publishingRef.current = false;
+      applySaveResult(saved);
       return;
     }
-    setState("saving");
+    setContentId(saved.contentId);
+    revisionRef.current = saved.revision;
     setMessage("Publishing…");
-    const result = await publishInterview({ contentId, expectedRevision: revisionRef.current });
+    const result = await publishInterview({ contentId: saved.contentId, expectedRevision: saved.revision });
     if (result.status === "ok") {
       setLifecycle("published");
       setState("saved");
@@ -249,7 +253,8 @@ export function InterviewEditor({
       setState("error");
       setMessage("Could not publish.");
     }
-  }, [contentId, save]);
+    publishingRef.current = false;
+  }, [applySaveResult, flushDraft]);
 
   const applyAiOperations = useCallback(
     (ops: InterviewAuthoringOperation[]) => {

@@ -75,6 +75,24 @@ describe("saveLessonDraft (#487)", () => {
     const result = await saveLessonDraft({ contentId: "c1", title: "T", expectedRevision: 1, payload: validPayload });
     expect(result.status).toBe("conflict");
   });
+
+  it("logs bounded diagnostics for a generic save failure without logging the payload", async () => {
+    const error = { code: "57014", message: "statement timeout", details: "cancelled", hint: "retry" };
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mockedCreate.mockResolvedValue(rpcClient(() => ({ data: null, error })));
+    const result = await saveLessonDraft({ contentId: "c1", title: "T", expectedRevision: 7, payload: validPayload });
+    expect(result.status).toBe("error");
+    expect(logged).toHaveBeenCalledWith("User content mutation failed", expect.objectContaining({
+      operation: "save_user_content_draft",
+      kind: "lesson",
+      contentId: "c1",
+      expectedRevision: 7,
+      durationMs: expect.any(Number),
+      error
+    }));
+    expect(logged.mock.calls[0][1]).not.toHaveProperty("payload");
+    logged.mockRestore();
+  });
 });
 
 describe("saveExerciseDraft (#488)", () => {

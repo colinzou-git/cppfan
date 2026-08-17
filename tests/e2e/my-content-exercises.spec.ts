@@ -16,7 +16,7 @@ test.describe("My Content exercise authoring (#488)", () => {
   });
 
   test("saves an exercise draft locally when no backend is configured", async ({ page }) => {
-    await page.goto("/my-content/exercises/new");
+    await page.goto("/my-content/exercises/new", { waitUntil: "networkidle" });
     await page.getByPlaceholder("Exercise title").fill("Reverse a line");
     await page.getByPlaceholder(/Describe the task/i).fill("Read a line and print it reversed.");
     await page.getByRole("button", { name: /save draft/i }).click();
@@ -24,7 +24,7 @@ test.describe("My Content exercise authoring (#488)", () => {
   });
 
   test("switches to function mode and reveals the signature field", async ({ page }) => {
-    await page.goto("/my-content/exercises/new");
+    await page.goto("/my-content/exercises/new", { waitUntil: "networkidle" });
     // program mode shows an input/output format; function mode shows a signature.
     await expect(page.getByPlaceholder(/What the program reads/i)).toBeVisible();
     await page.getByLabel("Code contract").selectOption("function");
