@@ -50,7 +50,10 @@ export function CodeLab({
     itemId,
     currentStandardSource: config.starterCode,
     source: c.source,
-    setSource: c.setSource
+    setSource: c.setSource,
+    suspendWorkingDraft: c.suspendDraftPersistence,
+    restoreWorkingDraft: c.restoreWorkingDraft,
+    adoptCurrentSourceAsWorkingDraft: c.adoptCurrentSourceAsWorkingDraft
   });
   const hasExecutionInput = config.mode === "stdin" || config.mode === "function";
   const inputLabel = config.mode === "function" ? "Arguments" : "Input Args";
@@ -185,7 +188,9 @@ export function CodeLab({
               onSelect={c.setTraceSource}
               onTrace={c.handleTrace}
               busy={c.tracePending}
-              disabled={c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference}
+              disabled={
+                c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference
+              }
             />
           ) : null}
 
