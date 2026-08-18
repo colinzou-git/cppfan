@@ -41,11 +41,11 @@ function findLocalPreviousDraft(itemId: string, currentKey: string, starterCode:
  * Supabase draft.
  *
  * Named practices (#674/#684) temporarily reuse the same live editor source but
- * are a different persistence concept. `suspendDraftPersistence()` snapshots the
- * ordinary working draft and prevents practice source from leaking into
- * localStorage/code_lab_drafts. `restoreWorkingDraft()` rehydrates that ordinary
- * draft when leaving practice mode. `adoptCurrentSourceAsWorkingDraft()` is the
- * explicit exception used when deleting an active practice and intentionally
+ * are a different persistence concept. `suspendDraftPersistence()` freezes the
+ * already tracked ordinary working draft and prevents practice source from
+ * leaking into localStorage/code_lab_drafts. `restoreWorkingDraft()` rehydrates
+ * that ordinary draft when leaving practice mode. `adoptCurrentSourceAsWorkingDraft()`
+ * is the explicit exception used when deleting an active practice and intentionally
  * keeping its editor source as the new working draft.
  */
 export function useCodeDraft({
@@ -191,7 +191,9 @@ export function useCodeDraft({
 
   const suspendDraftPersistence = useCallback(() => {
     if (persistenceSuspendedRef.current) return;
-    workingDraftSourceRef.current = sourceRef.current;
+    // `workingDraftSourceRef` is already updated on every ordinary-draft render
+    // and by local/remote hydration. Do not overwrite it from `sourceRef` here:
+    // a full-screen ?practice= load can race the setSource(localDraft) render.
     persistenceSuspendedRef.current = true;
     clearPendingSave();
     // Flush the latest ordinary draft at the boundary before practice editing.
