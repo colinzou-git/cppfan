@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { load, loadPrev, save } = vi.hoisted(() => ({
@@ -84,6 +84,34 @@ describe("useCodeDraft named-practice isolation (#684)", () => {
 
     expect(window.localStorage.getItem(draftStorageKey(ITEM))).toBe("ordinary-draft");
     expect(save.mock.calls.at(-1)?.[1]).toBe("ordinary-draft");
+  });
+
+  it("hydrates a delayed remote working draft behind an active practice without replacing it", async () => {
+    let resolveRemote!: (value: string | null) => void;
+    load.mockImplementationOnce(
+      () => new Promise<string | null>((resolve) => {
+        resolveRemote = resolve;
+      })
+    );
+
+    render(<Harness />);
+    await waitFor(() => expect(load).toHaveBeenCalledWith(ITEM, undefined));
+
+    fireEvent.click(screen.getByRole("button", { name: "suspend draft" }));
+    fireEvent.click(screen.getByRole("button", { name: "load practice" }));
+    expect(screen.getByTestId("source").textContent).toBe("named-practice");
+
+    await act(async () => {
+      resolveRemote("remote-working-draft");
+      await Promise.resolve();
+    });
+
+    // Remote hydration must update only the hidden ordinary draft while the
+    // named practice remains the visible editor source.
+    expect(screen.getByTestId("source").textContent).toBe("named-practice");
+    fireEvent.click(screen.getByRole("button", { name: "restore draft" }));
+    expect(screen.getByTestId("source").textContent).toBe("remote-working-draft");
+    expect(save.mock.calls.some(([, value]) => value === "named-practice")).toBe(false);
   });
 
   it("only promotes practice source into the draft through the explicit adopt path", async () => {
