@@ -2,7 +2,7 @@
 
 import { Editor, loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { CodeEditorProps } from "./code-editor";
 
 // Use the bundled monaco-editor instead of @monaco-editor/react's default CDN
@@ -93,27 +93,30 @@ export default function MonacoCodeEditor({
    * Guard `onChange` so programmatic reference/source swaps never write the
    * displayed reference back into the learner/practice source state.
    */
-  function syncExternalValue(editor: monaco.editor.IStandaloneCodeEditor, nextValue: string) {
-    const model = editor.getModel();
-    if (!model || model.getValue() === nextValue) return;
+  const syncExternalValue = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor, nextValue: string) => {
+      const model = editor.getModel();
+      if (!model || model.getValue() === nextValue) return;
 
-    const scrollTop = editor.getScrollTop();
-    const scrollLeft = editor.getScrollLeft();
-    applyingExternalValueRef.current = true;
-    try {
-      model.setValue(nextValue);
-    } finally {
-      applyingExternalValueRef.current = false;
-    }
-    editor.setScrollTop(scrollTop);
-    editor.setScrollLeft(scrollLeft);
-  }
+      const scrollTop = editor.getScrollTop();
+      const scrollLeft = editor.getScrollLeft();
+      applyingExternalValueRef.current = true;
+      try {
+        model.setValue(nextValue);
+      } finally {
+        applyingExternalValueRef.current = false;
+      }
+      editor.setScrollTop(scrollTop);
+      editor.setScrollLeft(scrollLeft);
+    },
+    []
+  );
 
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
     syncExternalValue(editor, value);
-  }, [value]);
+  }, [value, syncExternalValue]);
 
   useEffect(() => {
     decorationsRef.current?.set(buildDebugDecorations(breakpoints, debugLine));
