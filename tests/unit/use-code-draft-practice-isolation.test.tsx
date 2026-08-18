@@ -3,9 +3,13 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { load, loadPrev, save } = vi.hoisted(() => ({
-  load: vi.fn(async () => null as string | null),
-  loadPrev: vi.fn(async () => null as string | null),
-  save: vi.fn(async () => true)
+  load: vi.fn(async (_itemId: string, _contentVersionId?: string | null) => null as string | null),
+  loadPrev: vi.fn(
+    async (_itemId: string, _contentVersionId?: string | null) => null as string | null
+  ),
+  save: vi.fn(
+    async (_itemId: string, _source: string, _contentVersionId?: string | null) => true
+  )
 }));
 
 vi.mock("@/features/code-lab/code-draft-client", () => ({
@@ -89,9 +93,10 @@ describe("useCodeDraft named-practice isolation (#684)", () => {
   it("hydrates a delayed remote working draft behind an active practice without replacing it", async () => {
     let resolveRemote!: (value: string | null) => void;
     load.mockImplementationOnce(
-      () => new Promise<string | null>((resolve) => {
-        resolveRemote = resolve;
-      })
+      () =>
+        new Promise<string | null>((resolve) => {
+          resolveRemote = resolve;
+        })
     );
 
     render(<Harness />);
