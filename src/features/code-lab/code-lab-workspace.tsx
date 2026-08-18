@@ -100,6 +100,9 @@ export function CodeLabWorkspace({
     currentStandardSource: config.starterCode,
     source: c.source,
     setSource: c.setSource,
+    suspendWorkingDraft: c.suspendDraftPersistence,
+    restoreWorkingDraft: c.restoreWorkingDraft,
+    adoptCurrentSourceAsWorkingDraft: c.adoptCurrentSourceAsWorkingDraft,
     initialPracticeId
   });
   const [tab, setTab] = useState<DockTab>("terminal");
@@ -356,7 +359,9 @@ export function CodeLabWorkspace({
             onSelect={c.setTraceSource}
             onTrace={c.handleTrace}
             busy={c.tracePending}
-            disabled={c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference}
+            disabled={
+              c.busy !== null || c.source.trim().length === 0 || practices.readOnlyReference
+            }
           />
           <AiTracePanel trace={c.trace} pending={c.tracePending} />
         </>
@@ -451,7 +456,11 @@ export function CodeLabWorkspace({
         ) : null}
         {tab === "stdin" ? stdinField : null}
         {tab === "debug" ? (
-          practices.readOnlyReference ? referencePanel : <DebugTabPanel breakpoints={breakpointState} debug={debug} />
+          practices.readOnlyReference ? (
+            referencePanel
+          ) : (
+            <DebugTabPanel breakpoints={breakpointState} debug={debug} />
+          )
         ) : null}
         {tab === "ai" ? (
           practices.readOnlyReference ? (
@@ -492,7 +501,9 @@ export function CodeLabWorkspace({
               </div>
               <div
                 className={
-                  aiFullscreen ? "min-h-0 flex-1 overflow-auto p-4" : "min-h-0 flex-1 overflow-auto"
+                  aiFullscreen
+                    ? "min-h-0 flex-1 overflow-auto p-4"
+                    : "min-h-0 flex-1 overflow-auto"
                 }
               >
                 <div
@@ -531,7 +542,9 @@ export function CodeLabWorkspace({
             readOnly={practices.readOnlyReference}
             breakpoints={practices.readOnlyReference ? [] : breakpointState.breakpoints}
             debugLine={practices.readOnlyReference ? null : (debug.snapshot?.line ?? null)}
-            onToggleBreakpoint={practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint}
+            onToggleBreakpoint={
+              practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint
+            }
           />
           <DraftStatusLine status={c.draftStatus} />
         </div>
@@ -548,7 +561,9 @@ export function CodeLabWorkspace({
     >
       <ResizableColumns
         storageKey="cppfan:code-lab:columns"
-        left={<div className="h-full border-r border-slate-200 bg-slate-50/60">{problemPanel}</div>}
+        left={
+          <div className="h-full border-r border-slate-200 bg-slate-50/60">{problemPanel}</div>
+        }
         center={
           <div className="flex h-full flex-col gap-2 bg-slate-100 p-3">
             {practiceManager}
@@ -560,7 +575,9 @@ export function CodeLabWorkspace({
               fill
               breakpoints={practices.readOnlyReference ? [] : breakpointState.breakpoints}
               debugLine={practices.readOnlyReference ? null : (debug.snapshot?.line ?? null)}
-              onToggleBreakpoint={practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint}
+              onToggleBreakpoint={
+                practices.readOnlyReference ? undefined : breakpointState.toggleBreakpoint
+              }
             />
             <DraftStatusLine status={c.draftStatus} />
           </div>
