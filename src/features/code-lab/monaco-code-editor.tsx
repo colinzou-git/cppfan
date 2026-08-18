@@ -69,6 +69,8 @@ export default function MonacoCodeEditor({
 }: CodeEditorProps) {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const applyingExternalValueRef = useRef(false);
+  const latestValueRef = useRef(value);
+  latestValueRef.current = value;
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   // Read inside the (stable) onMount/onMouseDown closures without re-binding.
   const onToggleRef = useRef(onToggleBreakpoint);
@@ -77,26 +79,40 @@ export default function MonacoCodeEditor({
   // the inline lesson editor passes no handler and is visually unchanged.
   const debuggerEnabled = onToggleBreakpoint != null;
 
-  useEffect(() => {
-    const editor = editorRef.current;
-    const model = editor?.getModel();
-    if (!editor || !model || model.getValue() === value) return;
+  /**
+   * Monaco is deliberately uncontrolled for learner keystrokes, but Code Lab can
+   * replace the displayed source without changing the learner source — notably
+   * when switching between a named practice and read-only cppFan reference code.
+   *
+   * Use the MODEL API for those external replacements. `editor.executeEdits()`
+   * can be rejected once the editor becomes read-only in the same render, which
+   * previously left Monaco showing the practice model even though React already
+   * supplied the canonical cppFan sample (#684). Model-level `setValue` is not a
+   * user edit and works independently of the editor's read-only option.
+   *
+   * Guard `onChange` so programmatic reference/source swaps never write the
+   * displayed reference back into the learner/practice source state.
+   */
+  function syncExternalValue(editor: monaco.editor.IStandaloneCodeEditor, nextValue: string) {
+    const model = editor.getModel();
+    if (!model || model.getValue() === nextValue) return;
 
-    const selection = editor.getSelection();
     const scrollTop = editor.getScrollTop();
     const scrollLeft = editor.getScrollLeft();
-
     applyingExternalValueRef.current = true;
-    editor.executeEdits("cppfan-external-value", [
-      {
-        range: model.getFullModelRange(),
-        text: value
-      }
-    ]);
-    if (selection) editor.setSelection(selection);
+    try {
+      model.setValue(nextValue);
+    } finally {
+      applyingExternalValueRef.current = false;
+    }
     editor.setScrollTop(scrollTop);
     editor.setScrollLeft(scrollLeft);
-    applyingExternalValueRef.current = false;
+  }
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    syncExternalValue(editor, value);
   }, [value]);
 
   useEffect(() => {
@@ -115,6 +131,9 @@ export default function MonacoCodeEditor({
       }}
       onMount={(editor) => {
         editorRef.current = editor;
+        // The dynamic editor can finish mounting after an external value switch.
+        // Reconcile once on mount as well as in the value effect.
+        syncExternalValue(editor, latestValueRef.current);
         // Expose the editor instance so end-to-end tests can drive edits through
         // Monaco's own API (setValue), which fires the same change handler a
         // keystroke would. Monaco keyboard automation drops/reorders characters
