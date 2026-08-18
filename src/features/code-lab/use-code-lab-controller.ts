@@ -11,7 +11,11 @@ import type { CodeAction } from "./code-run-controls";
 import type { TraceSource } from "./trace-controls";
 import { getBoundaryChecklistsForCodeLab } from "./boundary-checklist-service";
 import { getDefaultPredictionPrompts } from "./prediction-prompts";
-import { hasRequiredPredictions, isPredictionEnabled, shouldRequirePredictionBeforeRun } from "./prediction-service";
+import {
+  hasRequiredPredictions,
+  isPredictionEnabled,
+  shouldRequirePredictionBeforeRun
+} from "./prediction-service";
 import { comparePredictionsToRunResult } from "./prediction-comparison";
 import type { CodePredictionComparison, CodePredictionSubmission } from "./prediction-types";
 import { buildCodeRemediationRecommendation } from "./error-remediation-service";
@@ -36,7 +40,11 @@ export type CodeLabControllerArgs = {
   contentVersionId?: string;
   /** Active milestone index for a user lab; run/test grade this checkpoint (#489). */
   milestoneIndex?: number;
-  onResult?: (result: { run?: CodeRunResult | null; test?: CodeTestResult | null; source?: string }) => void;
+  onResult?: (result: {
+    run?: CodeRunResult | null;
+    test?: CodeTestResult | null;
+    source?: string;
+  }) => void;
 };
 
 /**
@@ -45,14 +53,24 @@ export type CodeLabControllerArgs = {
  * lesson view and the full-page workspace render the same behavior from one
  * source of truth instead of duplicating it.
  */
-export function useCodeLabController({ itemId, config, contentVersionId, milestoneIndex, onResult }: CodeLabControllerArgs) {
+export function useCodeLabController({
+  itemId,
+  config,
+  contentVersionId,
+  milestoneIndex,
+  onResult
+}: CodeLabControllerArgs) {
   const [source, setSource] = useState(config.starterCode);
   // Autosave/resume: hydrates source from the saved draft on mount and persists
-  // edits (cross-device when signed in, localStorage otherwise). #431
+  // ordinary draft edits. Named practices temporarily suspend this persistence
+  // so practice source never overwrites the lesson's working draft (#684).
   const {
     status: draftStatus,
     hasPreviousVersionDraft,
-    copyPreviousVersionDraft
+    copyPreviousVersionDraft,
+    suspendDraftPersistence,
+    restoreWorkingDraft,
+    adoptCurrentSourceAsWorkingDraft
   } = useCodeDraft({
     itemId,
     starterCode: config.starterCode,
@@ -109,7 +127,12 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
         // The client only knows about the current code-capable item; richer
         // availability is resolved server-side on the dashboard.
         availableItems: [
-          { id: itemId, type: "code_lab", skillIds: config.skillTags ?? [], hasCodeLab: true }
+          {
+            id: itemId,
+            type: "code_lab",
+            skillIds: config.skillTags ?? [],
+            hasCodeLab: true
+          }
         ]
       })
     );
@@ -187,7 +210,13 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
     try {
       if (action === "run") {
         setReview(null);
-        const result = await runCodeRequest({ itemId, source, stdin, contentVersionId, milestoneIndex });
+        const result = await runCodeRequest({
+          itemId,
+          source,
+          stdin,
+          contentVersionId,
+          milestoneIndex
+        });
         setRunResult(result);
         runResultRef.current = result;
         // An unavailable item never executed: show the message but record no
@@ -248,6 +277,9 @@ export function useCodeLabController({ itemId, config, contentVersionId, milesto
     draftStatus,
     hasPreviousVersionDraft,
     copyPreviousVersionDraft,
+    suspendDraftPersistence,
+    restoreWorkingDraft,
+    adoptCurrentSourceAsWorkingDraft,
     stdin,
     setStdin,
     busy,
