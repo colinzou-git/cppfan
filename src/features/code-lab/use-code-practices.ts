@@ -36,12 +36,21 @@ function sortPractices(practices: CodePractice[]): CodePractice[] {
   return [...practices].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
+/**
+ * Named-practice orchestration (#674). The live editor source is shared with the
+ * Code Lab controller, but #684 keeps its persistence isolated from the ordinary
+ * lesson working draft by suspending draft autosave for the entire practice
+ * session and explicitly restoring/adopting the draft at the boundary.
+ */
 export function useCodePractices({
   enabled,
   itemId,
   currentStandardSource,
   source,
   setSource,
+  suspendWorkingDraft,
+  restoreWorkingDraft,
+  adoptCurrentSourceAsWorkingDraft,
   initialPracticeId
 }: {
   enabled: boolean;
@@ -49,9 +58,14 @@ export function useCodePractices({
   currentStandardSource: string;
   source: string;
   setSource: (value: string) => void;
+  suspendWorkingDraft: () => void;
+  restoreWorkingDraft: () => void;
+  adoptCurrentSourceAsWorkingDraft: () => void;
   initialPracticeId?: string;
 }) {
-  const [loadState, setLoadState] = useState<CodePracticeLoadState>(enabled ? "loading" : "disabled");
+  const [loadState, setLoadState] = useState<CodePracticeLoadState>(
+    enabled ? "loading" : "disabled"
+  );
   const [practices, setPractices] = useState<CodePractice[]>([]);
   const [activePracticeId, setActivePracticeId] = useState<string | null>(null);
   const [baselineSource, setBaselineSource] = useState<string | null>(null);
@@ -65,7 +79,9 @@ export function useCodePractices({
     () => practices.find((practice) => practice.id === activePracticeId) ?? null,
     [practices, activePracticeId]
   );
-  const practiceDirty = Boolean(activePractice && baselineSource !== null && source !== baselineSource);
+  const practiceDirty = Boolean(
+    activePractice && baselineSource !== null && source !== baselineSource
+  );
   const historicalAvailable = Boolean(
     activePractice && activePractice.standardSourceCodeSnapshot !== currentStandardSource
   );
@@ -77,19 +93,7 @@ export function useCodePractices({
   });
   const readOnlyReference = referenceMode !== "learner";
 
-  const applyPractice = useCallback(
-    (practice: CodePractice) => {
-      setReferenceMode("learner");
-      setActivePracticeId(practice.id);
-      setBaselineSource(practice.sourceCode);
-      setBaselineName(practice.name);
-      setSource(practice.sourceCode);
-      setError(null);
-    },
-    [setSource]
-  );
-
-  const detachPractice = useCallback(() => {
+  const clearPracticeMetadata = useCallback(() => {
     setReferenceMode("learner");
     setActivePracticeId(null);
     setBaselineSource(null);
@@ -97,11 +101,32 @@ export function useCodePractices({
     setError(null);
   }, []);
 
+  const applyPractice = useCallback(
+    (practice: CodePractice) => {
+      // Snapshot/flush the ordinary draft before replacing the shared live
+      // editor source. This call is idempotent across practice -> practice
+      // switches and synchronously suspends draft persistence (#684).
+      suspendWorkingDraft();
+      setReferenceMode("learner");
+      setActivePracticeId(practice.id);
+      setBaselineSource(practice.sourceCode);
+      setBaselineName(practice.name);
+      setSource(practice.sourceCode);
+      setError(null);
+    },
+    [setSource, suspendWorkingDraft]
+  );
+
+  const returnToWorkingDraft = useCallback(() => {
+    clearPracticeMetadata();
+    restoreWorkingDraft();
+  }, [clearPracticeMetadata, restoreWorkingDraft]);
+
   useEffect(() => {
     if (!enabled) {
       setLoadState("disabled");
       setPractices([]);
-      detachPractice();
+      clearPracticeMetadata();
       return;
     }
 
@@ -131,7 +156,7 @@ export function useCodePractices({
     return () => {
       cancelled = true;
     };
-  }, [enabled, itemId, initialPracticeId, applyPractice, detachPractice]);
+  }, [enabled, itemId, initialPracticeId, applyPractice, clearPracticeMetadata]);
 
   const createPractice = useCallback(
     async (name: string) => {
@@ -139,7 +164,9 @@ export function useCodePractices({
       setError(null);
       try {
         const created = await createPracticeRequest({ itemId, name, source });
-        setPractices((prev) => sortPractices([created, ...prev.filter((p) => p.id !== created.id)]));
+        setPractices((prev) =>
+          sortPractices([created, ...prev.filter((practice) => practice.id !== created.id)])
+        );
         applyPractice(created);
         return true;
       } catch (caught) {
@@ -158,7 +185,9 @@ export function useCodePractices({
     setError(null);
     try {
       const updated = await updatePracticeRequest({ practiceId: activePractice.id, source });
-      setPractices((prev) => sortPractices(prev.map((p) => (p.id === updated.id ? updated : p))));
+      setPractices((prev) =>
+        sortPractices(prev.map((practice) => (practice.id === updated.id ? updated : practice)))
+      );
       setBaselineSource(updated.sourceCode);
       setBaselineName(updated.name);
       return true;
@@ -177,7 +206,9 @@ export function useCodePractices({
       setError(null);
       try {
         const updated = await updatePracticeRequest({ practiceId: activePractice.id, name });
-        setPractices((prev) => sortPractices(prev.map((p) => (p.id === updated.id ? updated : p))));
+        setPractices((prev) =>
+          sortPractices(prev.map((practice) => (practice.id === updated.id ? updated : practice)))
+        );
         setBaselineName(updated.name);
         return true;
       } catch (caught) {
@@ -196,8 +227,14 @@ export function useCodePractices({
       setError(null);
       try {
         await deletePracticeRequest(practiceId);
-        setPractices((prev) => prev.filter((p) => p.id !== practiceId));
-        if (activePracticeId === practiceId) detachPractice();
+        setPractices((prev) => prev.filter((practice) => practice.id !== practiceId));
+        if (activePracticeId === practiceId) {
+          // #674 explicitly keeps the active editor source after deletion. Make
+          // that promotion into the ordinary draft deliberate instead of an
+          // accidental side effect of shared source state (#684).
+          adoptCurrentSourceAsWorkingDraft();
+          clearPracticeMetadata();
+        }
         return true;
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : "Could not delete this practice.");
@@ -206,7 +243,7 @@ export function useCodePractices({
         setBusy(null);
       }
     },
-    [activePracticeId, detachPractice]
+    [activePracticeId, adoptCurrentSourceAsWorkingDraft, clearPracticeMetadata]
   );
 
   const requestOpenPractice = useCallback(
@@ -231,20 +268,20 @@ export function useCodePractices({
       setPendingSwitch({ kind: "draft" });
       return;
     }
-    detachPractice();
-  }, [activePractice, practiceDirty, detachPractice]);
+    returnToWorkingDraft();
+  }, [activePractice, practiceDirty, returnToWorkingDraft]);
 
   const finishPendingSwitch = useCallback(() => {
     const pending = pendingSwitch;
     setPendingSwitch(null);
     if (!pending) return;
     if (pending.kind === "draft") {
-      detachPractice();
+      returnToWorkingDraft();
       return;
     }
     const practice = practices.find((candidate) => candidate.id === pending.practiceId);
     if (practice) applyPractice(practice);
-  }, [pendingSwitch, practices, applyPractice, detachPractice]);
+  }, [pendingSwitch, practices, applyPractice, returnToWorkingDraft]);
 
   const resolvePendingSwitch = useCallback(
     async (choice: "save" | "discard" | "cancel") => {

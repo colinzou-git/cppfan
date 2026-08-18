@@ -36,12 +36,17 @@ function findLocalPreviousDraft(itemId: string, currentKey: string, starterCode:
 
 /**
  * Autosave + resume for the Code Lab editor (#431), bound to the immutable
- * content version (#612). On mount it hydrates the source from the fastest
- * store keyed by (item, contentVersionId) — localStorage first, then the
- * cross-device Supabase draft — so opening a NEW published version starts from
- * its starter code and never silently restores code written for the OLD
- * definition. A prior-version draft (local or remote) is offered as an explicit
- * `copyPreviousVersionDraft()` instead. Every persistence path is best-effort.
+ * content version (#612). On mount it hydrates source from the fastest store
+ * keyed by (item, contentVersionId) — localStorage first, then the cross-device
+ * Supabase draft.
+ *
+ * Named practices (#674/#684) temporarily reuse the same live editor source but
+ * are a different persistence concept. `suspendDraftPersistence()` freezes the
+ * already tracked ordinary working draft and prevents practice source from
+ * leaking into localStorage/code_lab_drafts. `restoreWorkingDraft()` rehydrates
+ * that ordinary draft when leaving practice mode. `adoptCurrentSourceAsWorkingDraft()`
+ * is the explicit exception used when deleting an active practice and intentionally
+ * keeping its editor source as the new working draft.
  */
 export function useCodeDraft({
   itemId,
@@ -55,16 +60,49 @@ export function useCodeDraft({
   source: string;
   setSource: (value: string) => void;
   contentVersionId?: string | null;
-}): { status: DraftStatus; hasPreviousVersionDraft: boolean; copyPreviousVersionDraft: () => void } {
+}): {
+  status: DraftStatus;
+  hasPreviousVersionDraft: boolean;
+  copyPreviousVersionDraft: () => void;
+  suspendDraftPersistence: () => void;
+  restoreWorkingDraft: () => void;
+  adoptCurrentSourceAsWorkingDraft: () => void;
+} {
   const [status, setStatus] = useState<DraftStatus>("idle");
   const [previousDraft, setPreviousDraft] = useState<string | null>(null);
   const hydratingRef = useRef(true);
+  const persistenceSuspendedRef = useRef(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sourceRef = useRef(source);
+  const workingDraftSourceRef = useRef(source);
   sourceRef.current = source;
+  // The visible editor may contain a named practice while persistence is
+  // suspended. Only ordinary draft mode may advance the draft snapshot.
+  if (!persistenceSuspendedRef.current) workingDraftSourceRef.current = source;
+
   const itemIdRef = useRef(itemId);
   itemIdRef.current = itemId;
   const versionRef = useRef(contentVersionId);
   versionRef.current = contentVersionId;
+
+  const clearPendingSave = useCallback(() => {
+    if (saveTimerRef.current !== null) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+  }, []);
+
+  const persistDraftNow = useCallback(
+    (value: string, targetItemId = itemIdRef.current, targetVersion = versionRef.current) => {
+      try {
+        window.localStorage.setItem(draftStorageKey(targetItemId, targetVersion), value);
+      } catch {
+        // Best-effort; remote save below is the durable path when signed in.
+      }
+      return saveDraftRequest(targetItemId, value, targetVersion);
+    },
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -72,14 +110,16 @@ export function useCodeDraft({
     setPreviousDraft(null);
     const key = draftStorageKey(itemId, contentVersionId);
 
-    // Track what we last set so a slower remote draft only replaces the editor
-    // while the learner has not yet typed over the restored/starter value.
+    // Track the ordinary draft separately from the visible editor. A practice
+    // may become visible before the slower remote draft request resolves.
     let applied = starterCode;
+    workingDraftSourceRef.current = starterCode;
     let hasOwnDraft = false;
     try {
       const local = window.localStorage.getItem(key);
       if (local !== null && local !== starterCode) {
-        setSource(local);
+        workingDraftSourceRef.current = local;
+        if (!persistenceSuspendedRef.current) setSource(local);
         applied = local;
         hasOwnDraft = true;
       }
@@ -96,8 +136,14 @@ export function useCodeDraft({
 
     void (async () => {
       const remote = await loadDraftRequest(itemId, contentVersionId);
-      if (!cancelled && remote !== null && sourceRef.current === applied) {
-        setSource(remote);
+      // Use the hidden draft snapshot for the anti-clobber check. If a practice
+      // is visible, sourceRef intentionally differs from `applied`; that alone
+      // must not prevent ordinary draft hydration from completing in the
+      // background.
+      const ordinaryDraftUntouched = workingDraftSourceRef.current === applied;
+      if (!cancelled && remote !== null && ordinaryDraftUntouched) {
+        workingDraftSourceRef.current = remote;
+        if (!persistenceSuspendedRef.current) setSource(remote);
         applied = remote;
         hasOwnDraft = true;
       }
@@ -115,37 +161,76 @@ export function useCodeDraft({
   }, [itemId, starterCode, setSource, contentVersionId]);
 
   useEffect(() => {
-    if (hydratingRef.current) return;
+    if (hydratingRef.current || persistenceSuspendedRef.current) return;
+    workingDraftSourceRef.current = source;
     setStatus("saving");
-    const handle = setTimeout(() => {
-      try {
-        window.localStorage.setItem(draftStorageKey(itemId, contentVersionId), source);
-      } catch {
-        // Best-effort; remote save below is the durable path.
-      }
-      void saveDraftRequest(itemId, source, contentVersionId).finally(() => setStatus("saved"));
+    clearPendingSave();
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null;
+      if (persistenceSuspendedRef.current) return;
+      void persistDraftNow(source).finally(() => {
+        if (!persistenceSuspendedRef.current) setStatus("saved");
+      });
     }, DEBOUNCE_MS);
-    return () => clearTimeout(handle);
-  }, [source, itemId, contentVersionId]);
+    return clearPendingSave;
+  }, [source, itemId, contentVersionId, clearPendingSave, persistDraftNow]);
 
   useEffect(() => {
     return () => {
+      clearPendingSave();
       if (hydratingRef.current) return;
-      try {
-        window.localStorage.setItem(draftStorageKey(itemIdRef.current, versionRef.current), sourceRef.current);
-      } catch {
-        // ignore
-      }
-      void saveDraftRequest(itemIdRef.current, sourceRef.current, versionRef.current);
+      // A named practice may be the live editor source at unmount. Persist only
+      // the last ordinary draft snapshot.
+      void persistDraftNow(
+        workingDraftSourceRef.current,
+        itemIdRef.current,
+        versionRef.current
+      );
     };
-  }, []);
+  }, [clearPendingSave, persistDraftNow]);
+
+  const suspendDraftPersistence = useCallback(() => {
+    if (persistenceSuspendedRef.current) return;
+    // `workingDraftSourceRef` is already updated on every ordinary-draft render
+    // and by local/remote hydration. Do not overwrite it from `sourceRef` here:
+    // a full-screen ?practice= load can race the setSource(localDraft) render.
+    persistenceSuspendedRef.current = true;
+    clearPendingSave();
+    // Flush the latest ordinary draft at the boundary before practice editing.
+    // Do not expose this as a practice save/status transition.
+    if (!hydratingRef.current) void persistDraftNow(workingDraftSourceRef.current);
+  }, [clearPendingSave, persistDraftNow]);
+
+  const restoreWorkingDraft = useCallback(() => {
+    clearPendingSave();
+    persistenceSuspendedRef.current = false;
+    setSource(workingDraftSourceRef.current);
+  }, [clearPendingSave, setSource]);
+
+  const adoptCurrentSourceAsWorkingDraft = useCallback(() => {
+    clearPendingSave();
+    workingDraftSourceRef.current = sourceRef.current;
+    persistenceSuspendedRef.current = false;
+    setStatus("saving");
+    void persistDraftNow(workingDraftSourceRef.current).finally(() => setStatus("saved"));
+  }, [clearPendingSave, persistDraftNow]);
 
   const copyPreviousVersionDraft = useCallback(() => {
     if (previousDraft !== null) {
-      setSource(previousDraft);
+      workingDraftSourceRef.current = previousDraft;
+      // If a practice is active, update only the hidden ordinary draft. Do not
+      // replace the visible practice source.
+      if (!persistenceSuspendedRef.current) setSource(previousDraft);
       setPreviousDraft(null);
     }
   }, [previousDraft, setSource]);
 
-  return { status, hasPreviousVersionDraft: previousDraft !== null, copyPreviousVersionDraft };
+  return {
+    status,
+    hasPreviousVersionDraft: previousDraft !== null,
+    copyPreviousVersionDraft,
+    suspendDraftPersistence,
+    restoreWorkingDraft,
+    adoptCurrentSourceAsWorkingDraft
+  };
 }
