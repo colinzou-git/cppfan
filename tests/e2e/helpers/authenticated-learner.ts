@@ -262,22 +262,28 @@ export async function createAuthenticatedLearner(
       return String(result.data.id);
     },
     async lessonRatingEvidence(itemId: string) {
-      const card = await browserLikeClient
+      // Operator assertions intentionally use the service client. Direct
+      // learner writes stay RPC-only, and some fresh-stack privilege layouts
+      // keep review tables unavailable to the browser client.
+      const card = await service
         .from("review_cards")
         .select("id,reps,due_at")
+        .eq("user_id", userId)
         .eq("learning_item_id", itemId)
         .maybeSingle();
       if (card.error) throw card.error;
       const [logs, events] = card.data
         ? await Promise.all([
-            browserLikeClient
+            service
               .from("review_logs")
               .select("rating,submission_id")
+              .eq("user_id", userId)
               .eq("review_card_id", card.data.id)
               .order("reviewed_at", { ascending: true }),
-            browserLikeClient
+            service
               .from("skill_events")
               .select("event_type,metadata")
+              .eq("user_id", userId)
               .eq("learning_item_id", itemId)
               .order("event_time", { ascending: true })
           ])
