@@ -207,6 +207,94 @@ export async function createAuthenticatedLearner(
   return {
     email,
     userId,
+    async seedPublishedLesson(
+      input: {
+        title?: string;
+        content?: string;
+        explanation?: string;
+      } = {}
+    ) {
+      const payload = {
+        schemaVersion: 1,
+        itemType: "lesson",
+        title: input.title ?? "Playwright database-only lesson",
+        content: input.content ?? "A database-only lesson body used to verify review hydration.",
+        explanation:
+          input.explanation ?? "This explanation is projected from user-created content.",
+        difficulty: "beginner",
+        estimatedMinutes: 3
+      };
+      const saved = await browserLikeClient.rpc("save_user_content_draft", {
+        p_content_id: null,
+        p_kind: "lesson",
+        p_title: payload.title,
+        p_native_module_id: null,
+        p_recommendation_enabled: true,
+        p_schema_version: 1,
+        p_payload: payload,
+        p_expected_revision: null
+      });
+      if (saved.error) throw saved.error;
+      const row = (Array.isArray(saved.data) ? saved.data[0] : saved.data) as {
+        content_id: string;
+      };
+      const published = await browserLikeClient.rpc("publish_user_content", {
+        p_content_id: row.content_id,
+        p_expected_revision: null
+      });
+      if (published.error) throw published.error;
+      return {
+        contentId: row.content_id,
+        itemId: `user.item.${row.content_id}`,
+        title: payload.title,
+        content: payload.content
+      };
+    },
+    async makeReviewDue(itemId: string) {
+      const result = await service
+        .from("review_cards")
+        .update({ due_at: new Date(Date.now() - 60_000).toISOString() })
+        .eq("user_id", userId)
+        .eq("learning_item_id", itemId)
+        .select("id")
+        .single();
+      if (result.error) throw result.error;
+      return String(result.data.id);
+    },
+    async lessonRatingEvidence(itemId: string) {
+      // Operator assertions intentionally use the service client. Direct
+      // learner writes stay RPC-only, and some fresh-stack privilege layouts
+      // keep review tables unavailable to the browser client.
+      const card = await service
+        .from("review_cards")
+        .select("id,reps,due_at")
+        .eq("user_id", userId)
+        .eq("learning_item_id", itemId)
+        .maybeSingle();
+      if (card.error) throw card.error;
+      const [logs, events] = card.data
+        ? await Promise.all([
+            service
+              .from("review_logs")
+              .select("rating,submission_id")
+              .eq("user_id", userId)
+              .eq("review_card_id", card.data.id)
+              .order("reviewed_at", { ascending: true }),
+            service
+              .from("skill_events")
+              .select("event_type,metadata")
+              .eq("user_id", userId)
+              .eq("learning_item_id", itemId)
+              .order("event_time", { ascending: true })
+          ])
+        : [
+            { data: [], error: null },
+            { data: [], error: null }
+          ];
+      if (logs.error) throw logs.error;
+      if (events.error) throw events.error;
+      return { card: card.data, logs: logs.data ?? [], events: events.data ?? [] };
+    },
     /**
      * Seed a PUBLISHED judge-backed user interview problem (#608) and return its
      * projected id (`user.item.<contentId>`). Drives the same save+publish RPCs

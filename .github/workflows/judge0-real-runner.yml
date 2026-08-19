@@ -151,7 +151,11 @@ jobs:
           version: latest
 
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: |
+          if [[ -f /etc/apt/apt-mirrors.txt ]]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          fi
+          pnpm exec playwright install --with-deps chromium
 
       - name: Run authenticated browser E2E with Judge0
         run: pnpm test:e2e:authenticated tests/e2e/authenticated-*.spec.ts --project=chromium

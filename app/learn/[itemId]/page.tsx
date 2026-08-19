@@ -7,8 +7,13 @@ import { getLearningItemWithDetails } from "@/features/learning-items/learning-i
 import { getPrimarySkillId } from "@/features/learning-items/learning-item-seed";
 import { isCodeLabItem } from "@/features/code-lab/code-lab-catalog";
 import { recordSkillEvent } from "@/features/events/event-service";
+import { getLessonRatingState } from "@/features/learning-items/lesson-rating-queries";
 
-export default async function LearningItemPage({ params }: { params: Promise<{ itemId: string }> }) {
+export default async function LearningItemPage({
+  params
+}: {
+  params: Promise<{ itemId: string }>;
+}) {
   const { itemId } = await params;
   const result = await getLearningItemWithDetails(decodeURIComponent(itemId));
 
@@ -27,6 +32,10 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
   // Only Code Lab items use the wide split-pane layout; other items keep a
   // comfortable reading width so they are not awkwardly stretched (#431).
   const wide = result.status === "ok" && isCodeLabItem(result.data.item.id);
+  const lessonRatingState =
+    result.status === "ok" && result.data.item.type === "lesson"
+      ? await getLessonRatingState(result.data.item.id)
+      : undefined;
 
   return (
     <PageShell className="grid gap-6" size={wide ? "wide" : "reading"}>
@@ -41,11 +50,13 @@ export default async function LearningItemPage({ params }: { params: Promise<{ i
           className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
         >
           <p className="font-bold">This item is temporarily unavailable.</p>
-          <p className="mt-1">We couldn’t load it from the database just now. Please refresh or try again shortly.</p>
+          <p className="mt-1">
+            We couldn’t load it from the database just now. Please refresh or try again shortly.
+          </p>
         </div>
       ) : (
         <>
-          <LearningItemView data={result.data} />
+          <LearningItemView data={result.data} lessonRatingState={lessonRatingState} />
           <LearnerResources itemId={result.data.item.id} />
         </>
       )}

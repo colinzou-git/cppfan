@@ -1,8 +1,11 @@
 import { getLearningItemsForSkill } from "@/features/learning-items/learning-item-seed";
 import type { AcquisitionState } from "./goal-contract";
+import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 
 type LearningItem = ReturnType<typeof getLearningItemsForSkill>[number];
-export type AcquisitionItem = Pick<LearningItem, "id" | "title" | "estimated_minutes">;
+export type AcquisitionItem = Pick<LearningItem, "id" | "title" | "estimated_minutes"> & {
+  type?: LearningItemType;
+};
 
 export const SKILL_INITIAL_LEARNING_CONTRACT = {
   id: "skill-initial-learning",

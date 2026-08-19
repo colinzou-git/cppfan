@@ -20,6 +20,8 @@ import {
   isReviewEligibleType
 } from "./learning-item-seed";
 import type { LearningItemType, LearningItemWithDetails } from "./learning-item-types";
+import { LessonCompletionRating } from "./lesson-completion-rating";
+import type { LessonRatingState } from "./lesson-rating-types";
 
 const TYPE_LABELS: Record<LearningItemType, string> = {
   lesson: "Lesson",
@@ -36,7 +38,13 @@ const TYPE_LABELS: Record<LearningItemType, string> = {
  * Read-only view of a single learning item. Choice-based items list their
  * options statically; interactive answering and grading arrive in issue #3.
  */
-export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
+export function LearningItemView({
+  data,
+  lessonRatingState
+}: {
+  data: LearningItemWithDetails;
+  lessonRatingState?: LessonRatingState;
+}) {
   const { item, choices, skills } = data;
   const hasChoices = choices.length > 0;
   // Lessons show their explanation as lesson content. For graded/retrieval item
@@ -55,7 +63,10 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
   const practiceEnabled = item.type === "lesson";
 
   return (
-    <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="learning-item">
+    <Card
+      className="border-white/70 bg-white/85 shadow-sm backdrop-blur"
+      data-testid="learning-item"
+    >
       <CardHeader>
         <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-blue-100 text-blue-700">
           <BookOpen className="h-5 w-5" />
@@ -90,7 +101,11 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
 
           {hasChoices ? (
             <div data-testid="learning-item-choices">
-              <AnswerForm itemId={item.id} choices={choices} explanation={item.explanation ?? null} />
+              <AnswerForm
+                itemId={item.id}
+                choices={choices}
+                explanation={item.explanation ?? null}
+              />
             </div>
           ) : null}
 
@@ -102,21 +117,31 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
             <CompletionExercise itemId={item.id} blanks={completionBlanks} />
           ) : null}
 
-          {item.explanation && isLesson ? <ExplanationPanel explanation={item.explanation} /> : null}
+          {item.explanation && isLesson ? (
+            <ExplanationPanel explanation={item.explanation} />
+          ) : null}
 
           {item.explanation && !isLesson && !hasChoices ? (
             <RevealExplanation explanation={item.explanation} />
           ) : null}
 
           {isLesson ? (
-            <FurtherReadingPanel itemId={item.id} skillIds={skills.map((skill) => skill.skill_id)} />
+            <FurtherReadingPanel
+              itemId={item.id}
+              skillIds={skills.map((skill) => skill.skill_id)}
+            />
           ) : null}
 
           <div className="flex flex-wrap items-center gap-2">
             <ItemHelpLinks
               context={{
                 schemaVersion: 1,
-                sourceKind: isParsons || isCompletion ? "guided_exercise" : isLesson ? "learning_item" : "quiz_question",
+                sourceKind:
+                  isParsons || isCompletion
+                    ? "guided_exercise"
+                    : isLesson
+                      ? "learning_item"
+                      : "quiz_question",
                 sourceId: item.id,
                 sourceVersion: item.updated_at ?? "1",
                 title: item.title,
@@ -128,7 +153,7 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
                     ? completionBlanks.map((blank) => `Fill blank ${blank.position}.`)
                     : undefined,
                 visibleChoices: choices.map((choice) => choice.content),
-                visibleFeedback: isLesson ? item.explanation ?? undefined : undefined,
+                visibleFeedback: isLesson ? (item.explanation ?? undefined) : undefined,
                 assessmentState: isLesson ? "instructional" : "unanswered",
                 revealPolicy: isLesson ? "normal" : "hint_only",
                 metadata: {
@@ -151,6 +176,15 @@ export function LearningItemView({ data }: { data: LearningItemWithDetails }) {
         ) : (
           <MaybeCodeLab itemId={item.id} practiceEnabled={practiceEnabled} />
         )}
+
+        {item.type === "lesson" ? (
+          <div className={hasCodeLab ? "xl:col-span-2" : undefined}>
+            <LessonCompletionRating
+              itemId={item.id}
+              initialState={lessonRatingState ?? { state: "unavailable" }}
+            />
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

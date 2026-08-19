@@ -27,11 +27,17 @@ FSRS should manage:
 - Review history
 - Next scheduled review
 
+For an explicitly completed lesson, the exact lesson is a valid canonical FSRS
+card. Initial Hard/Good/Mastered choices map to FSRS hard/good/easy. The
+presentation label Mastered is not permanent and never substitutes for skill
+mastery.
+
 ## Event ledger responsibility
 
 The event ledger should record actions such as:
 
 - Lesson started
+- Lesson self-assessed (learner-attested exact-item acquisition evidence)
 - Concept viewed
 - Quiz submitted
 - Correct answer

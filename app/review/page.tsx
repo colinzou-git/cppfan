@@ -28,7 +28,17 @@ export default async function ReviewPage() {
         </p>
       </header>
 
-      {queue.authenticated ? (
+      {queue.authenticated && (queue.state === "unavailable" || queue.state === "error") ? (
+        <div
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"
+          role="alert"
+        >
+          <p className="font-black">Your review queue is temporarily unavailable.</p>
+          <p className="mt-1">
+            Please refresh or try again shortly. No review progress has been changed.
+          </p>
+        </div>
+      ) : queue.authenticated ? (
         // Keep the recall card readable (max ~48rem) and add session metadata to
         // the side on desktop instead of stretching the prompt; mobile stacks.
         <div className="grid gap-6 xl:grid-cols-[minmax(0,48rem)_minmax(18rem,1fr)] xl:items-start">
@@ -36,11 +46,16 @@ export default async function ReviewPage() {
           <aside className="rounded-2xl border border-white/70 bg-white/80 p-4 text-sm shadow-sm xl:sticky xl:top-6">
             <p className="font-black text-slate-950">Review progress</p>
             <p className="mt-1 text-slate-600">{queue.due.length} due in this session.</p>
-            <p className="mt-3 text-xs text-slate-500">Recall first, reveal, then rate with FSRS.</p>
+            <p className="mt-3 text-xs text-slate-500">
+              Recall first, reveal, then rate with FSRS.
+            </p>
           </aside>
         </div>
       ) : (
-        <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="review-preview">
+        <Card
+          className="border-white/70 bg-white/85 shadow-sm backdrop-blur"
+          data-testid="review-preview"
+        >
           <CardHeader>
             <CardTitle>Items ready for review scheduling</CardTitle>
             <CardDescription>

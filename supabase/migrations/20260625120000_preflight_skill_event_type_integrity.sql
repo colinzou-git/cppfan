@@ -40,6 +40,7 @@ begin
       from public.skill_events
       where event_type not in (
         'lesson_started',
+        'lesson_self_assessed',
         'concept_seen',
         'quiz_attempted',
         'quiz_correct',
