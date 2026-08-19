@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { rateReview } from "./review-actions";
 import { REVIEW_RATINGS, type ReviewRating } from "@/lib/fsrs/scheduler";
 import type { DueReviewEntry } from "./review-types";
+import { FormattedContent } from "@/features/learning-items/formatted-content";
 
 const RATING_LABELS: Record<ReviewRating, string> = {
   again: "Again",
@@ -25,6 +26,11 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
   const [remaining, setRemaining] = useState<DueReviewEntry[]>(entries);
   const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryAttempt, setRetryAttempt] = useState<{
+    cardId: string;
+    rating: ReviewRating;
+    submissionId: string;
+  } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const current = remaining[0] ?? null;
@@ -35,16 +41,20 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
     }
     setError(null);
     const cardId = current.cardId;
-    // A stable id per click so an in-flight retry / double-tap cannot rate twice.
-    const submissionId = crypto.randomUUID();
+    const attempt =
+      retryAttempt?.cardId === cardId && retryAttempt.rating === rating
+        ? retryAttempt
+        : { cardId, rating, submissionId: crypto.randomUUID() };
+    setRetryAttempt(attempt);
     startTransition(async () => {
-      const result = await rateReview({ cardId, rating, submissionId });
+      const result = await rateReview(attempt);
       if (result.status === "error") {
         setError("That review could not be saved. Please try again.");
         return;
       }
       // `ok` and `stale` (already rated elsewhere) both advance past this card.
       setRemaining((queue) => queue.filter((entry) => entry.cardId !== cardId));
+      setRetryAttempt(null);
       // Next card starts hidden so the learner attempts recall first.
       setRevealed(false);
     });
@@ -52,7 +62,11 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
 
   if (!current) {
     return (
-      <Card className="border-emerald-200 bg-emerald-50/90 shadow-sm" data-testid="review-empty" role="status">
+      <Card
+        className="border-emerald-200 bg-emerald-50/90 shadow-sm"
+        data-testid="review-empty"
+        role="status"
+      >
         <CardHeader>
           <CardTitle>All caught up</CardTitle>
         </CardHeader>
@@ -63,11 +77,22 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
     );
   }
 
+  const isLesson = current.type === "lesson";
+  const recallPrompt = isLesson
+    ? "Before reopening this lesson, explain its key idea and one example."
+    : current.prompt;
+
   return (
-    <Card className="border-white/70 bg-white/85 shadow-sm backdrop-blur" data-testid="review-queue">
+    <Card
+      className="border-white/70 bg-white/85 shadow-sm backdrop-blur"
+      data-testid="review-queue"
+    >
       <CardHeader>
         <CardTitle>{current.title}</CardTitle>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500" data-testid="review-remaining">
+        <p
+          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+          data-testid="review-remaining"
+        >
           {remaining.length} due
         </p>
       </CardHeader>
@@ -76,7 +101,7 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
           className="whitespace-pre-wrap break-words rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-800"
           data-testid="review-prompt"
         >
-          {current.prompt}
+          {recallPrompt}
         </div>
 
         <ItemHelpLinks
@@ -87,10 +112,10 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
             sourceId: current.itemId,
             sourceVersion: "1",
             title: current.title,
-            prompt: current.prompt,
+            prompt: revealed ? current.prompt : recallPrompt,
             topic: current.skillId,
             visibleChoices: revealed ? current.choices.map((choice) => choice.content) : undefined,
-            visibleFeedback: revealed ? current.explanation ?? undefined : undefined,
+            visibleFeedback: revealed ? (current.explanation ?? undefined) : undefined,
             assessmentState: revealed ? "revealed" : "unanswered",
             revealPolicy: revealed ? "normal" : "hint_only",
             metadata: {
@@ -117,11 +142,20 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
               disabled={isPending}
               data-testid="review-reveal"
             >
-              Reveal answer
+              {isLesson ? "Reveal lesson" : "Reveal answer"}
             </Button>
           </>
         ) : (
           <>
+            {isLesson ? (
+              <div
+                className="rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800"
+                data-testid="review-lesson-content"
+              >
+                <FormattedContent content={current.prompt} />
+              </div>
+            ) : null}
+
             {current.choices.length > 0 ? (
               <div className="grid gap-2" data-testid="review-choices">
                 <p className="text-sm font-semibold text-slate-700">Choices</p>
@@ -163,7 +197,7 @@ export function ReviewQueue({ entries }: { entries: DueReviewEntry[] }) {
                   onClick={() => rate(rating)}
                   data-testid={`review-rate-${rating}`}
                 >
-                  {RATING_LABELS[rating]}
+                  {isLesson && rating === "easy" ? "Mastered" : RATING_LABELS[rating]}
                 </Button>
               ))}
             </div>

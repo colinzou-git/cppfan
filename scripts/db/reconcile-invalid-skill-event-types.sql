@@ -46,7 +46,7 @@ do $$
 declare
   -- Canonical stable allowlist (mirrors src/features/events/event-names.ts).
   v_allowed text[] := array[
-    'lesson_started','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
+    'lesson_started','lesson_self_assessed','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
     'hint_used','review_completed','code_attempted','code_passed','skill_mastered',
     'skill_regressed','error_pattern_observed','error_pattern_cleared',
     'worked_example_viewed','completion_submitted','parsons_submitted',
@@ -67,6 +67,7 @@ declare
     'skillMastered','skill_mastered',
     'skillRegressed','skill_regressed',
     'lessonStarted','lesson_started',
+    'lessonSelfAssessed','lesson_self_assessed',
     'conceptSeen','concept_seen',
     'errorPatternObserved','error_pattern_observed',
     'errorPatternCleared','error_pattern_cleared',
@@ -174,7 +175,7 @@ begin
   select count(*) into v_left
     from public.skill_events
     where event_type not in (
-      'lesson_started','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
+      'lesson_started','lesson_self_assessed','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
       'hint_used','review_completed','code_attempted','code_passed','skill_mastered',
       'skill_regressed','error_pattern_observed','error_pattern_cleared',
       'worked_example_viewed','completion_submitted','parsons_submitted',

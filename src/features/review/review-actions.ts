@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { applyRating, type ReviewRating } from "@/lib/fsrs/scheduler";
@@ -8,6 +7,7 @@ import { getReviewCardForUser } from "./review-queries";
 import { enrollReviewForUser } from "./enroll-review";
 import { isReviewEligibleItem } from "@/features/learning-items/learning-item-seed";
 import { classifyRateRpc, type RateReviewResult } from "./rate-review-result";
+import { revalidateLearnerSurfaces } from "@/features/learning/revalidate-learner-surfaces";
 
 export type AddToReviewResult = { status: "ok" } | { status: "ineligible" } | { status: "error" };
 
@@ -30,7 +30,7 @@ export async function addToReview(input: { itemId: string }): Promise<AddToRevie
     return { status: "error" };
   }
 
-  revalidatePath("/review");
+  revalidateLearnerSurfaces();
   return { status: "ok" };
 }
 
@@ -55,7 +55,10 @@ export async function rateReview(input: {
 }): Promise<RateReviewResult> {
   const cardId = typeof input?.cardId === "string" ? input.cardId : "";
   const rating = input?.rating;
-  const submissionId = typeof input?.submissionId === "string" && input.submissionId ? input.submissionId : randomUUID();
+  const submissionId =
+    typeof input?.submissionId === "string" && input.submissionId
+      ? input.submissionId
+      : randomUUID();
 
   if (!cardId || !VALID_RATINGS.includes(rating)) {
     return { status: "error" };
@@ -107,7 +110,7 @@ export async function rateReview(input: {
   );
 
   if (result.status !== "error") {
-    revalidatePath("/review");
+    revalidateLearnerSurfaces();
   }
 
   return result;

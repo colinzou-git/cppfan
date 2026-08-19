@@ -5,6 +5,7 @@
  */
 export const SKILL_EVENT_NAMES = [
   "lesson_started",
+  "lesson_self_assessed",
   "concept_seen",
   "quiz_attempted",
   "quiz_correct",

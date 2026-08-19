@@ -46,6 +46,7 @@ export type ReviewPreviewEntry = {
 };
 
 export type ReviewQueueView = {
+  state: "ready" | "signed_out" | "unconfigured" | "unavailable" | "error";
   authenticated: boolean;
   due: DueReviewEntry[];
   preview: ReviewPreviewEntry[];

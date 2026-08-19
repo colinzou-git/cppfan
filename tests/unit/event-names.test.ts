@@ -34,8 +34,9 @@ const CONSTRAINT_REWRITE_MIGRATIONS = [
   "supabase/migrations/20260614540000_error_pattern_events.sql",
   "supabase/migrations/20260618150000_add_adaptive_practice_event_names.sql",
   "supabase/migrations/20260618160000_add_capstone_event_names.sql",
-  "supabase/migrations/20260618170000_add_placement_event_names.sql",
+  "supabase/migrations/20260618170000_add_placement_event_names.sql"
 ] as const;
+const FINAL_CONSTRAINT_MIGRATION = "supabase/migrations/20260819160000_lesson_fsrs_self_rating.sql";
 const PREFLIGHT_MIGRATION =
   "supabase/migrations/20260625120000_preflight_skill_event_type_integrity.sql";
 
@@ -58,6 +59,12 @@ describe("stable skill event names", () => {
       const sqlNames = singleQuotedIdents(readRepoFile(migration));
       expect([...new Set(sqlNames)].sort(), migration).toEqual([...SKILL_EVENT_NAMES].sort());
     }
+  });
+
+  it("the final lesson-rating constraint accepts the stable allowlist (#687)", () => {
+    const constraintSection = readRepoFile(FINAL_CONSTRAINT_MIGRATION).split("create table")[0];
+    const sqlNames = singleQuotedIdents(constraintSection);
+    expect([...new Set(sqlNames)].sort()).toEqual([...SKILL_EVENT_NAMES].sort());
   });
 
   it("preflight integrity migration covers every stable name (#441)", () => {

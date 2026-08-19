@@ -60,6 +60,9 @@ Because `learning_items` is the projection target, `/learn/[itemId]` resolves a
 published user lesson through the normal path with no separate resolver;
 `learning-item-view.tsx` adds the `User-Created` badge for `isUserLearningItemId`
 items, and `learner-resources.tsx` lists `learner_resource` attachments.
+The owner completes that projected lesson with Hard, Good, or Mastered exactly
+like native content. Its exact lesson card is then loaded database-first in
+Daily Review/Review Queue even though the item is absent from the bundled seed.
 
 ## Lesson payload (schema v1)
 
@@ -92,6 +95,11 @@ a substantial-edit choice: **continue schedule**, **publish as a new version**,
 or **reset review cards** (`reset_review_cards_for_content` resets only the
 owner's FSRS cards for this lesson to a fresh `new` state — FSRS scheduling and
 skill mastery stay separate).
+
+The exact lesson is the canonical card after an explicit initial self-rating.
+Optional authored `reviewCards[]` remain independent supplementary questions;
+publishing does not silently create a second automatic retrieval anchor for the
+lesson. `Mastered` is stored as FSRS `easy`, not as whole-skill mastery.
 
 All four editors share one serialized draft-persistence controller. Debounced
 autosave, manual Save, AI preflight, and publish preflight join the same

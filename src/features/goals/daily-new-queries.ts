@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
-import { localDateKey, nextLocalMidnight } from "@/lib/time/local-day";
+import { localDateKey } from "@/lib/time/local-day";
 import { getProfileForUser } from "@/features/profile/profile-queries";
 import { skillPrerequisitesSeed } from "@/features/skills/skill-seed";
 import { buildDailyNewPlan } from "./daily-new-builder";
@@ -8,13 +8,14 @@ import type { AcquisitionItem } from "./acquisition-contracts";
 import type { DailyNewPlan } from "./daily-new-model";
 import { getStudyGoalReadModel } from "./goal-queries";
 import type { StudyGoalReadModel } from "./goal-view-types";
+import { isSuccessfulAcquisitionEvent } from "./acquisition-evidence";
+import type { LearningItemType } from "@/features/learning-items/learning-item-types";
 
-const QUALIFYING_EVENTS = new Set([
-  "lesson_started", "concept_seen", "quiz_correct", "review_completed",
-  "code_passed", "worked_example_viewed", "completion_submitted", "parsons_checked"
-]);
-
-function emptyPlan(state: DailyNewPlan["state"], authenticated: boolean, activeGoalCount = 0): DailyNewPlan {
+function emptyPlan(
+  state: DailyNewPlan["state"],
+  authenticated: boolean,
+  activeGoalCount = 0
+): DailyNewPlan {
   return {
     state,
     authenticated,
@@ -44,50 +45,67 @@ export async function getDailyNewPlanForGoals(
   if (!auth.user) return emptyPlan("signed_out", false, goals.active.length);
 
   const targetSkillIds = new Set(
-    goals.active.flatMap((goal) => goal.targets.flatMap((target) => target.skillId ? [target.skillId] : []))
+    goals.active.flatMap((goal) =>
+      goal.targets.flatMap((target) => (target.skillId ? [target.skillId] : []))
+    )
   );
   const relevantSkillIds = new Set(targetSkillIds);
   for (const edge of skillPrerequisitesSeed) {
     if (targetSkillIds.has(edge.skill_id)) relevantSkillIds.add(edge.prerequisite_skill_id);
   }
-  const mappingsResult = relevantSkillIds.size === 0
-    ? { data: [], error: null }
-    : await supabase
-        .from("learning_item_skills")
-        .select("skill_id,learning_item_id")
-        .in("skill_id", [...relevantSkillIds])
-        .limit(2000);
+  const mappingsResult =
+    relevantSkillIds.size === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("learning_item_skills")
+          .select("skill_id,learning_item_id")
+          .in("skill_id", [...relevantSkillIds])
+          .limit(2000);
   if (mappingsResult.error) {
-    if (isMissingObjectError(mappingsResult.error)) return emptyPlan("unavailable", true, goals.active.length);
+    if (isMissingObjectError(mappingsResult.error))
+      return emptyPlan("unavailable", true, goals.active.length);
     logConfiguredFailure("daily-new-catalog-mappings", mappingsResult.error);
     return emptyPlan("error", true, goals.active.length);
   }
-  const mappedItemIds = [...new Set((mappingsResult.data ?? []).map((row) => String(row.learning_item_id)))];
-  const itemsResult = mappedItemIds.length === 0
-    ? { data: [], error: null }
-    : await supabase
-        .from("learning_items")
-        .select("id,title,estimated_minutes,order_index")
-        .in("id", mappedItemIds)
-        .eq("is_active", true)
-        // User content opted out of automatic recommendations (recommendation_enabled
-        // = false) is excluded here but stays directly learnable; native rows are null.
-        .or("recommendation_enabled.is.null,recommendation_enabled.eq.true")
-        .order("order_index", { ascending: true })
-        .limit(2000);
+  const mappedItemIds = [
+    ...new Set((mappingsResult.data ?? []).map((row) => String(row.learning_item_id)))
+  ];
+  const itemsResult =
+    mappedItemIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("learning_items")
+          .select("id,type,title,estimated_minutes,order_index")
+          .in("id", mappedItemIds)
+          .eq("is_active", true)
+          // User content opted out of automatic recommendations (recommendation_enabled
+          // = false) is excluded here but stays directly learnable; native rows are null.
+          .or("recommendation_enabled.is.null,recommendation_enabled.eq.true")
+          .order("order_index", { ascending: true })
+          .limit(2000);
   if (itemsResult.error) {
-    if (isMissingObjectError(itemsResult.error)) return emptyPlan("unavailable", true, goals.active.length);
+    if (isMissingObjectError(itemsResult.error))
+      return emptyPlan("unavailable", true, goals.active.length);
     logConfiguredFailure("daily-new-catalog-items", itemsResult.error);
     return emptyPlan("error", true, goals.active.length);
   }
   const itemsById = new Map(
-    (itemsResult.data ?? []).map((item) => [String(item.id), {
-      id: String(item.id),
-      title: String(item.title),
-      estimated_minutes: Number(item.estimated_minutes)
-    } satisfies AcquisitionItem])
+    (itemsResult.data ?? []).map((item) => [
+      String(item.id),
+      {
+        id: String(item.id),
+        title: String(item.title),
+        estimated_minutes: Number(item.estimated_minutes),
+        type: String(item.type) as LearningItemType
+      } satisfies AcquisitionItem
+    ])
   );
-  const itemOrder = new Map((itemsResult.data ?? []).map((item) => [String(item.id), Number(item.order_index)]));
+  const itemTypesById = new Map(
+    (itemsResult.data ?? []).map((item) => [String(item.id), String(item.type) as LearningItemType])
+  );
+  const itemOrder = new Map(
+    (itemsResult.data ?? []).map((item) => [String(item.id), Number(item.order_index)])
+  );
   const itemsBySkill = new Map<string, AcquisitionItem[]>();
   for (const mapping of mappingsResult.data ?? []) {
     const item = itemsById.get(String(mapping.learning_item_id));
@@ -96,28 +114,26 @@ export async function getDailyNewPlanForGoals(
     itemsBySkill.set(skillId, [...(itemsBySkill.get(skillId) ?? []), item]);
   }
   for (const [skillId, items] of itemsBySkill) {
-    itemsBySkill.set(skillId, items.sort((a, b) =>
-      (itemOrder.get(a.id) ?? 0) - (itemOrder.get(b.id) ?? 0) || a.id.localeCompare(b.id)
-    ));
+    itemsBySkill.set(
+      skillId,
+      items.sort(
+        (a, b) =>
+          (itemOrder.get(a.id) ?? 0) - (itemOrder.get(b.id) ?? 0) || a.id.localeCompare(b.id)
+      )
+    );
   }
 
   const timezone = goals.active[0]?.timezone ?? "UTC";
   const localPlanDate = localDateKey(now, timezone);
-  const [profile, evidenceResult, dueReviewResult, allocationResult] = await Promise.all([
+  const [profile, evidenceResult, allocationResult] = await Promise.all([
     getProfileForUser(auth.user.id),
     supabase
       .from("skill_events")
-      .select("learning_item_id,event_type")
+      .select("learning_item_id,event_type,metadata")
       .eq("user_id", auth.user.id)
       .not("learning_item_id", "is", null)
       .order("event_time", { ascending: false })
       .limit(2000),
-    supabase
-      .from("review_cards")
-      .select("learning_item_id")
-      .eq("user_id", auth.user.id)
-      .lt("due_at", nextLocalMidnight(now, timezone).toISOString())
-      .limit(500),
     supabase
       .from("study_goal_daily_allocations")
       .select("action_id,destination_id,daily_plan_version,status")
@@ -129,7 +145,7 @@ export async function getDailyNewPlanForGoals(
       .limit(100)
   ]);
 
-  const readError = evidenceResult.error ?? dueReviewResult.error ?? allocationResult.error;
+  const readError = evidenceResult.error ?? allocationResult.error;
   if (readError) {
     if (isMissingObjectError(readError)) return emptyPlan("unavailable", true, goals.active.length);
     logConfiguredFailure("daily-new-evidence", readError);
@@ -138,12 +154,16 @@ export async function getDailyNewPlanForGoals(
 
   const evidencedItemIds = new Set(
     (evidenceResult.data ?? [])
-      .filter((row) => typeof row.learning_item_id === "string" && QUALIFYING_EVENTS.has(String(row.event_type)))
+      .filter(
+        (row) =>
+          typeof row.learning_item_id === "string" &&
+          isSuccessfulAcquisitionEvent(itemTypesById.get(String(row.learning_item_id)), {
+            event_type: String(row.event_type),
+            metadata: row.metadata as Record<string, unknown> | null
+          })
+      )
       .map((row) => String(row.learning_item_id))
   );
-  for (const row of dueReviewResult.data ?? []) {
-    if (typeof row.learning_item_id === "string") evidencedItemIds.add(row.learning_item_id);
-  }
 
   const base = buildDailyNewPlan({
     goals: goals.active,
@@ -160,7 +180,10 @@ export async function getDailyNewPlanForGoals(
     return action ? [{ ...action, source: "learn_extra" as const }] : [];
   });
   const plannedIds = new Set(base.actions.map((action) => action.id));
-  const extraAction = base.eligibleActions.find((action) => !plannedIds.has(action.id) && !allocatedIds.has(action.id)) ?? null;
+  const extraAction =
+    base.eligibleActions.find(
+      (action) => !plannedIds.has(action.id) && !allocatedIds.has(action.id)
+    ) ?? null;
   const dailyPlanVersion = (allocationResult.data ?? []).reduce(
     (maximum, row) => Math.max(maximum, Number(row.daily_plan_version) || 0),
     0
@@ -176,12 +199,14 @@ export async function getDailyNewPlanForGoals(
       .map((action) => ({ ...action, dailyPlanVersion })),
     allocatedExtraActions: allocatedExtraActions.map((action) => ({ ...action, dailyPlanVersion })),
     eligibleActions: base.eligibleActions.map((action) => ({ ...action, dailyPlanVersion })),
-    extraAction: extraAction ? {
-      ...extraAction,
-      source: "learn_extra",
-      reasonCodes: [...extraAction.reasonCodes, "LEARN_EXTRA_REQUESTED"],
-      dailyPlanVersion
-    } : null,
+    extraAction: extraAction
+      ? {
+          ...extraAction,
+          source: "learn_extra",
+          reasonCodes: [...extraAction.reasonCodes, "LEARN_EXTRA_REQUESTED"],
+          dailyPlanVersion
+        }
+      : null,
     noMoreReason: extraAction ? null : base.noMoreReason
   };
 }

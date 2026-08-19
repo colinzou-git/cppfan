@@ -55,6 +55,18 @@ Derived acquisition state is one of:
 
 Acquisition state is not mastery and is not FSRS state. Initial learning may be complete while mastery remains weak and future FSRS reviews remain due. Page views, clicks, allocation, placement, and Evaluation never complete a step. One correct answer finishes a multi-step target only when the contract explicitly says it is sufficient.
 
+For a lesson step, the atomic `lesson_self_assessed` event is accepted as
+learner-attested exact-item completion after Hard, Good, or Mastered. A lesson
+page view, `lesson_started`, `concept_seen`, review-card existence, and a later
+`review_completed` event are not initial-acquisition evidence. The same
+transaction satisfies a matching persisted daily allocation using the immutable
+skill-event key.
+
+The current dashboard computes planned Daily New actions on read and persists
+Learn Extra allocations. The lesson-rating transaction reconciles every matching
+persisted allocation (including Learn Extra); it does not fabricate a planned
+allocation row solely to mark it satisfied.
+
 ## Canonical evidence adapter
 
 Goal progress reads a typed projection over canonical sources rather than copying all evidence into goal tables. Each evidence record exposes a stable key/source id, owner, target/skill, timestamp, action and activity type, trustworthy outcome, hint/independence metadata when available, source, confidence class, and contract-step mapping.

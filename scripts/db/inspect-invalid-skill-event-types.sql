@@ -27,7 +27,7 @@ set transaction read only;
 
 with allowed(name) as (
   values
-    ('lesson_started'),('concept_seen'),('quiz_attempted'),('quiz_correct'),
+    ('lesson_started'),('lesson_self_assessed'),('concept_seen'),('quiz_attempted'),('quiz_correct'),
     ('quiz_wrong'),('hint_used'),('review_completed'),('code_attempted'),
     ('code_passed'),('skill_mastered'),('skill_regressed'),
     ('error_pattern_observed'),('error_pattern_cleared'),('worked_example_viewed'),
@@ -45,6 +45,7 @@ known(legacy, stable) as (
     ('reviewCompleted','review_completed'),('codeAttempted','code_attempted'),
     ('codePassed','code_passed'),('skillMastered','skill_mastered'),
     ('skillRegressed','skill_regressed'),('lessonStarted','lesson_started'),
+    ('lessonSelfAssessed','lesson_self_assessed'),
     ('conceptSeen','concept_seen'),('errorPatternObserved','error_pattern_observed'),
     ('errorPatternCleared','error_pattern_cleared'),
     ('workedExampleViewed','worked_example_viewed'),
@@ -78,7 +79,7 @@ order by i.row_count desc, i.event_type;
 
 with allowed(name) as (
   values
-    ('lesson_started'),('concept_seen'),('quiz_attempted'),('quiz_correct'),
+    ('lesson_started'),('lesson_self_assessed'),('concept_seen'),('quiz_attempted'),('quiz_correct'),
     ('quiz_wrong'),('hint_used'),('review_completed'),('code_attempted'),
     ('code_passed'),('skill_mastered'),('skill_regressed'),
     ('error_pattern_observed'),('error_pattern_cleared'),('worked_example_viewed'),

@@ -3,6 +3,7 @@ import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/error
 import { nextLocalMidnight } from "@/lib/time/local-day";
 import { buildDailyReviewItems, type DailyReviewCardRow } from "./daily-review-builder";
 import type { DailyReviewView } from "./daily-review-model";
+import { loadReviewItemContent } from "./review-item-loader";
 
 const empty = (
   state: DailyReviewView["state"],
@@ -34,7 +35,18 @@ export async function getDailyReviewView(
     return empty("error", true, timezone);
   }
 
-  const items = buildDailyReviewItems((result.data ?? []) as DailyReviewCardRow[], timezone, now);
+  const rows = (result.data ?? []) as DailyReviewCardRow[];
+  const content = await loadReviewItemContent(
+    supabase,
+    rows.map((row) => row.learning_item_id)
+  );
+  if (content.status !== "ok") {
+    return empty(content.status, true, timezone);
+  }
+  const items = buildDailyReviewItems(rows, timezone, now, (itemId) => {
+    const details = content.items.get(itemId);
+    return details ? { ...details, skills: [] } : null;
+  });
 
   return { state: "ready", authenticated: true, timezone, items };
 }

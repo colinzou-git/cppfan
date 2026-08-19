@@ -3,6 +3,7 @@
 Use these event names in code:
 
 - lesson_started
+- lesson_self_assessed
 - concept_seen
 - quiz_attempted
 - quiz_correct

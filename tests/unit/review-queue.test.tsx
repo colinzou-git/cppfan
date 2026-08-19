@@ -31,7 +31,11 @@ function entry(overrides: Partial<DueReviewEntry> = {}): DueReviewEntry {
 describe("ReviewQueue reveal-then-rate flow", () => {
   beforeEach(() => {
     rateReview.mockReset();
-    rateReview.mockResolvedValue({ status: "ok", state: "review", dueAt: "2026-06-13T00:00:00.000Z" });
+    rateReview.mockResolvedValue({
+      status: "ok",
+      state: "review",
+      dueAt: "2026-06-13T00:00:00.000Z"
+    });
   });
 
   it("shows the prompt but hides ratings and explanation until revealed", () => {
@@ -59,14 +63,20 @@ describe("ReviewQueue reveal-then-rate flow", () => {
 
     await waitFor(() =>
       expect(rateReview).toHaveBeenCalledWith(
-        expect.objectContaining({ cardId: "card-1", rating: "good", submissionId: expect.any(String) })
+        expect.objectContaining({
+          cardId: "card-1",
+          rating: "good",
+          submissionId: expect.any(String)
+        })
       )
     );
     expect(await screen.findByTestId("review-empty")).toBeInTheDocument();
   });
 
   it("resets the reveal gate when advancing to the next card", async () => {
-    render(<ReviewQueue entries={[entry({ cardId: "a" }), entry({ cardId: "b", title: "Card B" })]} />);
+    render(
+      <ReviewQueue entries={[entry({ cardId: "a" }), entry({ cardId: "b", title: "Card B" })]} />
+    );
 
     fireEvent.click(screen.getByTestId("review-reveal"));
     expect(screen.getByTestId("review-ratings")).toBeInTheDocument();
@@ -83,5 +93,55 @@ describe("ReviewQueue reveal-then-rate flow", () => {
     for (const choice of entry().choices) {
       expect("is_correct" in choice).toBe(false);
     }
+  });
+
+  it("hides lesson content until reveal and presents Easy as Mastered", async () => {
+    render(
+      <ReviewQueue
+        entries={[
+          entry({
+            type: "lesson",
+            prompt: "Execution starts in main and returns an integer.",
+            choices: []
+          })
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId("review-prompt")).toHaveTextContent(/explain its key idea/i);
+    expect(screen.queryByText(/execution starts in main/i)).toBeNull();
+    expect(screen.getByTestId("review-reveal")).toHaveTextContent("Reveal lesson");
+
+    fireEvent.click(screen.getByTestId("review-reveal"));
+    expect(screen.getByTestId("review-lesson-content")).toHaveTextContent(
+      /execution starts in main/i
+    );
+    expect(screen.getByRole("button", { name: "Again" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Hard" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Good" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Mastered" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Easy" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mastered" }));
+    await waitFor(() =>
+      expect(rateReview).toHaveBeenCalledWith(expect.objectContaining({ rating: "easy" }))
+    );
+  });
+
+  it("reuses a failed rating submission id when the learner retries", async () => {
+    rateReview
+      .mockResolvedValueOnce({ status: "error" })
+      .mockResolvedValueOnce({ status: "ok", state: "review", dueAt: "2026-06-13T00:00:00.000Z" });
+    render(<ReviewQueue entries={[entry()]} />);
+    fireEvent.click(screen.getByTestId("review-reveal"));
+    fireEvent.click(screen.getByTestId("review-rate-hard"));
+    expect(await screen.findByRole("alert")).toBeVisible();
+    const first = rateReview.mock.calls[0][0];
+
+    const retry = screen.getByTestId("review-rate-hard");
+    await waitFor(() => expect(retry).not.toBeDisabled());
+    fireEvent.click(retry);
+    await waitFor(() => expect(rateReview).toHaveBeenCalledTimes(2));
+    expect(rateReview.mock.calls[1][0]).toEqual(first);
   });
 });

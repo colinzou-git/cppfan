@@ -12,9 +12,16 @@ Review scheduling decides when an item should appear again.
 
 Learning events describe what the learner actually did.
 
+`lesson_self_assessed` is written only by the atomic initial lesson-rating
+boundary after the learner chooses Hard, Good, or Mastered. It completes the
+exact lesson acquisition step and creates its FSRS transition in the same
+transaction. `Mastered` is stored as FSRS `easy`; it is not a `skill_mastered`
+event and does not permanently remove the lesson from review.
+
 ## Initial events
 
 - lesson started
+- lesson self-assessed (exact-item learner-attested completion)
 - concept viewed
 - quiz submitted
 - quiz answered correctly

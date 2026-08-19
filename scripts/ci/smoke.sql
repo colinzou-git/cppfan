@@ -22,6 +22,99 @@ begin
   raise notice 'grade RPC smoke OK (correct choice graded true)';
 end $$;
 
+-- #687: one trusted initial lesson rating atomically creates/rates the exact
+-- lesson card, logs standard FSRS `hard|good|easy`, and records exact evidence.
+do $$
+declare
+  v_uid uuid := '00000000-0000-0000-0000-000000000687';
+  v_submission uuid := '00000000-0000-4000-8000-000000000687';
+  v_first record;
+  v_replay record;
+  v_count integer;
+begin
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'apply_initial_lesson_rating'
+  ) then
+    raise exception '#687: apply_initial_lesson_rating RPC is missing';
+  end if;
+  if not exists (
+    select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relname = 'lesson_rating_receipts' and c.relrowsecurity
+  ) then
+    raise exception '#687: lesson_rating_receipts must exist with RLS enabled';
+  end if;
+  if has_table_privilege('authenticated', 'public.lesson_rating_receipts', 'SELECT') then
+    raise exception '#687: lesson rating receipts must remain server-only';
+  end if;
+
+  insert into auth.users (id, email) values (v_uid, 'lesson-rating-smoke@example.test')
+    on conflict (id) do nothing;
+  perform set_config('app.test_uid', v_uid::text, false);
+
+  select * into v_first from public.apply_initial_lesson_rating(
+    'cpp.program_basics.structure.lesson',
+    v_submission,
+    'mastered',
+    'easy',
+    jsonb_build_object(
+      'state', 'review', 'due_at', now() + interval '6 days',
+      'stability', 6.0, 'difficulty', 3.0, 'elapsed_days', 0,
+      'scheduled_days', 6, 'learning_steps', 0, 'reps', 1,
+      'lapses', 0, 'last_reviewed_at', now()
+    ),
+    jsonb_build_object(
+      'rating', 'easy', 'state', 'review', 'due_at', now() + interval '6 days',
+      'stability', 6.0, 'difficulty', 3.0, 'elapsed_days', 0,
+      'last_elapsed_days', 0, 'scheduled_days', 6, 'reviewed_at', now()
+    )
+  );
+  if v_first.status <> 'ok' or v_first.fsrs_rating <> 'easy' or v_first.card_id is null then
+    raise exception '#687: initial Mastered/easy rating failed: %', v_first;
+  end if;
+
+  select * into v_replay from public.apply_initial_lesson_rating(
+    'cpp.program_basics.structure.lesson',
+    v_submission,
+    'mastered',
+    'easy',
+    jsonb_build_object(
+      'state', 'review', 'due_at', now() + interval '30 days',
+      'stability', 30.0, 'difficulty', 1.0, 'elapsed_days', 0,
+      'scheduled_days', 30, 'learning_steps', 0, 'reps', 1,
+      'lapses', 0, 'last_reviewed_at', now()
+    ),
+    jsonb_build_object(
+      'rating', 'easy', 'state', 'review', 'due_at', now() + interval '30 days',
+      'stability', 30.0, 'difficulty', 1.0, 'elapsed_days', 0,
+      'last_elapsed_days', 0, 'scheduled_days', 30, 'reviewed_at', now()
+    )
+  );
+  if v_replay.status <> 'already_processed' or v_replay.due_at <> v_first.due_at then
+    raise exception '#687: replay was not idempotent: first=%, replay=%', v_first, v_replay;
+  end if;
+
+  select count(*) into v_count from public.review_logs
+  where review_card_id = v_first.card_id and rating = 'easy';
+  if v_count <> 1 then raise exception '#687: expected one easy review log, got %', v_count; end if;
+
+  select count(*) into v_count from public.skill_events
+  where user_id = v_uid
+    and learning_item_id = 'cpp.program_basics.structure.lesson'
+    and event_type = 'lesson_self_assessed'
+    and metadata->>'displayed_choice' = 'mastered'
+    and metadata->>'fsrs_rating' = 'easy';
+  if v_count <> 1 then raise exception '#687: expected one lesson_self_assessed event, got %', v_count; end if;
+
+  if exists (select 1 from public.skill_events where user_id = v_uid and event_type = 'skill_mastered') then
+    raise exception '#687: Mastered must never write skill_mastered';
+  end if;
+
+  delete from auth.users where id = v_uid;
+  perform set_config('app.test_uid', '', false);
+  raise notice 'lesson initial FSRS rating smoke OK';
+end $$;
+
 -- #669: authoritative user-lab hashes and atomic versioned completion.
 do $$
 begin
@@ -530,6 +623,9 @@ begin
   if position('error_pattern_observed' in v_def) = 0 or position('error_pattern_cleared' in v_def) = 0 then
     raise exception 'skill_events must allow error_pattern_observed/cleared (#126)';
   end if;
+  if position('lesson_self_assessed' in v_def) = 0 then
+    raise exception 'skill_events must allow lesson_self_assessed (#687)';
+  end if;
   if position('worked_example_viewed' in v_def) = 0
     or position('completion_submitted' in v_def) = 0
     or position('parsons_submitted' in v_def) = 0
@@ -656,7 +752,7 @@ begin
   select count(*) into v_bad
     from public.skill_events
     where event_type not in (
-      'lesson_started','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
+      'lesson_started','lesson_self_assessed','concept_seen','quiz_attempted','quiz_correct','quiz_wrong',
       'hint_used','review_completed','code_attempted','code_passed','skill_mastered',
       'skill_regressed','error_pattern_observed','error_pattern_cleared',
       'worked_example_viewed','completion_submitted','parsons_submitted',

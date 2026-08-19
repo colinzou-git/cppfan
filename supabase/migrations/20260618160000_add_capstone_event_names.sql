@@ -7,6 +7,7 @@ alter table public.skill_events drop constraint if exists skill_events_event_typ
 alter table public.skill_events add constraint skill_events_event_type_check
   check (event_type in (
     'lesson_started',
+    'lesson_self_assessed',
     'concept_seen',
     'quiz_attempted',
     'quiz_correct',

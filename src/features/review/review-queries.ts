@@ -1,8 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getEligibleReviewItems, getLearningItemById } from "@/features/learning-items/learning-item-seed";
+import { getEligibleReviewItems } from "@/features/learning-items/learning-item-seed";
 import { orderPublicChoices } from "@/features/learning-items/choice-ordering";
-import type { DueReviewEntry, ReviewCard, ReviewPreviewEntry, ReviewQueueView } from "./review-types";
+import type {
+  DueReviewEntry,
+  ReviewCard,
+  ReviewPreviewEntry,
+  ReviewQueueView
+} from "./review-types";
+import { isMissingObjectError, logConfiguredFailure } from "@/lib/supabase/errors";
+import { loadReviewItemContent, type ReviewItemContent } from "./review-item-loader";
 
 const CARD_COLUMNS =
   "id,user_id,learning_item_id,skill_id,state,due_at,stability,difficulty,elapsed_days,scheduled_days,learning_steps,reps,lapses,last_reviewed_at,created_at,updated_at";
@@ -16,8 +23,10 @@ function seedPreview(): ReviewPreviewEntry[] {
   }));
 }
 
-function toDueEntry(card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id">): DueReviewEntry | null {
-  const details = getLearningItemById(card.learning_item_id);
+function toDueEntry(
+  card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id">,
+  details: ReviewItemContent | undefined
+): DueReviewEntry | null {
   if (!details) {
     return null;
   }
@@ -29,7 +38,7 @@ function toDueEntry(card: Pick<ReviewCard, "id" | "learning_item_id" | "skill_id
     type: details.item.type,
     prompt: details.item.prompt,
     explanation: details.item.explanation,
-    // getLearningItemById returns answer-key-free public choices. Shuffle the
+    // The database loader selects answer-key-free public choices. Shuffle the
     // revealed reference list so review cards do not preserve authoring order.
     choices: orderPublicChoices(details.choices, `review:${card.id}:${card.learning_item_id}`)
   };
@@ -44,7 +53,7 @@ export async function getReviewQueue(now: Date = new Date()): Promise<ReviewQueu
   const supabase = await createClient();
 
   if (!supabase) {
-    return { authenticated: false, due: [], preview };
+    return { state: "unconfigured", authenticated: false, due: [], preview };
   }
 
   const {
@@ -52,7 +61,7 @@ export async function getReviewQueue(now: Date = new Date()): Promise<ReviewQueu
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { authenticated: false, due: [], preview };
+    return { state: "signed_out", authenticated: false, due: [], preview };
   }
 
   // #142: reading the queue must never enroll content. Cards are created only
@@ -66,14 +75,31 @@ export async function getReviewQueue(now: Date = new Date()): Promise<ReviewQueu
     .order("due_at", { ascending: true });
 
   if (dueResult.error) {
-    return { authenticated: true, due: [], preview };
+    if (!isMissingObjectError(dueResult.error)) {
+      logConfiguredFailure("review-queue", dueResult.error);
+    }
+    return {
+      state: isMissingObjectError(dueResult.error) ? "unavailable" : "error",
+      authenticated: true,
+      due: [],
+      preview
+    };
   }
 
-  const due = (dueResult.data ?? [])
-    .map((card) => toDueEntry(card as ReviewCard))
+  const cards = (dueResult.data ?? []) as ReviewCard[];
+  const content = await loadReviewItemContent(
+    supabase,
+    cards.map((card) => card.learning_item_id)
+  );
+  if (content.status !== "ok") {
+    return { state: content.status, authenticated: true, due: [], preview };
+  }
+
+  const due = cards
+    .map((card) => toDueEntry(card, content.items.get(card.learning_item_id)))
     .filter((entry): entry is DueReviewEntry => entry !== null);
 
-  return { authenticated: true, due, preview };
+  return { state: "ready", authenticated: true, due, preview };
 }
 
 /** Fetch a single review card owned by the signed-in learner (for grading a review). */
