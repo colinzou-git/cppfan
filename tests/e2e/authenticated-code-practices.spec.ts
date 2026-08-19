@@ -18,9 +18,7 @@ async function setEditor(page: Page, source: string) {
 
 async function getEditor(page: Page): Promise<string> {
   await page.waitForFunction(() => Boolean((window as EditorWindow).__cppfanCodeLabEditor));
-  return page.evaluate(
-    () => (window as EditorWindow).__cppfanCodeLabEditor?.getValue?.() ?? ""
-  );
+  return page.evaluate(() => (window as EditorWindow).__cppfanCodeLabEditor?.getValue?.() ?? "");
 }
 
 test.describe("saved lesson Code Lab practices (#674, #684)", () => {
@@ -30,6 +28,11 @@ test.describe("saved lesson Code Lab practices (#674, #684)", () => {
     context,
     baseURL
   }) => {
+    // This scenario intentionally exercises a long sequence across the embedded
+    // and full-screen editors. Mobile WebKit can exceed the default 30-second
+    // total test budget even though each interaction remains responsive.
+    test.setTimeout(90_000);
+
     const learner = await createAuthenticatedLearner(context, baseURL!);
     try {
       const page = await context.newPage();
@@ -91,9 +94,7 @@ test.describe("saved lesson Code Lab practices (#674, #684)", () => {
       const fullScreen = page.getByTestId("code-lab-open-full");
       await expect(fullScreen).toHaveAttribute("href", /\?practice=/);
       await fullScreen.click();
-      await expect(page).toHaveURL(
-        /\/lab\/cpp\.values_types\.variables\.sample_code\?practice=/
-      );
+      await expect(page).toHaveURL(/\/lab\/cpp\.values_types\.variables\.sample_code\?practice=/);
       await expect(page.getByTestId("code-practice-active-name")).toHaveText(
         "std::accumulate experiments"
       );
