@@ -107,4 +107,7 @@ for file in "${files[@]}"; do
   run_migration_with_retry "${file}"
 done
 
+echo "==> Reloading PostgREST schema cache"
+psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "NOTIFY pgrst, 'reload schema';"
+
 echo "==> Done. All migrations applied (idempotent; safe to re-run)."
