@@ -47,7 +47,11 @@ jobs:
         run: pnpm build
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium webkit
+        run: |
+          if [[ -f /etc/apt/apt-mirrors.txt ]]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          fi
+          pnpm exec playwright install --with-deps chromium webkit
 
       - name: E2E tests
         run: pnpm test:e2e
@@ -193,7 +197,11 @@ jobs:
         run: supabase start
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium webkit
+        run: |
+          if [[ -f /etc/apt/apt-mirrors.txt ]]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          fi
+          pnpm exec playwright install --with-deps chromium webkit
 
       - name: Run authenticated integration tests
         run: |
