@@ -252,6 +252,10 @@ grant execute on function public.apply_initial_lesson_rating(text, uuid, text, t
 grant select, update on table public.review_cards to service_role;
 grant select on table public.review_logs to service_role;
 grant select on table public.skill_events to service_role;
+grant select, insert on table public.study_goals to service_role;
+grant select, insert on table public.study_goal_revisions to service_role;
+grant select, insert on table public.study_goal_targets to service_role;
+grant select, insert on table public.study_goal_daily_allocations to service_role;
 
 comment on table public.lesson_rating_receipts is
   'Trusted idempotency receipts for exact-item initial lesson FSRS ratings (#687).';

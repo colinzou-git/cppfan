@@ -160,9 +160,10 @@ suite("atomic initial lesson FSRS ratings (#687)", () => {
       learner.from("review_cards").select("id,reps").eq("learning_item_id", item.id),
       learner.from("review_logs").select("rating,submission_id").eq("review_card_id", cardId),
       learner.from("skill_events").select("event_type,metadata").eq("learning_item_id", item.id),
-      learner
+      service
         .from("study_goal_daily_allocations")
         .select("status,satisfied_evidence_key,disposition_reason")
+        .eq("user_id", userId)
         .eq("id", allocationId)
         .single()
     ]);
