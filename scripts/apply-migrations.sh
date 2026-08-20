@@ -124,4 +124,8 @@ done
 echo "==> Reloading PostgREST schema cache"
 psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "NOTIFY pgrst, 'reload schema';"
 
+echo "==> Verifying lesson rating RPC metadata"
+psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -At -c \
+  "select p.oid::regprocedure::text || ' authenticated_execute=' || has_function_privilege('authenticated', p.oid, 'EXECUTE') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'apply_initial_lesson_rating';"
+
 echo "==> Done. All migrations applied (idempotent; safe to re-run)."
