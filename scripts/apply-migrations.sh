@@ -44,6 +44,20 @@ fi
 target="$(printf '%s' "${SUPABASE_DB_URL}" | sed -E 's#^.*@##; s#/.*$##')"
 echo "==> Target host: ${target}"
 
+# The Supabase session-pooler host is shared, so the username is the only safe
+# way to identify which project a deployment targets. Never print the password.
+connection_authority="${SUPABASE_DB_URL#*://}"
+connection_userinfo="${connection_authority%%@*}"
+target_user="${connection_userinfo%%:*}"
+if [[ "${target_user}" == postgres.* ]]; then
+  target_project_ref="${target_user#postgres.}"
+  echo "==> Target Supabase project ref: ${target_project_ref}"
+  if [[ -n "${EXPECTED_SUPABASE_PROJECT_REF:-}" && "${target_project_ref}" != "${EXPECTED_SUPABASE_PROJECT_REF}" ]]; then
+    echo "ERROR: SUPABASE_DB_URL targets project ${target_project_ref}, expected ${EXPECTED_SUPABASE_PROJECT_REF}." >&2
+    exit 1
+  fi
+fi
+
 if printf '%s' "${target}" | grep -q '<'; then
   echo "ERROR: the host still contains a placeholder like <region>. Copy the actual" >&2
   echo "       Session pooler connection string from the Supabase dashboard (it has" >&2
