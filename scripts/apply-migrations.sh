@@ -124,6 +124,14 @@ done
 echo "==> Reloading PostgREST schema cache"
 psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "NOTIFY pgrst, 'reload schema';"
 
+# Supabase's hosted PostgREST can stop consuming database notifications even
+# though NOTIFY itself succeeds. Reading the notification-queue usage is their
+# documented non-disruptive recovery for a stale cache that still cannot see a
+# newly created function. Keep it after NOTIFY so every production migration
+# both requests and actively verifies notification processing.
+echo "==> Refreshing the PostgREST notification queue"
+psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "select pg_notification_queue_usage();"
+
 echo "==> Verifying lesson rating RPC metadata"
 psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -At -c \
   "select p.oid::regprocedure::text || ' authenticated_execute=' || has_function_privilege('authenticated', p.oid, 'EXECUTE') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'apply_initial_lesson_rating';"
