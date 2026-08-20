@@ -21,14 +21,19 @@ describe("production database migration workflow (#441)", () => {
     expect(workflow).toMatch(/cancel-in-progress:\s*false/);
   });
 
-  it("reloads the PostgREST schema cache after applying migrations", () => {
+  it("reloads PostgREST and refreshes its notification queue after applying migrations", () => {
     const migrationScript = readFileSync(migrationScriptPath, "utf8");
 
     expect(migrationScript).toContain(
       `psql "\${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "NOTIFY pgrst, 'reload schema';"`
     );
+    expect(migrationScript).toContain(
+      `psql "\${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "select pg_notification_queue_usage();"`
+    );
     expect(migrationScript.indexOf("NOTIFY pgrst")).toBeGreaterThan(
       migrationScript.indexOf('run_migration_with_retry "${file}"')
     );
+    expect(migrationScript.indexOf("select pg_notification_queue_usage()"))
+      .toBeGreaterThan(migrationScript.indexOf("NOTIFY pgrst"));
   });
 });

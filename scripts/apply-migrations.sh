@@ -44,6 +44,20 @@ fi
 target="$(printf '%s' "${SUPABASE_DB_URL}" | sed -E 's#^.*@##; s#/.*$##')"
 echo "==> Target host: ${target}"
 
+# The Supabase session-pooler host is shared, so the username is the only safe
+# way to identify which project a deployment targets. Never print the password.
+connection_authority="${SUPABASE_DB_URL#*://}"
+connection_userinfo="${connection_authority%%@*}"
+target_user="${connection_userinfo%%:*}"
+if [[ "${target_user}" == postgres.* ]]; then
+  target_project_ref="${target_user#postgres.}"
+  echo "==> Target Supabase project ref: ${target_project_ref}"
+  if [[ -n "${EXPECTED_SUPABASE_PROJECT_REF:-}" && "${target_project_ref}" != "${EXPECTED_SUPABASE_PROJECT_REF}" ]]; then
+    echo "ERROR: SUPABASE_DB_URL targets project ${target_project_ref}, expected ${EXPECTED_SUPABASE_PROJECT_REF}." >&2
+    exit 1
+  fi
+fi
+
 if printf '%s' "${target}" | grep -q '<'; then
   echo "ERROR: the host still contains a placeholder like <region>. Copy the actual" >&2
   echo "       Session pooler connection string from the Supabase dashboard (it has" >&2
@@ -109,5 +123,17 @@ done
 
 echo "==> Reloading PostgREST schema cache"
 psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "NOTIFY pgrst, 'reload schema';"
+
+# Supabase's hosted PostgREST can stop consuming database notifications even
+# though NOTIFY itself succeeds. Reading the notification-queue usage is their
+# documented non-disruptive recovery for a stale cache that still cannot see a
+# newly created function. Keep it after NOTIFY so every production migration
+# both requests and actively verifies notification processing.
+echo "==> Refreshing the PostgREST notification queue"
+psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -q -c "select pg_notification_queue_usage();"
+
+echo "==> Verifying lesson rating RPC metadata"
+psql "${SUPABASE_DB_URL}" -v ON_ERROR_STOP=1 -At -c \
+  "select p.oid::regprocedure::text || ' authenticated_execute=' || has_function_privilege('authenticated', p.oid, 'EXECUTE') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'apply_initial_lesson_rating';"
 
 echo "==> Done. All migrations applied (idempotent; safe to re-run)."
