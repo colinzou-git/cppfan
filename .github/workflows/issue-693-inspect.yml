@@ -1,0 +1,17 @@
+name: issue-693-inspect
+on:
+  push:
+    branches:
+      - fix/693-google-dsa-expansion
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/issue-693-inspect-reference.mjs
