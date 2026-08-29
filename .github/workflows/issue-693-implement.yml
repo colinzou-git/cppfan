@@ -105,6 +105,8 @@ jobs:
         run: pnpm test
       - name: Production build
         run: pnpm build
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Representative browser regression
         run: pnpm exec playwright test tests/e2e/interview-dsa-expansion.spec.ts --project=chromium
       - name: Commit implementation
