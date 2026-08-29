@@ -22,7 +22,7 @@ describe("judge problem test suites (#176/#178)", () => {
   it("covers every interview-catalog problem with visible and hidden executable tests", () => {
     const catalogIds = interviewProblems.map((problem) => problem.id).sort();
     expect(judgeSupportedProblemIds()).toEqual(catalogIds);
-    expect(catalogIds).toHaveLength(90);
+    expect(catalogIds).toHaveLength(120);
 
     for (const problem of interviewProblems) {
       const suite = getJudgeProblemSuite(problem.id);
@@ -77,7 +77,11 @@ describe("judge problem test suites (#176/#178)", () => {
       "iv.cache.lru-design",
       "iv.cpp.iterator-invalidation",
       "iv.cpp.dangling-reference",
-      "iv.cpp.missing-virtual-destructor"
+      "iv.cpp.missing-virtual-destructor",
+      "iv.dp.edit-distance",
+      "iv.graph.k-stop-cheapest-route",
+      "iv.design.time-key-value",
+      "iv.tree.max-path-sum"
     ];
 
     for (const problemId of mockProblemIds) {

@@ -1,0 +1,322 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.trie.prefix-index",
+      "version": 1,
+      "ioDescription": "stdin: q followed by q operations: I word, S word, or P prefix. stdout: one 0/1 line for each S/P query.",
+      "cases": [
+        {
+          "id": "visible.basic",
+          "name": "insert and query",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\nI cat\nI car\nS cat\nP ca\nS cap\nI cap\nS cap\n",
+          "expectedStdout": "1\n1\n0\n1\n"
+        },
+        {
+          "id": "hidden.empty-prefix-state",
+          "name": "query before insert",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "4\nP a\nI a\nS a\nP a\n",
+          "expectedStdout": "0\n1\n1\n"
+        },
+        {
+          "id": "hidden.shared-prefix",
+          "name": "shared prefix and absent suffix",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "6\nI app\nI apple\nS ap\nP app\nS apple\nP apples\n",
+          "expectedStdout": "0\n1\n1\n0\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.stack.decode-nested-string",
+      "version": 1,
+      "ioDescription": "stdin: one encoded string with lowercase letters, digits, and brackets. stdout: the decoded string.",
+      "cases": [
+        {
+          "id": "visible.nested",
+          "name": "nested repeat",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "3[a2[c]]\n",
+          "expectedStdout": "accaccacc\n"
+        },
+        {
+          "id": "hidden.multidigit",
+          "name": "multi-digit repeat",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "10[z]\n",
+          "expectedStdout": "zzzzzzzzzz\n"
+        },
+        {
+          "id": "hidden.mixed",
+          "name": "nested with literal suffix",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "2[ab3[c]]x\n",
+          "expectedStdout": "abcccabcccx\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.strings.palindromic-substrings",
+      "version": 1,
+      "ioDescription": "stdin: one string line. stdout: the number of palindromic substrings.",
+      "cases": [
+        {
+          "id": "visible.repeated",
+          "name": "all equal",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "aaa\n",
+          "expectedStdout": "6\n"
+        },
+        {
+          "id": "hidden.distinct",
+          "name": "no longer palindrome",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "abc\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.even",
+          "name": "even palindrome",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "abba\n",
+          "expectedStdout": "6\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.twoptr.three-sum-target",
+      "version": 1,
+      "ioDescription": "stdin: n target, then n integers. stdout: count of unique value triplets summing to target.",
+      "cases": [
+        {
+          "id": "visible.classic",
+          "name": "duplicates and negatives",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "6 0\n-1 0 1 2 -1 -4\n",
+          "expectedStdout": "2\n"
+        },
+        {
+          "id": "hidden.none",
+          "name": "no target triple",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "4 10\n1 2 3 4\n",
+          "expectedStdout": "0\n"
+        },
+        {
+          "id": "hidden.dedup",
+          "name": "many duplicate values",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "7 3\n0 0 0 1 1 2 3\n",
+          "expectedStdout": "2\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.prefix.multiple-of-k-subarray",
+      "version": 1,
+      "ioDescription": "stdin: n k, then n signed integers. stdout: number of contiguous subarrays with sum divisible by k.",
+      "cases": [
+        {
+          "id": "visible.mixed",
+          "name": "mixed signs",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "5 5\n4 5 0 -2 -3\n",
+          "expectedStdout": "6\n"
+        },
+        {
+          "id": "hidden.small",
+          "name": "overlapping windows",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "3 2\n1 1 1\n",
+          "expectedStdout": "2\n"
+        },
+        {
+          "id": "hidden.negative",
+          "name": "negative remainders",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "4 3\n-1 -2 3 6\n",
+          "expectedStdout": "6\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.bsearch.rotated-target",
+      "version": 1,
+      "ioDescription": "stdin: n target, then n distinct integers forming a rotated sorted array. stdout: target index or -1.",
+      "cases": [
+        {
+          "id": "visible.pivot",
+          "name": "target at rotation",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7 0\n4 5 6 7 0 1 2\n",
+          "expectedStdout": "4\n"
+        },
+        {
+          "id": "hidden.absent",
+          "name": "target missing",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "7 3\n4 5 6 7 0 1 2\n",
+          "expectedStdout": "-1\n"
+        },
+        {
+          "id": "hidden.single",
+          "name": "single element",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "1 9\n9\n",
+          "expectedStdout": "0\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.bsearch.single-unpaired",
+      "version": 1,
+      "ioDescription": "stdin: odd n followed by n sorted integers. stdout: the value that appears once.",
+      "cases": [
+        {
+          "id": "visible.middle",
+          "name": "unique in middle",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "9\n1 1 2 2 3 4 4 5 5\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.one",
+          "name": "single element",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n7\n",
+          "expectedStdout": "7\n"
+        },
+        {
+          "id": "hidden.end",
+          "name": "unique at end",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "7\n-5 -5 0 0 2 2 9\n",
+          "expectedStdout": "9\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.twoptr.trapped-water",
+      "version": 1,
+      "ioDescription": "stdin: n followed by n non-negative heights. stdout: total trapped capacity.",
+      "cases": [
+        {
+          "id": "visible.classic",
+          "name": "multiple basins",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "12\n0 1 0 2 1 0 1 3 2 1 2 1\n",
+          "expectedStdout": "6\n"
+        },
+        {
+          "id": "hidden.monotone",
+          "name": "no basin",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "4\n3 2 1 0\n",
+          "expectedStdout": "0\n"
+        },
+        {
+          "id": "hidden.deep",
+          "name": "deep basin",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "6\n4 2 0 3 2 5\n",
+          "expectedStdout": "9\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.lca-general",
+      "version": 1,
+      "ioDescription": "stdin: n, then n level-order tokens (# for null), then query values u v. stdout: LCA value.",
+      "cases": [
+        {
+          "id": "visible.split",
+          "name": "queries in different subtrees",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n3 5 1 6 2 0 8\n5 1\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.ancestor",
+          "name": "one node is ancestor",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "5\n1 2 3 # 4\n2 4\n",
+          "expectedStdout": "2\n"
+        },
+        {
+          "id": "hidden.siblings",
+          "name": "siblings below root",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "7\n1 2 3 4 5 6 7\n4 5\n",
+          "expectedStdout": "2\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.max-path-sum",
+      "version": 1,
+      "ioDescription": "stdin: n followed by n level-order tokens (# for null). stdout: maximum non-empty path sum.",
+      "cases": [
+        {
+          "id": "visible.cross",
+          "name": "best path crosses subtree root",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n-10 9 20 # # 15 7\n",
+          "expectedStdout": "42\n"
+        },
+        {
+          "id": "hidden.negative",
+          "name": "all-negative singleton",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n-3\n",
+          "expectedStdout": "-3\n"
+        },
+        {
+          "id": "hidden.complete",
+          "name": "complete positive tree",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "7\n1 2 3 4 5 6 7\n",
+          "expectedStdout": "18\n"
+        },
+        {
+          "id": "hidden.scale",
+          "name": "small crossing path",
+          "hidden": true,
+          "category": "scale",
+          "stdin": "3\n2 -1 3\n",
+          "expectedStdout": "5\n"
+        }
+      ]
+    }
+  ]
+}

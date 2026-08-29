@@ -19,6 +19,9 @@ import catalog06b from "../../../services/interview-judge/catalog-fixtures-06b.j
 import catalog07a from "../../../services/interview-judge/catalog-fixtures-07a.json";
 import catalog07b from "../../../services/interview-judge/catalog-fixtures-07b.json";
 import catalog07c from "../../../services/interview-judge/catalog-fixtures-07c.json";
+import catalog08a from "../../../services/interview-judge/catalog-fixtures-08a.json";
+import catalog08b from "../../../services/interview-judge/catalog-fixtures-08b.json";
+import catalog08c from "../../../services/interview-judge/catalog-fixtures-08c.json";
 import { DEFAULT_JUDGE_LIMITS } from "./judge-contract";
 import type { JudgeWorkerTest } from "../../../services/interview-judge/protocol";
 import type { JudgeFixture } from "../../../services/interview-judge/worker-runner";
@@ -65,7 +68,10 @@ const DEFINITIONS = [
   ...catalog06b.definitions,
   ...catalog07a.definitions,
   ...catalog07b.definitions,
-  ...catalog07c.definitions
+  ...catalog07c.definitions,
+  ...catalog08a.definitions,
+  ...catalog08b.definitions,
+  ...catalog08c.definitions
 ] as RawDefinition[];
 
 const BY_ID = new Map(DEFINITIONS.map((definition) => [definition.problemId, definition]));
