@@ -21,6 +21,31 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Adapt generator skill fallback to current curriculum
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/issue-693-implement.mjs')
+          s = p.read_text()
+          old = '''function choose(candidates) {
+            const found = candidates.find((id) => skillIds.has(id));
+            if (!found) throw new Error(`No skill candidate exists: ${candidates.join(", ")}`);
+            return found;
+          }'''
+          new = '''function choose(candidates) {
+            let found = candidates.find((id) => skillIds.has(id));
+            if (!found) {
+              const parts = candidates[0].split(".");
+              const prefix = parts.slice(0, 2).join(".") + ".";
+              found = [...skillIds].find((id) => id.startsWith(prefix));
+            }
+            if (!found) throw new Error(`No skill candidate or module fallback exists: ${candidates.join(", ")}`);
+            return found;
+          }'''
+          if old not in s:
+              raise SystemExit('choose() anchor not found')
+          p.write_text(s.replace(old, new))
+          PY
       - name: Generate issue 693 changes
         run: node scripts/issue-693-implement.mjs
       - name: Focused unit tests
