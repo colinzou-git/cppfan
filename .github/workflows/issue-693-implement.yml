@@ -48,6 +48,7 @@ jobs:
           s = s.replace('primary: ["dsa.trees.bst"]', 'primary: ["dsa.trees.bst_search"]')
           s = s.replace('primary: ["dsa.graphs.shortest_paths"]', 'primary: ["dsa.graphs.shortest_path"]')
           s = s.replace('primary: ["dsa.recursion.backtracking"]', 'primary: ["dsa.complexity.recursion_choice"]')
+          s = s.replace('"4 5 0 0\\n..#..\\n.##..\\n.....\\n#....\\n", "12\\n"', '"4 5 0 0\\n..#..\\n.##..\\n.....\\n#....\\n", "16\\n"')
           p.write_text(s)
           PY
       - name: Generate issue 693 changes
