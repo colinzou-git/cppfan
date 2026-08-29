@@ -22,7 +22,7 @@ describe("judge problem test suites (#176/#178)", () => {
   it("covers every interview-catalog problem with visible and hidden executable tests", () => {
     const catalogIds = interviewProblems.map((problem) => problem.id).sort();
     expect(judgeSupportedProblemIds()).toEqual(catalogIds);
-    expect(catalogIds).toHaveLength(60);
+    expect(catalogIds).toHaveLength(90);
 
     for (const problem of interviewProblems) {
       const suite = getJudgeProblemSuite(problem.id);

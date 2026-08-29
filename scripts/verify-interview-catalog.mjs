@@ -21,7 +21,10 @@ const fixtureNames = [
   "catalog-fixtures-05a.json",
   "catalog-fixtures-05b.json",
   "catalog-fixtures-06a.json",
-  "catalog-fixtures-06b.json"
+  "catalog-fixtures-06b.json",
+  "catalog-fixtures-07a.json",
+  "catalog-fixtures-07b.json",
+  "catalog-fixtures-07c.json"
 ];
 const fixturePaths = fixtureNames.map((name) =>
   join(repoRoot, "services/interview-judge", name)
