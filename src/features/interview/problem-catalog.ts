@@ -1688,6 +1688,819 @@ export const interviewProblems: InterviewProblem[] = [
       }
     ],
     externalLinks: [CPPREF]
+  },
+  // ---- #690: curated C++ interview-question expansion (30 problems). Every
+  // problem is an original, executable cppFan task judged through the existing
+  // interview judge (visible + hidden fixtures live in the server-held catalog).
+  {
+    id: "iv.cpp.move-only-buffer",
+    version: 1,
+    title: "Implement a move-only owning buffer",
+    prompt:
+      "Design a buffer type that uniquely owns its storage: copying must be disabled, but moving must transfer ownership and leave the source in a valid empty state. Read n integers into a buffer, move it into a second buffer, and report the second buffer's contents followed by the moved-from buffer's size.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.value_semantics.move",
+    secondarySkillIds: ["cpp.value_semantics.special_members", "cpp.smart_pointers.unique_ptr"],
+    patternTags: ["cpp", "move-semantics", "ownership", "implementation"],
+    constraints: "0 <= n <= 1e5; values fit in int. Copying the buffer must not compile; the moved-from buffer must be empty and destructible.",
+    targetComplexity: "O(1) move (pointer/handle steal), O(n) construction.",
+    requiredEdgeCases: ["move from an empty buffer", "single element", "self-move must not corrupt state"],
+    clarifyingQuestions: ["Should the moved-from object be reusable, or only destructible?", "Is copy construction ever needed, or is the type strictly move-only?"],
+    hintLadder: [
+      "Delete the copy constructor and copy assignment so accidental copies are compile errors.",
+      "In the move constructor, take the source's storage (e.g. std::move the underlying vector) and then clear the source so it is a valid empty buffer.",
+      "A moved-from object must still be safe to destroy and assign to — leave it empty rather than in a half-owned state."
+    ],
+    visibleExamples: [
+      { input: "3\n1 2 3", output: "1 2 3\n0", note: "moved-to holds the data; moved-from size is 0" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.rule-of-five-buffer",
+    version: 1,
+    title: "Repair a raw-resource owner with the Rule of Five",
+    prompt:
+      "A type owns a raw heap array but defines none of its special members, so copies share and then double-free the same buffer. Give it correct copy and move construction/assignment plus a destructor (Rule of Five) so each owner has an independent buffer. Read n integers, deep-copy the owner, mutate the copy's first element to 999, and print the original then the copy to prove the copy is independent.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.value_semantics.rule_of_zero_five",
+    secondarySkillIds: ["cpp.value_semantics.deep_copy", "cpp.raii.resource_lifetime"],
+    patternTags: ["cpp", "rule-of-five", "resource-owner", "debugging"],
+    constraints: "0 <= n <= 1e5. The default (shallow) copy would double-free; a correct deep copy must leave the source untouched.",
+    targetComplexity: "O(n) copy, O(1) move.",
+    requiredEdgeCases: ["copy of an empty owner", "self-assignment", "mutating the copy must not change the original"],
+    clarifyingQuestions: ["Can this type be redesigned to the Rule of Zero with a std::vector member instead?", "Must moves leave the source empty and safe to destroy?"],
+    hintLadder: [
+      "The compiler-generated copy is shallow: two owners point at the same buffer and both delete it — a double free.",
+      "Copy construction/assignment must allocate a new buffer and copy the elements; the destructor frees exactly once.",
+      "Prefer the Rule of Zero (hold a std::vector) when you can; implement the Rule of Five only when you must own a raw resource directly."
+    ],
+    visibleExamples: [
+      { input: "3\n5 6 7", output: "5 6 7\n999 6 7", note: "original unchanged after the copy is mutated" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.special-member-dispatch",
+    version: 1,
+    title: "Which special member runs?",
+    prompt:
+      "Instrument a class so its copy constructor prints C, move constructor prints M, copy assignment prints c, and move assignment prints m. Given a sequence of operations (copyctor, movector, copyassign, moveassign), perform each and output the single-line log of which special member was invoked.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.value_semantics.special_members",
+    secondarySkillIds: ["cpp.value_semantics.copy", "cpp.value_semantics.move"],
+    constraints: "1 <= number of operations <= 100. Only the four measured special members print; construction and destruction are silent.",
+    patternTags: ["cpp", "special-members", "copy", "move"],
+    targetComplexity: "Reasoning about overload resolution; O(1) per operation.",
+    requiredEdgeCases: ["copy from an lvalue selects the copy operation", "std::move selects the move operation", "assignment to an existing object vs constructing a new one"],
+    clarifyingQuestions: ["Does binding to an rvalue always pick the move overload if one exists?", "Should a noexcept move be preferred by the standard library?"],
+    hintLadder: [
+      "Constructing a new object from an existing one is a constructor; assigning into an already-constructed object is an assignment.",
+      "An lvalue argument selects the copy overload; an rvalue (including std::move(x)) selects the move overload.",
+      "Print inside each of the four special members so the emitted log reflects overload resolution exactly."
+    ],
+    visibleExamples: [
+      { input: "4\ncopyctor movector copyassign moveassign", output: "CMcm", note: "copy/move ctor then copy/move assign" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.return-by-value",
+    version: 1,
+    title: "Fix an API that returns a dangling local",
+    prompt:
+      "A helper builds a greeting in a local std::string and returns a reference to it, so callers read freed memory. Change the API to return the string by value and rely on copy elision/move. Read a name line and print \"Hello, <name>!\".",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.value_semantics.copy_elision",
+    secondarySkillIds: ["cpp.references.return_semantics", "cpp.references.dangling"],
+    patternTags: ["cpp", "copy-elision", "return-by-value", "lifetime"],
+    constraints: "The name may contain spaces; it is a single input line. The local string is destroyed when the function returns.",
+    targetComplexity: "O(length of name); a single owned string is returned.",
+    requiredEdgeCases: ["empty name", "name containing spaces", "name with punctuation"],
+    clarifyingQuestions: ["Is returning by value acceptable for performance here?", "Should the whole line (including spaces) be treated as the name?"],
+    hintLadder: [
+      "The local string is destroyed at return, so a returned reference to it dangles.",
+      "Return std::string by value; guaranteed copy elision (C++17) or a move makes this cheap.",
+      "Read the whole line so names with spaces are preserved."
+    ],
+    visibleExamples: [
+      { input: "World", output: "Hello, World!", note: "greeting returned by value" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.raii-file-wrapper",
+    version: 1,
+    title: "Release a resource exactly once with RAII",
+    prompt:
+      "Write an RAII wrapper that prints \"open <name>\" on acquisition and \"close <name>\" on destruction, so the resource is released on every exit path — normal return or exception. Read n (name action) pairs; when action is fail, throw inside the scope and catch it, printing \"caught <name>\" after cleanup.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.raii.resource_lifetime",
+    secondarySkillIds: ["cpp.raii.destructor_cleanup", "cpp.raii.exception_safety_intro"],
+    patternTags: ["cpp", "raii", "resource-lifetime", "implementation"],
+    constraints: "0 <= n <= 1000. Cleanup must run exactly once whether the scope exits normally or by exception.",
+    targetComplexity: "O(1) per resource; deterministic acquire/release ordering.",
+    requiredEdgeCases: ["normal exit closes the resource", "an exception still closes the resource before the catch", "zero resources"],
+    clarifyingQuestions: ["Should the wrapper be movable, or is single-scope ownership enough here?", "Must close run before the catch handler observes the failure?"],
+    hintLadder: [
+      "Acquire in the constructor and release in the destructor so scope exit guarantees cleanup.",
+      "During stack unwinding the destructor runs before the surrounding catch handler, so close is printed before caught.",
+      "Do not release manually in the body — the destructor is the single release point."
+    ],
+    visibleExamples: [
+      { input: "2\ndb ok cache fail", output: "open db\nclose db\nopen cache\nclose cache\ncaught cache", note: "the failing scope still closes before it is caught" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.unique-ptr-transfer",
+    version: 1,
+    title: "Transfer unique ownership across a boundary",
+    prompt:
+      "A sink function consumes a std::unique_ptr<int> by value. Read n integers into a vector of unique_ptr, transfer each into the sink to accumulate a sum, and report the sum followed by the number of source pointers that are now null.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "medium",
+    primarySkillId: "cpp.smart_pointers.ownership_transfer",
+    secondarySkillIds: ["cpp.smart_pointers.unique_ptr", "cpp.value_semantics.move"],
+    patternTags: ["cpp", "unique-ptr", "ownership-transfer", "move"],
+    constraints: "0 <= n <= 1e5. unique_ptr is move-only; passing by value requires std::move at the call site.",
+    targetComplexity: "O(n); each transfer is O(1).",
+    requiredEdgeCases: ["empty input", "single pointer", "all sources become null after transfer"],
+    clarifyingQuestions: ["Should the sink take the unique_ptr by value (owning) or by reference (borrowing)?", "After std::move, what value does the source pointer hold?"],
+    hintLadder: [
+      "unique_ptr cannot be copied; use std::move to pass it into a by-value parameter.",
+      "After the move, the source pointer is null — that is how ownership transfer is observable.",
+      "Sum inside the sink so the caller no longer owns the integers."
+    ],
+    visibleExamples: [
+      { input: "3\n10 20 30", output: "60\n3", note: "sum, then count of nulled sources" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.shared-ptr-cycle",
+    version: 1,
+    title: "Break a shared_ptr ownership cycle",
+    prompt:
+      "Two nodes reference each other. If both links are std::shared_ptr, the reference counts never reach zero and the nodes leak. Redesign so the back-edge is a std::weak_ptr, then create two named nodes, link them, drop the owners, and print \"alive <n>\" where n is the number of nodes still alive (0 when the cycle is broken).",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.smart_pointers.cyclic_reference",
+    secondarySkillIds: ["cpp.smart_pointers.shared_ptr", "cpp.smart_pointers.weak_ptr"],
+    patternTags: ["cpp", "shared-ptr", "weak-ptr", "ownership-cycle"],
+    constraints: "Exactly two nodes; O(1) object graph. A shared/shared cycle leaks; exactly one edge must be weak.",
+    targetComplexity: "O(1) ownership/lifetime correctness.",
+    requiredEdgeCases: ["both owners released frees both nodes", "the weak edge does not keep its target alive", "accessing through the weak edge must lock() before use"],
+    clarifyingQuestions: ["Which direction is the true owner and which is the back-reference?", "Should the weak side lock() the pointer before dereferencing?"],
+    hintLadder: [
+      "A shared_ptr<->shared_ptr cycle keeps both use counts >= 1 forever.",
+      "Make the non-owning back-edge a weak_ptr so it does not contribute to the reference count.",
+      "When the external owners are reset, both nodes' destructors run and nothing leaks."
+    ],
+    visibleExamples: [
+      { input: "A B", output: "alive 0", note: "weak back-edge lets both nodes be freed" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.ownership-boundary",
+    version: 1,
+    title: "Design a clear owner / non-owner boundary",
+    prompt:
+      "A registry uniquely owns its widgets (std::unique_ptr), while lookups should borrow without transferring ownership. Read n (id value) widgets, then q lookup ids; for each, return the widget's value through a non-owning pointer, or \"absent\" if not found.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.smart_pointers.ownership_choice",
+    secondarySkillIds: ["cpp.references.non_owning", "cpp.smart_pointers.unique_ptr"],
+    patternTags: ["cpp", "api-design", "ownership", "non-owning"],
+    constraints: "0 <= n, q <= 1e5. The registry keeps ownership; a lookup returns a borrowed view, never a new owner.",
+    targetComplexity: "O(n) storage; lookup as implemented (linear here).",
+    requiredEdgeCases: ["lookup of an absent id", "empty registry", "repeated lookups of the same id do not transfer ownership"],
+    clarifyingQuestions: ["Should a lookup return a raw pointer/reference (borrow) or a shared_ptr (co-own)?", "May the caller outlive the registry?"],
+    hintLadder: [
+      "Store owners as unique_ptr so the registry has sole ownership.",
+      "Return a raw pointer (or reference) for lookups — a borrow that does not change ownership.",
+      "Return nullptr / \"absent\" for a miss rather than inserting a default entry."
+    ],
+    visibleExamples: [
+      { input: "2\n1 100 2 200\n3\n2 1 9", output: "200\n100\nabsent", note: "borrowed lookups; last id is absent" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.exception-safe-resource",
+    version: 1,
+    title: "Make multi-step acquisition exception-safe",
+    prompt:
+      "A routine acquires two resources in sequence. If the second step fails, the first must still be released. Using RAII for the first resource, read (first second mode); when mode is fail, throw before acquiring the second and catch it, printing \"recovered\". Emit the acquire/release lines so the ordering proves the first resource was released on failure.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.raii.exception_safety_intro",
+    secondarySkillIds: ["cpp.raii.resource_lifetime", "cpp.tooling.error_handling"],
+    patternTags: ["cpp", "raii", "exception-safety", "cleanup"],
+    constraints: "Two resources. On failure of the second acquisition, the first must be released exactly once during unwinding.",
+    targetComplexity: "O(1); deterministic acquire/release ordering.",
+    requiredEdgeCases: ["both steps succeed (both released in reverse order)", "second step fails (first still released)", "no leak on the failure path"],
+    clarifyingQuestions: ["Is the first resource owned by an RAII guard so unwinding releases it?", "Should partial success roll back the already-acquired resource?"],
+    hintLadder: [
+      "Wrap the first resource in an RAII guard so an exception during the second step unwinds it automatically.",
+      "Throwing before the second acquisition triggers the first guard's destructor before the catch handler runs.",
+      "Never rely on manual cleanup after a throw — the guard's destructor is the guaranteed release."
+    ],
+    visibleExamples: [
+      { input: "conn txn fail", output: "acquire conn\nrelease conn\nrecovered", note: "first resource released when the second step fails" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.object-slicing",
+    version: 1,
+    title: "Avoid object slicing",
+    prompt:
+      "Storing polymorphic objects by base value slices away the derived part, so virtual calls resolve to the base. Store the objects so polymorphism is preserved (e.g. std::unique_ptr<Base>). Read n shape tokens (circle/square) and print each shape's polymorphic name().",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.oop.slicing",
+    secondarySkillIds: ["cpp.oop.virtual_polymorphism", "cpp.smart_pointers.unique_ptr"],
+    patternTags: ["cpp", "oop", "slicing", "polymorphism"],
+    constraints: "0 <= n <= 1e5. Storing Base by value would slice; store via pointer/reference to keep the dynamic type.",
+    targetComplexity: "O(n); each virtual call is O(1).",
+    requiredEdgeCases: ["a single derived object", "a mix of derived types", "all elements the same derived type"],
+    clarifyingQuestions: ["Should the container own the objects polymorphically (unique_ptr<Base>)?", "Is copying the base sufficient, or must the dynamic type survive?"],
+    hintLadder: [
+      "A std::vector<Base> copies only the Base subobject — the derived part is sliced off.",
+      "Hold std::unique_ptr<Base> (or Base&) so the dynamic type and its vtable are preserved.",
+      "Virtual dispatch then selects the derived override at run time."
+    ],
+    visibleExamples: [
+      { input: "3\ncircle square circle", output: "circle\nsquare\ncircle", note: "polymorphic name() preserved" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.polymorphic-clone",
+    version: 1,
+    title: "Deep-copy owned polymorphic objects",
+    prompt:
+      "You own a container of std::unique_ptr<Base>, but unique_ptr is not copyable, and copying Base* would slice. Add a virtual clone() that returns a unique_ptr<Base> so each derived type duplicates itself. Read n animal tokens (dog/cat), clone the whole container, and print each clone's sound().",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.oop.polymorphic_ownership",
+    secondarySkillIds: ["cpp.smart_pointers.unique_ptr", "cpp.oop.abstract_interfaces"],
+    patternTags: ["cpp", "polymorphism", "unique-ptr", "api-design"],
+    constraints: "0 <= n <= 1e5. Cloning must produce an independent object of the correct dynamic type.",
+    targetComplexity: "O(n) clones, each O(1).",
+    requiredEdgeCases: ["clone a single object", "clone a mix of derived types", "the clone is independent of the original"],
+    clarifyingQuestions: ["Should clone() be pure virtual on the base?", "Must each derived clone return its own dynamic type?"],
+    hintLadder: [
+      "unique_ptr<Base> is move-only, so you cannot copy the container directly.",
+      "Add virtual unique_ptr<Base> clone() const and override it in each derived class to make_unique<Derived>(*this).",
+      "Copy the container by calling clone() on each element."
+    ],
+    visibleExamples: [
+      { input: "2\ndog cat", output: "woof\nmeow", note: "clones keep their dynamic type" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.override-mismatch",
+    version: 1,
+    title: "Catch an accidental non-override",
+    prompt:
+      "A derived class meant to override a virtual method has a slightly different signature, so it silently hides rather than overrides — calls through the base pointer run the base version. Fix the signature and mark it override so the compiler enforces the match. Read n integers and print each scaled through a base pointer to a Doubler (which returns x*2).",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.oop.override_final",
+    secondarySkillIds: ["cpp.oop.virtual_polymorphism", "cpp.tooling.warnings"],
+    patternTags: ["cpp", "virtual", "override", "debugging"],
+    constraints: "0 <= n <= 1e5. A const/parameter mismatch makes the derived method hide, not override.",
+    targetComplexity: "O(n); each virtual call is O(1).",
+    requiredEdgeCases: ["zero and negative inputs", "a single value", "call resolves to the derived override, not the base"],
+    clarifyingQuestions: ["Does the base method's const-qualification match the derived one?", "Would marking it override have surfaced the bug at compile time?"],
+    hintLadder: [
+      "A signature difference (e.g. missing const) means the derived method hides the base method instead of overriding it.",
+      "Add the override specifier so the compiler rejects a non-matching signature.",
+      "Once the signatures match, calls through Base* dispatch to Doubler::scale."
+    ],
+    visibleExamples: [
+      { input: "3\n3 5 7", output: "6\n10\n14", note: "override dispatches to Doubler" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.self-assignment-safe",
+    version: 1,
+    title: "Make assignment self-assignment-safe",
+    prompt:
+      "An owning type's copy assignment frees its buffer and then copies from the source — which corrupts data when the source is the same object (a = a). Repair it with a self-assignment guard or copy-and-swap. Read n integers, self-assign the owner, and print its elements, which must be intact.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.value_semantics.self_assignment",
+    secondarySkillIds: ["cpp.value_semantics.operators", "cpp.value_semantics.deep_copy"],
+    patternTags: ["cpp", "assignment", "copy-swap", "ownership"],
+    constraints: "0 <= n <= 1e5. Self-assignment must not free the buffer before copying from it.",
+    targetComplexity: "O(n) assignment.",
+    requiredEdgeCases: ["self-assignment of a non-empty owner", "self-assignment of an empty owner", "normal assignment between two owners still works"],
+    clarifyingQuestions: ["Should you guard with if (this != &other), or use copy-and-swap?", "Does copy-and-swap also give you the strong exception guarantee?"],
+    hintLadder: [
+      "The naive 'delete then copy' corrupts data when other is *this.",
+      "Guard with if (this == &other) return *this; or implement copy-and-swap which is inherently self-assignment safe.",
+      "Copy-and-swap also provides the strong exception guarantee as a bonus."
+    ],
+    visibleExamples: [
+      { input: "3\n8 9 10", output: "8 9 10", note: "data intact after a = a" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.erase-while-iterating",
+    version: 1,
+    title: "Erase while traversing a container",
+    prompt:
+      "Removing elements from a vector during a range/index loop invalidates iterators or skips elements. Safely erase every multiple of k while traversing (use the iterator returned by erase, or erase-remove). Read n integers then k, and print the remaining elements.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.stl.iterators",
+    secondarySkillIds: ["cpp.stl.vector", "cpp.stl.algorithms"],
+    patternTags: ["cpp", "stl", "iterators", "erase"],
+    constraints: "0 <= n <= 1e5; k may be 0 (then erase nothing to avoid division by zero).",
+    targetComplexity: "O(n) with erase-remove; naive repeated erase is O(n^2).",
+    requiredEdgeCases: ["erase every element", "erase none", "k = 0 removes nothing"],
+    clarifyingQuestions: ["Should the relative order of the kept elements be preserved?", "Is std::erase / erase-remove acceptable, or must it be a manual loop?"],
+    hintLadder: [
+      "vector::erase invalidates the erased iterator and everything after it; do not ++it after erasing.",
+      "Assign it = v.erase(it) on removal and only ++it when you keep an element.",
+      "The idiomatic O(n) solution is erase-remove (std::remove_if then erase)."
+    ],
+    visibleExamples: [
+      { input: "6\n1 2 3 4 5 6\n2", output: "1 3 5", note: "multiples of 2 removed safely" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.unordered-map-no-insert",
+    version: 1,
+    title: "Look up without accidental insertion",
+    prompt:
+      "Using operator[] to read a key inserts a default entry when the key is missing, silently growing the map and corrupting counts. Use find/count/at for read-only lookups. Read n (key value) entries, then q query keys; print the value or \"absent\" for each, then print \"size <n>\" to prove no accidental insertions occurred.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.stl.map",
+    secondarySkillIds: ["cpp.stl.set", "cpp.references.optional_overloads"],
+    patternTags: ["cpp", "unordered-map", "lookup", "api-semantics"],
+    constraints: "0 <= n, q <= 1e5. A read-only lookup must not change the map's size.",
+    targetComplexity: "O(1) average per lookup.",
+    requiredEdgeCases: ["query a missing key does not insert", "empty map", "size unchanged after all queries"],
+    clarifyingQuestions: ["Should a missing key report absent rather than a default value?", "Is it acceptable for the map to grow from reads?"],
+    hintLadder: [
+      "map[key] default-inserts when the key is absent — never use it for read-only access.",
+      "Use find (and compare against end()) or count/at instead.",
+      "The final size must equal the number of inserted keys, proving lookups did not insert."
+    ],
+    visibleExamples: [
+      { input: "2\na 1 b 2\n3\na c b", output: "1\nabsent\n2\nsize 2", note: "lookups do not grow the map" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.lambda-capture-lifetime",
+    version: 1,
+    title: "Capture lambdas by value to avoid dangling",
+    prompt:
+      "Storing lambdas that capture a loop variable by reference leaves them referring to a variable that changes or dies, so later calls read stale/garbage values. Capture by value so each stored callable is self-contained. Read n integers, build one lambda per value that returns its square, then invoke them all after the loop and print each result.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "cpp.stl.lambdas",
+    secondarySkillIds: ["cpp.references.dangling", "cpp.value_semantics.copy"],
+    patternTags: ["cpp", "lambda", "capture", "lifetime"],
+    constraints: "0 <= n <= 1e5. Values captured by reference would dangle or alias after the loop; capture by value.",
+    targetComplexity: "O(n); each stored call is O(1).",
+    requiredEdgeCases: ["a single value", "negative values", "results correct after the source loop ends"],
+    clarifyingQuestions: ["Should the lambda own a copy of the value or reference the loop variable?", "Do the callables outlive the loop scope?"],
+    hintLadder: [
+      "Capturing the loop variable by reference means every lambda sees the same (final/destroyed) variable.",
+      "Capture by value ([x]) so each lambda holds its own copy.",
+      "Invoke after the loop to confirm each captured value survived."
+    ],
+    visibleExamples: [
+      { input: "3\n2 3 4", output: "4\n9\n16", note: "values captured by value survive the loop" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.string-view-lifetime",
+    version: 1,
+    title: "Fix a dangling std::string_view",
+    prompt:
+      "Returning a std::string_view into a temporary std::string leaves the view pointing at freed memory. Redesign the function to return an owning std::string (or extend the source's lifetime). Read a line and print its first whitespace-delimited token.",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.references.views",
+    secondarySkillIds: ["cpp.templates.view_lifetime", "cpp.references.dangling"],
+    patternTags: ["cpp", "string-view", "borrowed-view", "lifetime"],
+    constraints: "The input line may be empty or have leading spaces. A string_view into a temporary dangles once the temporary dies.",
+    targetComplexity: "O(length of the token).",
+    requiredEdgeCases: ["leading whitespace before the token", "a single token", "an empty line yields an empty token"],
+    clarifyingQuestions: ["Does the returned view outlive the string it points into?", "Should the function return an owning std::string instead?"],
+    hintLadder: [
+      "A string_view is a non-owning borrow; if the backing string is a temporary, the view dangles.",
+      "Return std::string (owning) so the caller holds the data, or keep the source alive for the view's lifetime.",
+      "Skip leading whitespace, then copy up to the next whitespace into an owned string."
+    ],
+    visibleExamples: [
+      { input: "  hello world foo", output: "hello", note: "first token returned as an owning string" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.strict-weak-comparator",
+    version: 1,
+    title: "Repair a comparator that breaks sort",
+    prompt:
+      "A comparator that uses <= (or is otherwise not a strict weak ordering) causes undefined behavior in std::sort and ordered containers. Provide a correct comparator that orders records by priority ascending, breaking ties by name ascending. Read n (name priority) records and print them in sorted order.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "cpp.stl.algorithms",
+    secondarySkillIds: ["cpp.stl.vector", "cpp.functions.basics"],
+    patternTags: ["cpp", "comparator", "sort", "stl"],
+    constraints: "0 <= n <= 1e5. The comparator must be a strict weak ordering (irreflexive, consistent tie-breaking).",
+    targetComplexity: "O(n log n) sort.",
+    requiredEdgeCases: ["ties broken deterministically by name", "a single record", "all equal priorities"],
+    clarifyingQuestions: ["Must the comparator be irreflexive (return false for equal elements)?", "How are ties broken to keep the ordering total?"],
+    hintLadder: [
+      "A comparator using <= is not irreflexive (comp(a,a) is true), which is undefined behavior for std::sort.",
+      "Compare the primary key with <, and on equality fall through to a secondary key with < — never <=.",
+      "Order by priority, then by name, both with strict <."
+    ],
+    visibleExamples: [
+      { input: "3\nbob 2\nann 2\ncy 1", output: "cy 1\nann 2\nbob 2", note: "priority asc, ties by name asc" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.reserve-vs-resize",
+    version: 1,
+    title: "Distinguish vector capacity from size",
+    prompt:
+      "Calling resize(n) to 'pre-size' a vector before push_back creates n default elements and then appends after them — doubling the data. Use reserve(n) to allocate capacity without changing size. Read n integers, reserve capacity, push each back, then print \"size <n>\" followed by the elements.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.stl.vector",
+    secondarySkillIds: ["cpp.stl.iterators", "cpp.tooling.debugging"],
+    patternTags: ["cpp", "vector", "capacity", "debugging"],
+    constraints: "0 <= n <= 1e5. reserve changes capacity only; size stays 0 until you push_back.",
+    targetComplexity: "O(n) with a single allocation.",
+    requiredEdgeCases: ["empty input", "a single element", "final size equals the count pushed"],
+    clarifyingQuestions: ["Do you want to pre-allocate capacity (reserve) or create elements (resize)?", "What size should the vector report after the pushes?"],
+    hintLadder: [
+      "resize(n) creates n value-initialized elements; a following push_back appends beyond them.",
+      "reserve(n) only allocates storage — size stays 0 until you push_back.",
+      "After reserving and pushing n items, size() is exactly n."
+    ],
+    visibleExamples: [
+      { input: "4\n1 2 3 4", output: "size 4\n1 2 3 4", note: "reserve keeps size at the count pushed" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.template-deduction",
+    version: 1,
+    title: "Reason about template argument deduction",
+    prompt:
+      "Implement a function template that returns the larger of two values and another that reports a container's size, letting the compiler deduce the element type T. Read two integers a and b, then a vector of n integers, and print max(a, b) followed by the vector's size.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "cpp.templates.deduction",
+    secondarySkillIds: ["cpp.templates.function_templates", "cpp.references.parameter_passing"],
+    patternTags: ["cpp", "templates", "type-deduction"],
+    constraints: "0 <= n <= 1e5; values fit in 64-bit. Both arguments to the max template share one deduced type T.",
+    targetComplexity: "O(1) for max, O(1) for size.",
+    requiredEdgeCases: ["a greater than b", "a equal to b", "empty vector reports size 0"],
+    clarifyingQuestions: ["Should both parameters deduce to the same T, or allow mixed types?", "Does taking parameters by const reference change the deduced type?"],
+    hintLadder: [
+      "template<class T> T tmax(T a, T b) deduces T from the arguments; both must be the same type.",
+      "A separate template<class T> deduces T from the vector's element type for size().",
+      "Return the larger value and the container size."
+    ],
+    visibleExamples: [
+      { input: "7 3\n4\n9 1 8 2", output: "7\n4", note: "max(a,b), then the container size" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.if-constexpr-dispatch",
+    version: 1,
+    title: "Compile-time branch selection with if constexpr",
+    prompt:
+      "Write one function template that behaves differently by type: for an integral value it returns \"int:<2*value>\", for a std::string it returns \"str:<value>!\". A plain if would try to compile both branches for each type and fail; use if constexpr so only the valid branch is instantiated. Read n (tag value) pairs where tag i is integral and tag s is a string, and print each described result.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "hard",
+    primarySkillId: "cpp.templates.if_constexpr",
+    secondarySkillIds: ["cpp.templates.function_templates", "cpp.templates.constexpr"],
+    patternTags: ["cpp", "templates", "if-constexpr", "compile-time"],
+    constraints: "1 <= n <= 1000. The integral branch (value*2) must not be instantiated for std::string, and vice versa.",
+    targetComplexity: "O(1) per item; branch chosen at compile time.",
+    requiredEdgeCases: ["only integral inputs", "only string inputs", "a mix of both"],
+    clarifyingQuestions: ["Which type trait distinguishes the branches (is_integral)?", "Why would a runtime if fail to compile here?"],
+    hintLadder: [
+      "A runtime if would compile value*2 even when value is a std::string, which is ill-formed.",
+      "if constexpr (std::is_integral_v<T>) discards the false branch at compile time so only valid code is instantiated.",
+      "Return the int form for integrals and the string form otherwise."
+    ],
+    visibleExamples: [
+      { input: "3\ni 5\ns hi\ni 10", output: "int:10\nstr:hi!\nint:20", note: "integral vs string branch chosen at compile time" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.generic-static-contract",
+    version: 1,
+    title: "Constrain a template with static_assert",
+    prompt:
+      "Write a reusable function template sumSquares that computes the sum of squares of a container's elements, and constrain it with static_assert(std::is_arithmetic_v<T>) so a misuse on a non-arithmetic type fails at compile time with a clear message. Read n integers and print the sum of their squares.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.templates.static_assert",
+    secondarySkillIds: ["cpp.templates.function_templates", "cpp.templates.concepts"],
+    patternTags: ["cpp", "templates", "static-assert", "generic-programming"],
+    constraints: "0 <= n <= 1e5; values fit so the sum of squares fits in 64-bit. Non-arithmetic T must be rejected at compile time.",
+    targetComplexity: "O(n).",
+    requiredEdgeCases: ["empty container sums to 0", "negative values (squares are positive)", "single element"],
+    clarifyingQuestions: ["Should the constraint be a static_assert or a concept?", "What clear message should a misuse produce?"],
+    hintLadder: [
+      "Place static_assert(std::is_arithmetic_v<T>, \"...\") at the top of the template body.",
+      "Accumulate x*x over the elements in a value of type T.",
+      "A non-arithmetic instantiation now fails with your message instead of a deep template error."
+    ],
+    visibleExamples: [
+      { input: "3\n2 3 4", output: "29", note: "4 + 9 + 16" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.sanitizer-use-after-free",
+    version: 1,
+    title: "Repair a use-after-free caught by the sanitizer",
+    prompt:
+      "Code saves a reference (or pointer) to a vector element, then push_back reallocates the buffer, leaving the saved reference dangling — AddressSanitizer flags a heap-use-after-free. Fix it by indexing the vector after the appends rather than holding a stale reference. Read n integers, then a number of appended values, then an index, and print the element at that index (or \"oob\").",
+    group: "cpp_implementation",
+    roleRelevance: "systems",
+    difficulty: "hard",
+    primarySkillId: "cpp.tooling.sanitizers",
+    secondarySkillIds: ["cpp.references.dangling", "cpp.stl.vector"],
+    patternTags: ["cpp", "debugging", "asan", "ub", "lifetime"],
+    constraints: "0 <= n, appends <= 1e5. push_back may reallocate, invalidating references/pointers/iterators into the vector.",
+    targetComplexity: "O(n + appends).",
+    requiredEdgeCases: ["index valid only after the appends", "index out of bounds", "reallocation actually occurs before the read"],
+    clarifyingQuestions: ["Could push_back reallocate and invalidate the saved reference?", "Should the read use the current buffer via indexing?"],
+    hintLadder: [
+      "push_back can reallocate; any reference/pointer/iterator taken before it may dangle afterward.",
+      "Do not cache a reference across a push_back — index the vector by position after the appends.",
+      "Bounds-check the index and report oob when out of range."
+    ],
+    visibleExamples: [
+      { input: "2\n5 6\n3\n7 8 9\n4", output: "9", note: "index read after the appends, not via a stale reference" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.signed-unsigned-loop",
+    version: 1,
+    title: "Fix a signed/unsigned size bug",
+    prompt:
+      "A loop written as for (size_t i = 0; i <= v.size() - 1; ++i) wraps around to a huge value when the vector is empty (0u - 1), causing out-of-bounds access. Write a correct loop that counts adjacent increasing pairs (v[i] > v[i-1]) and handles the empty case safely. Read n integers and print the count.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.values_types.signed_unsigned",
+    secondarySkillIds: ["cpp.control_flow.loops", "cpp.stl.vector"],
+    patternTags: ["cpp", "integer", "signed-unsigned", "debugging"],
+    constraints: "0 <= n <= 1e5. size() is unsigned; size()-1 underflows when the container is empty.",
+    targetComplexity: "O(n).",
+    requiredEdgeCases: ["empty input must not underflow", "strictly increasing sequence", "no increases"],
+    clarifyingQuestions: ["What is size_t(0) - 1 for an empty vector?", "Should the loop start at index 1 and compare with the previous element?"],
+    hintLadder: [
+      "v.size() is unsigned, so size()-1 wraps to a huge number when the vector is empty.",
+      "Loop from i = 1 while i < v.size() (no subtraction), or cast size() to a signed type.",
+      "Count positions where v[i] > v[i-1]."
+    ],
+    visibleExamples: [
+      { input: "5\n1 3 2 4 4", output: "2", note: "adjacent increases: 1->3 and 2->4" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.optional-parse",
+    version: 1,
+    title: "Model a recoverable parse with std::optional",
+    prompt:
+      "Instead of a sentinel like -1 (ambiguous with real data) or throwing, model a parse that may fail using std::optional<long long>. Read n tokens; parse each as an integer, summing the successes and counting the failures. Print the sum, then the failure count.",
+    group: "cpp_implementation",
+    roleRelevance: "general",
+    difficulty: "medium",
+    primarySkillId: "cpp.tooling.optional_expected",
+    secondarySkillIds: ["cpp.tooling.error_handling", "cpp.utilities.variant"],
+    patternTags: ["cpp", "optional", "error-handling", "api-design"],
+    constraints: "0 <= n <= 1e5. A failed parse must be distinguishable from a parsed 0 or -1.",
+    targetComplexity: "O(total input length).",
+    requiredEdgeCases: ["all tokens valid", "all tokens invalid", "a mix, including a negative number"],
+    clarifyingQuestions: ["Should the API return std::optional rather than a sentinel value?", "Is a negative sign valid, but an empty/non-digit token a failure?"],
+    hintLadder: [
+      "Return std::optional<long long> — nullopt for failure, a value for success — so 0/-1 are not overloaded as errors.",
+      "Validate the token (optional sign, then digits) before converting.",
+      "Sum only the engaged optionals and count the nullopt results."
+    ],
+    visibleExamples: [
+      { input: "4\n10 x -5 12", output: "17\n1", note: "sum of parsed values, then failure count" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.thread-safe-counter",
+    version: 1,
+    title: "Fix a data race on a shared counter",
+    prompt:
+      "Multiple threads increment a shared counter without synchronization, so the final value is nondeterministic and too low (a data race, undefined behavior). Protect the increment with a std::mutex (or use std::atomic). Read T and K; run T threads that each increment the counter K times, and print the final count, which must equal T*K.",
+    group: "cpp_implementation",
+    roleRelevance: "concurrency-adjacent",
+    difficulty: "hard",
+    primarySkillId: "cpp.concurrency.data_races",
+    secondarySkillIds: ["cpp.concurrency.mutexes", "cpp.concurrency.threads"],
+    patternTags: ["cpp", "concurrency", "data-race", "synchronization"],
+    constraints: "1 <= T <= 32; 1 <= K <= 1e6. The unsynchronized version has a data race; the result must be deterministic T*K.",
+    targetComplexity: "O(T*K) increments; correctness independent of interleaving.",
+    requiredEdgeCases: ["a single thread", "many threads with small K", "final count is exactly T*K regardless of scheduling"],
+    clarifyingQuestions: ["Is a std::mutex + lock_guard or a std::atomic more appropriate here?", "Why is ++counter from multiple threads undefined behavior without synchronization?"],
+    hintLadder: [
+      "Concurrent unsynchronized ++counter is a data race — undefined behavior, and typically loses updates.",
+      "Guard the increment with std::lock_guard<std::mutex>, or make the counter std::atomic.",
+      "Join all threads before reading; the total must be exactly T*K."
+    ],
+    visibleExamples: [
+      { input: "8 10000", output: "80000", note: "T*K with a synchronized increment" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.mutex-protected-state",
+    version: 1,
+    title: "Protect a multi-field invariant with a mutex",
+    prompt:
+      "An account tracks a balance and an operation count that must always agree. Concurrent deposits without locking break the invariant. Protect the whole update with std::mutex and std::lock_guard so both fields advance atomically together. Read T, K, and amount; run T threads that each perform K deposits, and print the final balance (T*K*amount) then the operation count (T*K).",
+    group: "cpp_implementation",
+    roleRelevance: "concurrency-adjacent",
+    difficulty: "hard",
+    primarySkillId: "cpp.concurrency.mutexes",
+    secondarySkillIds: ["cpp.concurrency.data_races", "cpp.structs_classes.invariants_intro"],
+    patternTags: ["cpp", "concurrency", "mutex", "invariant"],
+    constraints: "1 <= T <= 32; 1 <= K <= 1e6. Both fields must be updated under one critical section so the invariant always holds.",
+    targetComplexity: "O(T*K) updates; deterministic final state.",
+    requiredEdgeCases: ["a single thread", "balance and count stay consistent", "large T and K"],
+    clarifyingQuestions: ["Should both fields be updated inside one locked section?", "Would separate atomics preserve the cross-field invariant?"],
+    hintLadder: [
+      "Two atomics do not make a multi-field update atomic as a whole; the invariant can still be observed broken.",
+      "Take a std::lock_guard over both updates so balance and count advance together.",
+      "Final balance is T*K*amount and the count is T*K."
+    ],
+    visibleExamples: [
+      { input: "4 1000 5", output: "20000\n4000", note: "balance T*K*amount, then op count T*K" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.deadlock-safe-transfer",
+    version: 1,
+    title: "Fix a two-lock transfer deadlock",
+    prompt:
+      "Transfers between two accounts lock account A then account B in one direction and B then A in the other, so concurrent transfers can deadlock. Fix it by acquiring both locks together with std::scoped_lock (or a consistent lock order). Read a, b, T, K, amt; run transfers back and forth and print the conserved total (a+b).",
+    group: "cpp_implementation",
+    roleRelevance: "concurrency-adjacent",
+    difficulty: "hard",
+    primarySkillId: "cpp.concurrency.deadlock",
+    secondarySkillIds: ["cpp.concurrency.mutexes", "cpp.concurrency.lock_granularity"],
+    patternTags: ["cpp", "concurrency", "deadlock", "lock-order"],
+    constraints: "1 <= T <= 16; 1 <= K <= 1e5. Inconsistent lock ordering can deadlock; the total must always be conserved.",
+    targetComplexity: "O(T*K) transfers; no deadlock, total invariant preserved.",
+    requiredEdgeCases: ["a single pair of threads", "transfers in both directions", "total conserved regardless of interleaving"],
+    clarifyingQuestions: ["Should both mutexes be acquired atomically with std::scoped_lock?", "Would a global lock ordering also prevent the deadlock?"],
+    hintLadder: [
+      "Locking A-then-B in one thread and B-then-A in another is the classic deadlock pattern.",
+      "Use std::scoped_lock(mA, mB) to acquire both without a fixed order (deadlock-avoiding), or always lock in a consistent global order.",
+      "The sum of the two balances is invariant, so the output equals a+b."
+    ],
+    visibleExamples: [
+      { input: "100 200 4 1000 3", output: "300", note: "total conserved (a+b)" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.bounded-blocking-queue",
+    version: 1,
+    title: "Implement a bounded blocking queue",
+    prompt:
+      "Build a small bounded producer/consumer queue: a producer pushes items 0..N-1 but must block when the queue is full, and a consumer blocks when it is empty. Use std::mutex and std::condition_variable with predicate waits (not sleeps). Read N and cap; print the sum of consumed items, which is N*(N-1)/2.",
+    group: "cpp_implementation",
+    roleRelevance: "concurrency-adjacent",
+    difficulty: "hard",
+    primarySkillId: "cpp.concurrency.condition_variables",
+    secondarySkillIds: ["cpp.concurrency.mutexes", "cpp.concurrency.shared_state_design"],
+    patternTags: ["cpp", "concurrency", "condition-variable", "producer-consumer"],
+    constraints: "1 <= N <= 1e5; 1 <= cap <= N. Waits must use predicates; correctness must not depend on sleeps or timing.",
+    targetComplexity: "O(N) items passed; bounded memory O(cap).",
+    requiredEdgeCases: ["capacity of 1", "a single item", "no lost or duplicated items"],
+    clarifyingQuestions: ["Should waits use a predicate to guard against spurious wakeups?", "How does the consumer learn that production is finished?"],
+    hintLadder: [
+      "The producer waits on cv until size < cap; the consumer waits until the queue is non-empty or production is done.",
+      "Always wait with a predicate (cv.wait(lk, pred)) so spurious wakeups are handled.",
+      "notify after each push/pop; the consumer's total equals 0+1+...+(N-1)."
+    ],
+    visibleExamples: [
+      { input: "1000 4", output: "499500", note: "sum 0..999" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
+  },
+  {
+    id: "iv.cpp.atomic-counter",
+    version: 1,
+    title: "Use std::atomic correctly",
+    prompt:
+      "For a simple shared counter and a completion flag, a lock is unnecessary — std::atomic provides lock-free, race-free updates, and volatile is NOT a synchronization tool. Read T and K; run T threads that each fetch_add the atomic counter K times, set an atomic flag when done, and print the final count (T*K) then the flag (1).",
+    group: "cpp_implementation",
+    roleRelevance: "concurrency-adjacent",
+    difficulty: "hard",
+    primarySkillId: "cpp.concurrency.atomics",
+    secondarySkillIds: ["cpp.concurrency.memory_ordering", "cpp.concurrency.data_races"],
+    patternTags: ["cpp", "concurrency", "atomic", "memory-model"],
+    constraints: "1 <= T <= 32; 1 <= K <= 1e6. volatile does not provide atomicity or ordering; use std::atomic.",
+    targetComplexity: "O(T*K) atomic increments.",
+    requiredEdgeCases: ["a single thread", "many threads", "final count is exactly T*K"],
+    clarifyingQuestions: ["Why is volatile not a substitute for std::atomic here?", "Is relaxed memory ordering sufficient for a plain counter?"],
+    hintLadder: [
+      "volatile prevents some compiler optimizations but gives neither atomicity nor cross-thread ordering.",
+      "Use std::atomic<long long> with fetch_add; relaxed ordering suffices for a pure counter.",
+      "Join all threads, then read the count (T*K) and the flag."
+    ],
+    visibleExamples: [
+      { input: "8 50000", output: "400000\n1", note: "count T*K, then flag set" }
+    ],
+    externalLinks: [CPPREF],
+    interviewCore: true
   }
 ];
 

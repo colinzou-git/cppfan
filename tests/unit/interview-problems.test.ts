@@ -8,6 +8,7 @@ import {
   type RoleRelevance
 } from "@/features/interview/problem-catalog";
 import { skillSeed } from "@/features/skills/skill-seed";
+import { getJudgeProblemSuite } from "@/features/interview/judge-test-suites";
 
 const skillIds = new Set(skillSeed.map((s) => s.id));
 const GROUPS = new Set<ProblemGroup>([
@@ -162,6 +163,42 @@ describe("interview problem catalog integrity (#176)", () => {
     // Each is a C++-specific reasoning task (tags like "cpp" or "cpp-design").
     expect(cpp.every((p) => p.patternTags.some((t) => t.startsWith("cpp")))).toBe(true);
     expect(cpp.some((p) => p.patternTags.includes("debugging"))).toBe(true);
+  });
+
+  it("has broad C++ interview coverage after the #690 expansion (>= 33)", () => {
+    const cpp = getInterviewProblemsByGroup("cpp_implementation");
+    expect(cpp.length).toBeGreaterThanOrEqual(33);
+
+    // #690 required C++ interview areas, keyed on stable pattern tags.
+    const tags = new Set(cpp.flatMap((p) => p.patternTags));
+    for (const tag of [
+      "move-semantics",
+      "raii",
+      "unique-ptr",
+      "polymorphism",
+      "stl",
+      "templates",
+      "debugging",
+      "concurrency"
+    ]) {
+      expect(tags.has(tag), `missing C++ interview area: ${tag}`).toBe(true);
+    }
+
+    // At least five concurrency-focused problems mapped to cpp.concurrency.* skills.
+    const concurrency = cpp.filter(
+      (p) => p.roleRelevance === "concurrency-adjacent" && p.primarySkillId.startsWith("cpp.concurrency.")
+    );
+    expect(concurrency.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("makes every C++ interview problem judge-supported with visible and hidden tests (#690)", () => {
+    for (const p of getInterviewProblemsByGroup("cpp_implementation")) {
+      const suite = getJudgeProblemSuite(p.id);
+      expect(suite, p.id).not.toBeNull();
+      expect(suite!.version, p.id).toBe(p.version);
+      expect(suite!.visibleTests.length, p.id).toBeGreaterThanOrEqual(1);
+      expect(suite!.hiddenTests.length, p.id).toBeGreaterThanOrEqual(2);
+    }
   });
 
   it("meets the #176 required first catalog: >= 60 problems across all 12 groups", () => {
