@@ -159,6 +159,50 @@ export const mockPacks: MockPack[] = [
     followUpIds: ["fu.dangling-reference.make-reusable", "fu.missing-virtual-destructor.make-reusable"],
     patternCoverage: ["cpp_implementation"],
     calibrationReserved: false
+  },
+  {
+    id: "pack.core.tree-postorder",
+    version: 1,
+    title: "Tree path reasoning under time",
+    category: "core_algorithm",
+    durationMinutes: 45,
+    problemIds: ["iv.tree.max-path-sum"],
+    followUpIds: ["fu.tree-max-path.return-witness"],
+    patternCoverage: ["trees_bst"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.ds.time-indexed-store",
+    version: 1,
+    title: "Historical reads under time",
+    category: "ds_implementation",
+    durationMinutes: 50,
+    problemIds: ["iv.design.time-key-value"],
+    followUpIds: ["fu.time-key-value.compaction"],
+    patternCoverage: ["arrays_hashing_prefix"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.graph-state",
+    version: 1,
+    title: "Shortest path with extra state",
+    category: "core_algorithm",
+    durationMinutes: 50,
+    problemIds: ["iv.graph.k-stop-cheapest-route"],
+    followUpIds: ["fu.k-stop.return-route"],
+    patternCoverage: ["graphs_paths"],
+    calibrationReserved: false
+  },
+  {
+    id: "pack.core.sequence-dp",
+    version: 1,
+    title: "Sequence DP and reconstruction",
+    category: "core_algorithm",
+    durationMinutes: 50,
+    problemIds: ["iv.dp.edit-distance"],
+    followUpIds: ["fu.edit-distance.edit-script"],
+    patternCoverage: ["dp_backtracking"],
+    calibrationReserved: false
   }
 ];
 

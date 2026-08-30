@@ -1,21 +1,8 @@
 import { interviewProblems, type InterviewProblem } from "./problem-catalog";
 
-export const INTERVIEW_CORE_PROBLEM_IDS = new Set<string>([
-  "iv.prefix.balance-returns-to-zero",
-  "iv.sliding.longest-window-under-budget",
-  "iv.bsearch.min-rate-before-deadline",
-  "iv.intervals.max-concurrent-maintenance",
-  "iv.heap.top-k-hot-keys",
-  "iv.heap.k-closest-points",
-  "iv.tree.diameter",
-  "iv.graph.service-init-order",
-  "iv.graph.cheapest-route",
-  "iv.dp.fewest-coins",
-  "iv.cache.lru-design",
-  "iv.cpp.iterator-invalidation",
-  "iv.cpp.dangling-reference",
-  "iv.cpp.missing-virtual-destructor"
-]);
+export const INTERVIEW_CORE_PROBLEM_IDS = new Set<string>(
+  interviewProblems.filter((problem) => problem.interviewCore ?? true).map((problem) => problem.id)
+);
 
 export type ProblemExposureKind = "diagnostic" | "guided" | "practice" | "mock" | "solution_revealed";
 

@@ -201,6 +201,20 @@ describe("interview problem catalog integrity (#176)", () => {
     }
   });
 
+  it("protects the high-signal #693 Google SWE subpattern coverage", () => {
+    expect(interviewProblems.length).toBeGreaterThanOrEqual(120);
+    const byId = new Map(interviewProblems.map((p) => [p.id, p]));
+    for (const id of ["iv.trie.prefix-index","iv.stack.decode-nested-string","iv.strings.palindromic-substrings","iv.twoptr.three-sum-target","iv.prefix.multiple-of-k-subarray","iv.bsearch.rotated-target","iv.bsearch.single-unpaired","iv.twoptr.trapped-water","iv.tree.lca-general","iv.tree.max-path-sum","iv.tree.build-from-traversals","iv.tree.path-sum","iv.tree.invert","iv.tree.same-structure-values","iv.bst.range-sum","iv.tree.longest-univalue-path","iv.tree.enumerate-root-leaf-paths","iv.tree.serialize-roundtrip","iv.dp.edit-distance","iv.backtracking.generate-balanced-parentheses","iv.dp.longest-increasing-subsequence","iv.design.snapshot-array","iv.design.time-key-value","iv.list.clone-random-links","iv.graph.robot-room-exploration","iv.graph.k-stop-cheapest-route","iv.graph.reconstruct-itinerary","iv.graph.alien-order","iv.graph.multi-source-spread","iv.graph.zero-one-grid-route"]) {
+      expect(byId.has(id), `missing #693 native interview problem: ${id}`).toBe(true);
+    }
+    const tags = new Set(interviewProblems.flatMap((p) => p.patternTags));
+    for (const tag of ["trie", "tree-dp", "reconstruction", "edit-distance", "time-indexed", "state-augmentation", "eulerian-path", "multi-source", "zero-one-bfs"]) {
+      expect(tags.has(tag), `missing #693 interview subpattern: ${tag}`).toBe(true);
+    }
+    expect(interviewProblems.some((p) => p.primarySkillId === "dsa.strings.trie")).toBe(true);
+    expect(interviewProblems.some((p) => p.primarySkillId === "dsa.techniques.dp_design")).toBe(true);
+  });
+
   it("meets the #176 required first catalog: >= 60 problems across all 12 groups", () => {
     expect(interviewProblems.length).toBeGreaterThanOrEqual(60);
     expect(new Set(interviewProblems.map((p) => p.group)).size).toBe(12);

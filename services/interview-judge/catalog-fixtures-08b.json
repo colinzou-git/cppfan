@@ -1,0 +1,322 @@
+{
+  "definitions": [
+    {
+      "problemId": "iv.tree.build-from-traversals",
+      "version": 1,
+      "ioDescription": "stdin: n, preorder values, then inorder values. stdout: canonical level-order tokens with # null markers trimmed from the end.",
+      "cases": [
+        {
+          "id": "visible.mixed",
+          "name": "balanced and sparse",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "5\n3 9 20 15 7\n9 3 15 20 7\n",
+          "expectedStdout": "3 9 20 # # 15 7\n"
+        },
+        {
+          "id": "hidden.single",
+          "name": "single node",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n1\n1\n",
+          "expectedStdout": "1\n"
+        },
+        {
+          "id": "hidden.skew",
+          "name": "left-skewed tree",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "4\n1 2 3 4\n4 3 2 1\n",
+          "expectedStdout": "1 2 # 3 # 4\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.path-sum",
+      "version": 1,
+      "ioDescription": "stdin: n level-order tokens (# for null), then target. stdout: 1 if a root-to-leaf path matches, otherwise 0.",
+      "cases": [
+        {
+          "id": "visible.hit",
+          "name": "target leaf path",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n5 4 8 11 # 13 4\n20\n",
+          "expectedStdout": "1\n"
+        },
+        {
+          "id": "hidden.miss",
+          "name": "no matching leaf",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "3\n1 2 3\n5\n",
+          "expectedStdout": "0\n"
+        },
+        {
+          "id": "hidden.negative",
+          "name": "negative singleton",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "1\n-2\n-2\n",
+          "expectedStdout": "1\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.invert",
+      "version": 1,
+      "ioDescription": "stdin: n followed by n level-order tokens (# for null). stdout: mirrored tree in canonical level-order form.",
+      "cases": [
+        {
+          "id": "visible.full",
+          "name": "complete tree",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n4 2 7 1 3 6 9\n",
+          "expectedStdout": "4 7 2 9 6 3 1\n"
+        },
+        {
+          "id": "hidden.empty",
+          "name": "empty tree",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "0\n",
+          "expectedStdout": "#\n"
+        },
+        {
+          "id": "hidden.one-sided",
+          "name": "one-sided tree",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "3\n1 2 #\n",
+          "expectedStdout": "1 # 2\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.same-structure-values",
+      "version": 1,
+      "ioDescription": "stdin: first tree as n plus level-order tokens, then second tree in the same format. stdout: 1 if identical, otherwise 0.",
+      "cases": [
+        {
+          "id": "visible.same",
+          "name": "identical trees",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "3\n1 2 3\n3\n1 2 3\n",
+          "expectedStdout": "1\n"
+        },
+        {
+          "id": "hidden.values",
+          "name": "same values different positions",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "3\n1 2 3\n3\n1 3 2\n",
+          "expectedStdout": "0\n"
+        },
+        {
+          "id": "hidden.empty",
+          "name": "both empty",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "0\n0\n",
+          "expectedStdout": "1\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.bst.range-sum",
+      "version": 1,
+      "ioDescription": "stdin: BST as n level-order tokens (# for null), then low high. stdout: inclusive range sum.",
+      "cases": [
+        {
+          "id": "visible.range",
+          "name": "middle range",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n10 5 15 3 7 13 18\n7 15\n",
+          "expectedStdout": "45\n"
+        },
+        {
+          "id": "hidden.none",
+          "name": "no values in range",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n5\n6 10\n",
+          "expectedStdout": "0\n"
+        },
+        {
+          "id": "hidden.prune",
+          "name": "both-side pruning",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "7\n8 3 10 1 6 # 14\n4 13\n",
+          "expectedStdout": "24\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.longest-univalue-path",
+      "version": 1,
+      "ioDescription": "stdin: n level-order tokens (# for null). stdout: longest same-value path length in edges.",
+      "cases": [
+        {
+          "id": "visible.branch",
+          "name": "right branch",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n5 4 5 1 1 # 5\n",
+          "expectedStdout": "2\n"
+        },
+        {
+          "id": "hidden.cross",
+          "name": "same value through root",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "3\n1 1 1\n",
+          "expectedStdout": "2\n"
+        },
+        {
+          "id": "hidden.single",
+          "name": "single node",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "1\n9\n",
+          "expectedStdout": "0\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.enumerate-root-leaf-paths",
+      "version": 1,
+      "ioDescription": "stdin: n level-order tokens (# for null). stdout: root-to-leaf path strings joined by | in lexicographic order.",
+      "cases": [
+        {
+          "id": "visible.paths",
+          "name": "two terminal paths",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "5\n1 2 3 # 5\n",
+          "expectedStdout": "1->2->5|1->3\n"
+        },
+        {
+          "id": "hidden.single",
+          "name": "single path",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n7\n",
+          "expectedStdout": "7\n"
+        },
+        {
+          "id": "hidden.empty",
+          "name": "empty tree",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "0\n",
+          "expectedStdout": "\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.tree.serialize-roundtrip",
+      "version": 1,
+      "ioDescription": "stdin: n followed by n level-order tokens (# for null). stdout: canonical level-order serialization.",
+      "cases": [
+        {
+          "id": "visible.sparse",
+          "name": "internal null markers",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "7\n1 2 3 # # 4 5\n",
+          "expectedStdout": "1 2 3 # # 4 5\n"
+        },
+        {
+          "id": "hidden.one-sided",
+          "name": "right-only child",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "3\n1 # 2\n",
+          "expectedStdout": "1 # 2\n"
+        },
+        {
+          "id": "hidden.empty",
+          "name": "empty tree",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "0\n",
+          "expectedStdout": "#\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.dp.edit-distance",
+      "version": 1,
+      "ioDescription": "stdin: source string line, then target string line. stdout: minimum edit distance.",
+      "cases": [
+        {
+          "id": "visible.horse",
+          "name": "mixed edits",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "horse\nros\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.empty",
+          "name": "empty source",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "\nabc\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.kitten",
+          "name": "classic replacement/insert",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "kitten\nsitting\n",
+          "expectedStdout": "3\n"
+        },
+        {
+          "id": "hidden.scale",
+          "name": "equal strings",
+          "hidden": true,
+          "category": "scale",
+          "stdin": "same\nsame\n",
+          "expectedStdout": "0\n"
+        }
+      ]
+    },
+    {
+      "problemId": "iv.backtracking.generate-balanced-parentheses",
+      "version": 1,
+      "ioDescription": "stdin: integer n. stdout: all balanced strings joined by one space; n=0 prints an empty line.",
+      "cases": [
+        {
+          "id": "visible.three",
+          "name": "five valid strings",
+          "hidden": false,
+          "category": "normal",
+          "stdin": "3\n",
+          "expectedStdout": "((())) (()()) (())() ()(()) ()()()\n"
+        },
+        {
+          "id": "hidden.one",
+          "name": "single pair",
+          "hidden": true,
+          "category": "boundary",
+          "stdin": "1\n",
+          "expectedStdout": "()\n"
+        },
+        {
+          "id": "hidden.zero",
+          "name": "zero pairs",
+          "hidden": true,
+          "category": "adversarial",
+          "stdin": "0\n",
+          "expectedStdout": "\n"
+        }
+      ]
+    }
+  ]
+}
