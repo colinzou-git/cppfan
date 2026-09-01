@@ -164,6 +164,7 @@ jobs:
         run: >-
           pnpm test:e2e:authenticated
           tests/e2e/authenticated-terminal-real.spec.ts
+          tests/e2e/authenticated-terminal-interview-real.spec.ts
           --project=chromium
 
       - name: Upload real Terminal diagnostics
