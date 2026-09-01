@@ -7,6 +7,7 @@ import {
 } from "@/features/ai-chat/ai-chat-context";
 import { buildAiProviderMessages } from "@/features/ai-chat/ai-chat-policy";
 import {
+  AI_PROVIDER_OUTPUT_TRUNCATED_CODE,
   AiProviderError,
   getAiProviderConfig,
   isAiChatEnabled,
@@ -54,6 +55,8 @@ const REQUEST_TIMEOUT_MS = Math.max(
   5_000,
   Math.min(120_000, Number(process.env.AI_REQUEST_TIMEOUT_MS) || 45_000)
 );
+const OUTPUT_TRUNCATION_NOTICE =
+  '\n\n---\n**Response reached the AI length limit. Ask "Continue" to get the rest.**';
 
 function apiError(
   code: string,
@@ -369,6 +372,27 @@ export async function POST(request: Request) {
 
         void (async () => {
           let output = "";
+          const saveCompletedOutput = async (content: string, providerOutputChars: number) => {
+            await saveAssistantMessage({
+              supabase: auth.supabase,
+              userId: auth.user.id,
+              conversationId: activeConversation.id,
+              requestId,
+              content,
+              status: "complete",
+              provider: config.provider,
+              model: config.model
+            });
+            try {
+              await recordAiChatOutput({
+                supabase: auth.supabase,
+                outputChars: providerOutputChars
+              });
+            } catch {
+              // Usage accounting must not turn a completed response into a failure.
+            }
+          };
+
           send({
             type: "meta",
             conversationId: activeConversation.id,
@@ -386,26 +410,21 @@ export async function POST(request: Request) {
               output += chunk;
               if (!send({ type: "delta", text: chunk })) abortController.abort();
             }
-            await saveAssistantMessage({
-              supabase: auth.supabase,
-              userId: auth.user.id,
-              conversationId: activeConversation.id,
-              requestId,
-              content: output,
-              status: "complete",
-              provider: config.provider,
-              model: config.model
-            });
-            try {
-              await recordAiChatOutput({
-                supabase: auth.supabase,
-                outputChars: output.length
-              });
-            } catch {
-              // Usage accounting must not turn a completed response into a failure.
-            }
+            await saveCompletedOutput(output, output.length);
             send({ type: "done", status: "complete" });
           } catch (error) {
+            if (
+              error instanceof AiProviderError &&
+              error.code === AI_PROVIDER_OUTPUT_TRUNCATED_CODE
+            ) {
+              const providerOutputChars = output.length;
+              output += OUTPUT_TRUNCATION_NOTICE;
+              send({ type: "delta", text: OUTPUT_TRUNCATION_NOTICE });
+              await saveCompletedOutput(output, providerOutputChars);
+              send({ type: "done", status: "complete" });
+              return;
+            }
+
             const stopped =
               abortController.signal.aborted &&
               !timedOut &&
