@@ -20,6 +20,8 @@ export type AiProviderRuntimeOverride = {
   credentialSource: "user";
 };
 
+export const AI_PROVIDER_OUTPUT_TRUNCATED_CODE = "provider_output_truncated";
+
 export class AiProviderError extends Error {
   readonly code: string;
   readonly status: number;
@@ -42,6 +44,14 @@ export class AiProviderError extends Error {
     this.status = status;
     this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+function providerOutputTruncatedError() {
+  return new AiProviderError({
+    code: AI_PROVIDER_OUTPUT_TRUNCATED_CODE,
+    message: "The AI response reached its length limit before finishing.",
+    status: 502
+  });
 }
 
 function configuredProvider(): string {
@@ -145,26 +155,40 @@ async function* fakeStream(messages: AiProviderMessage[]): AsyncGenerator<string
   }
 }
 
+type ProviderStreamFrame = {
+  text: string[];
+  finishReason: string | null;
+};
+
 type GroqChunk = {
   choices?: Array<{
     delta?: {
       content?: string;
     };
+    finish_reason?: string | null;
   }>;
 };
 
-function groqTextFromSseLine(line: string): string | null {
+function groqFrameFromSseLine(line: string): ProviderStreamFrame | null {
   const trimmed = line.trim();
   if (!trimmed.startsWith("data:")) return null;
   const payload = trimmed.slice(5).trim();
   if (!payload || payload === "[DONE]") return null;
   try {
     const parsed = JSON.parse(payload) as GroqChunk;
-    const content = parsed.choices?.[0]?.delta?.content;
-    return content || null;
+    const choice = parsed.choices?.[0];
+    const content = choice?.delta?.content;
+    return {
+      text: content ? [content] : [],
+      finishReason: typeof choice?.finish_reason === "string" ? choice.finish_reason : null
+    };
   } catch {
     return null;
   }
+}
+
+function groqReachedOutputLimit(reason: string | null) {
+  return reason?.toLowerCase() === "length";
 }
 
 async function* groqStream({
@@ -233,6 +257,14 @@ async function* groqStream({
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let outputTruncated = false;
+
+  const consumeFrame = function* (line: string) {
+    const frame = groqFrameFromSseLine(line);
+    if (!frame) return;
+    if (groqReachedOutputLimit(frame.finishReason)) outputTruncated = true;
+    for (const text of frame.text) yield text;
+  };
 
   while (true) {
     const { done, value } = await reader.read();
@@ -241,16 +273,16 @@ async function* groqStream({
     buffer = lines.pop() ?? "";
 
     for (const line of lines) {
-      const content = groqTextFromSseLine(line);
-      if (content) yield content;
+      yield* consumeFrame(line);
     }
 
     if (done) {
-      const content = groqTextFromSseLine(buffer);
-      if (content) yield content;
+      yield* consumeFrame(buffer);
       break;
     }
   }
+
+  if (outputTruncated) throw providerOutputTruncatedError();
 }
 
 type GeminiContent = {
@@ -265,6 +297,7 @@ type GeminiChunk = {
         text?: string;
       }>;
     };
+    finishReason?: string;
   }>;
 };
 
@@ -295,21 +328,32 @@ function geminiRequestBody(messages: AiProviderMessage[]) {
   };
 }
 
-function geminiTextFromSseLine(line: string): string[] {
+function geminiFrameFromSseLine(line: string): ProviderStreamFrame | null {
   const trimmed = line.trim();
-  if (!trimmed.startsWith("data:")) return [];
+  if (!trimmed.startsWith("data:")) return null;
   const payload = trimmed.slice(5).trim();
-  if (!payload) return [];
+  if (!payload) return null;
   try {
     const parsed = JSON.parse(payload) as GeminiChunk;
-    return parsed.candidates?.flatMap((candidate) =>
-      candidate.content?.parts
-        ?.map((part) => part.text)
-        .filter((text): text is string => Boolean(text)) ?? []
-    ) ?? [];
+    const candidates = parsed.candidates ?? [];
+    return {
+      text: candidates.flatMap((candidate) =>
+        candidate.content?.parts
+          ?.map((part) => part.text)
+          .filter((text): text is string => Boolean(text)) ?? []
+      ),
+      finishReason:
+        candidates
+          .map((candidate) => candidate.finishReason)
+          .find((reason): reason is string => typeof reason === "string") ?? null
+    };
   } catch {
-    return [];
+    return null;
   }
+}
+
+function geminiReachedOutputLimit(reason: string | null) {
+  return reason?.toUpperCase() === "MAX_TOKENS";
 }
 
 async function* googleStream({
@@ -372,6 +416,14 @@ async function* googleStream({
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let outputTruncated = false;
+
+  const consumeFrame = function* (line: string) {
+    const frame = geminiFrameFromSseLine(line);
+    if (!frame) return;
+    if (geminiReachedOutputLimit(frame.finishReason)) outputTruncated = true;
+    for (const text of frame.text) yield text;
+  };
 
   while (true) {
     const { done, value } = await reader.read();
@@ -380,14 +432,16 @@ async function* googleStream({
     buffer = lines.pop() ?? "";
 
     for (const line of lines) {
-      for (const content of geminiTextFromSseLine(line)) yield content;
+      yield* consumeFrame(line);
     }
 
     if (done) {
-      for (const content of geminiTextFromSseLine(buffer)) yield content;
+      yield* consumeFrame(buffer);
       break;
     }
   }
+
+  if (outputTruncated) throw providerOutputTruncatedError();
 }
 
 export async function* streamAiTutorResponse({
