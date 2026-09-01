@@ -18,17 +18,24 @@ describe("gdb-mi-parser (#442)", () => {
       reason: "breakpoint-hit",
       file: "main.cpp",
       line: 5,
-      func: "main"
+      func: "main",
+      exitCode: null
     });
   });
 
-  it("handles an end-of-step stop with an exited reason", () => {
-    expect(parseStopRecord('*stopped,reason="exited-normally"')).toEqual({
+  it("handles a normal inferior exit and parses its exit code", () => {
+    expect(parseStopRecord('*stopped,reason="exited-normally",exit-code="0"')).toEqual({
       reason: "exited-normally",
       file: null,
       line: null,
-      func: null
+      func: null,
+      exitCode: 0
     });
+  });
+
+  it("treats a missing or malformed exit code as unavailable", () => {
+    expect(parseStopRecord('*stopped,reason="exited-normally"').exitCode).toBeNull();
+    expect(parseStopRecord('*stopped,reason="exited",exit-code="not-a-number"').exitCode).toBeNull();
   });
 
   it("extracts ordered frames from -stack-list-frames", () => {
