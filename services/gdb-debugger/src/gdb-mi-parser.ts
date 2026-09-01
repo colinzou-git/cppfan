@@ -15,6 +15,7 @@ export type GdbStopInfo = {
   file: string | null;
   line: number | null;
   func: string | null;
+  exitCode: number | null;
 };
 
 export type GdbFrame = { level: number | null; func: string; file: string | null; line: number | null };
@@ -99,6 +100,13 @@ function asString(value: MiValue | undefined): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function asNumber(value: MiValue | undefined): number | null {
+  const text = asString(value);
+  if (text == null || text.trim() === "") return null;
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function toFrame(tuple: MiValue | undefined): GdbFrame | null {
   if (!tuple || typeof tuple !== "object" || Array.isArray(tuple)) return null;
   const level = asString(tuple.level);
@@ -120,7 +128,8 @@ export function parseStopRecord(line: string): GdbStopInfo {
     reason: asString(record.reason),
     file: frame?.file ?? null,
     line: frame?.line ?? null,
-    func: frame?.func ?? null
+    func: frame?.func ?? null,
+    exitCode: asNumber(record["exit-code"])
   };
 }
 
