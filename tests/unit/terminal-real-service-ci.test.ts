@@ -14,6 +14,10 @@ const focusedSpec = readFileSync(
   resolve("tests/e2e/authenticated-terminal-real.spec.ts"),
   "utf8"
 );
+const interviewFocusedSpec = readFileSync(
+  resolve("tests/e2e/authenticated-terminal-interview-real.spec.ts"),
+  "utf8"
+);
 
 describe("real interactive Terminal CI contract (#667)", () => {
   it("pins real providers and loopback endpoints", () => {
@@ -59,12 +63,16 @@ describe("real interactive Terminal CI contract (#667)", () => {
     expect(workflow).toContain("cancel-in-progress: false");
   });
 
-  it("runs only the focused browser spec and covers the full service protocol", () => {
+  it("runs only the focused browser specs and covers the full service protocol", () => {
     expect(workflow).toContain("tests/e2e/authenticated-terminal-real.spec.ts");
+    expect(workflow).toContain("tests/e2e/authenticated-terminal-interview-real.spec.ts");
     expect(workflow).not.toContain("tests/e2e/authenticated-*.spec.ts");
     expect(focusedSpec).toContain(
       'process.env.CPPFAN_REQUIRE_REAL_CODE_TERMINAL !== "true"'
     );
+    expect(interviewFocusedSpec).toContain("iv.prefix.balance-returns-to-zero");
+    expect(interviewFocusedSpec).toContain('toHaveValue("")');
+    expect(interviewFocusedSpec).toContain("learner-value");
     for (const marker of [
       "/health",
       "/terminal/start",

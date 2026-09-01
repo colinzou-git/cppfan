@@ -34,6 +34,17 @@ describe("interview Code Lab configs (#444)", () => {
     expect(config.prompt).toContain(problem.targetComplexity);
   });
 
+  it("starts native interview Input Args blank while preserving visible-test stdin (#698)", () => {
+    for (const problem of interviewProblems) {
+      const config = buildInterviewCodeLabConfig(problem);
+      expect(config.stdin, problem.id).toBeUndefined();
+      expect(
+        config.visibleTests.map((test) => test.stdin),
+        problem.id
+      ).toEqual(problem.visibleExamples.map((example) => example.input));
+    }
+  });
+
   it("starter code is a generic scaffold, never a full solution", () => {
     const config = buildInterviewCodeLabConfig(interviewProblems[0]);
     expect(config.starterCode).toContain("int main()");

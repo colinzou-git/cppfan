@@ -65,10 +65,6 @@ function buildInterviewVisibleTests(problem: InterviewProblem): CodeTestCase[] {
   }));
 }
 
-function firstInterviewStdin(problem: InterviewProblem): string | undefined {
-  return problem.visibleExamples.length > 0 ? problem.visibleExamples[0].input : undefined;
-}
-
 function resolveInterviewHiddenTestCount(problemId: string): number | undefined {
   const suite = getJudgeProblemSuite(problemId);
   return suite ? suite.hiddenTests.length : undefined;
@@ -81,7 +77,8 @@ export function buildInterviewCodeLabConfig(problem: InterviewProblem): Learning
     mode: "stdin",
     prompt: buildInterviewCodeLabPrompt(problem),
     starterCode: buildInterviewStarterCode(problem),
-    stdin: firstInterviewStdin(problem),
+    // Interactive Run should wait for learner input by default. Visible-example
+    // stdin belongs to Run Tests, not implicit pre-run Input Args (#698).
     visibleTests: buildInterviewVisibleTests(problem),
     hiddenTestCount: resolveInterviewHiddenTestCount(problem.id),
     skillTags: [problem.primarySkillId, ...problem.secondarySkillIds],
