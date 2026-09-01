@@ -29,6 +29,12 @@ int main() {
 }
 `;
 
+const NON_ZERO_SOURCE = `int main() {
+  int code = 7;
+  return code;
+}
+`;
+
 async function within<T>(promise: Promise<T>, timeoutMs = 5000): Promise<T> {
   let timer: NodeJS.Timeout | undefined;
   try {
@@ -99,9 +105,29 @@ runIf("GdbSession real-child integration (#702)", () => {
         expect(exited.status).toBe("exited");
         expect(exited.line).toBeNull();
         expect(exited.reason).toBe("exited-normally");
-        expect(exited.exitCode).toBe(0);
+        // GDB 15 omits exit-code for the exited-normally (zero) record.
+        expect(exited.exitCode).toBeNull();
         expect(exited.stack).toEqual([]);
         expect(exited.variables).toEqual([]);
+      } finally {
+        await session.dispose();
+      }
+    },
+    20_000
+  );
+
+  it(
+    "preserves a non-zero inferior exit code when GDB supplies it",
+    async () => {
+      const session = new GdbSession(NON_ZERO_SOURCE);
+      try {
+        const started = await within(session.start([]));
+        expect(started.status).toBe("paused");
+
+        const exited = await within(session.action("continue"));
+        expect(exited.status).toBe("exited");
+        expect(exited.reason).toBe("exited");
+        expect(exited.exitCode).toBe(7);
       } finally {
         await session.dispose();
       }
