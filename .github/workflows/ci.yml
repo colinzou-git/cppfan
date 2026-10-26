@@ -67,6 +67,41 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  debugger-service:
+    name: GDB debugger service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # #702: the debugger bug lived in real GDB/MI event ordering and could not
+      # be guarded by parser mocks alone. Install both tools explicitly so the
+      # real-child GdbSession integration suite cannot silently skip in primary CI.
+      - name: Install GDB toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ gdb
+          g++ --version
+          gdb --version
+
+      - name: Install debugger service dependencies
+        working-directory: services/gdb-debugger
+        run: npm install
+
+      - name: Test debugger and Terminal service
+        working-directory: services/gdb-debugger
+        run: npm test
+
+      - name: Build debugger service
+        working-directory: services/gdb-debugger
+        run: npm run build
+
   db:
     name: DB migrations
     runs-on: ubuntu-latest

@@ -18,10 +18,9 @@ import type { DebugSnapshot } from "./types.js";
 /**
  * Drives one `g++ -g -O0` + `gdb --interpreter=mi2` session (#442).
  *
- * NOTE: this talks to a real gdb subprocess, so it cannot be unit-tested without
- * a toolchain — it is exercised on the OVH deploy (treat as unverified until
- * then, like device-only behavior). The MI command/response correlation and the
- * snapshot assembly use the pure, unit-tested gdb-mi-parser.
+ * NOTE: this talks to a real gdb subprocess. Real-child integration coverage is
+ * kept alongside the pure MI parser tests so fast stop/exit ordering regressions
+ * are caught before the OVH deploy.
  */
 
 const ACTION_TO_MI: Record<string, string> = {
@@ -32,13 +31,24 @@ const ACTION_TO_MI: Record<string, string> = {
 };
 
 type Pending = { resolve: (line: string) => void; reject: (error: Error) => void };
+type StopWaiter = {
+  afterSequence: number;
+  resolve: (line: string | null) => void;
+  timer: NodeJS.Timeout | null;
+  settled: boolean;
+};
+
+function isExitReason(reason: string | null | undefined): boolean {
+  return reason === "exited-normally" || reason === "exited" || reason === "exited-signalled";
+}
 
 export class GdbSession {
   private workspace = "";
   private gdb: ChildProcessWithoutNullStreams | null = null;
   private token = 0;
   private readonly pending = new Map<number, Pending>();
-  private stopWaiters: ((line: string) => void)[] = [];
+  private stopWaiters: StopWaiter[] = [];
+  private stopSequence = 0;
   private readonly stdout = new OutputBuffer(DEBUG_LIMITS.maxOutputBytes);
   private readonly stderr = new OutputBuffer(DEBUG_LIMITS.maxOutputBytes);
   private lastStop: string | null = null;
@@ -70,17 +80,15 @@ export class GdbSession {
     for (const line of breakpointLines) {
       await this.command(`-break-insert main.cpp:${line}`);
     }
-    await this.command("-exec-run --start").catch(() => undefined);
-    const stop = await this.waitForStop();
+    const stop = await this.commandAndWaitForStop("-exec-run --start");
     return this.buildSnapshot(stop);
   }
 
   async action(action: string, _watches: string[] = []): Promise<DebugSnapshot> {
     const mi = ACTION_TO_MI[action];
     if (!mi) return this.buildSnapshot(this.lastStop);
-    if (this.exited) return this.snapshotShell("exited", { exitCode: this.exitCode });
-    await this.command(mi).catch(() => undefined);
-    const stop = await this.waitForStop();
+    if (this.exited) return this.buildSnapshot(this.lastStop);
+    const stop = await this.commandAndWaitForStop(mi);
     return this.buildSnapshot(stop);
   }
 
@@ -91,6 +99,9 @@ export class GdbSession {
       // already gone
     }
     this.gdb = null;
+    for (const waiter of [...this.stopWaiters]) {
+      this.settleStopWaiter(waiter, this.lastStop);
+    }
     if (this.workspace) {
       await rm(this.workspace, { recursive: true, force: true }).catch(() => undefined);
       this.workspace = "";
@@ -125,10 +136,11 @@ export class GdbSession {
     rl.on("line", (line) => this.onGdbLine(line));
     this.gdb.on("exit", (code) => {
       this.exited = true;
-      this.exitCode = code;
-      const waiters = this.stopWaiters;
-      this.stopWaiters = [];
-      for (const w of waiters) w(this.lastStop ?? "*stopped,reason=\"exited\"");
+      if (this.exitCode == null) this.exitCode = code;
+      const line = this.lastStop ?? '*stopped,reason="exited"';
+      for (const waiter of [...this.stopWaiters]) {
+        this.settleStopWaiter(waiter, line);
+      }
     });
   }
 
@@ -139,9 +151,17 @@ export class GdbSession {
 
     if (cls === "stopped") {
       this.lastStop = line;
-      const waiters = this.stopWaiters;
-      this.stopWaiters = [];
-      for (const w of waiters) w(line);
+      this.stopSequence += 1;
+      const stop = parseStopRecord(line);
+      if (isExitReason(stop.reason)) {
+        this.exited = true;
+        this.exitCode = stop.exitCode;
+      }
+      for (const waiter of [...this.stopWaiters]) {
+        if (this.stopSequence > waiter.afterSequence) {
+          this.settleStopWaiter(waiter, line);
+        }
+      }
       return;
     }
 
@@ -167,22 +187,63 @@ export class GdbSession {
     });
   }
 
-  private waitForStop(): Promise<string | null> {
-    if (this.exited) return Promise.resolve(this.lastStop);
+  /**
+   * Send a command that resumes/steps the inferior and consume the first stop
+   * that occurs after the command boundary. GDB may emit `*stopped` before the
+   * JavaScript continuation after `await command()` runs, so the sequence check
+   * is required to avoid dropping a fast stop and waiting for five minutes.
+   */
+  private async commandAndWaitForStop(mi: string): Promise<string | null> {
+    const afterSequence = this.stopSequence;
+    try {
+      await this.command(mi);
+    } catch (error) {
+      // A terminal stop may race a token-level error. Prefer the real runtime
+      // state when it has already advanced; otherwise surface the command error
+      // immediately instead of turning it into a session-wall wait.
+      if (this.stopSequence > afterSequence || this.exited) return this.lastStop;
+      throw error;
+    }
+    return this.waitForStopAfter(afterSequence);
+  }
+
+  private waitForStopAfter(afterSequence: number): Promise<string | null> {
+    if (this.exited || this.stopSequence > afterSequence) return Promise.resolve(this.lastStop);
     return new Promise<string | null>((resolve) => {
-      const timer = setTimeout(() => resolve(this.lastStop), DEBUG_LIMITS.sessionWallMs);
-      this.stopWaiters.push((line) => {
-        clearTimeout(timer);
-        resolve(line);
-      });
+      const waiter: StopWaiter = {
+        afterSequence,
+        resolve,
+        timer: null,
+        settled: false
+      };
+      waiter.timer = setTimeout(
+        () => this.settleStopWaiter(waiter, this.lastStop),
+        DEBUG_LIMITS.sessionWallMs
+      );
+      this.stopWaiters.push(waiter);
     });
   }
 
+  private settleStopWaiter(waiter: StopWaiter, line: string | null): void {
+    if (waiter.settled) return;
+    waiter.settled = true;
+    if (waiter.timer) clearTimeout(waiter.timer);
+    const index = this.stopWaiters.indexOf(waiter);
+    if (index >= 0) this.stopWaiters.splice(index, 1);
+    waiter.resolve(line);
+  }
+
   private async buildSnapshot(stopLine: string | null): Promise<DebugSnapshot> {
-    if (this.exited) {
-      return this.snapshotShell("exited", { exitCode: this.exitCode });
+    const stop = stopLine
+      ? parseStopRecord(stopLine)
+      : { reason: null, file: null, line: null, func: null, exitCode: null };
+    if (this.exited || isExitReason(stop.reason)) {
+      return this.snapshotShell("exited", {
+        reason: isExitReason(stop.reason) ? stop.reason ?? "exited" : "exited",
+        exitCode: stop.exitCode ?? this.exitCode,
+        line: null
+      });
     }
-    const stop = stopLine ? parseStopRecord(stopLine) : { reason: null, file: null, line: null, func: null };
     let frames: DebugSnapshot["stack"] = [];
     let variables: DebugSnapshot["variables"] = [];
     try {
