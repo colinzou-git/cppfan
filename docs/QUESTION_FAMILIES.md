@@ -221,3 +221,16 @@ prompts should make the learner choose the technique and name its assumptions:
 
 Use external references (see `/resources`) for inspiration only. Because the repo
 is public, keep explanations and quiz wording original.
+
+
+## Concurrency reasoning rules (#704)
+
+Concurrency items should test reasoning about **possible executions and synchronization state**, not whether one lucky run happened to work.
+
+- Prefer `code_reading` and `bug_spotting` for races, lock ownership, condition-variable predicates, atomics, and happens-before.
+- When teaching an interleaving, spell out a finite authored trace (`T1 read`, `T2 read`, `T1 write`, ...) or an explicit partial order. Do not infer correctness from an observed scheduler order.
+- Never use fixed delays as the premise that makes an answer correct. Correctness must come from synchronization, ownership, or a stated invariant.
+- A data-race trace may illustrate one possible lost update, but the explanation must still state that a C++ data race is undefined behavior rather than promising that exact runtime result.
+- For condition variables, separate the protected state from the notification: mutate state under the mutex, wait with/recheck a predicate, and choose `notify_one` versus `notify_all` from how many waiters' predicates become actionable.
+- For atomics, distinguish **atomicity of one operation** from a larger transaction/invariant. Release/acquire examples must name the publishing atomic and the happens-before relationship; relaxed examples must not smuggle in visibility guarantees for unrelated data.
+- Viewing an instructional trace is not mastery or an FSRS rating. Choice-backed reasoning items use the normal trusted grading/review-card flow.
