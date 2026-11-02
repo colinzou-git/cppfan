@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { exerciseCatalog } from "@/features/exercises/exercise-catalog";
 import {
   getLearningItemById,
+  learningItemChoices,
   learningItemSkills
 } from "@/features/learning-items/learning-item-seed";
 import { capstoneProjects, capstoneTracks } from "@/features/labs/capstone-tracks";
@@ -27,6 +28,38 @@ const REQUIRED_SKILLS = [
   "cpp.concurrency.shared_state_design"
 ];
 
+
+const REASONING_ITEM_IDS = [
+  "cpp.concurrency.threads.reasoning_join_trace",
+  "cpp.concurrency.threads.reasoning_dangling_capture",
+  "cpp.concurrency.data_races.reasoning_lost_update",
+  "cpp.concurrency.data_races.reasoning_plain_flag",
+  "cpp.concurrency.mutexes.reasoning_multi_field_invariant",
+  "cpp.concurrency.mutexes.reasoning_manual_unlock",
+  "cpp.concurrency.async.reasoning_exception_get",
+  "cpp.concurrency.async.reasoning_default_policy",
+  "cpp.concurrency.deadlock.reasoning_wait_cycle",
+  "cpp.concurrency.deadlock.reasoning_scoped_lock",
+  "cpp.concurrency.condition_variables.reasoning_predicate_trace",
+  "cpp.concurrency.condition_variables.reasoning_shutdown_notify",
+  "cpp.concurrency.atomics.reasoning_compound_check",
+  "cpp.concurrency.atomics.reasoning_volatile_stop",
+  "cpp.concurrency.jthread.reasoning_stop_trace",
+  "cpp.concurrency.jthread.reasoning_blocked_wait",
+  "cpp.concurrency.promise_future.reasoning_exception_channel",
+  "cpp.concurrency.promise_future.reasoning_get_twice",
+  "cpp.concurrency.task_selection.reasoning_io_concurrency",
+  "cpp.concurrency.task_selection.reasoning_detached_poller",
+  "cpp.concurrency.memory_ordering.reasoning_release_acquire",
+  "cpp.concurrency.memory_ordering.reasoning_relaxed_publish",
+  "cpp.concurrency.lock_granularity.reasoning_short_critical_section",
+  "cpp.concurrency.lock_granularity.reasoning_shared_ref_escape",
+  "cpp.concurrency.shared_state_design.reasoning_local_reduce",
+  "cpp.concurrency.shared_state_design.reasoning_cross_thread_mutation"
+] as const;
+
+const REQUIRED_REASONING_TYPES = ["code_reading", "bug_spotting"] as const;
+
 const REQUIRED_RESOURCES = [
   "cpp-core-guidelines-concurrency",
   "cppreference-condition-variable",
@@ -35,7 +68,7 @@ const REQUIRED_RESOURCES = [
   "clang-thread-sanitizer"
 ];
 
-describe("concurrency completion coverage (#118)", () => {
+describe("concurrency completion/depth coverage (#118/#704)", () => {
   it("keeps the original #78 conceptual scope represented as active skills and items", () => {
     const activeSkillIds = new Set(skillSeed.filter((skill) => skill.is_active).map((skill) => skill.id));
 
@@ -43,6 +76,34 @@ describe("concurrency completion coverage (#118)", () => {
       expect(activeSkillIds.has(skillId), `${skillId} should be active`).toBe(true);
       const itemCount = learningItemSkills.filter((mapping) => mapping.skill_id === skillId).length;
       expect(itemCount, `${skillId} should have lesson and quiz coverage`).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+
+  it("keeps deterministic reasoning depth on every concurrency skill (#704)", () => {
+    expect(new Set(REASONING_ITEM_IDS).size).toBe(26);
+
+    for (const skillId of REQUIRED_SKILLS) {
+      const mappings = learningItemSkills.filter((mapping) => mapping.skill_id === skillId);
+      expect(mappings.length, `${skillId} should have lesson, retrieval, and reasoning depth`).toBeGreaterThanOrEqual(4);
+
+      const types = mappings
+        .map((mapping) => getLearningItemById(mapping.learning_item_id)?.item.type)
+        .filter(Boolean);
+      for (const type of REQUIRED_REASONING_TYPES) {
+        expect(types, `${skillId} should include ${type}`).toContain(type);
+      }
+    }
+
+    for (const itemId of REASONING_ITEM_IDS) {
+      const details = getLearningItemById(itemId);
+      expect(details, itemId).toBeTruthy();
+      expect(["code_reading", "bug_spotting"]).toContain(details!.item.type);
+      expect(details!.item.prompt).not.toMatch(/sleep_for|sleep_until/i);
+
+      const choices = learningItemChoices.filter((choice) => choice.learning_item_id === itemId);
+      expect(choices, `${itemId} should have four choices`).toHaveLength(4);
+      expect(choices.filter((choice) => choice.is_correct), `${itemId} should have one answer`).toHaveLength(1);
     }
   });
 
