@@ -1,0 +1,54 @@
+name: Issue 706 bootstrap
+
+on:
+  push:
+    branches:
+      - issue-706-concurrency-exercises
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-check:
+    name: Apply #706 and run focused gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: issue-706-concurrency-exercises
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+      - name: Apply issue 706 patch
+        run: python3 scripts/tmp/issue-706-bootstrap.py
+      - name: Focused concurrency package tests
+        run: |
+          set -euo pipefail
+          for id in concurrency-data-race-repair concurrency-deadlock-safe-transfer concurrency-jthread-cancellation concurrency-promise-future-errors concurrency-shared-mutex-registry concurrency-release-acquire-handoff; do
+            echo "== $id solution =="
+            g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I "exercises/$id/solution" "exercises/$id/tests/tests.cpp" -o "/tmp/$id-solution"
+            "/tmp/$id-solution"
+            echo "== $id starter compiles =="
+            g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -I exercises/_harness -I "exercises/$id/starter" "exercises/$id/tests/tests.cpp" -o "/tmp/$id-starter"
+          done
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Focused unit tests
+        run: pnpm test -- tests/unit/exercise-catalog.test.ts tests/unit/concurrency-exercises.test.ts tests/unit/concurrency-coverage.test.ts
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Full exercise verifier
+        run: bash scripts/exercises/verify-all.sh
+      - name: Commit clean implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "Expand concurrency Code Lab exercises (#706)"
+          git push origin HEAD:issue-706-concurrency-exercises
