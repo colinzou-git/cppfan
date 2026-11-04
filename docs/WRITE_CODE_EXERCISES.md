@@ -233,6 +233,12 @@ See [CODE_LAB.md](CODE_LAB.md).
 | `random-dice-histogram` | seeded RNG, reproducibility | `number-guessing-stats` |
 | `filesystem-extension-summary` | std::filesystem paths, extension parsing | `directory-inventory-reporter` |
 | `concurrency-atomic-counter` | atomics, threads, data races | `task-queue-lab` |
+| `concurrency-data-race-repair` | mutex-protected multi-field invariants | `task-queue-lab` |
+| `concurrency-deadlock-safe-transfer` | scoped_lock and deadlock avoidance | `task-queue-lab` |
+| `concurrency-jthread-cancellation` | jthread, stop_token, cooperative shutdown | `task-queue-lab` |
+| `concurrency-promise-future-errors` | promise/future result and exception propagation | `task-queue-lab` |
+| `concurrency-shared-mutex-registry` | shared_mutex, read-heavy data structures | `task-queue-lab` |
+| `concurrency-release-acquire-handoff` | atomic release/acquire publication | `task-queue-lab` |
 | `concurrency-producer-consumer` | mutex, condition variables, shared state | `task-queue-lab` |
 | `raii-file-handle-simulator` | RAII lifetime, destructor cleanup | `note-manager` |
 | `value-semantics-deep-copy-buffer` | deep copy, rule of five, move | `note-manager` |

@@ -1,5 +1,6 @@
 #include "check.hpp"
 #include "safe_transfer.hpp"
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -28,10 +29,16 @@ static void test_negative_rejected() {
 }
 static void test_opposite_direction_workers() {
   TransferAccount a(10000), b(10000);
-  std::thread first([&] { for (int i = 0; i < 2500; ++i) CHECK(transfer_funds(a, b, 1)); });
-  std::thread second([&] { for (int i = 0; i < 2500; ++i) CHECK(transfer_funds(b, a, 1)); });
+  std::atomic<bool> ok{true};
+  std::thread first([&] {
+    for (int i = 0; i < 2500; ++i) if (!transfer_funds(a, b, 1)) ok.store(false);
+  });
+  std::thread second([&] {
+    for (int i = 0; i < 2500; ++i) if (!transfer_funds(b, a, 1)) ok.store(false);
+  });
   first.join();
   second.join();
+  CHECK(ok.load());
   CHECK(a.balance + b.balance == 20000);
   CHECK(a.balance == 10000);
   CHECK(b.balance == 10000);
