@@ -1,0 +1,29 @@
+{
+  "id": "concurrency-shared-mutex-registry",
+  "title": "Concurrency: shared-mutex read-heavy registry",
+  "skill_ids": [
+    "cpp.concurrency.lock_granularity",
+    "cpp.concurrency.mutexes",
+    "cpp.concurrency.shared_state_design"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": [
+    "shared_registry.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-shared-mutex-registry/work exercises/concurrency-shared-mutex-registry/tests/tests.cpp -o exercises/concurrency-shared-mutex-registry/work/run",
+  "test_command": "exercises/concurrency-shared-mutex-registry/work/run",
+  "required_tests": [
+    "test_empty_lookup",
+    "test_insert_and_replace",
+    "test_distinct_concurrent_writers",
+    "test_concurrent_readers_copy_values",
+    "test_copy_survives_replacement"
+  ],
+  "hints": [
+    "Protect the map with a mutable std::shared_mutex.",
+    "Use std::unique_lock for put() and std::shared_lock for get() and size().",
+    "Return a copy of the found string (optional) rather than a reference that outlives the lock."
+  ],
+  "project_lab": "task-queue-lab"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "concurrency-promise-future-errors",
+  "title": "Concurrency: promise/future results and exceptions",
+  "skill_ids": [
+    "cpp.concurrency.promise_future",
+    "cpp.concurrency.async",
+    "cpp.concurrency.task_selection"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": [
+    "promise_jobs.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-promise-future-errors/work exercises/concurrency-promise-future-errors/tests/tests.cpp -o exercises/concurrency-promise-future-errors/work/run",
+  "test_command": "exercises/concurrency-promise-future-errors/work/run",
+  "required_tests": [
+    "test_success_values",
+    "test_exceptions_propagate",
+    "test_mixed_jobs",
+    "test_empty_jobs",
+    "test_independent_jobs"
+  ],
+  "hints": [
+    "Create one promise and future per job before launching the workers.",
+    "Catch inside the worker and call set_exception(std::current_exception()).",
+    "Join workers and call future::get exactly once per job, catching exceptions at the receiving end."
+  ],
+  "project_lab": "task-queue-lab"
+}
