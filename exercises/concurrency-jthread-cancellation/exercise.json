@@ -1,0 +1,28 @@
+{
+  "id": "concurrency-jthread-cancellation",
+  "title": "Concurrency: cooperative jthread shutdown",
+  "skill_ids": [
+    "cpp.concurrency.jthread",
+    "cpp.concurrency.threads"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": [
+    "cooperative_stop.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-jthread-cancellation/work exercises/concurrency-jthread-cancellation/tests/tests.cpp -o exercises/concurrency-jthread-cancellation/work/run",
+  "test_command": "exercises/concurrency-jthread-cancellation/work/run",
+  "required_tests": [
+    "test_zero_workers",
+    "test_one_worker",
+    "test_multiple_workers",
+    "test_negative_workers",
+    "test_repeatable_shutdown"
+  ],
+  "hints": [
+    "Use std::jthread and accept std::stop_token in its callable.",
+    "condition_variable_any.wait(lock, stop_token, predicate) can unblock on a stop request.",
+    "Request stop for all workers, then join all before reading the atomic acknowledgment count."
+  ],
+  "project_lab": "task-queue-lab"
+}
