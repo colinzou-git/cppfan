@@ -110,6 +110,21 @@ if command -v docker >/dev/null 2>&1; then
 fi
 echo "VPS root filesystem usage:"
 df -h / | tail -n 1 || true
+echo "VPS inode usage:"
+df -i / | tail -n 1 || true
+echo "Docker images/containers/volumes/build-cache summary:"
+docker system df 2>/dev/null || true
+echo "Host journal size:"
+journalctl --disk-usage 2>/dev/null || true
+echo "Large top-level directories (read-only):"
+if sudo -n true 2>/dev/null; then
+  sudo -n du -x -h -d 1 /var/log /var/lib /tmp /home 2>/dev/null | sort -h | tail -n 22 || true
+  echo "Largest Docker JSON logs by size (bytes; no content):"
+  sudo -n find /var/lib/docker/containers -type f -name '*-json.log' -printf '%s %p\n' 2>/dev/null |
+    sort -nr | head -n 8 || true
+else
+  du -x -h -d 1 /var/log /tmp /home 2>/dev/null | sort -h | tail -n 18 || true
+fi
 
 for service in cppfan-gdb-debugger cppfan-terminal judge0; do
   status="$(systemctl is-active "${service}" 2>/dev/null || true)"
