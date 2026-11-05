@@ -32,6 +32,29 @@ for port in "${VPS_JUDGE0_PORT}" "${terminal_port}"; do
   fi
 done
 
+echo "Runner-side forwarded health: compare proxy policy vs direct localhost."
+# Include authenticated Judge0 probes, but print ONLY numeric HTTP status.
+# A 200 with --noproxy and 500 without indicates an unwanted runner proxy.
+for route in proxy direct; do
+  opts=()
+  if [[ "${route}" == "direct" ]]; then
+    opts+=(--noproxy '*')
+  fi
+  if [[ -n "${CODE_RUNNER_API_KEY:-}" ]]; then
+    code="$(curl "${opts[@]}" --silent --output /dev/null --write-out '%{http_code}' \
+      --connect-timeout 2 --max-time 4 \
+      -H "X-Auth-Token: ${CODE_RUNNER_API_KEY}" \
+      "http://127.0.0.1:23580/languages" 2>/dev/null || true)"
+    printf '%s runner Judge0 /languages: HTTP %s\n' "${route}" "${code:-unreachable}"
+  fi
+  if [[ "${mode}" == "terminal" ]]; then
+    code="$(curl "${opts[@]}" --silent --output /dev/null --write-out '%{http_code}' \
+      --connect-timeout 2 --max-time 4 \
+      "http://127.0.0.1:23581/health" 2>/dev/null || true)"
+    printf '%s runner Terminal /health: HTTP %s\n' "${route}" "${code:-unreachable}"
+  fi
+done
+
 echo "Running read-only remote port and service health diagnostics."
 ssh -i "${key}" \
   -o BatchMode=yes \
