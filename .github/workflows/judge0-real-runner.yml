@@ -142,6 +142,11 @@ jobs:
           fi
           echo "Judge0 SSH tunnel is reachable."
 
+      - name: Diagnose remote service preflight (read-only)
+        if: failure()
+        continue-on-error: true
+        run: bash scripts/ci/diagnose-remote-services.sh judge0
+
       - name: Verify Judge0 real compile/run
         run: bash scripts/ci/verify-judge0.sh
 
