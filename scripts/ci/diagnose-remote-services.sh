@@ -100,8 +100,12 @@ if command -v docker >/dev/null 2>&1; then
     printf '%s: %s\n' "${container}" "${health:-not-found}"
   done
 
-  echo "Judge0 DB readiness (pg_isready only):"
-  docker exec judge0-v1131-db-1 pg_isready -h 127.0.0.1 2>/dev/null || true
+  echo "Judge0 DB readiness (exit status only):"
+  if docker exec judge0-v1131-db-1 pg_isready -h 127.0.0.1 -q >/dev/null 2>&1; then
+    echo "pg_isready: accepting connections"
+  else
+    echo "pg_isready: failed (check Postgres process and listen address)"
+  fi
 
   echo "Recent Judge0 server error CLASS names only (never raw logs):"
   docker logs --since 10m judge0-v1131-server-1 2>&1 |
