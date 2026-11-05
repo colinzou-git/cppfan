@@ -82,10 +82,34 @@ for probe in "${judge_port}:/languages" "${terminal_port}:/health" "3008:/health
   printf '127.0.0.1:%s%s -> HTTP %s\n' "${port}" "${path}" "${status:-unreachable}"
 done
 
+# A deliberately invalid token should fail authentication (401/403), rather
+# than reaching language lookup; 500 here would implicate the auth middleware.
+invalid_code="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+  --connect-timeout 2 --max-time 4 \
+  -H 'X-Auth-Token: cppfan-invalid-diag-token' \
+  "http://127.0.0.1:${judge_port}/languages" 2>/dev/null || true)"
+printf 'Judge0 invalid-token /languages -> HTTP %s\n' "${invalid_code:-unreachable}"
+
 if command -v docker >/dev/null 2>&1; then
   echo "Docker container names and health/status (no logs or environment values):"
   docker ps --format '{{.Names}}: {{.Status}}' 2>/dev/null || true
+
+  echo "Judge0 container health metadata (no environment/command lines):"
+  for container in judge0-v1131-server-1 judge0-v1131-db-1 judge0-v1131-redis-1 judge0-v1131-workers-1; do
+    health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}not-configured{{end}}' "${container}" 2>/dev/null || true)"
+    printf '%s: %s\n' "${container}" "${health:-not-found}"
+  done
+
+  echo "Judge0 DB readiness (pg_isready only):"
+  docker exec judge0-v1131-db-1 pg_isready -h 127.0.0.1 2>/dev/null || true
+
+  echo "Recent Judge0 server error CLASS names only (never raw logs):"
+  docker logs --since 10m judge0-v1131-server-1 2>&1 |
+    grep -Eo 'PG::[A-Za-z_]+|ActiveRecord::[A-Za-z_]+|Redis::[A-Za-z_]+|Errno::[A-Za-z_]+|Rack::[A-Za-z_]+' |
+    sort -u | head -n 12 || true
 fi
+echo "VPS root filesystem usage:"
+df -h / | tail -n 1 || true
 
 for service in cppfan-gdb-debugger cppfan-terminal judge0; do
   status="$(systemctl is-active "${service}" 2>/dev/null || true)"
