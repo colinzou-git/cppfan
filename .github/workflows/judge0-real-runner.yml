@@ -147,12 +147,6 @@ jobs:
         continue-on-error: true
         run: bash scripts/ci/diagnose-remote-services.sh judge0
 
-      # TEMPORARY one-off infrastructure recovery. Only this internal PR branch;
-      # never run on main, other PRs, or scheduled workflows. Remove after use.
-      - name: Recover VPS disk from unused caches (one-off)
-        if: failure() && github.event_name == 'pull_request' && github.head_ref == 'ci/repair-gdb-and-remote-preflight'
-        run: bash scripts/ci/recover-vps-disk.sh
-
       - name: Verify Judge0 real compile/run
         run: bash scripts/ci/verify-judge0.sh
 
