@@ -147,12 +147,6 @@ jobs:
         continue-on-error: true
         run: bash scripts/ci/diagnose-remote-services.sh judge0
 
-      # Temporary one-off recovery: a full VPS disk left Judge0's existing
-      # PostgreSQL container stopped (exit 137). Never run automatically on main.
-      - name: Recover existing Judge0 PostgreSQL container (one-off)
-        if: failure() && github.event_name == 'pull_request' && github.head_ref == 'ci/repair-gdb-and-remote-preflight'
-        run: bash scripts/ci/recover-judge0-db.sh
-
       - name: Verify Judge0 real compile/run
         run: bash scripts/ci/verify-judge0.sh
 
