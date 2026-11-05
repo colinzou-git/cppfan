@@ -100,12 +100,25 @@ if command -v docker >/dev/null 2>&1; then
     printf '%s: %s\n' "${container}" "${health:-not-found}"
   done
 
-  echo "Judge0 DB readiness (exit status only):"
-  if docker exec judge0-v1131-db-1 pg_isready -h 127.0.0.1 -q >/dev/null 2>&1; then
-    echo "pg_isready: accepting connections"
-  else
-    echo "pg_isready: failed (check Postgres process and listen address)"
-  fi
+  echo "Judge0 DB reachability (exit codes only, preserving all data):"
+  for mode in socket tcp; do
+    if [[ "${mode}" == "socket" ]]; then
+      docker exec judge0-v1131-db-1 pg_isready -q >/dev/null 2>&1
+    else
+      docker exec judge0-v1131-db-1 pg_isready -q -h 127.0.0.1 -p 5432 >/dev/null 2>&1
+    fi
+    code=$?
+    printf 'pg_isready %s exit=%s (0=accepting, 1=rejecting, 2=no response, 127=missing command)\n' "${mode}" "${code}"
+  done
+
+  echo "Judge0 container process state (no environment values):"
+  for container in judge0-v1131-db-1 judge0-v1131-server-1 judge0-v1131-redis-1; do
+    docker inspect --format '{{.Name}} running={{.State.Running}} restarting={{.State.Restarting}} exit={{.State.ExitCode}}' "${container}" 2>/dev/null || true
+  done
+  echo "Recent PostgreSQL diagnostic keywords only (no raw log lines):"
+  docker logs --since 15m judge0-v1131-db-1 2>&1 |
+    grep -Eo 'No space left on device|could not write|could not extend|FATAL|PANIC|database system is ready to accept connections|database system is shut down|database system is in recovery|permission denied' |
+    sort -u | head -n 12 || true
 
   echo "Recent Judge0 server error CLASS names only (never raw logs):"
   docker logs --since 10m judge0-v1131-server-1 2>&1 |
