@@ -2800,6 +2800,72 @@ export const exerciseCatalog: Exercise[] = [
       "A dummy head node makes building the result list simple; return dummy.next."
     ],
     projectLab: "note-manager"
+  },
+  {
+    id: "concurrency-data-race-repair",
+    title: "Concurrency: repair shared statistics",
+    skillIds: ["cpp.concurrency.data_races","cpp.concurrency.mutexes","cpp.concurrency.shared_state_design"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["concurrent_stats.hpp"],
+    requiredTests: ["test_empty_input","test_single_worker","test_many_workers","test_zero_workers","test_repeatable_invariants"],
+    hints: ["Split indices across workers so every input element is visited once.","Keep per-thread count and sum local; lock once to update the shared pair.","Join all threads before reading the final statistics."],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-deadlock-safe-transfer",
+    title: "Concurrency: deadlock-safe account transfers",
+    skillIds: ["cpp.concurrency.deadlock","cpp.concurrency.mutexes","cpp.concurrency.lock_granularity"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["safe_transfer.hpp"],
+    requiredTests: ["test_basic_transfer","test_insufficient_funds","test_self_transfer","test_negative_rejected","test_opposite_direction_workers"],
+    hints: ["Reject negative amounts, and short-circuit transfers to the same object before locking.","Acquire both independent mutexes together using std::scoped_lock.","Check available funds and update both balances before releasing either lock."],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-jthread-cancellation",
+    title: "Concurrency: cooperative jthread shutdown",
+    skillIds: ["cpp.concurrency.jthread","cpp.concurrency.threads"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["cooperative_stop.hpp"],
+    requiredTests: ["test_zero_workers","test_one_worker","test_multiple_workers","test_negative_workers","test_repeatable_shutdown"],
+    hints: ["Use std::jthread and accept std::stop_token in its callable.","condition_variable_any.wait(lock, stop_token, predicate) can unblock on a stop request.","Request stop for all workers, then join all before reading the atomic acknowledgment count."],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-promise-future-errors",
+    title: "Concurrency: promise/future results and exceptions",
+    skillIds: ["cpp.concurrency.promise_future","cpp.concurrency.async","cpp.concurrency.task_selection"],
+    difficulty: "advanced",
+    estimatedMinutes: 35,
+    editableFiles: ["promise_jobs.hpp"],
+    requiredTests: ["test_success_values","test_exceptions_propagate","test_mixed_jobs","test_empty_jobs","test_independent_jobs"],
+    hints: ["Create one promise and future per job before launching the workers.","Catch inside the worker and call set_exception(std::current_exception()).","Join workers and call future::get exactly once per job, catching exceptions at the receiving end."],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-shared-mutex-registry",
+    title: "Concurrency: shared-mutex read-heavy registry",
+    skillIds: ["cpp.concurrency.lock_granularity","cpp.concurrency.mutexes","cpp.concurrency.shared_state_design"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["shared_registry.hpp"],
+    requiredTests: ["test_empty_lookup","test_insert_and_replace","test_distinct_concurrent_writers","test_concurrent_readers_copy_values","test_copy_survives_replacement"],
+    hints: ["Protect the map with a mutable std::shared_mutex.","Use std::unique_lock for put() and std::shared_lock for get() and size().","Return a copy of the found string (optional) rather than a reference that outlives the lock."],
+    projectLab: "task-queue-lab"
+  },
+  {
+    id: "concurrency-release-acquire-handoff",
+    title: "Concurrency: release/acquire data publication",
+    skillIds: ["cpp.concurrency.memory_ordering","cpp.concurrency.atomics","cpp.concurrency.data_races"],
+    difficulty: "advanced",
+    estimatedMinutes: 40,
+    editableFiles: ["release_acquire.hpp"],
+    requiredTests: ["test_zero_values","test_one_value","test_multiple_values","test_negative_values","test_full_payload_repeatable"],
+    hints: ["The payload is initially private to the producer; no consumer may access it before the flag.","Call ready.store(true, std::memory_order_release) only AFTER filling the payload.","The consumer loops until ready.load(std::memory_order_acquire) then reads; join both threads."],
+    projectLab: "task-queue-lab"
   }
 ];
 

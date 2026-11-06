@@ -4,7 +4,7 @@ Generated from the on-disk `exercises/<id>/exercise.json` packages by
 `scripts/exercises/report-coverage.mjs` (#473). Do not edit manually — run
 `pnpm report:exercise-coverage` to regenerate.
 
-Current catalog: **139** exercises across **11** required areas.
+Current catalog: **145** exercises across **11** required areas.
 
 | Area | Minimum | Current | Gap |
 |---|---:|---:|---:|
@@ -13,7 +13,7 @@ Current catalog: **139** exercises across **11** required areas.
 | Classes, constructors, invariants, RAII, and value semantics | 6 | 11 | 0 |
 | STL containers, iterators, algorithms, and lambdas | 8 | 14 | 0 |
 | Templates, utilities, optional/variant, and modern C++ | 6 | 12 | 0 |
-| Debugging, testing, exceptions, and concurrency | 5 | 5 | 0 |
+| Debugging, testing, exceptions, and concurrency | 5 | 11 | 0 |
 | Arrays, strings, and hash maps | 10 | 66 | 0 |
 | Two pointers, sliding window, and binary search | 6 | 24 | 0 |
 | Stacks, queues, and recursion/backtracking | 4 | 10 | 0 |
@@ -102,7 +102,13 @@ Current catalog: **139** exercises across **11** required areas.
 ### Debugging, testing, exceptions, and concurrency
 
 - `concurrency-atomic-counter`
+- `concurrency-data-race-repair`
+- `concurrency-deadlock-safe-transfer`
+- `concurrency-jthread-cancellation`
 - `concurrency-producer-consumer`
+- `concurrency-promise-future-errors`
+- `concurrency-release-acquire-handoff`
+- `concurrency-shared-mutex-registry`
 - `concurrency-task-queue`
 - `debug-fix-off-by-one`
 - `tooling-status-parser`

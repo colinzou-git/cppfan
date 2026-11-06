@@ -6832,5 +6832,179 @@ int main() {
       { name: "With empties", stdin: "4\n0\n1 1\n0\n2 0 2\n", expectedStdout: "0 1 2\n", matcher: "exact" }
     ],
     skillTags: ["dsa.trees.heap", "dsa.trees.heap_applications", "dsa.trees.linked_list"]
+  },
+  "concurrency-data-race-repair": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: repair shared statistics\n\nRead n and worker count then n integers. Use worker threads protecting the shared count/sum pair with a mutex. Print 'count sum'.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "5 3\n1 2 3 4 5\n",
+    starterCode: "#include <algorithm>\n#include <mutex>\n#include <thread>\n#include <vector>\n\nstruct ConcurrentStats {\n  long long count = 0;\n  long long sum = 0;\n};\n\ninline ConcurrentStats parallel_stats(const std::vector<int>& values, int workers) {\n  // TODO: spawn workers, protect BOTH shared fields with the same mutex, join.\n  (void)values;\n  (void)workers;\n  return {};\n}\n\n#include <iostream>\nint main() {\n  int n=0, workers=0;\n  if (!(std::cin >> n >> workers)) return 0;\n  std::vector<int> values;\n  for (int i=0,x=0;i<n;++i) { std::cin >> x; values.push_back(x); }\n  const auto stats=parallel_stats(values,workers);\n  std::cout << stats.count << \" \" << stats.sum << \"\\n\";\n}\n",
+    visibleTests: [
+      {
+        "name": "Non-divisible split",
+        "stdin": "5 3\n1 2 3 4 5\n",
+        "expectedStdout": "5 15\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "More workers",
+        "stdin": "3 8\n-4 7 1\n",
+        "expectedStdout": "3 4\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Empty",
+        "stdin": "0 2\n",
+        "expectedStdout": "0 0\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.data_races","cpp.concurrency.mutexes","cpp.concurrency.shared_state_design"]
+  },
+  "concurrency-deadlock-safe-transfer": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: deadlock-safe account transfers\n\nRead A B rounds A-to-B amount B-to-A amount. Transfer concurrently in opposite directions without deadlock; print final A B balances.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "100 100 10 3 2\n",
+    starterCode: "#include <mutex>\n\nstruct TransferAccount {\n  explicit TransferAccount(long long starting) : balance(starting) {}\n  long long balance;\n  std::mutex mutex;\n};\n\ninline bool transfer_funds(TransferAccount& from, TransferAccount& to, long long amount) {\n  // TODO: reject negatives, handle self-transfer, acquire both mutexes and transfer.\n  (void)from;\n  (void)to;\n  (void)amount;\n  return false;\n}\n\n#include <iostream>\nint main() {\n  long long a=0,b=0,out=0,in=0; int rounds=0;\n  if (!(std::cin>>a>>b>>rounds>>out>>in)) return 0;\n  TransferAccount left(a),right(b);\n  std::thread t1([&] { for(int i=0;i<rounds;++i) transfer_funds(left,right,out); });\n  std::thread t2([&] { for(int i=0;i<rounds;++i) transfer_funds(right,left,in); });\n  t1.join(); t2.join();\n  std::cout << left.balance << \" \" << right.balance << \"\\n\";\n}\n",
+    visibleTests: [
+      {
+        "name": "Opposite transfers",
+        "stdin": "100 100 10 3 2\n",
+        "expectedStdout": "90 110\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Equal transfers",
+        "stdin": "100 100 30 1 1\n",
+        "expectedStdout": "100 100\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Zero rounds",
+        "stdin": "50 60 0 4 9\n",
+        "expectedStdout": "50 60\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.deadlock","cpp.concurrency.mutexes","cpp.concurrency.lock_granularity"]
+  },
+  "concurrency-jthread-cancellation": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: cooperative jthread shutdown\n\nRead worker count. Start std::jthread workers, stop each through stop_token, join and print the count that acknowledged stop.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "4\n",
+    starterCode: "#include <atomic>\n#include <condition_variable>\n#include <mutex>\n#include <stop_token>\n#include <thread>\n#include <vector>\n\ninline int count_cooperative_stops(int workers) {\n  // TODO: create jthread workers; wait for stop, request_stop and join everyone.\n  (void)workers;\n  return 0;\n}\n\n#include <iostream>\nint main() { int n=0; if (!(std::cin>>n)) return 0; std::cout<<count_cooperative_stops(n)<<\"\\n\"; }\n",
+    visibleTests: [
+      {
+        "name": "Four workers",
+        "stdin": "4\n",
+        "expectedStdout": "4\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "One worker",
+        "stdin": "1\n",
+        "expectedStdout": "1\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "None",
+        "stdin": "0\n",
+        "expectedStdout": "0\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.jthread","cpp.concurrency.threads"]
+  },
+  "concurrency-promise-future-errors": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: promise/future results and exceptions\n\nRead n and n integer jobs; compute square for nonnegative jobs using a promise/future, propagate negative-job exceptions and print 'error' in their position.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "4\n2 -3 0 5\n",
+    starterCode: "#include <exception>\n#include <future>\n#include <stdexcept>\n#include <string>\n#include <thread>\n#include <vector>\n\ninline std::vector<std::string> parallel_square_results(const std::vector<int>& values) {\n  // TODO: each worker sets a value or exception on a promise.\n  (void)values;\n  return {};\n}\n\n#include <iostream>\nint main() {\n  int n=0; if (!(std::cin>>n)) return 0;\n  std::vector<int> vals;\n  for(int i=0,v=0;i<n;++i) { std::cin>>v; vals.push_back(v); }\n  auto results=parallel_square_results(vals);\n  for(std::size_t i=0;i<results.size();++i) { if(i) std::cout<<\" \"; std::cout<<results[i]; }\n  std::cout<<\"\\n\";\n}\n",
+    visibleTests: [
+      {
+        "name": "Mixed",
+        "stdin": "4\n2 -3 0 5\n",
+        "expectedStdout": "4 error 0 25\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "All success",
+        "stdin": "3\n1 3 7\n",
+        "expectedStdout": "1 9 49\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Empty",
+        "stdin": "0\n",
+        "expectedStdout": "\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.promise_future","cpp.concurrency.async","cpp.concurrency.task_selection"]
+  },
+  "concurrency-shared-mutex-registry": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: shared-mutex read-heavy registry\n\nRead n commands 'put key value', 'get key', or 'size'. Use std::shared_mutex for thread-safe read-heavy state; print get/size results, '(missing)' for absent keys.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "5\nput 1 alpha\nget 1\nget 2\nput 2 beta\nsize\n",
+    starterCode: "#include <mutex>\n#include <optional>\n#include <shared_mutex>\n#include <string>\n#include <unordered_map>\n\nclass SharedRegistry {\n public:\n  void put(int key, std::string value) {\n    // TODO: acquire an exclusive lock and write the map.\n    (void)key;\n    (void)value;\n  }\n  std::optional<std::string> get(int key) const {\n    // TODO: acquire a shared lock; return a copied value or nullopt.\n    (void)key;\n    return std::nullopt;\n  }\n  std::size_t size() const {\n    // TODO: read size under a shared lock.\n    return 0;\n  }\n\n private:\n  mutable std::shared_mutex mutex_;\n  std::unordered_map<int, std::string> values_;\n};\n\n#include <iostream>\nint main() {\n  int n=0; if (!(std::cin>>n)) return 0;\n  SharedRegistry registry;\n  for(int i=0;i<n;++i) {\n    std::string cmd; std::cin>>cmd;\n    if(cmd==\"put\") { int k; std::string v; std::cin>>k>>v; registry.put(k,v); }\n    if(cmd==\"get\") { int k; std::cin>>k; auto v=registry.get(k); std::cout<<(v?*v:\"(missing)\")<<\"\\n\"; }\n    if(cmd==\"size\") std::cout<<registry.size()<<\"\\n\";\n  }\n}\n",
+    visibleTests: [
+      {
+        "name": "Put/get/size",
+        "stdin": "5\nput 1 alpha\nget 1\nget 2\nput 2 beta\nsize\n",
+        "expectedStdout": "alpha\n(missing)\n2\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Replace",
+        "stdin": "4\nput 5 old\nput 5 new\nget 5\nsize\n",
+        "expectedStdout": "new\n1\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Empty",
+        "stdin": "2\nget 4\nsize\n",
+        "expectedStdout": "(missing)\n0\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.lock_granularity","cpp.concurrency.mutexes","cpp.concurrency.shared_state_design"]
+  },
+  "concurrency-release-acquire-handoff": {
+    enabled: true,
+    language: "cpp",
+    mode: "stdin",
+    prompt: "Concurrency: release/acquire data publication\n\nRead n. Producer fills a vector with 1,4,7,... and release-stores readiness; consumer acquire-loads ready and copies data. Print 'count sum'.\n\nRequirements: use sound C++20 synchronization, no scheduler sleeps; honor the input/output contract.",
+    stdin: "4\n",
+    starterCode: "#include <atomic>\n#include <thread>\n#include <vector>\n\ninline std::vector<int> release_acquire_handoff(int n) {\n  // TODO: producer fills values 1,4,7,...; release store publishes.\n  // Consumer performs acquire load and copies the published vector.\n  (void)n;\n  return {};\n}\n\n#include <iostream>\nint main() {\n  int n=0; if (!(std::cin>>n)) return 0;\n  auto items=release_acquire_handoff(n);\n  long long sum=0; for(int x:items) sum+=x;\n  std::cout<<items.size()<<\" \"<<sum<<\"\\n\";\n}\n",
+    visibleTests: [
+      {
+        "name": "Four",
+        "stdin": "4\n",
+        "expectedStdout": "4 22\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Single",
+        "stdin": "1\n",
+        "expectedStdout": "1 1\n",
+        "matcher": "exact"
+      },
+      {
+        "name": "Empty",
+        "stdin": "0\n",
+        "expectedStdout": "0 0\n",
+        "matcher": "exact"
+      }
+    ],
+    skillTags: ["cpp.concurrency.memory_ordering","cpp.concurrency.atomics","cpp.concurrency.data_races"]
   }
 };

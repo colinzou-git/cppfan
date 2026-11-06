@@ -1,0 +1,29 @@
+{
+  "id": "concurrency-release-acquire-handoff",
+  "title": "Concurrency: release/acquire data publication",
+  "skill_ids": [
+    "cpp.concurrency.memory_ordering",
+    "cpp.concurrency.atomics",
+    "cpp.concurrency.data_races"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 40,
+  "editable_files": [
+    "release_acquire.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-release-acquire-handoff/work exercises/concurrency-release-acquire-handoff/tests/tests.cpp -o exercises/concurrency-release-acquire-handoff/work/run",
+  "test_command": "exercises/concurrency-release-acquire-handoff/work/run",
+  "required_tests": [
+    "test_zero_values",
+    "test_one_value",
+    "test_multiple_values",
+    "test_negative_values",
+    "test_full_payload_repeatable"
+  ],
+  "hints": [
+    "The payload is initially private to the producer; no consumer may access it before the flag.",
+    "Call ready.store(true, std::memory_order_release) only AFTER filling the payload.",
+    "The consumer loops until ready.load(std::memory_order_acquire) then reads; join both threads."
+  ],
+  "project_lab": "task-queue-lab"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "concurrency-data-race-repair",
+  "title": "Concurrency: repair shared statistics",
+  "skill_ids": [
+    "cpp.concurrency.data_races",
+    "cpp.concurrency.mutexes",
+    "cpp.concurrency.shared_state_design"
+  ],
+  "difficulty": "advanced",
+  "estimated_minutes": 35,
+  "editable_files": [
+    "concurrent_stats.hpp"
+  ],
+  "build_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread -I exercises/_harness -I exercises/concurrency-data-race-repair/work exercises/concurrency-data-race-repair/tests/tests.cpp -o exercises/concurrency-data-race-repair/work/run",
+  "test_command": "exercises/concurrency-data-race-repair/work/run",
+  "required_tests": [
+    "test_empty_input",
+    "test_single_worker",
+    "test_many_workers",
+    "test_zero_workers",
+    "test_repeatable_invariants"
+  ],
+  "hints": [
+    "Split indices across workers so every input element is visited once.",
+    "Keep per-thread count and sum local; lock once to update the shared pair.",
+    "Join all threads before reading the final statistics."
+  ],
+  "project_lab": "task-queue-lab"
+}
