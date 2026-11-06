@@ -45,7 +45,22 @@ CODE_TERMINAL_REAL_E2E_ENABLED=true
 
 Use the actual loopback port of the deployed `services/gdb-debugger` process if
 it differs from `3008`. Configure every secret and variable before enabling the
-workflow. Fork pull requests skip the secret-bearing job.
+workflow.
+
+If the real-service preflight fails, the workflow now runs a **read-only SSH
+diagnostic** reporting HTTP status (without response bodies), listening ports,
+Docker container status, and the active state of likely systemd units. Compare
+the configured `VPS_TERMINAL_PORT` with the port where `/health` actually
+returns HTTP 200. The repo's documented default is `3008`, but a GitHub
+repository variable may override it (including to `3009`). Correct that
+variable to the **deployed service's actual port**; never disable the health
+check to make the workflow green.
+
+If both Judge0 `/languages` and Terminal `/health` fail over a working SSH
+tunnel, inspect VPS service/container state and dependencies. A curl HTTP 500
+means the forwarded HTTP endpoint answered but its health contract failed;
+it does **not** prove a working application service. Restart or repair the
+underlying deployed service only after reviewing remote diagnostic evidence. Fork pull requests skip the secret-bearing job.
 
 No key, session capability, provider token, or raw service response belongs in
 workflow output, artifacts, committed files, or issue comments.
