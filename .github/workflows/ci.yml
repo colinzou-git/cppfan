@@ -90,9 +90,18 @@ jobs:
           g++ --version
           gdb --version
 
+      # The service has no standalone lockfile; npm install inside a pnpm-managed
+      # checkout triggers npm Arborist's `edgesOut` crash on the hosted runner.
+      # Install the root lockfile instead. Its pinned TypeScript, Vitest and Node
+      # types supply the debugger service's full dev dependency set.
+      - name: Enable pnpm through Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+          pnpm --version
+
       - name: Install debugger service dependencies
-        working-directory: services/gdb-debugger
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Test debugger and Terminal service
         working-directory: services/gdb-debugger
