@@ -285,3 +285,25 @@ exercises in each area, and advisory duplicate/shallow-test diagnostics;
 floor or a hard-quality defect (duplicate title, `< 4` tests, uncovered
 exercise) appears. Once every floor is met, add breadth through **new, focused
 issues** rather than reopening #473.
+
+## Dedicated concurrency ThreadSanitizer verification (#707)
+
+The regular `scripts/exercises/verify-all.sh` continues checking all native
+exercise packages under AddressSanitizer and UBSan. The independent mandatory
+GitHub Actions job **C++ concurrency ThreadSanitizer** checks data races without
+combining incompatible sanitizers. It discovers concurrency packages by
+`exercise.json` `skill_ids` starting with `cpp.concurrency.`, rather than
+hard-coding an exercise list.
+
+On Linux with GCC and TSan installed, run:
+
+```bash
+bash scripts/exercises/verify-concurrency-tsan.sh
+```
+
+The verifier first compiles a deliberately racy **CI-only** smoke fixture and
+requires a ThreadSanitizer race report. It then compiles and runs each concurrency
+reference test suite under TSan with bounded timeouts. Deliberately incomplete
+starter files remain subject to normal build verification only. A missing or
+unusable TSan runtime causes CI to **fail**, not silently skip. TSan catches
+reported races; it is not a proof of total absence of concurrency defects.

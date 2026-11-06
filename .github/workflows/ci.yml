@@ -208,6 +208,17 @@ jobs:
       - name: Verify interview catalog reference solutions
         run: node scripts/verify-interview-catalog.mjs
 
+  concurrency-tsan:
+    name: C++ concurrency ThreadSanitizer
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check TSan compiler/runtime and all concurrency reference solutions
+        run: bash scripts/exercises/verify-concurrency-tsan.sh
+
   auth-integration:
     name: Authenticated integration
     runs-on: ubuntu-latest
